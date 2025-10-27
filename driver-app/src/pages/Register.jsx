@@ -1,28 +1,17 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  IonInput,
-  IonButton,
-  IonItem,
-  IonLabel,
-  IonText,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  useIonToast,
-  useIonLoading,
-} from '@ionic/react';
-import { authAPI } from '../services/api';
+import { IonText, useIonLoading } from '@ionic/react';
+import { AuthLayout } from '@layouts/AuthLayout';
+import { Button } from '@components';
+import { Input } from '@components';
+import { Card } from '@components';
+import { authAPI } from '@services/api';
+import { useToast } from '@hooks/useToast';
+import storage from '@services/storage';
 
 const Register = () => {
   const history = useHistory();
-  const [present] = useIonToast();
+  const { showSuccess, showWarning, showError } = useToast();
   const [presentLoading, dismissLoading] = useIonLoading();
   
   const [name, setName] = useState('');
@@ -34,20 +23,17 @@ const Register = () => {
     e.preventDefault();
 
     if (!name || !email || !password || !confirmPassword) {
-      present({
-        message: 'Por favor completa todos los campos',
-        duration: 2000,
-        color: 'warning',
-      });
+      showWarning('Por favor completa todos los campos');
       return;
     }
 
     if (password !== confirmPassword) {
-      present({
-        message: 'Las contraseñas no coinciden',
-        duration: 2000,
-        color: 'warning',
-      });
+      showWarning('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (password.length < 6) {
+      showWarning('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
@@ -61,105 +47,85 @@ const Register = () => {
         userType: 'driver',
       });
 
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      storage.setSession(response.data.token, response.data.user);
 
       await dismissLoading();
-      
-      present({
-        message: '¡Registro exitoso!',
-        duration: 2000,
-        color: 'success',
-      });
-
+      showSuccess('¡Registro exitoso!');
       history.push('/home');
     } catch (error) {
       await dismissLoading();
-      
-      present({
-        message: error.response?.data?.error || 'Error al registrarse',
-        duration: 3000,
-        color: 'danger',
-      });
+      showError(error.response?.data?.error || 'Error al registrarse');
     }
   };
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar color="primary">
-          <IonTitle>Registro - Conductor</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-          <IonCard style={{ width: '100%', maxWidth: '400px' }}>
-            <IonCardHeader>
-              <IonCardTitle>Crear Cuenta de Conductor</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <form onSubmit={handleRegister}>
-                <IonItem>
-                  <IonLabel position="floating">Nombre</IonLabel>
-                  <IonInput
-                    type="text"
-                    value={name}
-                    onIonInput={(e) => setName(e.detail.value)}
-                    required
-                  />
-                </IonItem>
+    <AuthLayout title="Registro - Conductor" toolbarColor="secondary">
+      <Card title="Crear Cuenta de Conductor">
+        <form onSubmit={handleRegister}>
+          <Input
+            label="Nombre Completo"
+            type="text"
+            value={name}
+            onIonInput={(e) => setName(e.detail.value)}
+            placeholder="Juan Pérez"
+            required
+          />
 
-                <IonItem>
-                  <IonLabel position="floating">Email</IonLabel>
-                  <IonInput
-                    type="email"
-                    value={email}
-                    onIonInput={(e) => setEmail(e.detail.value)}
-                    required
-                  />
-                </IonItem>
+          <Input
+            label="Email"
+            type="email"
+            value={email}
+            onIonInput={(e) => setEmail(e.detail.value)}
+            placeholder="tu@email.com"
+            required
+          />
 
-                <IonItem>
-                  <IonLabel position="floating">Contraseña</IonLabel>
-                  <IonInput
-                    type="password"
-                    value={password}
-                    onIonInput={(e) => setPassword(e.detail.value)}
-                    required
-                  />
-                </IonItem>
+          <Input
+            label="Contraseña"
+            type="password"
+            value={password}
+            onIonInput={(e) => setPassword(e.detail.value)}
+            placeholder="Mínimo 6 caracteres"
+            helper="Debe tener al menos 6 caracteres"
+            required
+          />
 
-                <IonItem>
-                  <IonLabel position="floating">Confirmar Contraseña</IonLabel>
-                  <IonInput
-                    type="password"
-                    value={confirmPassword}
-                    onIonInput={(e) => setConfirmPassword(e.detail.value)}
-                    required
-                  />
-                </IonItem>
+          <Input
+            label="Confirmar Contraseña"
+            type="password"
+            value={confirmPassword}
+            onIonInput={(e) => setConfirmPassword(e.detail.value)}
+            placeholder="Repite tu contraseña"
+            error={
+              confirmPassword && password !== confirmPassword
+                ? 'Las contraseñas no coinciden'
+                : ''
+            }
+            required
+          />
 
-                <IonButton expand="block" type="submit" style={{ marginTop: '20px' }}>
-                  Registrarse
-                </IonButton>
+          <Button 
+            expand="block" 
+            type="submit" 
+            size="large"
+            variant="secondary"
+            className="mt-md"
+          >
+            Registrarse
+          </Button>
 
-                <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                  <IonText>
-                    ¿Ya tienes cuenta?{' '}
-                    <a onClick={() => history.push('/login')} style={{ cursor: 'pointer', color: 'var(--ion-color-primary)' }}>
-                      Inicia sesión aquí
-                    </a>
-                  </IonText>
-                </div>
-              </form>
-            </IonCardContent>
-          </IonCard>
-        </div>
-      </IonContent>
-    </IonPage>
+          <div className="text-center mt-md">
+            <IonText>
+              ¿Ya tienes cuenta?{' '}
+              <a onClick={() => history.push('/login')}>
+                Inicia sesión aquí
+              </a>
+            </IonText>
+          </div>
+        </form>
+      </Card>
+    </AuthLayout>
   );
 };
 
 export default Register;
-
-

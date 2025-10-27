@@ -1,0 +1,16 @@
+{
+  "name": "@desvare/shared",
+  "version": "1.0.0",
+  "description": "Componentes y utilidades compartidas entre client-pwa y driver-app",
+  "private": true,
+  "main": "index.js",
+  "type": "module",
+  "peerDependencies": {
+    "@ionic/react": "^8.7.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "axios": "^1.12.2",
+    "socket.io-client": "^4.8.1"
+  }
+}
+
