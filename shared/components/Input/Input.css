@@ -3,13 +3,14 @@
 }
 
 .shared-input-item {
-  --background: var(--ion-color-light);
-  --border-radius: 8px;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  --inner-padding-end: 12px;
+  --background: width;
+  --border-radius: 12px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --inner-padding-end: 10px;
   --min-height: 56px;
-  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 12px;
+  border: 1px solid var(--desvare-medium);
   transition: all 0.2s ease;
 }
 
@@ -43,3 +44,19 @@
   box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.1);
 }
 
+/* En Input.css */
+.input-icon-wrapper {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+  height: -webkit-fill-available;
+  color: var(--ion-color-medium);
+}
+
+.shared-input-item.ion-focused .input-icon-wrapper {
+  color: var(--ion-color-primary);
+}
+
+.input-error .input-icon-wrapper {
+  color: var(--ion-color-danger);
+}

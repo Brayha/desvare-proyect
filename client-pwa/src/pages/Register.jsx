@@ -7,7 +7,9 @@ import { Input } from '@components';
 import { Card } from '@components';
 import { authAPI } from '@services/api';
 import { useToast } from '@hooks/useToast';
-import storage from '@services/storage';
+import { Sms, Profile2User, Key } from 'iconsax-react';
+import storage from '@services/storage'; 
+
 
 const Register = () => {
   const history = useHistory();
@@ -65,6 +67,7 @@ const Register = () => {
           <Input
             label="Nombre Completo"
             type="text"
+            iconComponent={<Profile2User size={24} color="#9CA3AF" variant="Bold" />}
             value={name}
             onIonInput={(e) => setName(e.detail.value)}
             placeholder="Juan Pérez"
@@ -75,6 +78,7 @@ const Register = () => {
             label="Email"
             type="email"
             value={email}
+            iconComponent={<Sms size={24} color="#9CA3AF" variant="Bold" />}
             onIonInput={(e) => setEmail(e.detail.value)}
             placeholder="tu@email.com"
             required
@@ -84,6 +88,7 @@ const Register = () => {
             label="Contraseña"
             type="password"
             value={password}
+            iconComponent={<Key size={24} color="#9CA3AF" variant="Bold" />}
             onIonInput={(e) => setPassword(e.detail.value)}
             placeholder="Mínimo 6 caracteres"
             helper="Debe tener al menos 6 caracteres"
@@ -94,6 +99,7 @@ const Register = () => {
             label="Confirmar Contraseña"
             type="password"
             value={confirmPassword}
+            iconComponent={<Key size={24} color="#9CA3AF" variant="Bold" />}
             onIonInput={(e) => setConfirmPassword(e.detail.value)}
             placeholder="Repite tu contraseña"
             error={
@@ -109,6 +115,7 @@ const Register = () => {
             type="submit" 
             size="large"
             variant="success"
+            color="primary"
             className="mt-md"
           >
             Registrarse

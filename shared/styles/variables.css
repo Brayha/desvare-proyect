@@ -5,16 +5,16 @@
 
 :root {
   /* ===== COLORES PRINCIPALES ===== */
-  --desvare-primary: #3880ff;
-  --desvare-primary-rgb: 56, 128, 255;
+  --desvare-primary: #0055ff;
+  --desvare-primary-rgb: 0, 85, 255;
   --desvare-primary-contrast: #ffffff;
   
-  --desvare-secondary: #3dc2ff;
-  --desvare-secondary-rgb: 61, 194, 255;
+  --desvare-secondary: #223D62;
+  --desvare-secondary-rgb: 34, 61, 98;
   --desvare-secondary-contrast: #ffffff;
   
-  --desvare-tertiary: #5260ff;
-  --desvare-tertiary-rgb: 82, 96, 255;
+  --desvare-tertiary: #475569;
+  --desvare-tertiary-rgb: 71, 85, 105;
   
   --desvare-success: #2dd36f;
   --desvare-success-rgb: 45, 211, 111;
@@ -25,14 +25,14 @@
   --desvare-danger: #eb445a;
   --desvare-danger-rgb: 235, 68, 90;
   
-  --desvare-dark: #222428;
-  --desvare-dark-rgb: 34, 36, 40;
+  --desvare-dark: #9CA3AF;
+  --desvare-dark-rgb: 156, 163, 175;
   
-  --desvare-medium: #92949c;
-  --desvare-medium-rgb: 146, 148, 156;
+  --desvare-medium: #E5E7EB;
+  --desvare-medium-rgb: 229, 231, 235;
   
-  --desvare-light: #f4f5f8;
-  --desvare-light-rgb: 244, 245, 248;
+  --desvare-light: #F9FAFB;
+  --desvare-light-rgb: 249, 250, 251;
   
   /* ===== ESPACIADOS ===== */
   --spacing-xs: 4px;

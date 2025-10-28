@@ -15,6 +15,8 @@ import './Input.css';
  * @param {string} props.error - Mensaje de error
  * @param {string} props.helper - Texto de ayuda
  * @param {string} props.labelPosition - Posición del label: 'floating', 'fixed', 'stacked'
+ * @param {string} props.icon - Ícono de ionicons (ej: 'mail-outline', 'lock-closed-outline')
+ * 
  */
 const Input = ({
   label,
@@ -24,10 +26,13 @@ const Input = ({
   placeholder = '',
   required = false,
   disabled = false,
+  clearOnEdit = false,
   error = '',
   helper = '',
-  labelPosition = 'floating',
+  labelPosition = 'stacked',
   className = '',
+  icon = null,           // Para Ionicons (string)
+  iconComponent = null,  // Para Iconsax (React component)
   ...props
 }) => {
   return (
@@ -36,6 +41,21 @@ const Input = ({
         className={`shared-input-item ${error ? 'input-error' : ''}`}
         lines="none"
       >
+       {/* Soporte para ambos tipos de íconos */}
+       {iconComponent && (
+          <div slot="start" className="input-icon-wrapper">
+            {iconComponent}
+          </div>
+        )}
+        
+        {!iconComponent && icon && (
+          <IonIcon 
+            icon={icon} 
+            slot="start" 
+            className="input-icon"
+          />
+        )}
+
         {label && (
           <IonLabel position={labelPosition}>
             {label}
