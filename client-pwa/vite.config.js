@@ -15,5 +15,11 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, '../shared/utils'),
       '@styles': path.resolve(__dirname, '../shared/styles'),
     },
+    dedupe: ['react', 'react-dom', '@ionic/react'],
+  },
+  server: {
+    fs: {
+      allow: ['..'], // Permitir acceso a carpeta shared
+    },
   },
 })

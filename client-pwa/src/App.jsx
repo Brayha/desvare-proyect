@@ -21,6 +21,7 @@ import '@ionic/react/css/display.css';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import RequestService from './pages/RequestService';
 
 setupIonicReact();
 
@@ -32,6 +33,7 @@ function App() {
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
           <Route exact path="/home" component={Home} />
+          <Route exact path="/request-service" component={RequestService} />
           <Route exact path="/">
             <Redirect to="/login" />
           </Route>

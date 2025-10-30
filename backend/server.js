@@ -9,11 +9,29 @@ const app = express();
 const server = http.createServer(app);
 
 // Configuración de CORS
+// Soporta múltiples URLs separadas por coma en las variables de entorno
+const getAllowedOrigins = () => {
+  const origins = [];
+  
+  // CLIENT_URL puede tener múltiples URLs separadas por coma
+  if (process.env.CLIENT_URL) {
+    origins.push(...process.env.CLIENT_URL.split(',').map(url => url.trim()));
+  } else {
+    origins.push('http://localhost:5173', 'http://localhost:5175');
+  }
+  
+  // DRIVER_URL puede tener múltiples URLs separadas por coma
+  if (process.env.DRIVER_URL) {
+    origins.push(...process.env.DRIVER_URL.split(',').map(url => url.trim()));
+  } else {
+    origins.push('http://localhost:8100', 'http://localhost:5174');
+  }
+  
+  return origins;
+};
+
 const corsOptions = {
-  origin: [
-    process.env.CLIENT_URL || 'http://localhost:5173',
-    process.env.DRIVER_URL || 'http://localhost:8100'
-  ],
+  origin: getAllowedOrigins(),
   credentials: true
 };
 

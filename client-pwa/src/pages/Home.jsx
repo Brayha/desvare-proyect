@@ -133,11 +133,10 @@ const Home = () => {
             <IonButton 
               expand="block" 
               size="large"
-              onClick={handleRequestQuote}
-              disabled={isLoading}
+              onClick={() => history.push('/request-service')}
             >
               <IonIcon icon={searchOutline} slot="start" />
-              {isLoading ? 'Enviando...' : 'Buscar Grúa'}
+              Buscar Grúa
             </IonButton>
             {currentRequest && (
               <IonText color="medium" style={{ display: 'block', marginTop: '10px', textAlign: 'center' }}>
