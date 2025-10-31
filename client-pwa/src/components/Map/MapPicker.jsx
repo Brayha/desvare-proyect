@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Map, { Marker, Source, Layer, NavigationControl } from 'react-map-gl';
-import { IonButton, IonIcon, IonText, IonSpinner } from '@ionic/react';
-import { location as locationIcon } from 'ionicons/icons';
+import { IonText, IonSpinner } from '@ionic/react';
 import { Location } from 'iconsax-react';
 import { getRoute, formatDistance, formatDuration, calculateBounds } from '../../utils/mapbox';
 import './MapPicker.css';
@@ -21,22 +20,28 @@ const INITIAL_VIEW_STATE = {
  * 
  * @param {Object} origin - Punto de origen { lat, lng, address }
  * @param {Object} destination - Punto de destino { lat, lng, address }
- * @param {Function} onOriginChange - Callback cuando cambia el origen
- * @param {Function} onDestinationChange - Callback cuando cambia el destino
  * @param {Function} onRouteCalculated - Callback cuando se calcula una ruta
  */
 const MapPicker = ({
   origin,
   destination,
-  onOriginChange,
-  onDestinationChange,
   onRouteCalculated,
 }) => {
   const mapRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [route, setRoute] = useState(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
-  const [selectionMode, setSelectionMode] = useState(null); // 'origin' | 'destination' | null
+
+  // Centrar mapa cuando se obtiene el origen
+  useEffect(() => {
+    if (origin && mapRef.current) {
+      mapRef.current.flyTo({
+        center: [origin.lng, origin.lat],
+        zoom: 15,
+        duration: 1500,
+      });
+    }
+  }, [origin]);
 
   // Calcular ruta cuando ambos puntos estén definidos
   useEffect(() => {
@@ -48,6 +53,7 @@ const MapPicker = ({
         onRouteCalculated(null);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [origin, destination]);
 
   // Ajustar zoom cuando hay ruta
@@ -88,32 +94,6 @@ const MapPicker = ({
     }
   };
 
-  const handleMapClick = useCallback((event) => {
-    if (!selectionMode) return;
-
-    const { lng, lat } = event.lngLat;
-    const newPoint = { lat, lng, address: 'Cargando dirección...' };
-
-    if (selectionMode === 'origin') {
-      onOriginChange(newPoint);
-      setSelectionMode(null);
-    } else if (selectionMode === 'destination') {
-      onDestinationChange(newPoint);
-      setSelectionMode(null);
-    }
-  }, [selectionMode, onOriginChange, onDestinationChange]);
-
-  const handleMarkerDragEnd = useCallback((event, type) => {
-    const { lng, lat } = event.lngLat;
-    const newPoint = { lat, lng, address: 'Cargando dirección...' };
-
-    if (type === 'origin') {
-      onOriginChange(newPoint);
-    } else if (type === 'destination') {
-      onDestinationChange(newPoint);
-    }
-  }, [onOriginChange, onDestinationChange]);
-
   // Estilo de la línea de ruta
   const routeLayerStyle = {
     id: 'route',
@@ -131,14 +111,10 @@ const MapPicker = ({
         ref={mapRef}
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
-        onClick={handleMapClick}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
-        cursor={selectionMode ? 'crosshair' : 'grab'}
       >
-        {/* Control de navegación (zoom +/-) */}
-        <NavigationControl position="top-right" />
 
         {/* Marcador de Origen */}
         {origin && (
@@ -146,10 +122,8 @@ const MapPicker = ({
             longitude={origin.lng}
             latitude={origin.lat}
             anchor="bottom"
-            draggable
-            onDragEnd={(e) => handleMarkerDragEnd(e, 'origin')}
           >
-            <Location size="32" color="#3880ff" variant="Bold" />
+            <Location size="40" color="#3880ff" variant="Bold" />
           </Marker>
         )}
 
@@ -159,10 +133,8 @@ const MapPicker = ({
             longitude={destination.lng}
             latitude={destination.lat}
             anchor="bottom"
-            draggable
-            onDragEnd={(e) => handleMarkerDragEnd(e, 'destination')}
           >
-            <Location size="32" color="#eb445a" variant="Bold" />
+            <Location size="40" color="#eb445a" variant="Bold" />
           </Marker>
         )}
 
@@ -183,27 +155,6 @@ const MapPicker = ({
           </IonText>
         </div>
       )}
-
-      {/* Controles inferiores */}
-      <div className="map-controls">
-        <IonButton
-          size="small"
-          fill={selectionMode === 'origin' ? 'solid' : 'outline'}
-          onClick={() => setSelectionMode(selectionMode === 'origin' ? null : 'origin')}
-        >
-          <IonIcon icon={locationIcon} slot="start" />
-          {selectionMode === 'origin' ? 'Cancelar' : 'Seleccionar Origen'}
-        </IonButton>
-
-        <IonButton
-          size="small"
-          fill={selectionMode === 'destination' ? 'solid' : 'outline'}
-          onClick={() => setSelectionMode(selectionMode === 'destination' ? null : 'destination')}
-        >
-          <IonIcon icon={locationIcon} slot="start" />
-          {selectionMode === 'destination' ? 'Cancelar' : 'Seleccionar Destino'}
-        </IonButton>
-      </div>
     </div>
   );
 };

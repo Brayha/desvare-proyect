@@ -1,26 +1,107 @@
 .request-service-page {
-  --background: var(--ion-background-color, #f5f5f5);
+  --background: transparent;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
 }
 
-/* Información de ubicación */
-.location-info {
+/* Mapa a pantalla completa */
+.fullscreen-map {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-bottom-bar-container {
+  padding: 24px 16px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+}
+
+.search-button {
+  background-color: white;
+  padding: 16px;
+  border-radius: 16px;
+  border: 2px solid var(--ion-color-light);
+  display: flex;
+  justify-content: start;
+  width: 100%;
+  cursor: pointer;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+  }
+}
+
+/* Cargando ubicación */
+.map-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 16px;
+  background: var(--ion-background-color);
+}
+
+.map-loading p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.search-fab::part(native) {
+  padding: 0;
+  border-radius: 28px;
+}
+
+.search-fab-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px;
+  white-space: nowrap;
+}
+
+.search-fab-content strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Modal de búsqueda */
+.modal-search-content {
+  --background: var(--ion-background-color);
+}
+
+.location-input-container {
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 24px;
-  padding: 16px;
   background: var(--ion-card-background, #fff);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--ion-color-light);
 }
 
-.location-item {
+.location-input {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--ion-background-color, #f5f5f5);
 }
 
-.location-icon {
+.location-input .location-icon {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -30,150 +111,254 @@
   flex-shrink: 0;
 }
 
-.location-icon.origin-icon {
+.location-input.origin .location-icon {
   background: rgba(56, 128, 255, 0.1);
 }
 
-.location-icon.destination-icon {
+.location-input.destination .location-icon {
   background: rgba(235, 68, 90, 0.1);
 }
 
-.location-details {
+.location-input .input-content {
   flex: 1;
-}
-
-.location-label {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.location-address {
-  margin: 4px 0 0 0;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-/* Sección de búsqueda */
-.search-section {
-  margin-bottom: 24px;
-}
-
-.search-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.search-actions ion-button {
-  flex: 1;
-}
-
-.search-loading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  justify-content: center;
-}
-
-.search-results {
-  margin-top: 12px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.search-results ion-item {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --inner-padding-end: 0;
-}
-
-.search-results ion-item h3 {
-  font-size: 14px;
-  font-weight: 500;
-  margin: 0;
-  line-height: 1.4;
-}
-
-/* Resumen de ruta */
-.route-summary {
-  padding: 20px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
-  border-radius: 12px;
-  margin-bottom: 24px;
-  border: 2px solid rgba(16, 185, 129, 0.2);
-}
-
-.route-summary h3 {
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.route-stats {
-  display: flex;
-  gap: 24px;
-}
-
-.route-stat {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.route-stat ion-text {
+.location-input .input-content label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
+.location-input .input-content input {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ion-text-color);
+  outline: none;
+  padding: 0;
+  width: 100%;
+}
+
+.location-input .input-content input::placeholder {
+  color: var(--ion-color-medium);
+  opacity: 0.6;
+}
+
+.location-input .input-content input.readonly-input {
+  color: var(--ion-color-dark);
+  cursor: not-allowed;
+}
+
+/* Lista de resultados */
+.results-list {
+  margin-top: 0;
+  padding: 0;
+}
+
+.result-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+}
+
+.result-item h3 {
   font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.5;
+  color: var(--ion-text-color);
 }
 
-.route-stat strong {
+/* Estados de búsqueda */
+.search-loading,
+.no-results,
+.search-instructions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  gap: 12px;
+}
+
+.no-results p,
+.search-instructions p {
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.search-loading {
+  padding: 20px;
+}
+
+/* Tarjeta de información de ruta */
+.route-info-card {
+  background-color: white;
+  padding: 20px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.route-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.route-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ion-text-color);
+}
+
+.route-locations {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.route-location-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.route-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.route-icon.origin-marker {
+  background: rgba(56, 128, 255, 0.15);
+}
+
+.route-icon.destination-marker {
+  background: rgba(235, 68, 90, 0.15);
+}
+
+.route-location-info {
+  flex: 1;
+}
+
+.route-location-info .location-type {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.route-location-info .location-address {
+  margin: 2px 0 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ion-text-color);
+}
+
+.route-stats-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 16px;
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.stat-item ion-text {
+  font-size: 12px;
+}
+
+.stat-item strong {
   font-size: 18px;
-  color: var(--ion-color-success, #10b981);
+  font-weight: 700;
+  color: var(--ion-color-primary);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .location-info {
-    padding: 12px;
-    gap: 12px;
-  }
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--ion-color-medium);
+  opacity: 0.3;
+}
 
-  .location-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .location-address {
-    font-size: 13px;
-  }
-
-  .route-stats {
-    flex-direction: column;
-    gap: 12px;
-  }
+.confirm-button {
+  margin-top: 8px;
+  --border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  height: 52px;
 }
 
 /* Modo oscuro */
 @media (prefers-color-scheme: dark) {
-  .location-info {
+  .search-fab {
+    --background: #2c2c2c;
+  }
+  
+  .search-fab-content strong {
+    color: #ffffff;
+  }
+
+  .location-input-container {
     background: var(--ion-card-background, #1e1e1e);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
   }
 
-  .search-results {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  .location-input {
+    background: rgba(255, 255, 255, 0.05);
   }
 
-  .route-summary {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.08) 100%);
-    border-color: rgba(16, 185, 129, 0.3);
+  .search-bottom-bar-container {
+    background-color: var(--ion-background-color);
+  }
+
+  .search-button {
+    background-color: var(--ion-card-background);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .route-info-card {
+    background-color: var(--ion-card-background);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .route-header h3 {
+    color: var(--ion-text-color);
+  }
+
+  .route-stats-info {
+    background: rgba(255, 255, 255, 0.05);
   }
 }
-
