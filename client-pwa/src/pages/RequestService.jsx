@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-// import { useHistory } from 'react-router-dom'; // TODO: Usar en Paso 4
+import { useHistory } from 'react-router-dom';
 import {
   IonPage,
   IonHeader,
@@ -26,7 +26,7 @@ import { getAddressFromCoordinates, searchAddress, getPlaceDetails } from "../ut
 import "./RequestService.css";
 
 const RequestService = () => {
-  // const history = useHistory(); // TODO: Usar en Paso 4
+  const history = useHistory();
   const { showSuccess, showError } = useToast();
 
   // Geolocalización
@@ -206,8 +206,9 @@ const RequestService = () => {
     );
 
     showSuccess("✅ Ruta confirmada");
-    // TODO: Navegar a la siguiente página (formulario de detalles)
-    // history.push('/request-details');
+    
+    // Navegar a la página de autenticación/confirmación
+    history.push('/request-auth');
   };
 
   return (

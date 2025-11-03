@@ -21,7 +21,10 @@ import '@ionic/react/css/display.css';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import LocationPermission from './pages/LocationPermission';
 import RequestService from './pages/RequestService';
+import RequestAuth from './pages/RequestAuth';
+import RequestConfirmation from './pages/RequestConfirmation';
 
 setupIonicReact();
 
@@ -33,7 +36,10 @@ function App() {
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
           <Route exact path="/home" component={Home} />
+          <Route exact path="/location-permission" component={LocationPermission} />
           <Route exact path="/request-service" component={RequestService} />
+          <Route exact path="/request-auth" component={RequestAuth} />
+          <Route exact path="/request-confirmation" component={RequestConfirmation} />
           <Route exact path="/">
             <Redirect to="/login" />
           </Route>

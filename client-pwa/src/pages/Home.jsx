@@ -133,7 +133,7 @@ const Home = () => {
             <IonButton 
               expand="block" 
               size="large"
-              onClick={() => history.push('/request-service')}
+              onClick={() => history.push('/location-permission')}
             >
               <IonIcon icon={searchOutline} slot="start" />
               Buscar Grúa

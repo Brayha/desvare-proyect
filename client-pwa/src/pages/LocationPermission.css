@@ -1,0 +1,177 @@
+.location-permission-page {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.permission-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+/* Icono principal */
+.icon-container {
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  backdrop-filter: blur(10px);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.location-icon {
+  font-size: 64px;
+  color: white;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Título */
+.permission-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 16px 0;
+}
+
+/* Descripción */
+.permission-description {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 32px 0;
+  max-width: 400px;
+}
+
+/* Lista de beneficios */
+.benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px 16px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  text-align: left;
+}
+
+.benefit-item ion-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.benefit-item p {
+  margin: 0;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Botón de acción */
+.permission-button {
+  --background: white;
+  --color: #667eea;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+  text-transform: none;
+  margin-bottom: 24px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.permission-button::part(native) {
+  padding: 16px;
+}
+
+/* Nota de privacidad */
+.privacy-note {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  max-width: 350px;
+  line-height: 1.4;
+}
+
+/* Estado de éxito */
+.success-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.success-icon {
+  font-size: 80px;
+  animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.success-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 375px) {
+  .permission-container {
+    padding: 24px 20px;
+  }
+
+  .permission-title {
+    font-size: 24px;
+  }
+
+  .icon-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  .location-icon {
+    font-size: 52px;
+  }
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .location-permission-page {
+    --background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);
+  }
+}
+

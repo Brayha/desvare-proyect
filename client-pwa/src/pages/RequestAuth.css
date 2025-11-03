@@ -1,0 +1,161 @@
+.request-auth-page {
+  --background: var(--ion-background-color, #f5f5f5);
+}
+
+/* Resumen de ruta */
+.route-summary-card {
+  margin: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.route-summary-card ion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.route-summary-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.route-summary-item ion-icon {
+  font-size: 24px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.route-summary-text {
+  flex: 1;
+}
+
+.route-summary-text small {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.route-summary-text p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.route-summary-divider {
+  height: 1px;
+  background: var(--ion-color-light);
+  margin: 16px 0;
+}
+
+.route-summary-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ion-color-light);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-item ion-icon {
+  font-size: 20px;
+}
+
+.stat-item small {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Segmento de autenticación */
+.auth-segment-container {
+  padding: 0 16px;
+  margin: 16px 0;
+}
+
+.auth-segment-container ion-segment {
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Formulario de autenticación */
+.auth-form {
+  padding: 0 16px 16px;
+}
+
+.auth-form ion-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 0;
+}
+
+.auth-form ion-card-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.auth-form ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 16px;
+}
+
+.submit-button {
+  margin-top: 24px;
+  --border-radius: 12px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Texto de privacidad */
+.privacy-text {
+  padding: 24px 32px;
+  text-align: center;
+}
+
+.privacy-text p {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .request-auth-page {
+    --background: var(--ion-background-color);
+  }
+
+  .route-summary-card,
+  .auth-form ion-card,
+  .auth-segment-container ion-segment {
+    background: var(--ion-card-background, #1e1e1e);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .route-summary-divider,
+  .route-summary-stats {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 375px) {
+  .route-summary-card,
+  .auth-form {
+    margin: 12px;
+    padding: 12px;
+  }
+
+  .route-summary-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+

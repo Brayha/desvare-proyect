@@ -1,0 +1,184 @@
+.request-confirmation-page {
+  --background: var(--ion-background-color, #f5f5f5);
+}
+
+/* Cards generales */
+.user-info-card,
+.route-info-card,
+.notes-card {
+  margin: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-info-card ion-card-title,
+.route-info-card ion-card-title,
+.notes-card ion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+/* Información del usuario */
+.user-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.user-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.user-info-item ion-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.user-info-item p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Información de ruta */
+.route-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.route-info-item ion-icon {
+  font-size: 24px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.route-info-text {
+  flex: 1;
+}
+
+.route-info-text small {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.route-info-text p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.route-divider {
+  height: 1px;
+  background: var(--ion-color-light);
+  margin: 16px 0;
+}
+
+.route-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ion-color-light);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-item ion-icon {
+  font-size: 20px;
+}
+
+.stat-item small {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Notas */
+.notes-card ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.notes-card ion-textarea {
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+}
+
+.notes-card small {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+/* Acciones de confirmación */
+.confirmation-actions {
+  padding: 0 16px 16px;
+  margin-top: 24px;
+}
+
+.confirm-button {
+  --background: var(--ion-color-primary);
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(56, 128, 255, 0.3);
+  font-weight: 600;
+  text-transform: none;
+  margin-bottom: 8px;
+}
+
+/* Texto informativo */
+.info-text {
+  padding: 16px 32px 32px;
+  text-align: center;
+}
+
+.info-text p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .request-confirmation-page {
+    --background: var(--ion-background-color);
+  }
+
+  .user-info-card,
+  .route-info-card,
+  .notes-card {
+    background: var(--ion-card-background, #1e1e1e);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .route-divider,
+  .route-stats {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 375px) {
+  .user-info-card,
+  .route-info-card,
+  .notes-card {
+    margin: 12px;
+  }
+
+  .route-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .confirmation-actions {
+    padding: 0 12px 12px;
+  }
+}
+
