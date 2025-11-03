@@ -51,6 +51,42 @@ const requestRoutes = require('./routes/requests');
 app.use('/api/auth', authRoutes);
 app.use('/api/requests', requestRoutes);
 
+// Proxy para Google Places API (evitar CORS en frontend)
+app.get('/api/google-places-proxy', async (req, res) => {
+  try {
+    // Construir URL según el tipo de endpoint
+    let googleUrl;
+    
+    if (req.query.place_id) {
+      // Es una petición de Place Details
+      const params = new URLSearchParams(req.query);
+      googleUrl = `https://maps.googleapis.com/maps/api/place/details/json?${params.toString()}`;
+    } else {
+      // Es una petición de Autocomplete
+      const params = new URLSearchParams(req.query);
+      googleUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params.toString()}`;
+    }
+    
+    console.log('🔍 Proxy Google Places:', googleUrl.split('?')[0]);
+    
+    // Usar fetch nativo de Node.js (disponible en Node 18+)
+    const response = await fetch(googleUrl);
+    const data = await response.json();
+    
+    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+      console.error('❌ Error de Google Places:', data.status, data.error_message);
+    }
+    
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Error en proxy de Google Places:', error);
+    res.status(500).json({ 
+      error: 'Error al consultar Google Places API',
+      status: 'ERROR' 
+    });
+  }
+});
+
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ message: 'Desvare Backend API funcionando correctamente' });

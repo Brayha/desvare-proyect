@@ -61,9 +61,15 @@ const MapPicker = ({
     if (route && route.geometry && mapRef.current) {
       const bounds = calculateBounds(route.geometry.coordinates);
       if (bounds) {
+        // Padding más grande para considerar la tarjeta inferior
         mapRef.current.fitBounds(bounds, {
-          padding: 50,
-          duration: 1000,
+          padding: {
+            top: 80,      // Espacio superior
+            bottom: 350,  // Espacio inferior para la tarjeta de ruta
+            left: 50,     // Espacio izquierdo
+            right: 50,    // Espacio derecho
+          },
+          duration: 1500, // Animación más suave
         });
       }
     }
@@ -94,13 +100,13 @@ const MapPicker = ({
     }
   };
 
-  // Estilo de la línea de ruta
+  // Estilo de la línea de ruta (negra y delgada)
   const routeLayerStyle = {
     id: 'route',
     type: 'line',
     paint: {
-      'line-color': '#3880ff',
-      'line-width': 4,
+      'line-color': '#000000',  // Negro
+      'line-width': 3,          // Más delgada
       'line-opacity': 0.8,
     },
   };

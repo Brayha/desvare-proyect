@@ -22,7 +22,7 @@ import { Location } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useToast } from "@hooks/useToast";
-import { getAddressFromCoordinates, searchAddress } from "../utils/mapbox";
+import { getAddressFromCoordinates, searchAddress, getPlaceDetails } from "../utils/mapbox";
 import "./RequestService.css";
 
 const RequestService = () => {
@@ -53,6 +53,7 @@ const RequestService = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [lastSearchQuery, setLastSearchQuery] = useState(""); // Para detectar cambios reales
 
   // Actualizar ubicación de origen cuando se obtiene geolocalización
   useEffect(() => {
@@ -85,49 +86,102 @@ const RequestService = () => {
 
   // Buscar direcciones mientras el usuario escribe
   useEffect(() => {
+    // Si no hay query suficiente, limpiar resultados
     if (searchQuery.length < 3) {
       setSearchResults([]);
+      setIsSearching(false);
+      setLastSearchQuery("");
       return;
     }
 
+    // 🔥 CLAVE: Solo buscar si el query cambió realmente
+    if (searchQuery === lastSearchQuery) {
+      console.log('⏸️ Búsqueda pausada - query sin cambios');
+      return;
+    }
+
+    // Mostrar indicador de carga inmediatamente
+    setIsSearching(true);
+
     const delayDebounce = setTimeout(async () => {
-      setIsSearching(true);
       try {
-        const results = await searchAddress(searchQuery);
+        console.log(`🔍 Buscando "${searchQuery}"...`);
+        
+        // Pasar la ubicación del usuario para priorizar resultados cercanos
+        const userLocation = origin ? { lat: origin.lat, lng: origin.lng } : null;
+        const results = await searchAddress(searchQuery, userLocation);
+        
         setSearchResults(results);
+        setLastSearchQuery(searchQuery); // 🔥 Guardar query buscado para no repetir
+        console.log(`✅ ${results.length} resultados encontrados`);
       } catch (error) {
         console.error("Error buscando dirección:", error);
         showError("Error al buscar dirección");
+        setSearchResults([]);
       } finally {
         setIsSearching(false);
       }
-    }, 500); // Esperar 500ms después de que el usuario deje de escribir
+    }, 1000); // 1 segundo de debounce (más tiempo = menos llamadas)
 
-    return () => clearTimeout(delayDebounce);
-  }, [searchQuery, showError]);
+    return () => {
+      clearTimeout(delayDebounce);
+      // No limpiar isSearching aquí para que se vea el spinner
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, origin, showError]);
 
   const handleOpenSearchModal = () => {
     setShowModal(true);
     setSearchQuery("");
     setSearchResults([]);
+    setLastSearchQuery(""); // Resetear búsqueda anterior
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setSearchQuery("");
     setSearchResults([]);
+    setLastSearchQuery(""); // Resetear búsqueda anterior
   };
 
-  const handleSelectDestination = (place) => {
-    const newDestination = {
-      lat: place.coordinates[1],
-      lng: place.coordinates[0],
-      address: place.name,
-    };
+  const handleSelectDestination = async (place) => {
+    try {
+      // Si el lugar viene de Google Places (sin coordenadas), obtener detalles
+      if (place.source === 'google' && place.place_id) {
+        setIsSearching(true);
+        console.log('🔍 Obteniendo coordenadas del lugar seleccionado...');
+        
+        const details = await getPlaceDetails(place.place_id);
+        
+        const newDestination = {
+          lat: details.coordinates[1],
+          lng: details.coordinates[0],
+          address: details.name,
+        };
 
-    setDestination(newDestination);
-    handleCloseModal();
-    showSuccess("✅ Destino seleccionado");
+        setDestination(newDestination);
+        handleCloseModal();
+        showSuccess("✅ Destino seleccionado");
+        setIsSearching(false);
+      } else if (place.coordinates) {
+        // Si ya tiene coordenadas (viene de Mapbox), usar directamente
+        const newDestination = {
+          lat: place.coordinates[1],
+          lng: place.coordinates[0],
+          address: place.name,
+        };
+
+        setDestination(newDestination);
+        handleCloseModal();
+        showSuccess("✅ Destino seleccionado");
+      } else {
+        throw new Error('No se pudo obtener las coordenadas del lugar');
+      }
+    } catch (error) {
+      console.error('❌ Error al seleccionar destino:', error);
+      showError("Error al obtener coordenadas del lugar");
+      setIsSearching(false);
+    }
   };
 
   const handleEditRoute = () => {
