@@ -21,9 +21,67 @@
   padding: 24px 16px;
   flex: 1;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
   justify-content: center;
   align-items: center;
   background-color: white;
+}
+
+/* Mostrar dirección de origen (clickeable) */
+.origin-display {
+  background-color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--ion-color-light-shade);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.origin-display:hover {
+  background-color: var(--ion-color-light);
+  transform: scale(1.02);
+}
+
+.origin-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+}
+
+.origin-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.origin-text small {
+  font-size: 11px;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.origin-text p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ion-color-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edit-icon {
+  font-size: 20px;
+  color: var(--ion-color-primary);
 }
 
 .search-button {

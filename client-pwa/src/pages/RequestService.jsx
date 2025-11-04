@@ -73,6 +73,7 @@ const RequestService = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [lastSearchQuery, setLastSearchQuery] = useState("");
+  const [isEditingOrigin, setIsEditingOrigin] = useState(false); // Para saber si estamos editando origen o destino
 
   // Estado de usuario logueado
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -154,7 +155,8 @@ const RequestService = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, origin, showError]);
 
-  const handleOpenSearchModal = () => {
+  const handleOpenSearchModal = (isOrigin = false) => {
+    setIsEditingOrigin(isOrigin);
     setShowModal(true);
     setSearchQuery("");
     setSearchResults([]);
@@ -166,10 +168,13 @@ const RequestService = () => {
     setSearchQuery("");
     setSearchResults([]);
     setLastSearchQuery(""); // Resetear búsqueda anterior
+    setIsEditingOrigin(false);
   };
 
   const handleSelectDestination = async (place) => {
     try {
+      let newLocation = null;
+      
       // Si el lugar viene de Google Places (sin coordenadas), obtener detalles
       if (place.source === 'google' && place.place_id) {
         setIsSearching(true);
@@ -177,32 +182,40 @@ const RequestService = () => {
         
         const details = await getPlaceDetails(place.place_id);
         
-        const newDestination = {
+        newLocation = {
           lat: details.coordinates[1],
           lng: details.coordinates[0],
           address: details.name,
         };
-
-        setDestination(newDestination);
-        handleCloseModal();
-        showSuccess("✅ Destino seleccionado");
         setIsSearching(false);
       } else if (place.coordinates) {
         // Si ya tiene coordenadas (viene de Mapbox), usar directamente
-        const newDestination = {
-      lat: place.coordinates[1],
-      lng: place.coordinates[0],
-      address: place.name,
-    };
-
-        setDestination(newDestination);
-        handleCloseModal();
-        showSuccess("✅ Destino seleccionado");
+        newLocation = {
+          lat: place.coordinates[1],
+          lng: place.coordinates[0],
+          address: place.name,
+        };
       } else {
         throw new Error('No se pudo obtener las coordenadas del lugar');
       }
+
+      // Aplicar el cambio según si estamos editando origen o destino
+      if (isEditingOrigin) {
+        setOrigin(newLocation);
+        handleCloseModal();
+        showSuccess("✅ Origen actualizado");
+        
+        // Si ya había un destino, la ruta se recalculará automáticamente
+        if (destination) {
+          console.log('🔄 Recalculando ruta con nuevo origen...');
+        }
+      } else {
+        setDestination(newLocation);
+        handleCloseModal();
+        showSuccess("✅ Destino seleccionado");
+      }
     } catch (error) {
-      console.error('❌ Error al seleccionar destino:', error);
+      console.error('❌ Error al seleccionar ubicación:', error);
       showError("Error al obtener coordenadas del lugar");
       setIsSearching(false);
     }
@@ -378,10 +391,23 @@ const RequestService = () => {
           {/* Botón para abrir búsqueda - solo si no hay destino */}
           {origin && !destination && (
             <div className="search-bottom-bar-container">
-              <div className="search-button" onClick={handleOpenSearchModal}>
+              {/* Dirección de origen (clickeable para editar) */}
+              <div className="origin-display" onClick={() => handleOpenSearchModal(true)}>
+                <div className="origin-icon">
+                  <Location size="20" color="#3880ff" variant="Bold" />
+                </div>
+                <div className="origin-text">
+                  <small>Origen</small>
+                  <p>{origin.address}</p>
+                </div>
+                <IonIcon icon={navigateCircleOutline} className="edit-icon" />
+              </div>
+              
+              {/* Botón de destino */}
+              <div className="search-button" onClick={() => handleOpenSearchModal(false)}>
                 <h2>¿A dónde vamos?</h2>
               </div>
-              </div>
+            </div>
           )}
 
           {/* Tarjeta inferior con información de ruta - solo si hay destino */}
@@ -481,40 +507,24 @@ const RequestService = () => {
                   <IonIcon icon={closeOutline} />
                 </IonButton>
               </IonButtons>
-              <IonTitle>¿A dónde vamos?</IonTitle>
+              <IonTitle>{isEditingOrigin ? 'Cambiar origen' : '¿A dónde vamos?'}</IonTitle>
             </IonToolbar>
           </IonHeader>
 
           <IonContent className="modal-search-content">
-            {/* Input de Origen (solo lectura) */}
+            {/* Input de búsqueda unificado */}
             <div className="location-input-container">
-              <div className="location-input origin">
+              <div className={`location-input ${isEditingOrigin ? 'origin' : 'destination'}`}>
                 <div className="location-icon">
-                  <Location size="24" color="#3880ff" variant="Bold" />
+                  <Location size="24" color={isEditingOrigin ? "#3880ff" : "#eb445a"} variant="Bold" />
                 </div>
                 <div className="input-content">
-                  <label>Origen</label>
+                  <label>{isEditingOrigin ? 'Nuevo origen' : 'Destino'}</label>
                   <input
                     type="text"
-                    value={origin?.address || "Tu ubicación"}
-                    readOnly
-                    className="readonly-input"
-                  />
-                </div>
-              </div>
-
-              {/* Input de Destino (editable con búsqueda) */}
-              <div className="location-input destination">
-                <div className="location-icon">
-                  <Location size="24" color="#eb445a" variant="Bold" />
-                </div>
-                <div className="input-content">
-                  <label>Destino</label>
-                  <input
-                    type="text"
-              value={searchQuery}
+                    value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar dirección en Colombia..."
+                    placeholder={isEditingOrigin ? "Buscar nueva ubicación de origen..." : "Buscar dirección en Colombia..."}
                     autoFocus
                   />
                 </div>
