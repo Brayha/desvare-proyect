@@ -368,7 +368,7 @@
   height: 40px;
   background: var(--ion-color-medium);
   opacity: 0.3;
-}
+  }
 
 .confirm-button {
   margin-top: 8px;

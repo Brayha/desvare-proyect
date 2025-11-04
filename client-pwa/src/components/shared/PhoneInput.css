@@ -1,0 +1,47 @@
+.phone-input-wrapper {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.phone-input-item {
+  --background: #f5f5f5;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+}
+
+.phone-input-item.ion-invalid {
+  --background: #fee;
+  border: 1px solid #f44;
+}
+
+.phone-prefix {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-right: 8px;
+  white-space: nowrap;
+  padding-right: 8px;
+  border-right: 1px solid #ddd;
+}
+
+.phone-input-field {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  --padding-start: 12px;
+}
+
+.phone-input-error {
+  color: #f44;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 16px;
+  font-weight: 500;
+}
+

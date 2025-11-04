@@ -25,6 +25,8 @@ import { arrowBack, locationOutline, navigateOutline, timeOutline, mapOutline } 
 import { useToast } from "@hooks/useToast";
 import { authAPI, requestAPI } from "../services/api";
 import socketService from "../services/socket";
+import PhoneInput from "../components/shared/PhoneInput";
+import OTPInput from "../components/shared/OTPInput";
 import "./RequestAuth.css";
 
 const RequestAuth = () => {
@@ -34,147 +36,198 @@ const RequestAuth = () => {
   // Datos de la ruta (desde localStorage)
   const [routeData, setRouteData] = useState(null);
   
-  // Estado de autenticación
+  // Estado de autenticación OTP (2 pasos)
   const [authMode, setAuthMode] = useState("login"); // "login" o "register"
+  const [step, setStep] = useState(1); // 1: formulario, 2: OTP
+  const [userId, setUserId] = useState(null); // ID del usuario para verificar OTP
   const [isLoading, setIsLoading] = useState(false);
   
-  // Formulario de login
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  // Formulario de login (solo teléfono)
+  const [loginPhone, setLoginPhone] = useState("");
   
-  // Formulario de registro
+  // Formulario de registro (nombre, teléfono, email opcional)
   const [registerName, setRegisterName] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
   const [registerPhone, setRegisterPhone] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  
+  // OTP
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
 
   useEffect(() => {
+    console.log('🔍 RequestAuth - Verificando estado de autenticación...');
+    
     // Verificar si ya está autenticado
     const userData = localStorage.getItem('user');
     if (userData) {
-      // Ya está autenticado, ir directo a waiting quotes
-      history.push('/waiting-quotes');
+      console.log('✅ Usuario ya autenticado, redirigiendo...');
+      history.replace('/waiting-quotes');
       return;
     }
 
-    // Cargar datos de la ruta
+    // Cargar datos de la ruta (usar 'requestData' que es lo que guarda RequestService)
     const storedRouteData = localStorage.getItem('requestData');
     if (!storedRouteData) {
-      // No hay datos de ruta, redirigir al inicio
-      showError("No se encontraron datos de la ruta");
-      history.push('/home');
+      console.log('❌ No hay datos de ruta, volviendo a RequestService');
+      showError('Selecciona primero tu destino');
+      history.replace('/request-service');
       return;
     }
 
-    setRouteData(JSON.parse(storedRouteData));
-  }, [history, showError]);
+    try {
+      const parsedRouteData = JSON.parse(storedRouteData);
+      console.log('📋 Datos de ruta cargados:', parsedRouteData);
+      setRouteData(parsedRouteData);
+    } catch (error) {
+      console.error('❌ Error al parsear requestData:', error);
+      showError('Error al cargar datos de la ruta');
+      history.replace('/request-service');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ✅ Sin dependencias para ejecutar solo una vez al montar y evitar loops
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  // PASO 1: Login (solo teléfono)
+  const handleLoginSubmit = async () => {
+    console.log('📱 Iniciando login con teléfono:', loginPhone);
     
-    if (!loginEmail || !loginPassword) {
-      showError("Por favor completa todos los campos");
+    if (!loginPhone || loginPhone.length !== 10) {
+      showError('Ingresa un número de teléfono válido');
       return;
     }
 
     setIsLoading(true);
-
     try {
-      const response = await authAPI.login({
-        email: loginEmail,
-        password: loginPassword,
-      });
-
-      // Guardar datos del usuario
-      const user = response.data.user;
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('token', response.data.token);
-
-      showSuccess(`¡Bienvenido de nuevo, ${user.name}!`);
-
-      console.log('🔌 Socket.IO ya está conectado desde App.jsx');
+      const response = await authAPI.loginOTP({ phone: loginPhone });
+      console.log('✅ Login OTP - Respuesta:', response.data);
       
-      // Registrar cliente (Socket.IO ya está conectado desde App.jsx)
-      socketService.registerClient(user.id);
-      console.log('👤 Cliente registrado en Socket.IO:', user.id);
-
-      // 🆕 ENVIAR SOLICITUD AQUÍ (después de autenticar)
-      await sendRequestToDrivers(user);
-
-      // Redirigir a waiting quotes
-      setTimeout(() => {
-        history.push('/waiting-quotes');
-      }, 500);
-
+      setUserId(response.data.userId);
+      setStep(2); // Ir a paso de OTP
+      showSuccess('Te enviamos un código de verificación');
+      
     } catch (error) {
-      showError(error.response?.data?.error || "Error al iniciar sesión");
+      console.error('❌ Error en login OTP:', error);
+      const errorMsg = error.response?.data?.error || 'Error al iniciar sesión';
+      showError(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  // PASO 1: Registro (nombre, teléfono, email opcional)
+  const handleRegisterSubmit = async () => {
+    console.log('📱 Iniciando registro:', { registerName, registerPhone, registerEmail });
     
-    if (!registerName || !registerEmail || !registerPhone || !registerPassword) {
-      showError("Por favor completa todos los campos");
+    if (!registerName || !registerPhone || registerPhone.length !== 10) {
+      showError('Nombre y teléfono válido son requeridos');
       return;
     }
 
     setIsLoading(true);
-
     try {
-      const response = await authAPI.register({
+      const response = await authAPI.registerOTP({
         name: registerName,
-        email: registerEmail,
         phone: registerPhone,
-        password: registerPassword,
-        role: 'client',
+        email: registerEmail || undefined,
       });
-
-      // Guardar datos del usuario
-      const user = response.data.user;
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('token', response.data.token);
-
-      showSuccess(`¡Bienvenido, ${user.name}!`);
-
-      console.log('🔌 Socket.IO ya está conectado desde App.jsx');
+      console.log('✅ Registro OTP - Respuesta:', response.data);
       
-      // Registrar cliente (Socket.IO ya está conectado desde App.jsx)
-      socketService.registerClient(user.id);
-      console.log('👤 Cliente registrado en Socket.IO:', user.id);
-
-      // 🆕 ENVIAR SOLICITUD AQUÍ (después de registrar)
-      await sendRequestToDrivers(user);
-
-      // Redirigir a waiting quotes
-      setTimeout(() => {
-        history.push('/waiting-quotes');
-      }, 500);
-
+      setUserId(response.data.userId);
+      setStep(2); // Ir a paso de OTP
+      showSuccess('Te enviamos un código de verificación');
+      
     } catch (error) {
-      showError(error.response?.data?.error || "Error al registrarse");
+      console.error('❌ Error en registro OTP:', error);
+      const errorMsg = error.response?.data?.error || 'Error al registrarte';
+      
+      // Si el teléfono ya existe, sugerir usar login
+      if (errorMsg.includes('ya está registrado')) {
+        showError('Este número ya está registrado. Usa "Iniciar Sesión" en su lugar.');
+      } else {
+        showError(errorMsg);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Función para enviar solicitud a conductores
+  // PASO 2: Verificar OTP y enviar solicitud
+  const handleVerifyOTP = async () => {
+    console.log('🔐 Verificando OTP:', otp);
+    console.log('🆔 UserId guardado:', userId);
+    
+    if (otp.length !== 4) {
+      setOtpError('Ingresa el código de 4 dígitos');
+      return;
+    }
+
+    if (!userId) {
+      setOtpError('Error: No se encontró el ID de usuario. Intenta de nuevo.');
+      setStep(1);
+      return;
+    }
+
+    setIsLoading(true);
+    setOtpError("");
+    
+    try {
+      // 1. Verificar OTP
+      console.log('📤 Enviando a verify-otp:', { userId, otp });
+      const response = await authAPI.verifyOTP({
+        userId: userId,
+        otp: otp,
+      });
+      console.log('✅ OTP verificado - Respuesta:', response.data);
+      
+      const { token, user } = response.data;
+      
+      // 2. Guardar token y usuario
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      console.log('💾 Token y usuario guardados');
+      
+      // 3. Enviar solicitud a conductores
+      console.log('🚀 Enviando solicitud a conductores...');
+      await sendRequestToDrivers(user);
+      
+      // 4. Redirigir a WaitingQuotes
+      console.log('🔄 Redirigiendo a /waiting-quotes...');
+      await new Promise(resolve => setTimeout(resolve, 100)); // Delay para sincronizar localStorage
+      history.replace('/waiting-quotes');
+      
+    } catch (error) {
+      console.error('❌ Error al verificar OTP:', error);
+      const errorMsg = error.response?.data?.error || 'Código inválido o expirado';
+      setOtpError(errorMsg);
+      setOtp(""); // Limpiar OTP
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Función para enviar solicitud a conductores (después de autenticar)
   const sendRequestToDrivers = async (user) => {
     try {
-      console.log('📤 Enviando solicitud a conductores desde RequestAuth...');
-      
-      if (!routeData || !routeData.origin || !routeData.destination || !routeData.routeInfo) {
-        throw new Error('Datos de ruta incompletos');
+      console.log('📡 sendRequestToDrivers - Iniciando...');
+      console.log('👤 Usuario:', user);
+      console.log('🗺️ RouteData:', routeData);
+
+      // 1. Verificar Socket.IO
+      if (!socketService.isConnected()) {
+        console.log('⚠️ Socket.IO no conectado, esperando...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      // Crear objeto de solicitud con validación
-      const requestPayload = {
+      // 2. Registrar cliente en Socket.IO
+      console.log('👤 Registrando cliente en Socket.IO...');
+      socketService.registerClient(user.id);
+
+      // 3. Crear solicitud en BD
+      console.log('📝 Creando solicitud en BD...');
+      const requestData = {
         clientId: user.id,
         clientName: user.name,
         clientPhone: user.phone || 'N/A',
-        clientEmail: user.email,
+        clientEmail: user.email || 'N/A',
         origin: {
           coordinates: [routeData.origin.lng, routeData.origin.lat],
           address: routeData.origin.address,
@@ -186,21 +239,19 @@ const RequestAuth = () => {
         distance: routeData.routeInfo.distance,
         duration: routeData.routeInfo.duration,
       };
-
-      console.log('📦 Payload que se enviará:', JSON.stringify(requestPayload, null, 2));
-
-      // Crear solicitud en la base de datos
-      const response = await requestAPI.createRequest(requestPayload);
       
+      console.log('📦 Request payload:', JSON.stringify(requestData, null, 2));
+      
+      const response = await requestAPI.createRequest(requestData);
       const requestId = response.data.requestId;
-      
-      // Guardar el requestId en localStorage para WaitingQuotes
-      localStorage.setItem('currentRequestId', requestId);
+      console.log('✅ Solicitud creada en BD con ID:', requestId);
 
-      console.log('📡 Enviando evento Socket.IO a conductores...');
-      console.log('🎯 Request ID:', requestId);
-      
-      // Emitir evento de nueva solicitud vía Socket.IO con TODOS los datos incluyendo coordenadas
+      // 4. Guardar requestId (usar 'currentRequestId' para consistencia)
+      localStorage.setItem('currentRequestId', requestId);
+      console.log('💾 RequestId guardado en localStorage:', requestId);
+
+      // 5. Emitir evento Socket.IO a conductores
+      console.log('📡 Emitiendo request:new via Socket.IO...');
       socketService.sendNewRequest({
         requestId: requestId,
         clientId: user.id,
@@ -219,16 +270,24 @@ const RequestAuth = () => {
         duration: routeData.routeInfo.duration,
       });
 
-      console.log('✅ Solicitud enviada correctamente a backend y conductores vía Socket.IO');
-
+      console.log('✅ sendRequestToDrivers completado exitosamente');
+      
     } catch (error) {
-      console.error('❌ Error al enviar solicitud:', error);
-      throw error; // Re-lanzar para que sea manejado por el handleLogin/handleRegister
+      console.error('❌ Error en sendRequestToDrivers:', error);
+      throw error;
     }
   };
 
   const handleBack = () => {
-    history.goBack();
+    if (step === 2) {
+      // Volver al paso 1
+      setStep(1);
+      setOtp("");
+      setOtpError("");
+    } else {
+      // Volver a RequestService
+      history.goBack();
+    }
   };
 
   if (!routeData) {
@@ -248,206 +307,175 @@ const RequestAuth = () => {
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonButton onClick={handleBack}>
+            <IonButton onClick={handleBack} disabled={isLoading}>
               <IonIcon icon={arrowBack} />
             </IonButton>
           </IonButtons>
-          <IonTitle>Confirmar Solicitud</IonTitle>
+          <IonTitle>{step === 1 ? 'Autenticación' : 'Verificación'}</IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent className="request-auth-page">
-        {/* Resumen de la ruta */}
+      <IonContent className="ion-padding request-auth-content">
+        {/* Resumen de la solicitud */}
         <IonCard className="route-summary-card">
           <IonCardHeader>
-            <IonCardTitle>
-              <IonIcon icon={mapOutline} />
-              Resumen de tu ruta
-            </IonCardTitle>
+            <IonCardTitle>Resumen del Servicio</IonCardTitle>
           </IonCardHeader>
           <IonCardContent>
-            <div className="route-summary-item">
-              <IonIcon icon={locationOutline} color="primary" />
-              <div className="route-summary-text">
-                <IonText color="medium">
-                  <small>Origen</small>
-                </IonText>
-                <IonText>
-                  <p>{routeData.origin.address}</p>
-                </IonText>
+            <div className="route-detail">
+              <IonIcon icon={locationOutline} className="detail-icon" />
+              <div className="detail-content">
+                <IonLabel className="detail-label">Origen</IonLabel>
+                <IonText className="detail-text">{routeData.origin.address}</IonText>
               </div>
             </div>
 
-            <div className="route-summary-divider" />
-
-            <div className="route-summary-item">
-              <IonIcon icon={navigateOutline} color="danger" />
-              <div className="route-summary-text">
-                <IonText color="medium">
-                  <small>Destino</small>
-                </IonText>
-                <IonText>
-                  <p>{routeData.destination.address}</p>
-                </IonText>
+            <div className="route-detail">
+              <IonIcon icon={navigateOutline} className="detail-icon" />
+              <div className="detail-content">
+                <IonLabel className="detail-label">Destino</IonLabel>
+                <IonText className="detail-text">{routeData.destination.address}</IonText>
               </div>
             </div>
 
-            <div className="route-summary-stats">
-              <div className="stat-item">
-                <IonIcon icon={mapOutline} color="medium" />
-                <IonText>
-                  <small>{routeData.routeInfo.distanceText}</small>
-                </IonText>
+            <div className="route-metrics">
+              <div className="metric">
+                <IonIcon icon={mapOutline} />
+                <IonText>{routeData.routeInfo.distanceText}</IonText>
               </div>
-              <div className="stat-item">
-                <IonIcon icon={timeOutline} color="medium" />
-                <IonText>
-                  <small>{routeData.routeInfo.durationText}</small>
-                </IonText>
+              <div className="metric">
+                <IonIcon icon={timeOutline} />
+                <IonText>{routeData.routeInfo.durationText}</IonText>
               </div>
             </div>
           </IonCardContent>
         </IonCard>
 
-        {/* Segmento Login/Register */}
-        <div className="auth-segment-container">
-          <IonSegment value={authMode} onIonChange={(e) => setAuthMode(e.detail.value)}>
-            <IonSegmentButton value="login">
-              <IonLabel>Iniciar Sesión</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="register">
-              <IonLabel>Registrarse</IonLabel>
-            </IonSegmentButton>
-          </IonSegment>
-        </div>
+        {/* PASO 1: Formulario de Login o Registro */}
+        {step === 1 && (
+          <>
+            <IonSegment 
+              value={authMode} 
+              onIonChange={(e) => setAuthMode(e.detail.value)}
+              className="auth-segment"
+            >
+              <IonSegmentButton value="login">
+                <IonLabel>Iniciar Sesión</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="register">
+                <IonLabel>Registrarse</IonLabel>
+              </IonSegmentButton>
+            </IonSegment>
 
-        {/* Formulario de Login */}
-        {authMode === "login" && (
-          <form onSubmit={handleLogin} className="auth-form">
-            <IonCard>
-              <IonCardHeader>
-                <IonCardTitle>Inicia sesión</IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <IonItem>
-                  <IonLabel position="floating">Email</IonLabel>
-                  <IonInput
-                    type="email"
-                    value={loginEmail}
-                    onIonInput={(e) => setLoginEmail(e.detail.value)}
-                    required
-                  />
-                </IonItem>
-
-                <IonItem>
-                  <IonLabel position="floating">Contraseña</IonLabel>
-                  <IonInput
-                    type="password"
-                    value={loginPassword}
-                    onIonInput={(e) => setLoginPassword(e.detail.value)}
-                    required
-                  />
-                </IonItem>
+            {authMode === "login" ? (
+              <div className="auth-form">
+                <IonText color="medium" className="auth-subtitle">
+                  Ingresa tu número de teléfono
+                </IonText>
+                
+                <PhoneInput
+                  value={loginPhone}
+                  onChange={setLoginPhone}
+                />
 
                 <IonButton
                   expand="block"
-                  type="submit"
-                  disabled={isLoading}
-                  className="submit-button"
+                  onClick={handleLoginSubmit}
+                  disabled={isLoading || loginPhone.length !== 10}
+                  className="auth-button"
                 >
-                  {isLoading ? (
-                    <>
-                      <IonSpinner name="crescent" />
-                      <span style={{ marginLeft: "10px" }}>Iniciando sesión...</span>
-                    </>
-                  ) : (
-                    "Iniciar Sesión"
-                  )}
+                  {isLoading ? <IonSpinner /> : 'Continuar'}
                 </IonButton>
-              </IonCardContent>
-            </IonCard>
-          </form>
-        )}
+              </div>
+            ) : (
+              <div className="auth-form">
+                <IonText color="medium" className="auth-subtitle">
+                  Crea tu cuenta para cotizar
+                </IonText>
 
-        {/* Formulario de Registro */}
-        {authMode === "register" && (
-          <form onSubmit={handleRegister} className="auth-form">
-            <IonCard>
-              <IonCardHeader>
-                <IonCardTitle>Crea tu cuenta</IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <IonItem>
-                  <IonLabel position="floating">Nombre completo</IonLabel>
+                <IonItem lines="none" className="custom-input-item">
+                  <IonLabel position="stacked">Nombre completo</IonLabel>
                   <IonInput
                     type="text"
+                    placeholder="Juan Pérez"
                     value={registerName}
                     onIonInput={(e) => setRegisterName(e.detail.value)}
-                    required
                   />
                 </IonItem>
 
-                <IonItem>
-                  <IonLabel position="floating">Email</IonLabel>
+                <PhoneInput
+                  value={registerPhone}
+                  onChange={setRegisterPhone}
+                />
+
+                <IonItem lines="none" className="custom-input-item">
+                  <IonLabel position="stacked">Email (opcional)</IonLabel>
                   <IonInput
                     type="email"
+                    placeholder="juan@ejemplo.com"
                     value={registerEmail}
                     onIonInput={(e) => setRegisterEmail(e.detail.value)}
-                    required
-                  />
-                </IonItem>
-
-                <IonItem>
-                  <IonLabel position="floating">Teléfono</IonLabel>
-                  <IonInput
-                    type="tel"
-                    value={registerPhone}
-                    onIonInput={(e) => setRegisterPhone(e.detail.value)}
-                    placeholder="+57 300 123 4567"
-                    required
-                  />
-                </IonItem>
-
-                <IonItem>
-                  <IonLabel position="floating">Contraseña</IonLabel>
-                  <IonInput
-                    type="password"
-                    value={registerPassword}
-                    onIonInput={(e) => setRegisterPassword(e.detail.value)}
-                    required
                   />
                 </IonItem>
 
                 <IonButton
                   expand="block"
-                  type="submit"
-                  disabled={isLoading}
-                  className="submit-button"
+                  onClick={handleRegisterSubmit}
+                  disabled={isLoading || !registerName || registerPhone.length !== 10}
+                  className="auth-button"
                 >
-                  {isLoading ? (
-                    <>
-                      <IonSpinner name="crescent" />
-                      <span style={{ marginLeft: "10px" }}>Registrando...</span>
-                    </>
-                  ) : (
-                    "Registrarse"
-                  )}
+                  {isLoading ? <IonSpinner /> : 'Crear Cuenta'}
                 </IonButton>
-              </IonCardContent>
-            </IonCard>
-          </form>
+              </div>
+            )}
+          </>
         )}
 
-        <IonText className="privacy-text">
-          <p>
-            Al continuar, aceptas que tus datos se usen para conectar con conductores
-            disponibles. No compartimos tu información con terceros.
-          </p>
-        </IonText>
+        {/* PASO 2: Verificación OTP */}
+        {step === 2 && (
+          <div className="otp-form">
+            <IonText color="medium" className="otp-subtitle">
+              Ingresa el código de 4 dígitos
+            </IonText>
+            <IonText color="medium" className="otp-hint">
+              (Para pruebas usa: 0000)
+            </IonText>
+
+            <OTPInput
+              value={otp}
+              onChange={(value) => {
+                setOtp(value);
+                setOtpError("");
+              }}
+              error={otpError}
+            />
+
+            <IonButton
+              expand="block"
+              onClick={handleVerifyOTP}
+              disabled={isLoading || otp.length !== 4}
+              className="auth-button"
+            >
+              {isLoading ? <IonSpinner /> : 'Verificar y Buscar Cotizaciones'}
+            </IonButton>
+
+            <IonButton
+              expand="block"
+              fill="clear"
+              onClick={() => {
+                setStep(1);
+                setOtp("");
+                setOtpError("");
+              }}
+              disabled={isLoading}
+            >
+              Cambiar número
+            </IonButton>
+          </div>
+        )}
       </IonContent>
     </IonPage>
   );
 };
 
 export default RequestAuth;
-

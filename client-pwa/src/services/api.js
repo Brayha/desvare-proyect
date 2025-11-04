@@ -25,8 +25,14 @@ api.interceptors.request.use(
 
 // API de autenticación
 export const authAPI = {
+  // Autenticación tradicional (para drivers)
   register: (data) => api.post('/api/auth/register', data),
   login: (data) => api.post('/api/auth/login', data),
+  
+  // Autenticación OTP (para clients)
+  registerOTP: (data) => api.post('/api/auth/register-otp', data),
+  loginOTP: (data) => api.post('/api/auth/login-otp', data),
+  verifyOTP: (data) => api.post('/api/auth/verify-otp', data),
 };
 
 // API de solicitudes
