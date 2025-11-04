@@ -79,15 +79,23 @@ const RequestConfirmation = () => {
         notes: notes || undefined,
       });
 
-      // Emitir evento de nueva solicitud vía Socket.IO
+      // Emitir evento de nueva solicitud vía Socket.IO con TODOS los datos incluyendo coordenadas
       socketService.sendNewRequest({
         requestId: response.data.requestId,
         clientId: user.id,
         clientName: user.name,
-        origin: routeData.origin.address,
-        destination: routeData.destination.address,
-        distance: routeData.routeInfo.distanceText,
-        duration: routeData.routeInfo.durationText,
+        origin: {
+          address: routeData.origin.address,
+          lat: routeData.origin.lat,
+          lng: routeData.origin.lng
+        },
+        destination: {
+          address: routeData.destination.address,
+          lat: routeData.destination.lat,
+          lng: routeData.destination.lng
+        },
+        distance: routeData.routeInfo.distance,
+        duration: routeData.routeInfo.duration,
       });
 
       showSuccess("¡Solicitud enviada! Los conductores recibirán tu solicitud.");

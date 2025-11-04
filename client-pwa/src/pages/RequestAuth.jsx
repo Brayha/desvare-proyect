@@ -92,24 +92,9 @@ const RequestAuth = () => {
 
       showSuccess(`¡Bienvenido de nuevo, ${user.name}!`);
 
-      console.log('🔌 Conectando Socket.IO después del login...');
+      console.log('🔌 Socket.IO ya está conectado desde App.jsx');
       
-      // Conectar Socket.IO y esperar a que se conecte
-      const socket = socketService.connect();
-      
-      await new Promise((resolve) => {
-        if (socket.connected) {
-          console.log('✅ Socket.IO ya estaba conectado');
-          resolve();
-        } else {
-          socket.once('connect', () => {
-            console.log('✅ Socket.IO conectado exitosamente');
-            resolve();
-          });
-        }
-      });
-
-      // Registrar cliente
+      // Registrar cliente (Socket.IO ya está conectado desde App.jsx)
       socketService.registerClient(user.id);
       console.log('👤 Cliente registrado en Socket.IO:', user.id);
 
@@ -154,24 +139,9 @@ const RequestAuth = () => {
 
       showSuccess(`¡Bienvenido, ${user.name}!`);
 
-      console.log('🔌 Conectando Socket.IO después del registro...');
+      console.log('🔌 Socket.IO ya está conectado desde App.jsx');
       
-      // Conectar Socket.IO y esperar a que se conecte
-      const socket = socketService.connect();
-      
-      await new Promise((resolve) => {
-        if (socket.connected) {
-          console.log('✅ Socket.IO ya estaba conectado');
-          resolve();
-        } else {
-          socket.once('connect', () => {
-            console.log('✅ Socket.IO conectado exitosamente');
-            resolve();
-          });
-        }
-      });
-
-      // Registrar cliente
+      // Registrar cliente (Socket.IO ya está conectado desde App.jsx)
       socketService.registerClient(user.id);
       console.log('👤 Cliente registrado en Socket.IO:', user.id);
 
@@ -230,13 +200,21 @@ const RequestAuth = () => {
       console.log('📡 Enviando evento Socket.IO a conductores...');
       console.log('🎯 Request ID:', requestId);
       
-      // Emitir evento de nueva solicitud vía Socket.IO con TODOS los datos
+      // Emitir evento de nueva solicitud vía Socket.IO con TODOS los datos incluyendo coordenadas
       socketService.sendNewRequest({
         requestId: requestId,
         clientId: user.id,
         clientName: user.name,
-        origin: routeData.origin.address,
-        destination: routeData.destination.address,
+        origin: {
+          address: routeData.origin.address,
+          lat: routeData.origin.lat,
+          lng: routeData.origin.lng
+        },
+        destination: {
+          address: routeData.destination.address,
+          lat: routeData.destination.lat,
+          lng: routeData.destination.lng
+        },
         distance: routeData.routeInfo.distance,
         duration: routeData.routeInfo.duration,
       });

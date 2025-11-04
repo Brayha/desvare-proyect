@@ -21,7 +21,6 @@ import {
   useIonToast,
 } from '@ionic/react';
 import { logOutOutline, searchOutline } from 'ionicons/icons';
-import { requestAPI } from '../services/api';
 import socketService from '../services/socket';
 
 const Home = () => {
@@ -29,9 +28,7 @@ const Home = () => {
   const [present] = useIonToast();
   
   const [user, setUser] = useState(null);
-  const [currentRequest, setCurrentRequest] = useState(null);
   const [quotes, setQuotes] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -43,8 +40,7 @@ const Home = () => {
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
 
-    // Conectar Socket.IO
-    socketService.connect();
+    // Registrar cliente (Socket.IO ya está conectado desde App.jsx)
     socketService.registerClient(parsedUser.id);
 
     // Escuchar cotizaciones recibidas
@@ -60,11 +56,15 @@ const Home = () => {
     });
 
     return () => {
+      // Solo limpiar el listener, no desconectar (manejado por App.jsx)
       socketService.offQuoteReceived();
-      socketService.disconnect();
     };
   }, [history, present]);
 
+  // TODO: Esta función no se usa actualmente, el flujo de solicitudes ahora es:
+  // RequestService → RequestAuth → WaitingQuotes
+  // Mantener comentado por si se necesita en el futuro
+  /*
   const handleRequestQuote = async () => {
     if (isLoading) return;
 
@@ -93,7 +93,8 @@ const Home = () => {
         color: 'success',
       });
 
-    } catch (error) {
+    } catch (err) {
+      console.error('Error al enviar solicitud:', err);
       present({
         message: 'Error al enviar solicitud',
         duration: 3000,
@@ -103,6 +104,7 @@ const Home = () => {
       setIsLoading(false);
     }
   };
+  */
 
   const handleLogout = () => {
     console.log('👋 Cerrando sesión...');
@@ -113,8 +115,9 @@ const Home = () => {
     localStorage.removeItem('requestData');
     localStorage.removeItem('currentRequestId');
     
-    // Desconectar Socket.IO
-    socketService.disconnect();
+    // NO desconectar Socket.IO aquí - se maneja en App.jsx al desmontar
+    // Solo limpiar listeners locales
+    socketService.offQuoteReceived();
     
     // Redirigir al home (sin autenticación)
     // El componente InitialRedirect en App.jsx lo redirigirá a /location-permission
@@ -154,11 +157,6 @@ const Home = () => {
               <IonIcon icon={searchOutline} slot="start" />
               Buscar Grúa
             </IonButton>
-            {currentRequest && (
-              <IonText color="medium" style={{ display: 'block', marginTop: '10px', textAlign: 'center' }}>
-                <small>Solicitud #{currentRequest.id.slice(-6)} enviada</small>
-              </IonText>
-            )}
           </IonCardContent>
         </IonCard>
 

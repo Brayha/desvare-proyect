@@ -80,60 +80,75 @@ const WaitingQuotes = () => {
   const [quotesReceived, setQuotesReceived] = useState([]);
 
   useEffect(() => {
-    // Verificar que tengamos todos los datos necesarios
-    const userData = localStorage.getItem('user');
-    const storedRouteData = localStorage.getItem('requestData');
-    const currentRequestId = localStorage.getItem('currentRequestId');
+    let isMounted = true; // Flag para evitar actualizaciones si el componente se desmonta
 
-    // Si falta algo, redirigir
-    if (!userData) {
-      showError("Debes iniciar sesión primero");
-      history.push('/request-auth');
-      return;
-    }
+    const initializeData = () => {
+      // Verificar que tengamos todos los datos necesarios
+      const userData = localStorage.getItem('user');
+      const storedRouteData = localStorage.getItem('requestData');
+      const currentRequestId = localStorage.getItem('currentRequestId');
 
-    if (!storedRouteData) {
-      showError("No se encontraron datos de la ruta");
-      history.push('/request-service');
-      return;
-    }
+      // Si falta algo, redirigir
+      if (!userData) {
+        if (isMounted) {
+          showError("Debes iniciar sesión primero");
+          history.push('/request-auth');
+        }
+        return;
+      }
 
-    if (!currentRequestId) {
-      showError("No se encontró la solicitud. Por favor, intenta de nuevo.");
-      history.push('/request-service');
-      return;
-    }
+      if (!storedRouteData) {
+        if (isMounted) {
+          showError("No se encontraron datos de la ruta");
+          history.push('/request-service');
+        }
+        return;
+      }
 
-    // Cargar datos en el state
-    const parsedUser = JSON.parse(userData);
-    const parsedRouteData = JSON.parse(storedRouteData);
+      if (!currentRequestId) {
+        if (isMounted) {
+          showError("No se encontró la solicitud. Por favor, intenta de nuevo.");
+          history.push('/request-service');
+        }
+        return;
+      }
 
-    console.log('📋 WaitingQuotes - Datos cargados:', {
-      user: parsedUser.name,
-      requestId: currentRequestId,
-      routeInfo: parsedRouteData.routeInfo
-    });
+      // Cargar datos en el state
+      const parsedUser = JSON.parse(userData);
+      const parsedRouteData = JSON.parse(storedRouteData);
 
-    setUser(parsedUser);
-    setRouteData(parsedRouteData);
-    setRequestId(currentRequestId);
-    setRequestSent(true); // La solicitud ya fue enviada en RequestAuth
-    setIsLoading(false);
+      console.log('📋 WaitingQuotes - Datos cargados:', {
+        user: parsedUser.name,
+        requestId: currentRequestId,
+        routeInfo: parsedRouteData.routeInfo
+      });
 
-    console.log('✅ WaitingQuotes - Componente listo');
+      if (isMounted) {
+        setUser(parsedUser);
+        setRouteData(parsedRouteData);
+        setRequestId(currentRequestId);
+        setRequestSent(true); // La solicitud ya fue enviada en RequestAuth
+        setIsLoading(false);
+      }
 
-    // Solo escuchar cotizaciones (Socket.IO ya está conectado desde RequestAuth)
-    socketService.onQuoteReceived((quote) => {
-      console.log('💰 Cotización recibida en WaitingQuotes:', quote);
-      console.log('📍 Ubicación del conductor:', quote.location);
-      console.log('💵 Monto:', quote.amount);
-      
-      setQuotesReceived((prev) => [...prev, quote]);
-      // 🧪 EXPERIMENT-QUOTES: Toast eliminado para no interrumpir la experiencia
-      // showSuccess(`Nueva cotización: $${quote.amount.toLocaleString()}`);
-    });
+      console.log('✅ WaitingQuotes - Componente listo');
+
+      // Solo escuchar cotizaciones (Socket.IO ya está conectado desde App.jsx)
+      socketService.onQuoteReceived((quote) => {
+        if (!isMounted) return;
+        
+        console.log('💰 Cotización recibida en WaitingQuotes:', quote);
+        console.log('📍 Ubicación del conductor:', quote.location);
+        console.log('💵 Monto:', quote.amount);
+        
+        setQuotesReceived((prev) => [...prev, quote]);
+      });
+    };
+
+    initializeData();
 
     return () => {
+      isMounted = false;
       // Limpiar listener de cotizaciones al desmontar
       socketService.offQuoteReceived();
       console.log('🧹 Limpiando listeners de cotizaciones');
@@ -146,6 +161,8 @@ const WaitingQuotes = () => {
   // ============================================
   useEffect(() => {
     if (!EXPERIMENT_QUOTES) return; // Si el experimento está desactivado, no hacer nada
+    
+    const timeoutIds = []; // Array para guardar los IDs de los timeouts
     
     // Solo disparar cuando llegue la PRIMERA cotización real
     if (quotesReceived.length === 1 && routeData?.origin) {
@@ -161,15 +178,23 @@ const WaitingQuotes = () => {
       randomQuotes.forEach((quote, index) => {
         const delay = 3000; // 3 segundos fijos entre cada cotización
         
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           console.log(`🧪 EXPERIMENT-QUOTES: Enviando cotización #${index + 1} (${quote.driverName}) - $${quote.amount.toLocaleString()}`);
           setQuotesReceived((prev) => [...prev, quote]);
-          // 🧪 EXPERIMENT-QUOTES: Toast eliminado para no interrumpir la experiencia
-          // showSuccess(`Nueva cotización: $${quote.amount.toLocaleString()} - ${quote.driverName}`);
         }, delay * (index + 1)); // Secuencial: 3s, 6s, 9s, 12s, 15s, 18s
+        
+        timeoutIds.push(timeoutId); // Guardar el ID para limpiarlo después
       });
     }
-  }, [quotesReceived.length, routeData, showSuccess]);
+    
+    // Cleanup: Limpiar todos los timeouts si el componente se desmonta
+    return () => {
+      timeoutIds.forEach(id => clearTimeout(id));
+      if (timeoutIds.length > 0) {
+        console.log('🧹 EXPERIMENT-QUOTES: Limpiando timeouts pendientes');
+      }
+    };
+  }, [quotesReceived.length, routeData]);
   // ============================================
   // 🧪 FIN EXPERIMENT-QUOTES
   // ============================================

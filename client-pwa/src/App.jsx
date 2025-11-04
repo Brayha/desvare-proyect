@@ -1,6 +1,8 @@
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
+import { useEffect } from 'react';
+import socketService from './services/socket';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -44,6 +46,18 @@ const InitialRedirect = () => {
 };
 
 function App() {
+  // Conectar Socket.IO una sola vez al iniciar la app
+  useEffect(() => {
+    console.log('🚀 Inicializando Socket.IO...');
+    socketService.connect();
+    
+    // Cleanup al desmontar la app
+    return () => {
+      console.log('👋 Cerrando Socket.IO...');
+      socketService.disconnect();
+    };
+  }, []);
+
   return (
     <IonApp>
       <IonReactRouter>

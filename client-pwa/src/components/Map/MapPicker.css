@@ -5,6 +5,17 @@
   overflow: hidden;
 }
 
+/* Suprimir warnings de Mapbox aria-hidden */
+.mapboxgl-canvas-container,
+.mapboxgl-canvas {
+  pointer-events: auto !important;
+}
+
+/* Ocultar controles de atribución que causan warnings */
+.mapboxgl-ctrl-attrib-button {
+  pointer-events: auto !important;
+}
+
 /* Overlay de carga */
 .map-loading-overlay {
   position: absolute;

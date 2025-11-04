@@ -100,14 +100,16 @@ const RequestService = () => {
       
       showSuccess("✅ Ubicación obtenida correctamente");
     }
-  }, [currentGeolocation, origin, showSuccess]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentGeolocation]);
 
   // Mostrar error de geolocalización
   useEffect(() => {
     if (geoError) {
       showError(geoError);
     }
-  }, [geoError, showError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geoError]);
 
   // Buscar direcciones mientras el usuario escribe
   useEffect(() => {
@@ -153,7 +155,7 @@ const RequestService = () => {
       // No limpiar isSearching aquí para que se vea el spinner
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, origin, showError]);
+  }, [searchQuery, lastSearchQuery]);
 
   const handleOpenSearchModal = (isOrigin = false) => {
     setIsEditingOrigin(isOrigin);
@@ -238,22 +240,7 @@ const RequestService = () => {
     try {
       console.log('📤 Usuario logueado - Enviando solicitud directamente...');
 
-      // Verificar si Socket.IO está conectado, si no, conectar
-      const socket = socketService.connect();
-      
-      await new Promise((resolve) => {
-        if (socket.connected) {
-          console.log('✅ Socket.IO ya estaba conectado');
-          resolve();
-        } else {
-          socket.once('connect', () => {
-            console.log('✅ Socket.IO conectado exitosamente');
-            resolve();
-          });
-        }
-      });
-
-      // Registrar cliente si no está registrado
+      // Socket.IO ya está conectado desde App.jsx, solo registrar cliente
       socketService.registerClient(currentUser.id);
       console.log('👤 Cliente registrado en Socket.IO:', currentUser.id);
 
@@ -298,13 +285,21 @@ const RequestService = () => {
       console.log('📡 Enviando evento Socket.IO a conductores...');
       console.log('🎯 Request ID:', requestId);
       
-      // Emitir evento de nueva solicitud vía Socket.IO
+      // Emitir evento de nueva solicitud vía Socket.IO con TODOS los datos incluyendo coordenadas
       socketService.sendNewRequest({
         requestId: requestId,
         clientId: currentUser.id,
         clientName: currentUser.name,
-        origin: origin.address,
-        destination: destination.address,
+        origin: {
+          address: origin.address,
+          lat: origin.lat,
+          lng: origin.lng
+        },
+        destination: {
+          address: destination.address,
+          lat: destination.lat,
+          lng: destination.lng
+        },
         distance: routeInfo.distance,
         duration: routeInfo.duration,
       });
