@@ -105,10 +105,26 @@ const Home = () => {
   };
 
   const handleLogout = () => {
+    console.log('👋 Cerrando sesión...');
+    
+    // Limpiar TODOS los datos de localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('requestData');
+    localStorage.removeItem('currentRequestId');
+    
+    // Desconectar Socket.IO
     socketService.disconnect();
-    history.push('/login');
+    
+    // Redirigir al home (sin autenticación)
+    // El componente InitialRedirect en App.jsx lo redirigirá a /location-permission
+    history.replace('/');
+    
+    present({
+      message: '👋 Sesión cerrada correctamente',
+      duration: 2000,
+      color: 'success',
+    });
   };
 
   return (

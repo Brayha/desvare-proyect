@@ -25,8 +25,23 @@ import LocationPermission from './pages/LocationPermission';
 import RequestService from './pages/RequestService';
 import RequestAuth from './pages/RequestAuth';
 import RequestConfirmation from './pages/RequestConfirmation';
+import WaitingQuotes from './pages/WaitingQuotes';
 
 setupIonicReact();
+
+// Componente para redirección inteligente basada en autenticación
+const InitialRedirect = () => {
+  const userData = localStorage.getItem('user');
+  const token = localStorage.getItem('token');
+  
+  // Si el usuario está autenticado, llevarlo al home
+  if (userData && token) {
+    return <Redirect to="/home" />;
+  }
+  
+  // Si no está autenticado, llevarlo a pedir permisos de ubicación
+  return <Redirect to="/location-permission" />;
+};
 
 function App() {
   return (
@@ -40,9 +55,8 @@ function App() {
           <Route exact path="/request-service" component={RequestService} />
           <Route exact path="/request-auth" component={RequestAuth} />
           <Route exact path="/request-confirmation" component={RequestConfirmation} />
-          <Route exact path="/">
-            <Redirect to="/login" />
-          </Route>
+          <Route exact path="/waiting-quotes" component={WaitingQuotes} />
+          <Route exact path="/" component={InitialRedirect} />
         </IonRouterOutlet>
       </IonReactRouter>
     </IonApp>

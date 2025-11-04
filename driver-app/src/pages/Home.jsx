@@ -23,9 +23,10 @@ import {
   useIonToast,
   useIonAlert,
 } from '@ionic/react';
-import { logOutOutline, carSportOutline } from 'ionicons/icons';
+import { logOutOutline, carSportOutline, locationOutline } from 'ionicons/icons';
 import { requestAPI } from '../services/api';
 import socketService from '../services/socket';
+import { useDriverLocation } from '../hooks/useDriverLocation';
 
 const Home = () => {
   const history = useHistory();
@@ -37,6 +38,9 @@ const Home = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [quoteAmount, setQuoteAmount] = useState('');
+
+  // Hook de geolocalización del conductor
+  const { location: driverLocation, loading: locationLoading, error: locationError } = useDriverLocation(10000);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -85,6 +89,24 @@ const Home = () => {
     };
   }, [history, present, presentAlert]);
 
+  // Mostrar error de ubicación si existe
+  useEffect(() => {
+    if (locationError) {
+      present({
+        message: `⚠️ Error de ubicación: ${locationError}`,
+        duration: 4000,
+        color: 'warning',
+      });
+    }
+  }, [locationError, present]);
+
+  // Mostrar confirmación cuando se obtiene la ubicación
+  useEffect(() => {
+    if (driverLocation && !locationLoading) {
+      console.log('✅ Ubicación del conductor lista:', driverLocation);
+    }
+  }, [driverLocation, locationLoading]);
+
   const handleRespondToRequest = (request) => {
     setSelectedRequest(request);
     setQuoteAmount('');
@@ -101,25 +123,50 @@ const Home = () => {
       return;
     }
 
+    // Verificar que tengamos la ubicación del conductor
+    if (!driverLocation) {
+      present({
+        message: '⚠️ Obteniendo tu ubicación... Intenta de nuevo',
+        duration: 2000,
+        color: 'warning',
+      });
+      return;
+    }
+
     try {
-      // Guardar en BD
-      await requestAPI.addQuote(selectedRequest.requestId, {
+      console.log('📤 Enviando cotización con ubicación:', driverLocation);
+
+      // Preparar datos de la cotización
+      const quoteData = {
         driverId: user.id,
         driverName: user.name,
         amount: parseFloat(quoteAmount),
-      });
+        location: {
+          lat: driverLocation.lat,
+          lng: driverLocation.lng,
+        },
+      };
 
-      // Enviar por Socket.IO
+      // Guardar en BD
+      await requestAPI.addQuote(selectedRequest.requestId, quoteData);
+
+      // Enviar por Socket.IO con ubicación
       socketService.sendQuote({
         requestId: selectedRequest.requestId,
         clientId: selectedRequest.clientId,
         driverId: user.id,
         driverName: user.name,
         amount: parseFloat(quoteAmount),
+        location: {
+          lat: driverLocation.lat,
+          lng: driverLocation.lng,
+        },
       });
 
+      console.log('✅ Cotización enviada con ubicación exitosamente');
+
       present({
-        message: 'Cotización enviada exitosamente',
+        message: '✅ Cotización enviada exitosamente',
         duration: 2000,
         color: 'success',
       });
@@ -136,6 +183,7 @@ const Home = () => {
         )
       );
     } catch (error) {
+      console.error('❌ Error al enviar cotización:', error);
       present({
         message: 'Error al enviar cotización',
         duration: 3000,
@@ -157,6 +205,24 @@ const Home = () => {
         <IonToolbar color="primary">
           <IonTitle>Conductor - {user?.name}</IonTitle>
           <IonButtons slot="end">
+            {/* Indicador de ubicación */}
+            {locationLoading ? (
+              <IonButton disabled>
+                <IonIcon icon={locationOutline} />
+                <IonText style={{ fontSize: '12px', marginLeft: '4px' }}>...</IonText>
+              </IonButton>
+            ) : driverLocation ? (
+              <IonButton disabled color="success">
+                <IonIcon icon={locationOutline} />
+                <IonText style={{ fontSize: '12px', marginLeft: '4px' }}>✓</IonText>
+              </IonButton>
+            ) : (
+              <IonButton disabled color="danger">
+                <IonIcon icon={locationOutline} />
+                <IonText style={{ fontSize: '12px', marginLeft: '4px' }}>✗</IonText>
+              </IonButton>
+            )}
+            
             <IonButton onClick={handleLogout}>
               <IonIcon icon={logOutOutline} />
             </IonButton>

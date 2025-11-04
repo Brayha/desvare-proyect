@@ -23,7 +23,7 @@ import {
 } from "@ionic/react";
 import { arrowBack, locationOutline, navigateOutline, timeOutline, mapOutline } from "ionicons/icons";
 import { useToast } from "@hooks/useToast";
-import { authAPI } from "../services/api";
+import { authAPI, requestAPI } from "../services/api";
 import socketService from "../services/socket";
 import "./RequestAuth.css";
 
@@ -52,8 +52,8 @@ const RequestAuth = () => {
     // Verificar si ya está autenticado
     const userData = localStorage.getItem('user');
     if (userData) {
-      // Ya está autenticado, ir directo a confirmar solicitud
-      history.push('/request-confirmation');
+      // Ya está autenticado, ir directo a waiting quotes
+      history.push('/waiting-quotes');
       return;
     }
 
@@ -86,18 +86,39 @@ const RequestAuth = () => {
       });
 
       // Guardar datos del usuario
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const user = response.data.user;
+      localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', response.data.token);
 
-      showSuccess(`¡Bienvenido de nuevo, ${response.data.user.name}!`);
+      showSuccess(`¡Bienvenido de nuevo, ${user.name}!`);
 
-      // Conectar Socket.IO
-      socketService.connect();
-      socketService.registerClient(response.data.user.id);
+      console.log('🔌 Conectando Socket.IO después del login...');
+      
+      // Conectar Socket.IO y esperar a que se conecte
+      const socket = socketService.connect();
+      
+      await new Promise((resolve) => {
+        if (socket.connected) {
+          console.log('✅ Socket.IO ya estaba conectado');
+          resolve();
+        } else {
+          socket.once('connect', () => {
+            console.log('✅ Socket.IO conectado exitosamente');
+            resolve();
+          });
+        }
+      });
 
-      // Redirigir a confirmación de solicitud
+      // Registrar cliente
+      socketService.registerClient(user.id);
+      console.log('👤 Cliente registrado en Socket.IO:', user.id);
+
+      // 🆕 ENVIAR SOLICITUD AQUÍ (después de autenticar)
+      await sendRequestToDrivers(user);
+
+      // Redirigir a waiting quotes
       setTimeout(() => {
-        history.push('/request-confirmation');
+        history.push('/waiting-quotes');
       }, 500);
 
     } catch (error) {
@@ -127,24 +148,104 @@ const RequestAuth = () => {
       });
 
       // Guardar datos del usuario
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const user = response.data.user;
+      localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', response.data.token);
 
-      showSuccess(`¡Bienvenido, ${response.data.user.name}!`);
+      showSuccess(`¡Bienvenido, ${user.name}!`);
 
-      // Conectar Socket.IO
-      socketService.connect();
-      socketService.registerClient(response.data.user.id);
+      console.log('🔌 Conectando Socket.IO después del registro...');
+      
+      // Conectar Socket.IO y esperar a que se conecte
+      const socket = socketService.connect();
+      
+      await new Promise((resolve) => {
+        if (socket.connected) {
+          console.log('✅ Socket.IO ya estaba conectado');
+          resolve();
+        } else {
+          socket.once('connect', () => {
+            console.log('✅ Socket.IO conectado exitosamente');
+            resolve();
+          });
+        }
+      });
 
-      // Redirigir a confirmación de solicitud
+      // Registrar cliente
+      socketService.registerClient(user.id);
+      console.log('👤 Cliente registrado en Socket.IO:', user.id);
+
+      // 🆕 ENVIAR SOLICITUD AQUÍ (después de registrar)
+      await sendRequestToDrivers(user);
+
+      // Redirigir a waiting quotes
       setTimeout(() => {
-        history.push('/request-confirmation');
+        history.push('/waiting-quotes');
       }, 500);
 
     } catch (error) {
       showError(error.response?.data?.error || "Error al registrarse");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Función para enviar solicitud a conductores
+  const sendRequestToDrivers = async (user) => {
+    try {
+      console.log('📤 Enviando solicitud a conductores desde RequestAuth...');
+      
+      if (!routeData || !routeData.origin || !routeData.destination || !routeData.routeInfo) {
+        throw new Error('Datos de ruta incompletos');
+      }
+
+      // Crear objeto de solicitud con validación
+      const requestPayload = {
+        clientId: user.id,
+        clientName: user.name,
+        clientPhone: user.phone || 'N/A',
+        clientEmail: user.email,
+        origin: {
+          coordinates: [routeData.origin.lng, routeData.origin.lat],
+          address: routeData.origin.address,
+        },
+        destination: {
+          coordinates: [routeData.destination.lng, routeData.destination.lat],
+          address: routeData.destination.address,
+        },
+        distance: routeData.routeInfo.distance,
+        duration: routeData.routeInfo.duration,
+      };
+
+      console.log('📦 Payload que se enviará:', JSON.stringify(requestPayload, null, 2));
+
+      // Crear solicitud en la base de datos
+      const response = await requestAPI.createRequest(requestPayload);
+      
+      const requestId = response.data.requestId;
+      
+      // Guardar el requestId en localStorage para WaitingQuotes
+      localStorage.setItem('currentRequestId', requestId);
+
+      console.log('📡 Enviando evento Socket.IO a conductores...');
+      console.log('🎯 Request ID:', requestId);
+      
+      // Emitir evento de nueva solicitud vía Socket.IO con TODOS los datos
+      socketService.sendNewRequest({
+        requestId: requestId,
+        clientId: user.id,
+        clientName: user.name,
+        origin: routeData.origin.address,
+        destination: routeData.destination.address,
+        distance: routeData.routeInfo.distance,
+        duration: routeData.routeInfo.duration,
+      });
+
+      console.log('✅ Solicitud enviada correctamente a backend y conductores vía Socket.IO');
+
+    } catch (error) {
+      console.error('❌ Error al enviar solicitud:', error);
+      throw error; // Re-lanzar para que sea manejado por el handleLogin/handleRegister
     }
   };
 

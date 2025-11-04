@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Map, { Marker, Source, Layer, NavigationControl } from 'react-map-gl';
+import mapboxgl from 'mapbox-gl';
 import { IonText, IonSpinner } from '@ionic/react';
 import { Location } from 'iconsax-react';
 import { getRoute, formatDistance, formatDuration, calculateBounds } from '../../utils/mapbox';
@@ -21,11 +22,15 @@ const INITIAL_VIEW_STATE = {
  * @param {Object} origin - Punto de origen { lat, lng, address }
  * @param {Object} destination - Punto de destino { lat, lng, address }
  * @param {Function} onRouteCalculated - Callback cuando se calcula una ruta
+ * @param {Array} quotes - Cotizaciones con ubicación de conductores
+ * @param {Function} onQuoteClick - Callback cuando se hace click en un price marker
  */
 const MapPicker = ({
   origin,
   destination,
   onRouteCalculated,
+  quotes = [],
+  onQuoteClick = null,
 }) => {
   const mapRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -74,6 +79,41 @@ const MapPicker = ({
       }
     }
   }, [route]);
+
+  // Auto-zoom cuando llegan cotizaciones (WaitingQuotes)
+  useEffect(() => {
+    // Solo si hay cotizaciones Y hay origen (pero NO hay destino/ruta)
+    if (quotes.length > 0 && origin && !destination && mapRef.current) {
+      console.log('🔍 Auto-zoom para mostrar origen + cotizaciones');
+      
+      // Crear array de coordenadas: origen + todas las cotizaciones
+      const coordinates = [
+        [origin.lng, origin.lat], // Origen
+        ...quotes
+          .filter(q => q.location && q.location.lat && q.location.lng)
+          .map(q => [q.location.lng, q.location.lat]) // Cotizaciones
+      ];
+
+      if (coordinates.length > 1) {
+        // Calcular bounds que incluyan todos los puntos
+        const bounds = coordinates.reduce((bounds, coord) => {
+          return bounds.extend(coord);
+        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+
+        // Aplicar bounds con padding
+        mapRef.current.fitBounds(bounds, {
+          padding: {
+            top: 80,
+            bottom: 100,  // Menos padding abajo (no hay tarjeta grande)
+            left: 80,
+            right: 80,
+          },
+          duration: 1500,
+          maxZoom: 14, // No acercar demasiado
+        });
+      }
+    }
+  }, [quotes, origin, destination]);
 
   const calculateRoute = async () => {
     setIsCalculatingRoute(true);
@@ -143,6 +183,39 @@ const MapPicker = ({
             <Location size="40" color="#eb445a" variant="Bold" />
           </Marker>
         )}
+
+        {/* Price Markers de Cotizaciones */}
+        {quotes && quotes.length > 0 && quotes.map((quote, index) => {
+          // Solo mostrar si el quote tiene ubicación
+          if (!quote.location || !quote.location.lat || !quote.location.lng) {
+            return null;
+          }
+
+          return (
+            <Marker
+              key={quote.driverId || index}
+              longitude={quote.location.lng}
+              latitude={quote.location.lat}
+              anchor="center"
+              onClick={(e) => {
+                e.originalEvent.stopPropagation();
+                if (onQuoteClick) {
+                  onQuoteClick(quote);
+                }
+              }}
+            >
+              <div 
+                className="price-marker"
+                style={{
+                  cursor: onQuoteClick ? 'pointer' : 'default',
+                  animation: 'bounceIn 0.5s ease-out'
+                }}
+              >
+                ${quote.amount.toLocaleString()}
+              </div>
+            </Marker>
+          );
+        })}
 
         {/* Línea de Ruta */}
         {route && route.geometry && (

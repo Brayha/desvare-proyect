@@ -38,6 +38,52 @@
   transform: scale(1.1);
 }
 
+/* Price Marker - Globo de precio flotante estilo Airbnb */
+.price-marker {
+  background: white;
+  color: #222222;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.price-marker:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), 0 2px 4px rgba(0, 0, 0, 0.12);
+  background: #f7f7f7;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.price-marker:active {
+  transform: scale(1.02);
+  background: #efefef;
+}
+
+/* Animación de aparición del price marker */
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* Ajustes responsive */
 @media (max-width: 768px) {
   .map-picker-container {

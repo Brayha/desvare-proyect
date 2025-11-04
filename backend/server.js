@@ -122,29 +122,46 @@ io.on('connection', (socket) => {
 
   // Cliente solicita cotización
   socket.on('request:new', (data) => {
-    console.log('📢 Nueva solicitud de cotización:', data);
-    // Enviar a todos los conductores conectados
+    console.log('📢 Nueva solicitud de cotización recibida');
+    console.log('📦 Datos completos:', JSON.stringify(data, null, 2));
+    console.log(`🚗 Conductores conectados en sala "drivers": ${io.sockets.adapter.rooms.get('drivers')?.size || 0}`);
+    
+    // Enviar a todos los conductores conectados con TODOS los datos
     io.to('drivers').emit('request:received', {
       requestId: data.requestId,
       clientId: data.clientId,
       clientName: data.clientName,
+      origin: data.origin,
+      destination: data.destination,
+      distance: data.distance,
+      duration: data.duration,
       timestamp: new Date()
     });
+    
+    console.log('✅ Solicitud emitida a conductores en sala "drivers"');
   });
 
   // Conductor envía respuesta
   socket.on('quote:send', (data) => {
-    console.log('💰 Cotización enviada:', data);
-    // Enviar al cliente específico
+    console.log('💰 Cotización recibida del conductor:', data);
+    console.log('📍 Ubicación del conductor:', data.location);
+    
+    // Enviar al cliente específico con TODA la información
     const clientSocketId = connectedClients.get(data.clientId);
     if (clientSocketId) {
-      io.to(clientSocketId).emit('quote:received', {
+      const quoteData = {
         requestId: data.requestId,
         driverId: data.driverId,
         driverName: data.driverName,
         amount: data.amount,
+        location: data.location, // 🆕 INCLUIR UBICACIÓN DEL CONDUCTOR
         timestamp: new Date()
-      });
+      };
+      
+      console.log('📤 Enviando cotización al cliente con ubicación:', quoteData);
+      io.to(clientSocketId).emit('quote:received', quoteData);
+    } else {
+      console.log('⚠️ Cliente no encontrado con ID:', data.clientId);
     }
   });
 

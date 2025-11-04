@@ -5,19 +5,59 @@ const Request = require('../models/Request');
 // POST /api/requests/new - Crear nueva solicitud de cotización
 router.post('/new', async (req, res) => {
   try {
-    const { clientId, clientName } = req.body;
+    const { 
+      clientId, 
+      clientName, 
+      clientPhone, 
+      clientEmail,
+      origin,
+      destination,
+      distance,
+      duration,
+      notes
+    } = req.body;
 
-    // Validar campos requeridos
+    console.log('📦 Datos recibidos en el backend:', JSON.stringify(req.body, null, 2));
+
+    // Validar campos requeridos básicos
     if (!clientId || !clientName) {
       return res.status(400).json({ 
         error: 'clientId y clientName son requeridos' 
       });
     }
 
-    // Crear nueva solicitud
+    // Validar campos de ubicación requeridos
+    if (!origin || !origin.coordinates || !origin.address) {
+      return res.status(400).json({ 
+        error: 'origin con coordinates y address son requeridos' 
+      });
+    }
+
+    if (!destination || !destination.coordinates || !destination.address) {
+      return res.status(400).json({ 
+        error: 'destination con coordinates y address son requeridos' 
+      });
+    }
+
+    // Crear nueva solicitud con todos los datos
     const request = new Request({
       clientId,
       clientName,
+      clientPhone: clientPhone || 'N/A',
+      clientEmail: clientEmail || 'N/A',
+      origin: {
+        type: 'Point',
+        coordinates: origin.coordinates, // [lng, lat]
+        address: origin.address
+      },
+      destination: {
+        type: 'Point',
+        coordinates: destination.coordinates, // [lng, lat]
+        address: destination.address
+      },
+      distance: distance || 0,
+      duration: duration || 0,
+      notes: notes || '',
       status: 'pending',
       quotes: []
     });
@@ -25,6 +65,10 @@ router.post('/new', async (req, res) => {
     await request.save();
 
     console.log('✅ Nueva solicitud creada:', request._id);
+    console.log('📍 Origen:', origin.address);
+    console.log('📍 Destino:', destination.address);
+    console.log('📏 Distancia:', distance, 'metros');
+    console.log('⏱️ Duración:', duration, 'segundos');
 
     res.status(201).json({
       message: 'Solicitud creada exitosamente',
@@ -33,6 +77,10 @@ router.post('/new', async (req, res) => {
         id: request._id,
         clientId: request.clientId,
         clientName: request.clientName,
+        origin: request.origin,
+        destination: request.destination,
+        distance: request.distance,
+        duration: request.duration,
         status: request.status,
         createdAt: request.createdAt
       }
@@ -40,6 +88,8 @@ router.post('/new', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error al crear solicitud:', error);
+    console.error('❌ Detalles del error:', error.message);
+    console.error('❌ Stack:', error.stack);
     res.status(500).json({ 
       error: 'Error al crear solicitud',
       details: error.message 

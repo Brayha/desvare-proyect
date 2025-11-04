@@ -23,12 +23,14 @@ import { MapPicker } from "../components/Map/MapPicker";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useToast } from "@hooks/useToast";
 import { getAddressFromCoordinates, searchAddress, getPlaceDetails } from "../utils/mapbox";
+import { requestAPI } from "../services/api";
+import socketService from "../services/socket";
 import "./RequestService.css";
 
 const RequestService = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
-
+  
   // Geolocalización
   const {
     location: currentGeolocation,
@@ -43,17 +45,39 @@ const RequestService = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Verificar si el usuario ya está logueado
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    
+    if (userData && token) {
+      const parsedUser = JSON.parse(userData);
+      setIsLoggedIn(true);
+      setCurrentUser(parsedUser);
+      console.log('✅ Usuario ya logueado:', parsedUser.name);
+    } else {
+      setIsLoggedIn(false);
+      setCurrentUser(null);
+      console.log('ℹ️ Usuario no logueado');
+    }
+  }, []);
+
   // Estados del formulario
   const [origin, setOrigin] = useState(null); // { lat, lng, address }
   const [destination, setDestination] = useState(null); // { lat, lng, address }
   const [routeInfo, setRouteInfo] = useState(null); // { distance, duration, distanceText, durationText }
-
+  
   // Estados del modal de búsqueda
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [lastSearchQuery, setLastSearchQuery] = useState(""); // Para detectar cambios reales
+  const [lastSearchQuery, setLastSearchQuery] = useState("");
+
+  // Estado de usuario logueado
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isSendingRequest, setIsSendingRequest] = useState(false); // Para detectar cambios reales
 
   // Actualizar ubicación de origen cuando se obtiene geolocalización
   useEffect(() => {
@@ -63,16 +87,16 @@ const RequestService = () => {
         lng: currentGeolocation.longitude,
         address: "Tu ubicación actual",
       };
-
+      
       setOrigin(newOrigin);
-
+      
       // Obtener dirección real
       getAddressFromCoordinates(newOrigin.lng, newOrigin.lat).then(
         (address) => {
           setOrigin((prev) => ({ ...prev, address }));
         }
       );
-
+      
       showSuccess("✅ Ubicación obtenida correctamente");
     }
   }, [currentGeolocation, origin, showSuccess]);
@@ -166,10 +190,10 @@ const RequestService = () => {
       } else if (place.coordinates) {
         // Si ya tiene coordenadas (viene de Mapbox), usar directamente
         const newDestination = {
-          lat: place.coordinates[1],
-          lng: place.coordinates[0],
-          address: place.name,
-        };
+      lat: place.coordinates[1],
+      lng: place.coordinates[0],
+      address: place.name,
+    };
 
         setDestination(newDestination);
         handleCloseModal();
@@ -189,24 +213,135 @@ const RequestService = () => {
     setRouteInfo(null);
   };
 
+  // Función para enviar solicitud directamente (usuario ya logueado)
+  const sendRequestDirectly = async () => {
+    if (!currentUser || !origin || !destination || !routeInfo) {
+      showError('Faltan datos para enviar la solicitud');
+      return;
+    }
+    
+    setIsSendingRequest(true);
+
+    try {
+      console.log('📤 Usuario logueado - Enviando solicitud directamente...');
+
+      // Verificar si Socket.IO está conectado, si no, conectar
+      const socket = socketService.connect();
+      
+      await new Promise((resolve) => {
+        if (socket.connected) {
+          console.log('✅ Socket.IO ya estaba conectado');
+          resolve();
+        } else {
+          socket.once('connect', () => {
+            console.log('✅ Socket.IO conectado exitosamente');
+            resolve();
+          });
+        }
+      });
+
+      // Registrar cliente si no está registrado
+      socketService.registerClient(currentUser.id);
+      console.log('👤 Cliente registrado en Socket.IO:', currentUser.id);
+
+      // Crear objeto de solicitud
+      const requestPayload = {
+        clientId: currentUser.id,
+        clientName: currentUser.name,
+        clientPhone: currentUser.phone || 'N/A',
+        clientEmail: currentUser.email,
+        origin: {
+          coordinates: [origin.lng, origin.lat],
+          address: origin.address,
+        },
+        destination: {
+          coordinates: [destination.lng, destination.lat],
+          address: destination.address,
+        },
+        distance: routeInfo.distance,
+        duration: routeInfo.duration,
+      };
+
+      console.log('📦 Payload de solicitud:', requestPayload);
+
+      // Crear solicitud en la base de datos
+      const response = await requestAPI.createRequest(requestPayload);
+      
+      const requestId = response.data.requestId;
+      
+      // Guardar el requestId en localStorage
+      localStorage.setItem('currentRequestId', requestId);
+
+      // Guardar también requestData para WaitingQuotes
+      localStorage.setItem(
+        "requestData",
+        JSON.stringify({
+          origin,
+          destination,
+          routeInfo,
+        })
+      );
+
+      console.log('📡 Enviando evento Socket.IO a conductores...');
+      console.log('🎯 Request ID:', requestId);
+      
+      // Emitir evento de nueva solicitud vía Socket.IO
+      socketService.sendNewRequest({
+        requestId: requestId,
+        clientId: currentUser.id,
+        clientName: currentUser.name,
+        origin: origin.address,
+        destination: destination.address,
+        distance: routeInfo.distance,
+        duration: routeInfo.duration,
+      });
+
+      console.log('✅ Solicitud enviada correctamente');
+      showSuccess('✅ Buscando conductores...');
+
+      // Redirigir a waiting quotes
+      setTimeout(() => {
+        history.push('/waiting-quotes');
+      }, 500);
+
+    } catch (error) {
+      console.error('❌ Error al enviar solicitud:', error);
+      showError(error.response?.data?.error || "Error al enviar solicitud");
+    } finally {
+      setIsSendingRequest(false);
+    }
+  };
+
   const handleConfirmRoute = () => {
     if (!routeInfo) {
       showError("⚠️ Espera mientras calculamos la ruta");
       return;
     }
 
+    console.log('📦 RouteInfo que se guardará:', routeInfo);
+
+    // Si el usuario YA está logueado, enviar solicitud directamente
+    if (isLoggedIn && currentUser) {
+      console.log('✅ Usuario logueado - Enviando solicitud directamente');
+      sendRequestDirectly();
+      return;
+    }
+
+    // Si NO está logueado, guardar datos y redirigir a login/registro
+    console.log('ℹ️ Usuario no logueado - Redirigiendo a login/registro');
+
     // Guardar datos en localStorage para la siguiente página
     localStorage.setItem(
       "requestData",
       JSON.stringify({
-        origin,
-        destination,
-        routeInfo,
+      origin,
+      destination,
+      routeInfo,
       })
     );
 
     showSuccess("✅ Ruta confirmada");
-    
+
     // Navegar a la página de autenticación/confirmación
     history.push('/request-auth');
   };
@@ -233,11 +368,11 @@ const RequestService = () => {
               </IonText>
             </div>
           ) : (
-            <MapPicker
-              origin={origin}
-              destination={destination}
-              onRouteCalculated={setRouteInfo}
-            />
+          <MapPicker
+            origin={origin}
+            destination={destination}
+            onRouteCalculated={setRouteInfo}
+          />
           )}
 
           {/* Botón para abrir búsqueda - solo si no hay destino */}
@@ -246,7 +381,7 @@ const RequestService = () => {
               <div className="search-button" onClick={handleOpenSearchModal}>
                 <h2>¿A dónde vamos?</h2>
               </div>
-            </div>
+              </div>
           )}
 
           {/* Tarjeta inferior con información de ruta - solo si hay destino */}
@@ -277,23 +412,23 @@ const RequestService = () => {
                       <p className="location-address">{origin.address}</p>
                     </IonText>
                   </div>
-                </div>
+            </div>
 
-                {/* Destino */}
+            {/* Destino */}
                 <div className="route-location-item">
                   <div className="route-icon destination-marker">
                     <Location size="20" color="#eb445a" variant="Bold" />
-                  </div>
-                  <div className="route-location-info">
-                    <IonText color="medium">
-                      <p className="location-type">Destino</p>
-                    </IonText>
-                    <IonText>
-                      <p className="location-address">{destination.address}</p>
-                    </IonText>
-                  </div>
-                </div>
               </div>
+                  <div className="route-location-info">
+                <IonText color="medium">
+                      <p className="location-type">Destino</p>
+                </IonText>
+                <IonText>
+                      <p className="location-address">{destination.address}</p>
+                </IonText>
+              </div>
+            </div>
+          </div>
 
               {/* Información de ruta (distancia y tiempo) */}
               {routeInfo && (
@@ -319,10 +454,19 @@ const RequestService = () => {
                 expand="block"
                 size="large"
                 onClick={handleConfirmRoute}
-                disabled={!routeInfo}
+                disabled={!routeInfo || isSendingRequest}
                 className="confirm-button"
               >
-                Confirmo la ruta
+                {isSendingRequest ? (
+                  <>
+                    <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
+                    Enviando solicitud...
+                  </>
+                ) : isLoggedIn ? (
+                  '🚀 Buscar Cotizaciones'
+                ) : (
+                  'Confirmo la ruta'
+                )}
               </IonButton>
             </div>
           )}
@@ -368,7 +512,7 @@ const RequestService = () => {
                   <label>Destino</label>
                   <input
                     type="text"
-                    value={searchQuery}
+              value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Buscar dirección en Colombia..."
                     autoFocus
@@ -410,7 +554,7 @@ const RequestService = () => {
                 <IonText color="medium">
                   <p>No se encontraron resultados para "{searchQuery}"</p>
                   <p>Intenta con otra dirección en Colombia</p>
-                </IonText>
+              </IonText>
               </div>
             )}
 
@@ -420,8 +564,8 @@ const RequestService = () => {
                 <IonText color="medium">
                   <p>Escribe al menos 3 caracteres para buscar una dirección</p>
                 </IonText>
-              </div>
-            )}
+            </div>
+          )}
           </IonContent>
         </IonModal>
       </IonContent>
