@@ -1,6 +1,20 @@
 import React, { useRef, useEffect } from 'react';
 import './OTPInput.css';
 
+/**
+ * Componente OTPInput para códigos de 4 dígitos
+ * Features:
+ * - Auto-focus en primer input
+ * - Auto-avance al siguiente input
+ * - Retroceso con backspace
+ * - Soporte para pegar código completo
+ * - Animación shake en error
+ * 
+ * @param {string} value - Valor del OTP (4 dígitos)
+ * @param {function} onChange - Callback cuando cambia el valor
+ * @param {string} error - Mensaje de error (opcional)
+ * @param {boolean} autoFocus - Auto-focus en primer input (default: true)
+ */
 const OTPInput = ({ value, onChange, error, autoFocus = true }) => {
   const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
   
@@ -78,5 +92,6 @@ const OTPInput = ({ value, onChange, error, autoFocus = true }) => {
   );
 };
 
+export { OTPInput };
 export default OTPInput;
 

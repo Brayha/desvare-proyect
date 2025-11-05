@@ -2,7 +2,24 @@ import React from 'react';
 import { IonItem, IonLabel, IonInput } from '@ionic/react';
 import './PhoneInput.css';
 
-const PhoneInput = ({ value, onChange, error }) => {
+/**
+ * Componente PhoneInput para números de teléfono colombianos
+ * Formato automático: 319 257 95 62
+ * Prefijo fijo: 🇨🇴 +57
+ * 
+ * @param {string} value - Valor del teléfono (solo números, sin espacios)
+ * @param {function} onChange - Callback cuando cambia el valor
+ * @param {string} error - Mensaje de error (opcional)
+ * @param {string} label - Label del input (opcional)
+ * @param {string} placeholder - Placeholder (default: "319 257 95 62")
+ */
+const PhoneInput = ({ 
+  value, 
+  onChange, 
+  error, 
+  label,
+  placeholder = "319 257 95 62"
+}) => {
   const handleInput = (e) => {
     const rawValue = e.detail.value || '';
     // Solo números, máximo 10 dígitos
@@ -28,6 +45,9 @@ const PhoneInput = ({ value, onChange, error }) => {
 
   return (
     <div className="phone-input-wrapper">
+      {label && (
+        <IonLabel className="phone-input-label">{label}</IonLabel>
+      )}
       <IonItem 
         className={`phone-input-item ${error ? 'ion-invalid' : ''}`}
         lines="none"
@@ -37,7 +57,7 @@ const PhoneInput = ({ value, onChange, error }) => {
           type="tel"
           inputmode="numeric"
           maxlength={13} // "319 257 95 62" = 13 caracteres con espacios
-          placeholder="319 257 95 62"
+          placeholder={placeholder}
           value={formatPhone(value)}
           onIonInput={handleInput}
           className="phone-input-field"
@@ -52,5 +72,6 @@ const PhoneInput = ({ value, onChange, error }) => {
   );
 };
 
+export { PhoneInput };
 export default PhoneInput;
 

@@ -31,33 +31,10 @@ import WaitingQuotes from './pages/WaitingQuotes';
 
 setupIonicReact();
 
-// Componente para redirección inteligente basada en autenticación
+// Componente para redirección inteligente - Todos van al Home primero
 const InitialRedirect = () => {
-  const userData = localStorage.getItem('user');
-  const token = localStorage.getItem('token');
-  const locationPermission = localStorage.getItem('locationPermission');
-  
-  console.log('🔍 InitialRedirect - Estado:', {
-    hasUser: !!userData,
-    hasToken: !!token,
-    hasLocationPermission: locationPermission === 'granted'
-  });
-  
-  // Usuario logueado + permisos → RequestService (para cotizar directamente)
-  if (userData && token && locationPermission === 'granted') {
-    console.log('✅ Usuario logueado con permisos → /request-service');
-    return <Redirect to="/request-service" />;
-  }
-  
-  // Usuario logueado pero sin permisos → Pedir permisos
-  if (userData && token && locationPermission !== 'granted') {
-    console.log('⚠️ Usuario logueado sin permisos → /location-permission');
-    return <Redirect to="/location-permission" />;
-  }
-  
-  // Usuario NO logueado → Pedir permisos primero
-  console.log('❌ Usuario NO logueado → /location-permission');
-  return <Redirect to="/location-permission" />;
+  console.log('🏠 InitialRedirect → Redirigiendo a /home');
+  return <Redirect to="/home" />;
 };
 
 function App() {

@@ -29,36 +29,41 @@ const Home = () => {
   
   const [user, setUser] = useState(null);
   const [quotes, setQuotes] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
-    if (!userData) {
-      history.push('/login');
-      return;
-    }
+    const token = localStorage.getItem('token');
+    
+    if (userData && token) {
+      // Usuario está logueado
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      setIsLoggedIn(true);
 
-    const parsedUser = JSON.parse(userData);
-    setUser(parsedUser);
+      // Registrar cliente (Socket.IO ya está conectado desde App.jsx)
+      socketService.registerClient(parsedUser.id);
 
-    // Registrar cliente (Socket.IO ya está conectado desde App.jsx)
-    socketService.registerClient(parsedUser.id);
-
-    // Escuchar cotizaciones recibidas
-    socketService.onQuoteReceived((quote) => {
-      console.log('💰 Cotización recibida:', quote);
-      setQuotes((prev) => [quote, ...prev]);
-      
-      present({
-        message: `Nueva cotización de ${quote.driverName}: $${quote.amount.toLocaleString()}`,
-        duration: 3000,
-        color: 'success',
+      // Escuchar cotizaciones recibidas
+      socketService.onQuoteReceived((quote) => {
+        console.log('💰 Cotización recibida:', quote);
+        setQuotes((prev) => [quote, ...prev]);
+        
+        present({
+          message: `Nueva cotización de ${quote.driverName}: $${quote.amount.toLocaleString()}`,
+          duration: 3000,
+          color: 'success',
+        });
       });
-    });
 
-    return () => {
-      // Solo limpiar el listener, no desconectar (manejado por App.jsx)
-      socketService.offQuoteReceived();
-    };
+      return () => {
+        // Solo limpiar el listener, no desconectar (manejado por App.jsx)
+        socketService.offQuoteReceived();
+      };
+    } else {
+      // Usuario NO está logueado
+      setIsLoggedIn(false);
+    }
   }, [history, present]);
 
   // TODO: Esta función no se usa actualmente, el flujo de solicitudes ahora es:
@@ -106,6 +111,22 @@ const Home = () => {
   };
   */
 
+  // Función para solicitar grúa (verifica permisos primero)
+  const handleRequestTowTruck = () => {
+    console.log('🚗 Botón "Solicitar Grúa" presionado');
+    
+    // Verificar si tiene permisos de ubicación
+    const locationPermission = localStorage.getItem('locationPermission');
+    
+    if (locationPermission === 'granted') {
+      console.log('✅ Ya tiene permisos → Ir directo a /request-service');
+      history.push('/request-service');
+    } else {
+      console.log('⚠️ Sin permisos → Ir a /location-permission');
+      history.push('/location-permission');
+    }
+  };
+
   const handleLogout = () => {
     console.log('👋 Cerrando sesión...');
     
@@ -119,40 +140,47 @@ const Home = () => {
     // Solo limpiar listeners locales
     socketService.offQuoteReceived();
     
-    // Redirigir al home (sin autenticación)
-    // El componente InitialRedirect en App.jsx lo redirigirá a /location-permission
-    history.replace('/');
+    // Redirigir al home
+    history.replace('/home');
     
-    present({
-      message: '👋 Sesión cerrada correctamente',
-      duration: 2000,
-      color: 'success',
-    });
+    // Recargar para actualizar el estado
+    window.location.reload();
   };
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar color="primary">
-          <IonTitle>Cliente - {user?.name}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={handleLogout}>
-              <IonIcon icon={logOutOutline} />
-            </IonButton>
-          </IonButtons>
+          <IonTitle>
+            {isLoggedIn ? `Hola, ${user?.name}` : 'Desvare - Grúas'}
+          </IonTitle>
+          {isLoggedIn && (
+            <IonButtons slot="end">
+              <IonButton onClick={handleLogout}>
+                <IonIcon icon={logOutOutline} />
+              </IonButton>
+            </IonButtons>
+          )}
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
         {/* Botón para solicitar cotización */}
         <IonCard>
           <IonCardHeader>
-            <IonCardTitle>Solicitar Servicio</IonCardTitle>
+            <IonCardTitle>Solicitar Servicio de Grúa</IonCardTitle>
           </IonCardHeader>
           <IonCardContent>
+            <IonText color="medium">
+              <p>
+                {isLoggedIn 
+                  ? '¿Necesitas una grúa? Busca las mejores cotizaciones.' 
+                  : 'Inicia sesión o regístrate para solicitar una grúa.'}
+              </p>
+            </IonText>
             <IonButton 
               expand="block" 
               size="large"
-              onClick={() => history.push('/location-permission')}
+              onClick={handleRequestTowTruck}
             >
               <IonIcon icon={searchOutline} slot="start" />
               Buscar Grúa

@@ -25,8 +25,7 @@ import { arrowBack, locationOutline, navigateOutline, timeOutline, mapOutline } 
 import { useToast } from "@hooks/useToast";
 import { authAPI, requestAPI } from "../services/api";
 import socketService from "../services/socket";
-import PhoneInput from "../components/shared/PhoneInput";
-import OTPInput from "../components/shared/OTPInput";
+import { PhoneInput, OTPInput } from "../../../shared/components";
 import "./RequestAuth.css";
 
 const RequestAuth = () => {

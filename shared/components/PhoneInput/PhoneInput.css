@@ -3,6 +3,14 @@
   margin-bottom: 16px;
 }
 
+.phone-input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
 .phone-input-item {
   --background: #f5f5f5;
   --border-radius: 12px;

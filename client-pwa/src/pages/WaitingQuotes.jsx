@@ -211,9 +211,8 @@ const WaitingQuotes = () => {
     
     showSuccess('Solicitud cancelada');
     
-    // Redirigir a RequestService para buscar un nuevo destino
-    // El origen ya estará guardado desde la sesión anterior
-    history.replace('/request-service');
+    // Volver al Home para reiniciar el proceso
+    history.replace('/home');
   };
 
   // Estas funciones se usarán cuando implementemos el bottom sheet de detalles
