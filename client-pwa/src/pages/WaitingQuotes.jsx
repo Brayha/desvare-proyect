@@ -81,6 +81,7 @@ const WaitingQuotes = () => {
 
   useEffect(() => {
     let isMounted = true; // Flag para evitar actualizaciones si el componente se desmonta
+    console.log('🔄 WaitingQuotes - useEffect ejecutándose');
 
     const initializeData = () => {
       // Verificar que tengamos todos los datos necesarios
@@ -88,29 +89,39 @@ const WaitingQuotes = () => {
       const storedRouteData = localStorage.getItem('requestData');
       const currentRequestId = localStorage.getItem('currentRequestId');
 
+      console.log('📦 Datos en localStorage:', {
+        hasUser: !!userData,
+        hasRouteData: !!storedRouteData,
+        hasRequestId: !!currentRequestId,
+        isMounted
+      });
+
       // Si falta algo, redirigir
       if (!userData) {
         if (isMounted) {
+          console.log('❌ No hay usuario, redirigiendo a /request-auth');
           showError("Debes iniciar sesión primero");
           history.push('/request-auth');
         }
-        return;
+        return false;
       }
 
       if (!storedRouteData) {
         if (isMounted) {
+          console.log('❌ No hay datos de ruta, redirigiendo a /request-service');
           showError("No se encontraron datos de la ruta");
           history.push('/request-service');
         }
-        return;
+        return false;
       }
 
       if (!currentRequestId) {
         if (isMounted) {
+          console.log('❌ No hay requestId, redirigiendo a /request-service');
           showError("No se encontró la solicitud. Por favor, intenta de nuevo.");
           history.push('/request-service');
         }
-        return;
+        return false;
       }
 
       // Cargar datos en el state
@@ -132,26 +143,30 @@ const WaitingQuotes = () => {
       }
 
       console.log('✅ WaitingQuotes - Componente listo');
+      return true;
+    };
 
-      // Solo escuchar cotizaciones (Socket.IO ya está conectado desde App.jsx)
+    // Inicializar datos
+    const success = initializeData();
+    
+    // Solo registrar listener si la inicialización fue exitosa
+    if (success) {
+      console.log('👂 Registrando listener de cotizaciones');
       socketService.onQuoteReceived((quote) => {
-        if (!isMounted) return;
-        
         console.log('💰 Cotización recibida en WaitingQuotes:', quote);
         console.log('📍 Ubicación del conductor:', quote.location);
         console.log('💵 Monto:', quote.amount);
         
         setQuotesReceived((prev) => [...prev, quote]);
       });
-    };
+    }
 
-    initializeData();
-
+    // Cleanup function
     return () => {
+      console.log('🧹 WaitingQuotes - Desmontando componente');
       isMounted = false;
-      // Limpiar listener de cotizaciones al desmontar
       socketService.offQuoteReceived();
-      console.log('🧹 Limpiando listeners de cotizaciones');
+      console.log('🔇 Listener de cotizaciones removido');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar al montar el componente
@@ -202,8 +217,14 @@ const WaitingQuotes = () => {
   const handleCancelRequest = () => {
     console.log('🚫 Cancelando solicitud...');
     
-    // TODO: Emitir evento de cancelación a conductores via Socket.IO
-    // socketService.emit('request:cancel', { requestId });
+    // Obtener el requestId antes de limpiar
+    const currentRequestId = localStorage.getItem('currentRequestId');
+    
+    if (currentRequestId) {
+      // Emitir evento de cancelación a conductores via Socket.IO
+      socketService.cancelRequest(currentRequestId);
+      console.log('📡 Evento de cancelación enviado a conductores');
+    }
     
     // Limpiar datos de la solicitud
     localStorage.removeItem('requestData');

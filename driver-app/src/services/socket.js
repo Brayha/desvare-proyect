@@ -55,6 +55,20 @@ class SocketService {
       this.socket.off('request:received');
     }
   }
+
+  onRequestCancelled(callback) {
+    if (this.socket) {
+      console.log('👂 Escuchando cancelaciones de solicitudes');
+      this.socket.on('request:cancelled', callback);
+    }
+  }
+
+  offRequestCancelled() {
+    if (this.socket) {
+      console.log('🔇 Dejando de escuchar cancelaciones');
+      this.socket.off('request:cancelled');
+    }
+  }
 }
 
 export default new SocketService();

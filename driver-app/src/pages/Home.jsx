@@ -83,11 +83,33 @@ const Home = () => {
       });
     });
 
+    // Escuchar cancelaciones de solicitudes
+    socketService.onRequestCancelled((data) => {
+      console.log('🚫 Solicitud cancelada:', data.requestId);
+      
+      // Eliminar la solicitud de la lista
+      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      
+      // Cerrar modal si estaba abierta para esta solicitud
+      if (selectedRequest && selectedRequest.requestId === data.requestId) {
+        setShowModal(false);
+        setSelectedRequest(null);
+      }
+      
+      // Mostrar notificación
+      present({
+        message: data.message || 'Servicio cancelado por el cliente',
+        duration: 4000,
+        color: 'warning',
+      });
+    });
+
     return () => {
       socketService.offRequestReceived();
+      socketService.offRequestCancelled();
       socketService.disconnect();
     };
-  }, [history, present, presentAlert]);
+  }, [history, present, presentAlert, selectedRequest]);
 
   // Mostrar error de ubicación si existe
   useEffect(() => {

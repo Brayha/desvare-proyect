@@ -86,6 +86,15 @@ class SocketService {
     }
   }
 
+  cancelRequest(requestId) {
+    if (this.socket && this.socket.connected) {
+      console.log('🚫 Cancelando solicitud:', requestId);
+      this.socket.emit('request:cancel', { requestId });
+    } else {
+      console.warn('⚠️ No se puede cancelar solicitud: Socket no conectado');
+    }
+  }
+
   onQuoteReceived(callback) {
     if (this.socket) {
       // Remover listener anterior para evitar duplicados

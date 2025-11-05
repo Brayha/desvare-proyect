@@ -165,6 +165,21 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Cliente cancela solicitud
+  socket.on('request:cancel', (data) => {
+    console.log('🚫 Solicitud cancelada por cliente:', data.requestId);
+    console.log('📢 Notificando a todos los conductores...');
+    
+    // Notificar a TODOS los conductores que el servicio fue cancelado
+    io.to('drivers').emit('request:cancelled', {
+      requestId: data.requestId,
+      message: 'Servicio cancelado por el cliente',
+      timestamp: new Date()
+    });
+    
+    console.log('✅ Notificación de cancelación enviada a conductores');
+  });
+
   // Desconexión
   socket.on('disconnect', () => {
     console.log('🔌 Cliente desconectado:', socket.id);

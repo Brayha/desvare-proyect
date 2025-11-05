@@ -112,17 +112,39 @@ const Home = () => {
   */
 
   // Función para solicitar grúa (verifica permisos primero)
-  const handleRequestTowTruck = () => {
+  const handleRequestTowTruck = async () => {
     console.log('🚗 Botón "Solicitar Grúa" presionado');
     
-    // Verificar si tiene permisos de ubicación
-    const locationPermission = localStorage.getItem('locationPermission');
-    
-    if (locationPermission === 'granted') {
-      console.log('✅ Ya tiene permisos → Ir directo a /request-service');
-      history.push('/request-service');
-    } else {
-      console.log('⚠️ Sin permisos → Ir a /location-permission');
+    // Verificar permisos del navegador directamente
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const result = await navigator.permissions.query({ name: 'geolocation' });
+        console.log('📍 Estado de permisos de geolocalización:', result.state);
+        
+        if (result.state === 'granted') {
+          // Tiene permisos, guardar en localStorage y ir al mapa
+          localStorage.setItem('locationPermission', 'granted');
+          console.log('✅ Permisos confirmados → Ir directo a /request-service');
+          history.push('/request-service');
+        } else {
+          // No tiene permisos o están denegados
+          console.log('⚠️ Sin permisos → Ir a /location-permission');
+          history.push('/location-permission');
+        }
+      } else {
+        // Navegador no soporta query de permisos, verificar localStorage
+        const locationPermission = localStorage.getItem('locationPermission');
+        if (locationPermission === 'granted') {
+          console.log('✅ Ya tiene permisos (localStorage) → Ir directo a /request-service');
+          history.push('/request-service');
+        } else {
+          console.log('⚠️ Sin permisos → Ir a /location-permission');
+          history.push('/location-permission');
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error al verificar permisos:', error);
+      // En caso de error, ir a location-permission por seguridad
       history.push('/location-permission');
     }
   };

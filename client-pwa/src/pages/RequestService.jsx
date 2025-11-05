@@ -307,10 +307,16 @@ const RequestService = () => {
       console.log('✅ Solicitud enviada correctamente');
       showSuccess('✅ Buscando conductores...');
 
-      // Redirigir a waiting quotes
-      setTimeout(() => {
-        history.push('/waiting-quotes');
-      }, 500);
+      // Guardar requestId en localStorage para WaitingQuotes
+      localStorage.setItem('currentRequestId', requestId);
+      console.log('💾 RequestId guardado en localStorage:', requestId);
+
+      // Esperar un momento para asegurar que localStorage se sincroniza
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Redirigir a waiting quotes usando replace para evitar loops
+      console.log('🔄 Redirigiendo a /waiting-quotes...');
+      history.replace('/waiting-quotes');
 
     } catch (error) {
       console.error('❌ Error al enviar solicitud:', error);
