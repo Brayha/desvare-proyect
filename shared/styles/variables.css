@@ -31,7 +31,7 @@
   --desvare-medium: #E5E7EB;
   --desvare-medium-rgb: 229, 231, 235;
   
-  --desvare-light: #F9FAFB;
+  --desvare-light: #F7F7F7;
   --desvare-light-rgb: 249, 250, 251;
   
   /* ===== ESPACIADOS ===== */
@@ -42,14 +42,27 @@
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
   
-  /* ===== TIPOGRAFÍA ===== */
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  --font-size-xs: 12px;
-  --font-size-sm: 14px;
-  --font-size-md: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 24px;
-  --font-size-xxl: 32px;
+    /* ===== TIPOGRAFÍA ===== */
+    --font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  
+    /* Font weights de Raleway */
+    --font-weight-thin: 100;
+    --font-weight-extralight: 200;
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    --font-weight-black: 900;
+    
+    /* Font sizes */
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-xxl: 32px;
   
   /* ===== BORDES Y SOMBRAS ===== */
   --border-radius-sm: 4px;
