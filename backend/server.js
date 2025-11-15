@@ -46,10 +46,12 @@ const io = new Server(server, {
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const requestRoutes = require('./routes/requests');
+const vehicleRoutes = require('./routes/vehicles');
 
 // Usar rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/requests', requestRoutes);
+app.use('/api/vehicles', vehicleRoutes);
 
 // Proxy para Google Places API (evitar CORS en frontend)
 app.get('/api/google-places-proxy', async (req, res) => {
