@@ -43,7 +43,7 @@ import './VehicleWizardModal.css';
  * @param {function} onComplete - Callback con datos completos del vehículo y servicio
  * @param {string} userId - ID del usuario (null si no está logueado)
  */
-const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
+const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipServiceDetails = false }) => {
   const { showSuccess, showError, showWarning } = useToast();
 
   // Estados del wizard
@@ -78,18 +78,36 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
 
   // Definir pasos del wizard
   const STEPS = isCreatingNew
-    ? [
-        { id: 'category', title: 'Categoría', description: '¿Qué tipo de vehículo es?' },
-        { id: 'brand', title: 'Marca', description: 'Selecciona la marca' },
-        { id: 'model', title: 'Modelo', description: 'Selecciona el modelo' },
-        { id: 'plate', title: 'Placa', description: 'Ingresa la placa' },
-        { id: 'specifics', title: 'Detalles', description: 'Información adicional' },
-        { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
-      ]
-    : [
-        { id: 'list', title: 'Mis Vehículos', description: 'Selecciona o agrega uno nuevo' },
-        { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
-      ];
+    ? (skipServiceDetails
+        ? [
+            // Flujo de Mi Garaje: sin servicio
+            { id: 'category', title: 'Categoría', description: '¿Qué tipo de vehículo es?' },
+            { id: 'brand', title: 'Marca', description: 'Selecciona la marca' },
+            { id: 'model', title: 'Modelo', description: 'Selecciona el modelo' },
+            { id: 'plate', title: 'Placa', description: 'Ingresa la placa' },
+            { id: 'specifics', title: 'Detalles', description: 'Información adicional' },
+          ]
+        : [
+            // Flujo de solicitud de servicio: con servicio
+            { id: 'category', title: 'Categoría', description: '¿Qué tipo de vehículo es?' },
+            { id: 'brand', title: 'Marca', description: 'Selecciona la marca' },
+            { id: 'model', title: 'Modelo', description: 'Selecciona el modelo' },
+            { id: 'plate', title: 'Placa', description: 'Ingresa la placa' },
+            { id: 'specifics', title: 'Detalles', description: 'Información adicional' },
+            { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
+          ]
+      )
+    : (skipServiceDetails
+        ? [
+            // Flujo de selección de vehículo existente sin servicio (no debería ocurrir)
+            { id: 'list', title: 'Mis Vehículos', description: 'Selecciona o agrega uno nuevo' },
+          ]
+        : [
+            // Flujo de selección de vehículo existente con servicio
+            { id: 'list', title: 'Mis Vehículos', description: 'Selecciona o agrega uno nuevo' },
+            { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
+          ]
+      );
 
   const totalSteps = STEPS.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
@@ -288,6 +306,12 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
               return;
             }
           }
+          
+          // Si skipServiceDetails es true, este es el último paso
+          if (skipServiceDetails) {
+            await handleComplete();
+            return;
+          }
           break;
         }
         case 'service':
@@ -409,17 +433,23 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
         vehicleSnapshot.busData = vehicleData.specifics.busData;
       }
 
-      const completeData = {
-        vehicleId, // ID del vehículo (null si usuario no está logueado)
-        vehicleSnapshot,
-        serviceDetails: {
-          problem: serviceDetails.problem.trim(),
-          basement: serviceDetails.basement,
-          truckCurrentState: serviceDetails.truckCurrentState,
-        },
-      };
+      // Si skipServiceDetails es true, solo devolver datos del vehículo
+      const completeData = skipServiceDetails
+        ? {
+            vehicleId,
+            vehicleSnapshot,
+          }
+        : {
+            vehicleId, // ID del vehículo (null si usuario no está logueado)
+            vehicleSnapshot,
+            serviceDetails: {
+              problem: serviceDetails.problem.trim(),
+              basement: serviceDetails.basement,
+              truckCurrentState: serviceDetails.truckCurrentState,
+            },
+          };
 
-      console.log('✅ Datos completos del vehículo y servicio:', completeData);
+      console.log('✅ Datos completos:', completeData);
       onComplete(completeData);
       handleCloseModal();
     } catch (error) {

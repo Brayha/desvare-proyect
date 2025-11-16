@@ -281,6 +281,7 @@ const MyGarage = () => {
         onDismiss={() => setShowWizardModal(false)}
         onComplete={handleWizardComplete}
         userId={user?.id}
+        skipServiceDetails={true} // No preguntar detalles del servicio en Mi Garaje
       />
 
       {/* Action Sheet */}
