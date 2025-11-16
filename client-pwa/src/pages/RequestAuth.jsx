@@ -219,10 +219,16 @@ const RequestAuth = () => {
           const categoryId = vehicleData.vehicleSnapshot.category?.id;
           if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
             newVehiclePayload.isArmored = vehicleData.vehicleSnapshot.isArmored || false;
-          } else if (categoryId === 'CAMIONES' && vehicleData.vehicleSnapshot.truckData) {
-            newVehiclePayload.truckData = vehicleData.vehicleSnapshot.truckData;
-          } else if (categoryId === 'BUSES' && vehicleData.vehicleSnapshot.busData) {
-            newVehiclePayload.busData = vehicleData.vehicleSnapshot.busData;
+          } else if (categoryId === 'CAMIONES') {
+            // Solo agregar si existe y tiene datos
+            if (vehicleData.vehicleSnapshot.truckData && Object.keys(vehicleData.vehicleSnapshot.truckData).length > 0) {
+              newVehiclePayload.truckData = vehicleData.vehicleSnapshot.truckData;
+            }
+          } else if (categoryId === 'BUSES') {
+            // Solo agregar si existe y tiene datos
+            if (vehicleData.vehicleSnapshot.busData && Object.keys(vehicleData.vehicleSnapshot.busData).length > 0) {
+              newVehiclePayload.busData = vehicleData.vehicleSnapshot.busData;
+            }
           }
           
           const vehicleResponse = await vehicleAPI.createVehicle(newVehiclePayload);

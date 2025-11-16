@@ -442,10 +442,16 @@ const VehicleWizardModal = ({
         const categoryId = vehicleData.category?.id;
         if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
           newVehiclePayload.isArmored = vehicleData.specifics?.isArmored || false;
-        } else if (categoryId === 'CAMIONES' && vehicleData.specifics?.truckData) {
-          newVehiclePayload.truckData = vehicleData.specifics.truckData;
-        } else if (categoryId === 'BUSES' && vehicleData.specifics?.busData) {
-          newVehiclePayload.busData = vehicleData.specifics.busData;
+        } else if (categoryId === 'CAMIONES') {
+          // Solo agregar si existe y tiene datos válidos
+          if (vehicleData.specifics?.truckData && Object.keys(vehicleData.specifics.truckData).length > 0) {
+            newVehiclePayload.truckData = vehicleData.specifics.truckData;
+          }
+        } else if (categoryId === 'BUSES') {
+          // Solo agregar si existe y tiene datos válidos
+          if (vehicleData.specifics?.busData && Object.keys(vehicleData.specifics.busData).length > 0) {
+            newVehiclePayload.busData = vehicleData.specifics.busData;
+          }
         }
 
         console.log('📤 Guardando nuevo vehículo:', newVehiclePayload);
@@ -469,10 +475,16 @@ const VehicleWizardModal = ({
       const categoryId = vehicleData.category?.id;
       if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
         vehicleSnapshot.isArmored = vehicleData.specifics?.isArmored || false;
-      } else if (categoryId === 'CAMIONES' && vehicleData.specifics?.truckData) {
-        vehicleSnapshot.truckData = vehicleData.specifics.truckData;
-      } else if (categoryId === 'BUSES' && vehicleData.specifics?.busData) {
-        vehicleSnapshot.busData = vehicleData.specifics.busData;
+      } else if (categoryId === 'CAMIONES') {
+        // Solo agregar si existe y tiene datos válidos
+        if (vehicleData.specifics?.truckData && Object.keys(vehicleData.specifics.truckData).length > 0) {
+          vehicleSnapshot.truckData = vehicleData.specifics.truckData;
+        }
+      } else if (categoryId === 'BUSES') {
+        // Solo agregar si existe y tiene datos válidos
+        if (vehicleData.specifics?.busData && Object.keys(vehicleData.specifics.busData).length > 0) {
+          vehicleSnapshot.busData = vehicleData.specifics.busData;
+        }
       }
 
       // Si context es 'garage', solo devolver datos del vehículo (sin servicio)
