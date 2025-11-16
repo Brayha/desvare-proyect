@@ -5,3 +5,9 @@ export { default as Card } from './Card/Card';
 export { default as PhoneInput } from './PhoneInput/PhoneInput';
 export { default as OTPInput } from './OTPInput/OTPInput';
 
+// Componentes de vehículos
+export { default as VehicleCategorySelector } from './VehicleCategorySelector/VehicleCategorySelector';
+export { default as VehicleBrandSelector } from './VehicleBrandSelector/VehicleBrandSelector';
+export { default as VehicleModelSelector } from './VehicleModelSelector/VehicleModelSelector';
+export { default as VehiclePlateInput } from './VehiclePlateInput/VehiclePlateInput';
+
