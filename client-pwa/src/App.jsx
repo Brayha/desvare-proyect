@@ -24,10 +24,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import LocationPermission from './pages/LocationPermission';
-import RequestService from './pages/RequestService';
 import RequestAuth from './pages/RequestAuth';
 import RequestConfirmation from './pages/RequestConfirmation';
 import WaitingQuotes from './pages/WaitingQuotes';
+import TabLayout from './components/TabLayout/TabLayout';
 
 setupIonicReact();
 
@@ -54,14 +54,19 @@ function App() {
     <IonApp>
       <IonReactRouter>
         <IonRouterOutlet>
+          {/* Páginas sin tabs */}
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
           <Route exact path="/home" component={Home} />
           <Route exact path="/location-permission" component={LocationPermission} />
-          <Route exact path="/request-service" component={RequestService} />
           <Route exact path="/request-auth" component={RequestAuth} />
           <Route exact path="/request-confirmation" component={RequestConfirmation} />
           <Route exact path="/waiting-quotes" component={WaitingQuotes} />
+          
+          {/* Tabs (Desvare + Mi cuenta) */}
+          <Route path="/tabs" component={TabLayout} />
+          
+          {/* Redirección inicial */}
           <Route exact path="/" component={InitialRedirect} />
         </IonRouterOutlet>
       </IonReactRouter>

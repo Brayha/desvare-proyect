@@ -86,9 +86,9 @@ const Home = () => {
           // Tiene permisos, guardar en localStorage y ir al mapa
           localStorage.setItem("locationPermission", "granted");
           console.log(
-            "✅ Permisos confirmados → Ir directo a /request-service"
+            "✅ Permisos confirmados → Ir directo a /tabs/desvare"
           );
-          history.push("/request-service");
+          history.push("/tabs/desvare");
         } else {
           // No tiene permisos o están denegados
           console.log("⚠️ Sin permisos → Ir a /location-permission");
@@ -99,9 +99,9 @@ const Home = () => {
         const locationPermission = localStorage.getItem("locationPermission");
         if (locationPermission === "granted") {
           console.log(
-            "✅ Ya tiene permisos (localStorage) → Ir directo a /request-service"
+            "✅ Ya tiene permisos (localStorage) → Ir directo a /tabs/desvare"
           );
-          history.push("/request-service");
+          history.push("/tabs/desvare");
         } else {
           console.log("⚠️ Sin permisos → Ir a /location-permission");
           history.push("/location-permission");

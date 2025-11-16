@@ -30,7 +30,7 @@ const LocationPermission = () => {
 
       // Esperar 1 segundo para mostrar el éxito y luego navegar
       setTimeout(() => {
-        history.push("/request-service");
+        history.push("/tabs/desvare");
       }, 1000);
     } catch (error) {
       showError(
