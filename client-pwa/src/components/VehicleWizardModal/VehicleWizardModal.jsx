@@ -456,21 +456,34 @@ const VehicleWizardModal = ({
 
         // Agregar campos específicos según la categoría
         const categoryId = vehicleData.category?.id;
+        
+        console.log('🔍 DEBUG - vehicleData.specifics:', vehicleData.specifics);
+        console.log('🔍 DEBUG - categoryId:', categoryId);
+        
         if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
           newVehiclePayload.isArmored = vehicleData.specifics?.isArmored || false;
+          console.log('✅ AUTO/CAMIONETA/ELECTRICO - isArmored:', newVehiclePayload.isArmored);
         } else if (categoryId === 'CAMIONES') {
           // Solo agregar si existe y tiene datos válidos
+          console.log('🚚 CAMION - checking truckData:', vehicleData.specifics?.truckData);
           if (vehicleData.specifics?.truckData && Object.keys(vehicleData.specifics.truckData).length > 0) {
             newVehiclePayload.truckData = vehicleData.specifics.truckData;
+            console.log('✅ CAMION - truckData agregado');
+          } else {
+            console.log('⚠️ CAMION - truckData vacío o undefined, NO se agregará');
           }
         } else if (categoryId === 'BUSES') {
           // Solo agregar si existe y tiene datos válidos
+          console.log('🚌 BUS - checking busData:', vehicleData.specifics?.busData);
           if (vehicleData.specifics?.busData && Object.keys(vehicleData.specifics.busData).length > 0) {
             newVehiclePayload.busData = vehicleData.specifics.busData;
+            console.log('✅ BUS - busData agregado');
+          } else {
+            console.log('⚠️ BUS - busData vacío o undefined, NO se agregará');
           }
         }
 
-        console.log('📤 Guardando nuevo vehículo:', newVehiclePayload);
+        console.log('📤 Guardando nuevo vehículo:', JSON.stringify(newVehiclePayload, null, 2));
         const response = await vehicleAPI.createVehicle(newVehiclePayload);
         vehicleId = response.data.data?._id || response.data._id;
         showSuccess('✅ Vehículo guardado en tu garaje');
