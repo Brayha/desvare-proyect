@@ -101,20 +101,25 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
               <IonLabel className="service-label">
                 ¿En qué nivel? <span className="required">*</span>
               </IonLabel>
-              <IonItem 
-                lines="none" 
+              <IonItem
+                lines="none"
                 className={`service-item ${errors.basementLevel ? 'ion-invalid' : ''}`}
               >
                 <IonInput
                   type="number"
-                  min="-10"
-                  max="-1"
-                  value={data?.basement?.level}
-                  onIonInput={(e) => handleChange('basement', {
-                    ...data?.basement,
-                    level: parseInt(e.detail.value)
-                  })}
-                  placeholder="-1, -2, -3..."
+                  min="1"
+                  max="10"
+                  value={data?.basement?.level ? Math.abs(data.basement.level) : ''}
+                  onIonInput={(e) => {
+                    const positiveValue = parseInt(e.detail.value);
+                    if (!isNaN(positiveValue) && positiveValue > 0) {
+                      handleChange('basement', {
+                        ...data?.basement,
+                        level: -Math.abs(positiveValue) // Convertir a negativo
+                      });
+                    }
+                  }}
+                  placeholder="1, 2, 3... (nivel de sótano)"
                 />
               </IonItem>
               {errors.basementLevel ? (
@@ -123,7 +128,8 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
                 </IonText>
               ) : (
                 <IonText className="service-helper">
-                  <p>Los niveles inferiores incrementan el costo del servicio</p>
+                  <p>Ingresa el número del nivel (ej: 1 para sótano -1, 2 para sótano -2)</p>
+                  <p><small>Los niveles inferiores incrementan el costo del servicio</small></p>
                 </IonText>
               )}
             </div>
