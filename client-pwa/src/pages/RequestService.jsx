@@ -697,6 +697,7 @@ const RequestService = () => {
           onDismiss={handleVehicleWizardDismiss}
           onComplete={handleVehicleWizardComplete}
           userId={currentUser?.id || null}
+          context="service" // Modo servicio: vehículo + detalles del servicio
         />
       </IonContent>
     </IonPage>

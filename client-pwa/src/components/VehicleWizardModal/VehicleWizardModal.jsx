@@ -29,21 +29,23 @@ import './VehicleWizardModal.css';
 /**
  * Modal Wizard para crear/seleccionar vehículo y agregar detalles del servicio
  * 
- * Flujo:
- * 1. Listar vehículos guardados (si hay) o ir a crear uno nuevo
- * 2. Seleccionar categoría
- * 3. Seleccionar marca
- * 4. Seleccionar modelo
- * 5. Ingresar placa
- * 6. Datos específicos del vehículo (blindaje, dimensiones, etc)
- * 7. Detalles del servicio (problema, sótano, peso)
+ * Flujo depende del contexto:
+ * - 'garage': Solo gestión de vehículos (sin servicio)
+ * - 'service': Vehículo + detalles del servicio (problema, sótano, peso)
  * 
  * @param {boolean} isOpen - Controla si el modal está abierto
  * @param {function} onDismiss - Callback al cerrar el modal
  * @param {function} onComplete - Callback con datos completos del vehículo y servicio
  * @param {string} userId - ID del usuario (null si no está logueado)
+ * @param {string} context - Contexto de uso: 'garage' o 'service' (default: 'service')
  */
-const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipServiceDetails = false }) => {
+const VehicleWizardModal = ({ 
+  isOpen, 
+  onDismiss, 
+  onComplete, 
+  userId, 
+  context = 'service' 
+}) => {
   const { showSuccess, showError, showWarning } = useToast();
 
   // Estados del wizard
@@ -76,9 +78,12 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipService
   const [models, setModels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Definir pasos del wizard
+  // Determinar si estamos en modo garaje
+  const isGarageMode = context === 'garage';
+
+  // Definir pasos del wizard según contexto
   const STEPS = isCreatingNew
-    ? (skipServiceDetails
+    ? (isGarageMode
         ? [
             // Flujo de Mi Garaje: sin servicio
             { id: 'category', title: 'Categoría', description: '¿Qué tipo de vehículo es?' },
@@ -97,13 +102,13 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipService
             { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
           ]
       )
-    : (skipServiceDetails
+    : (isGarageMode
         ? [
-            // Flujo de selección de vehículo existente sin servicio (no debería ocurrir)
+            // En garaje solo mostrar lista (si hay vehículos)
             { id: 'list', title: 'Mis Vehículos', description: 'Selecciona o agrega uno nuevo' },
           ]
         : [
-            // Flujo de selección de vehículo existente con servicio
+            // En solicitud: lista + servicio
             { id: 'list', title: 'Mis Vehículos', description: 'Selecciona o agrega uno nuevo' },
             { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
           ]
@@ -183,12 +188,32 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipService
   useEffect(() => {
     if (isOpen) {
       loadCategories();
-      if (userId) {
+      
+      if (userId && context === 'service') {
+        // Modo servicio con usuario logueado: detectar si tiene vehículos
         loadUserVehicles();
+      } else if (userId && context === 'garage') {
+        // Modo garaje: siempre cargar vehículos
+        loadUserVehicles();
+      } else if (!userId && context === 'service') {
+        // Usuario no logueado en servicio: ir directo a crear
+        setIsCreatingNew(true);
+        setCurrentStep(0);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, userId]);
+  }, [isOpen, userId, context]);
+
+  // Auto-detectar si usuario no tiene vehículos en modo servicio
+  useEffect(() => {
+    if (isOpen && userId && context === 'service' && userVehicles.length === 0 && !isLoading) {
+      // Si no tiene vehículos, ir directo a crear
+      console.log('🚗 Usuario sin vehículos → Ir directo a crear');
+      setIsCreatingNew(true);
+      setCurrentStep(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userVehicles, isOpen, userId, context, isLoading]);
 
   // Cargar marcas cuando se selecciona categoría
   useEffect(() => {
@@ -429,8 +454,8 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipService
         vehicleSnapshot.busData = vehicleData.specifics.busData;
       }
 
-      // Si skipServiceDetails es true, solo devolver datos del vehículo
-      const completeData = skipServiceDetails
+      // Si context es 'garage', solo devolver datos del vehículo (sin servicio)
+      const completeData = context === 'garage'
         ? {
             vehicleId,
             vehicleSnapshot,
@@ -445,7 +470,7 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipService
             },
           };
 
-      console.log('✅ Datos completos:', completeData);
+      console.log(`✅ Datos completos (context: ${context}):`, completeData);
       onComplete(completeData);
       handleCloseModal();
     } catch (error) {
@@ -578,9 +603,25 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipService
           </IonButtons>
           <IonTitle>{currentStepInfo.title}</IonTitle>
           <IonButtons slot="end">
-            <IonText color="medium" style={{ fontSize: '14px', marginRight: '12px' }}>
-              {currentStep + 1}/{totalSteps}
-            </IonText>
+            {/* Botón "Ya tienes cuenta" si no está logueado en modo servicio */}
+            {!userId && context === 'service' && currentStep === 0 ? (
+              <IonButton 
+                onClick={() => {
+                  onDismiss();
+                  // TODO: Abrir AuthModal (implementar callback como prop si es necesario)
+                  console.log('🔐 Usuario quiere iniciar sesión');
+                }}
+                size="small"
+              >
+                <IonText style={{ fontSize: '13px', whiteSpace: 'nowrap' }}>
+                  ¿Ya tienes cuenta?
+                </IonText>
+              </IonButton>
+            ) : (
+              <IonText color="medium" style={{ fontSize: '14px', marginRight: '12px' }}>
+                {currentStep + 1}/{totalSteps}
+              </IonText>
+            )}
           </IonButtons>
         </IonToolbar>
         <IonProgressBar value={progress / 100} color="primary" />
