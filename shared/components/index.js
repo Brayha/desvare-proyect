@@ -12,4 +12,5 @@ export { default as VehicleModelSelector } from './VehicleModelSelector/VehicleM
 export { default as VehiclePlateInput } from './VehiclePlateInput/VehiclePlateInput';
 export { default as VehicleSpecificsForm } from './VehicleSpecificsForm/VehicleSpecificsForm';
 export { default as ServiceDetailsForm } from './ServiceDetailsForm/ServiceDetailsForm';
+export { default as VehicleList } from './VehicleList/VehicleList';
 
