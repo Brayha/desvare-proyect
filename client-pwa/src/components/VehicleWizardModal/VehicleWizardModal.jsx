@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   IonModal,
   IonContent,
@@ -71,6 +71,7 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
   });
 
   // Estados de catálogos (dropdowns)
+  const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [models, setModels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,14 +95,23 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
   const progress = ((currentStep + 1) / totalSteps) * 100;
   const currentStepInfo = STEPS[currentStep];
 
-  // Cargar vehículos del usuario si está logueado
-  useEffect(() => {
-    if (isOpen && userId) {
-      loadUserVehicles();
+  // Funciones de carga con useCallback para evitar warnings de dependencias
+  const loadCategories = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await vehicleAPI.getCategories();
+      setCategories(response.data || []);
+      console.log('✅ Categorías cargadas:', response.data.length);
+    } catch (error) {
+      console.error('❌ Error cargando categorías:', error);
+      showError('Error al cargar categorías');
+      setCategories([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, [isOpen, userId]);
+  }, [showError]);
 
-  const loadUserVehicles = async () => {
+  const loadUserVehicles = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getUserVehicles(userId);
@@ -114,23 +124,9 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
 
-  // Cargar marcas cuando se selecciona categoría
-  useEffect(() => {
-    if (vehicleData.category) {
-      loadBrands(vehicleData.category.id);
-    }
-  }, [vehicleData.category]);
-
-  // Cargar modelos cuando se selecciona marca
-  useEffect(() => {
-    if (vehicleData.brand && vehicleData.category) {
-      loadModels(vehicleData.brand.id, vehicleData.category.id);
-    }
-  }, [vehicleData.brand, vehicleData.category]);
-
-  const loadBrands = async (categoryId) => {
+  const loadBrands = useCallback(async (categoryId) => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getBrands(categoryId);
@@ -143,9 +139,9 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [showError]);
 
-  const loadModels = async (brandId, categoryId) => {
+  const loadModels = useCallback(async (brandId, categoryId) => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getModels(brandId, categoryId);
@@ -158,7 +154,31 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [showError]);
+
+  // Cargar categorías y vehículos del usuario cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      loadCategories();
+      if (userId) {
+        loadUserVehicles();
+      }
+    }
+  }, [isOpen, userId, loadCategories, loadUserVehicles]);
+
+  // Cargar marcas cuando se selecciona categoría
+  useEffect(() => {
+    if (vehicleData.category) {
+      loadBrands(vehicleData.category.id);
+    }
+  }, [vehicleData.category, loadBrands]);
+
+  // Cargar modelos cuando se selecciona marca
+  useEffect(() => {
+    if (vehicleData.brand && vehicleData.category) {
+      loadModels(vehicleData.brand.id, vehicleData.category.id);
+    }
+  }, [vehicleData.brand, vehicleData.category, loadModels]);
 
   // Handlers de selección
   const handleSelectCategory = (category) => {
@@ -236,7 +256,7 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
             return;
           }
           break;
-        case 'specifics':
+        case 'specifics': {
           // Validar campos específicos según categoría
           const category = vehicleData.category.id;
           if (category === 'CAMIONES') {
@@ -254,6 +274,7 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
             }
           }
           break;
+        }
         case 'service':
           if (!serviceDetails.problem || serviceDetails.problem.trim().length < 10) {
             showWarning('Describe el problema con más detalle (mín. 10 caracteres)');
@@ -393,6 +414,7 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
       basement: { isInBasement: false, level: null },
       truckCurrentState: { isLoaded: false, currentWeight: null },
     });
+    setCategories([]);
     setBrands([]);
     setModels([]);
     onDismiss();
@@ -414,6 +436,7 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
       case 'category':
         return (
           <VehicleCategorySelector
+            categories={categories}
             onSelect={handleSelectCategory}
             selectedCategory={vehicleData.category}
           />
