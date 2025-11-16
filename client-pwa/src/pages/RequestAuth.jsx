@@ -219,15 +219,29 @@ const RequestAuth = () => {
           const categoryId = vehicleData.vehicleSnapshot.category?.id;
           if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
             newVehiclePayload.isArmored = vehicleData.vehicleSnapshot.isArmored || false;
-          } else if (categoryId === 'CAMIONES') {
-            // Solo agregar si existe y tiene datos
-            if (vehicleData.vehicleSnapshot.truckData && Object.keys(vehicleData.vehicleSnapshot.truckData).length > 0) {
-              newVehiclePayload.truckData = vehicleData.vehicleSnapshot.truckData;
+          } else if (categoryId === 'CAMIONES' && vehicleData.vehicleSnapshot.truckData) {
+            // Filtrar solo propiedades con valor
+            const validTruckData = Object.keys(vehicleData.vehicleSnapshot.truckData)
+              .filter(key => vehicleData.vehicleSnapshot.truckData[key] != null && vehicleData.vehicleSnapshot.truckData[key] !== '')
+              .reduce((obj, key) => {
+                obj[key] = vehicleData.vehicleSnapshot.truckData[key];
+                return obj;
+              }, {});
+            
+            if (Object.keys(validTruckData).length > 0) {
+              newVehiclePayload.truckData = validTruckData;
             }
-          } else if (categoryId === 'BUSES') {
-            // Solo agregar si existe y tiene datos
-            if (vehicleData.vehicleSnapshot.busData && Object.keys(vehicleData.vehicleSnapshot.busData).length > 0) {
-              newVehiclePayload.busData = vehicleData.vehicleSnapshot.busData;
+          } else if (categoryId === 'BUSES' && vehicleData.vehicleSnapshot.busData) {
+            // Filtrar solo propiedades con valor
+            const validBusData = Object.keys(vehicleData.vehicleSnapshot.busData)
+              .filter(key => vehicleData.vehicleSnapshot.busData[key] != null && vehicleData.vehicleSnapshot.busData[key] !== '')
+              .reduce((obj, key) => {
+                obj[key] = vehicleData.vehicleSnapshot.busData[key];
+                return obj;
+              }, {});
+            
+            if (Object.keys(validBusData).length > 0) {
+              newVehiclePayload.busData = validBusData;
             }
           }
           

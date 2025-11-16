@@ -29,15 +29,12 @@ import './VehicleWizardModal.css';
 /**
  * Modal Wizard para crear/seleccionar vehículo y agregar detalles del servicio
  * 
- * Flujo depende del contexto:
- * - 'garage': Solo gestión de vehículos (sin servicio)
- * - 'service': Vehículo + detalles del servicio (problema, sótano, peso)
+ * Flujo: Seleccionar/crear vehículo → Agregar detalles del servicio
  * 
  * @param {boolean} isOpen - Controla si el modal está abierto
  * @param {function} onDismiss - Callback al cerrar el modal
  * @param {function} onComplete - Callback con datos completos del vehículo y servicio
  * @param {string} userId - ID del usuario (null si no está logueado)
- * @param {string} context - Contexto de uso: 'garage' o 'service' (default: 'service')
  * @param {function} onRequestAuth - Callback cuando usuario no logueado quiere iniciar sesión (opcional)
  */
 const VehicleWizardModal = ({ 
@@ -45,7 +42,6 @@ const VehicleWizardModal = ({
   onDismiss, 
   onComplete, 
   userId, 
-  context = 'service',
   onRequestAuth 
 }) => {
   const { showSuccess, showError, showWarning } = useToast();
@@ -80,41 +76,22 @@ const VehicleWizardModal = ({
   const [models, setModels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Determinar si estamos en modo garaje
-  const isGarageMode = context === 'garage';
-
-  // Definir pasos del wizard según contexto
+  // Definir pasos del wizard (siempre incluye servicio)
   const STEPS = isCreatingNew
-    ? (isGarageMode
-        ? [
-            // Flujo de Mi Garaje: sin servicio
-            { id: 'category', title: 'Categoría', description: '¿Qué tipo de vehículo es?' },
-            { id: 'brand', title: 'Marca', description: 'Selecciona la marca' },
-            { id: 'model', title: 'Modelo', description: 'Selecciona el modelo' },
-            { id: 'plate', title: 'Placa', description: 'Ingresa la placa' },
-            { id: 'specifics', title: 'Detalles', description: 'Información adicional' },
-          ]
-        : [
-            // Flujo de solicitud de servicio: con servicio
-            { id: 'category', title: 'Categoría', description: '¿Qué tipo de vehículo es?' },
-            { id: 'brand', title: 'Marca', description: 'Selecciona la marca' },
-            { id: 'model', title: 'Modelo', description: 'Selecciona el modelo' },
-            { id: 'plate', title: 'Placa', description: 'Ingresa la placa' },
-            { id: 'specifics', title: 'Detalles', description: 'Información adicional' },
-            { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
-          ]
-      )
-    : (isGarageMode
-        ? [
-            // En garaje solo mostrar lista (si hay vehículos)
-            { id: 'list', title: 'Mis Vehículos', description: 'Selecciona o agrega uno nuevo' },
-          ]
-        : [
-            // En solicitud: lista + servicio
-            { id: 'list', title: 'Mis Vehículos', description: 'Selecciona o agrega uno nuevo' },
-            { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
-          ]
-      );
+    ? [
+        // Flujo de creación: vehículo + servicio
+        { id: 'category', title: 'Categoría', description: '¿Qué tipo de vehículo es?' },
+        { id: 'brand', title: 'Marca', description: 'Selecciona la marca' },
+        { id: 'model', title: 'Modelo', description: 'Selecciona el modelo' },
+        { id: 'plate', title: 'Placa', description: 'Ingresa la placa' },
+        { id: 'specifics', title: 'Detalles', description: 'Información adicional' },
+        { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
+      ]
+    : [
+        // Flujo de selección: lista + servicio
+        { id: 'list', title: 'Mis Vehículos', description: 'Selecciona o agrega uno nuevo' },
+        { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
+      ];
 
   const totalSteps = STEPS.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
@@ -457,33 +434,33 @@ const VehicleWizardModal = ({
         // Agregar campos específicos según la categoría
         const categoryId = vehicleData.category?.id;
         
-        console.log('🔍 DEBUG - vehicleData.specifics:', vehicleData.specifics);
-        console.log('🔍 DEBUG - categoryId:', categoryId);
-        
         if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
           newVehiclePayload.isArmored = vehicleData.specifics?.isArmored || false;
-          console.log('✅ AUTO/CAMIONETA/ELECTRICO - isArmored:', newVehiclePayload.isArmored);
-        } else if (categoryId === 'CAMIONES') {
-          // Solo agregar si existe y tiene datos válidos
-          console.log('🚚 CAMION - checking truckData:', vehicleData.specifics?.truckData);
-          if (vehicleData.specifics?.truckData && Object.keys(vehicleData.specifics.truckData).length > 0) {
-            newVehiclePayload.truckData = vehicleData.specifics.truckData;
-            console.log('✅ CAMION - truckData agregado');
-          } else {
-            console.log('⚠️ CAMION - truckData vacío o undefined, NO se agregará');
+        } else if (categoryId === 'CAMIONES' && vehicleData.specifics?.truckData) {
+          // Filtrar solo propiedades con valor
+          const validTruckData = Object.keys(vehicleData.specifics.truckData)
+            .filter(key => vehicleData.specifics.truckData[key] != null && vehicleData.specifics.truckData[key] !== '')
+            .reduce((obj, key) => {
+              obj[key] = vehicleData.specifics.truckData[key];
+              return obj;
+            }, {});
+          
+          if (Object.keys(validTruckData).length > 0) {
+            newVehiclePayload.truckData = validTruckData;
           }
-        } else if (categoryId === 'BUSES') {
-          // Solo agregar si existe y tiene datos válidos
-          console.log('🚌 BUS - checking busData:', vehicleData.specifics?.busData);
-          if (vehicleData.specifics?.busData && Object.keys(vehicleData.specifics.busData).length > 0) {
-            newVehiclePayload.busData = vehicleData.specifics.busData;
-            console.log('✅ BUS - busData agregado');
-          } else {
-            console.log('⚠️ BUS - busData vacío o undefined, NO se agregará');
+        } else if (categoryId === 'BUSES' && vehicleData.specifics?.busData) {
+          // Filtrar solo propiedades con valor
+          const validBusData = Object.keys(vehicleData.specifics.busData)
+            .filter(key => vehicleData.specifics.busData[key] != null && vehicleData.specifics.busData[key] !== '')
+            .reduce((obj, key) => {
+              obj[key] = vehicleData.specifics.busData[key];
+              return obj;
+            }, {});
+          
+          if (Object.keys(validBusData).length > 0) {
+            newVehiclePayload.busData = validBusData;
           }
         }
-
-        console.log('📤 Guardando nuevo vehículo:', JSON.stringify(newVehiclePayload, null, 2));
         const response = await vehicleAPI.createVehicle(newVehiclePayload);
         vehicleId = response.data.data?._id || response.data._id;
         showSuccess('✅ Vehículo guardado en tu garaje');
@@ -504,35 +481,44 @@ const VehicleWizardModal = ({
       const categoryId = vehicleData.category?.id;
       if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
         vehicleSnapshot.isArmored = vehicleData.specifics?.isArmored || false;
-      } else if (categoryId === 'CAMIONES') {
-        // Solo agregar si existe y tiene datos válidos
-        if (vehicleData.specifics?.truckData && Object.keys(vehicleData.specifics.truckData).length > 0) {
-          vehicleSnapshot.truckData = vehicleData.specifics.truckData;
+      } else if (categoryId === 'CAMIONES' && vehicleData.specifics?.truckData) {
+        // Filtrar solo propiedades con valor
+        const validTruckData = Object.keys(vehicleData.specifics.truckData)
+          .filter(key => vehicleData.specifics.truckData[key] != null && vehicleData.specifics.truckData[key] !== '')
+          .reduce((obj, key) => {
+            obj[key] = vehicleData.specifics.truckData[key];
+            return obj;
+          }, {});
+        
+        if (Object.keys(validTruckData).length > 0) {
+          vehicleSnapshot.truckData = validTruckData;
         }
-      } else if (categoryId === 'BUSES') {
-        // Solo agregar si existe y tiene datos válidos
-        if (vehicleData.specifics?.busData && Object.keys(vehicleData.specifics.busData).length > 0) {
-          vehicleSnapshot.busData = vehicleData.specifics.busData;
+      } else if (categoryId === 'BUSES' && vehicleData.specifics?.busData) {
+        // Filtrar solo propiedades con valor
+        const validBusData = Object.keys(vehicleData.specifics.busData)
+          .filter(key => vehicleData.specifics.busData[key] != null && vehicleData.specifics.busData[key] !== '')
+          .reduce((obj, key) => {
+            obj[key] = vehicleData.specifics.busData[key];
+            return obj;
+          }, {});
+        
+        if (Object.keys(validBusData).length > 0) {
+          vehicleSnapshot.busData = validBusData;
         }
       }
 
-      // Si context es 'garage', solo devolver datos del vehículo (sin servicio)
-      const completeData = context === 'garage'
-        ? {
-            vehicleId,
-            vehicleSnapshot,
-          }
-        : {
-            vehicleId, // ID del vehículo (null si usuario no está logueado)
-            vehicleSnapshot,
-            serviceDetails: {
-              problem: serviceDetails.problem.trim(),
-              basement: serviceDetails.basement,
-              truckCurrentState: serviceDetails.truckCurrentState,
-            },
-          };
+      // Devolver datos completos: vehículo + servicio
+      const completeData = {
+        vehicleId, // ID del vehículo (null si usuario no está logueado)
+        vehicleSnapshot,
+        serviceDetails: {
+          problem: serviceDetails.problem.trim(),
+          basement: serviceDetails.basement,
+          truckCurrentState: serviceDetails.truckCurrentState,
+        },
+      };
 
-      console.log(`✅ Datos completos (context: ${context}):`, completeData);
+      console.log('✅ Datos completos:', completeData);
       onComplete(completeData);
       handleCloseModal();
     } catch (error) {

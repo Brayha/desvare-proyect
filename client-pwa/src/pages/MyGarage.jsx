@@ -22,15 +22,11 @@ import {
 } from '@ionic/react';
 import {
   arrowBack,
-  addOutline,
   carOutline,
   ellipsisVertical,
-  createOutline,
   trashOutline,
   checkmarkCircle,
 } from 'ionicons/icons';
-import { Button } from '@components';
-import VehicleWizardModal from '../components/VehicleWizardModal/VehicleWizardModal';
 import { vehicleAPI } from '../services/vehicleAPI';
 import { useToast } from '@hooks/useToast';
 import './MyGarage.css';
@@ -42,7 +38,6 @@ const MyGarage = () => {
   const [user, setUser] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showWizardModal, setShowWizardModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -82,28 +77,9 @@ const MyGarage = () => {
     }
   };
 
-  const handleAddVehicle = () => {
-    setShowWizardModal(true);
-  };
-
-  const handleWizardComplete = async (data) => {
-    console.log('✅ Vehículo agregado:', data);
-    setShowWizardModal(false);
-    showSuccess('Vehículo agregado a tu garaje');
-    // Recargar lista
-    if (user) {
-      await loadVehicles(user.id);
-    }
-  };
-
   const handleVehicleOptions = (vehicle) => {
     setSelectedVehicle(vehicle);
     setShowActionSheet(true);
-  };
-
-  const handleEditVehicle = () => {
-    showWarning('Función de edición próximamente');
-    // TODO: Implementar edición en siguiente paso
   };
 
   const handleDeleteVehicle = () => {
@@ -176,11 +152,6 @@ const MyGarage = () => {
             </IonButton>
           </IonButtons>
           <IonTitle>Mi Garaje</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={handleAddVehicle}>
-              <IonIcon icon={addOutline} />
-            </IonButton>
-          </IonButtons>
         </IonToolbar>
       </IonHeader>
 
@@ -197,12 +168,8 @@ const MyGarage = () => {
             <IonIcon icon={carOutline} className="empty-icon" />
             <IonText>
               <h3>No tienes vehículos</h3>
-              <p>Agrega tu primer vehículo para empezar a solicitar servicios más rápido</p>
+              <p>Tus vehículos se guardarán automáticamente cuando solicites un servicio</p>
             </IonText>
-            <Button expand="block" onClick={handleAddVehicle} className="add-first-vehicle-btn">
-              <IonIcon icon={addOutline} slot="start" />
-              Agregar vehículo
-            </Button>
           </div>
         ) : (
           <IonList className="vehicles-list">
@@ -264,25 +231,7 @@ const MyGarage = () => {
             })}
           </IonList>
         )}
-
-        {vehicles.length > 0 && (
-          <div className="garage-footer">
-            <Button expand="block" onClick={handleAddVehicle} variant="outline">
-              <IonIcon icon={addOutline} slot="start" />
-              Agregar otro vehículo
-            </Button>
-          </div>
-        )}
       </IonContent>
-
-      {/* Wizard Modal */}
-      <VehicleWizardModal
-        isOpen={showWizardModal}
-        onDismiss={() => setShowWizardModal(false)}
-        onComplete={handleWizardComplete}
-        userId={user?.id}
-        context="garage" // Modo garaje: solo gestión de vehículos (sin servicio)
-      />
 
       {/* Action Sheet */}
       <IonActionSheet
@@ -290,11 +239,6 @@ const MyGarage = () => {
         onDidDismiss={() => setShowActionSheet(false)}
         header={`${selectedVehicle?.brand?.name} ${selectedVehicle?.model?.name}`}
         buttons={[
-          {
-            text: 'Editar',
-            icon: createOutline,
-            handler: handleEditVehicle,
-          },
           {
             text: 'Eliminar',
             icon: trashOutline,
