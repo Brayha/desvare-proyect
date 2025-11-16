@@ -168,35 +168,30 @@ const VehicleWizardModal = ({
     if (isOpen) {
       loadCategories();
       
-      if (userId && context === 'service') {
-        // Modo servicio con usuario logueado: detectar si tiene vehículos
+      if (userId) {
+        // Usuario logueado: cargar sus vehículos
         loadUserVehicles();
-      } else if (userId && context === 'garage') {
-        // Modo garaje: siempre cargar vehículos
-        loadUserVehicles();
-      } else if (!userId && context === 'service') {
-        // Usuario no logueado en servicio: ir directo a crear
+      } else {
+        // Usuario no logueado: ir directo a crear vehículo
         setIsCreatingNew(true);
         setCurrentStep(0);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, userId, context]);
+  }, [isOpen, userId]);
 
-  // Auto-detectar si usuario no tiene vehículos en modo servicio
+  // Auto-detectar si usuario no tiene vehículos
   useEffect(() => {
     // Solo ejecutar si:
     // 1. Modal está abierto
     // 2. Usuario está logueado
-    // 3. Estamos en modo servicio
-    // 4. No estamos cargando
-    // 5. Ya se cargaron los vehículos (userVehicles no es undefined)
-    // 6. No hay vehículos
-    // 7. No estamos ya en modo crear
+    // 3. No estamos cargando
+    // 4. Ya se cargaron los vehículos (userVehicles no es undefined)
+    // 5. No hay vehículos
+    // 6. No estamos ya en modo crear
     if (
       isOpen && 
       userId && 
-      context === 'service' && 
       !isLoading && 
       userVehicles !== undefined && 
       userVehicles.length === 0 && 
@@ -208,7 +203,7 @@ const VehicleWizardModal = ({
       setCurrentStep(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userVehicles, isOpen, userId, context, isLoading]);
+  }, [userVehicles, isOpen, userId, isLoading]);
 
   // Cargar marcas cuando se selecciona categoría
   useEffect(() => {
@@ -652,11 +647,11 @@ const VehicleWizardModal = ({
           <IonTitle>{currentStepInfo.title}</IonTitle>
           <IonButtons slot="end">
             {/* Botón "Ya tienes cuenta" si no está logueado en modo servicio */}
-            {!userId && context === 'service' && currentStep === 0 ? (
+            {!userId && currentStep === 0 ? (
               <IonButton 
                 onClick={() => {
                   onDismiss();
-                  // Llamar callback si existe, si no, redirigir a /request-auth
+                  // Llamar callback si existe
                   if (onRequestAuth) {
                     onRequestAuth();
                   } else {
