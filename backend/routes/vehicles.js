@@ -114,14 +114,17 @@ router.post('/', async (req, res) => {
       model,
       year,
       color,
-      licensePlate
+      licensePlate,
+      isArmored,
+      truckData,
+      busData
     } = req.body;
 
-    // Validaciones
-    if (!userId || !category || !brand || !model) {
+    // Validaciones básicas
+    if (!userId || !category || !brand || !model || !licensePlate) {
       return res.status(400).json({
         success: false,
-        error: 'userId, category, brand y model son requeridos'
+        error: 'userId, category, brand, model y licensePlate son requeridos'
       });
     }
 
@@ -146,13 +149,31 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // Validaciones específicas por categoría
+    const categoryId = category.id;
+
+    if (categoryId === 'CAMIONES' && !truckData) {
+      return res.status(400).json({
+        success: false,
+        error: 'truckData es requerido para camiones (trailerType, length, height, axleType)'
+      });
+    }
+
+    if (categoryId === 'BUSES' && !busData) {
+      return res.status(400).json({
+        success: false,
+        error: 'busData es requerido para buses (length, height, axleType, passengerCapacity)'
+      });
+    }
+
     console.log(`🚗 Creando vehículo para usuario ${userId}:`);
     console.log(`   Categoría: ${category.name}`);
     console.log(`   Marca: ${brand.name}`);
     console.log(`   Modelo: ${model.name}`);
+    console.log(`   Placa: ${licensePlate}`);
 
-    // Crear vehículo
-    const vehicle = new Vehicle({
+    // Crear vehículo con datos básicos
+    const vehicleData = {
       userId,
       category: {
         id: category.id,
@@ -170,8 +191,39 @@ router.post('/', async (req, res) => {
       color,
       licensePlate: licensePlate?.toUpperCase(),
       isActive: true
-    });
+    };
 
+    // Agregar campos específicos según categoría
+    if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
+      vehicleData.isArmored = isArmored || false;
+      console.log(`   Blindado: ${vehicleData.isArmored ? 'Sí' : 'No'}`);
+    }
+
+    if (categoryId === 'CAMIONES' && truckData) {
+      vehicleData.truckData = {
+        trailerType: truckData.trailerType,
+        length: truckData.length,
+        height: truckData.height,
+        axleType: truckData.axleType
+      };
+      console.log(`   Tipo furgón: ${truckData.trailerType}`);
+      console.log(`   Dimensiones: ${truckData.length}m x ${truckData.height}m`);
+      console.log(`   Pacha: ${truckData.axleType}`);
+    }
+
+    if (categoryId === 'BUSES' && busData) {
+      vehicleData.busData = {
+        length: busData.length,
+        height: busData.height,
+        axleType: busData.axleType,
+        passengerCapacity: busData.passengerCapacity
+      };
+      console.log(`   Dimensiones: ${busData.length}m x ${busData.height}m`);
+      console.log(`   Pacha: ${busData.axleType}`);
+      console.log(`   Capacidad: ${busData.passengerCapacity} pasajeros`);
+    }
+
+    const vehicle = new Vehicle(vehicleData);
     await vehicle.save();
 
     console.log(`✅ Vehículo creado con ID: ${vehicle._id}`);
@@ -179,17 +231,7 @@ router.post('/', async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Vehículo registrado exitosamente',
-      data: {
-        id: vehicle._id,
-        userId: vehicle.userId,
-        category: vehicle.category,
-        brand: vehicle.brand,
-        model: vehicle.model,
-        year: vehicle.year,
-        color: vehicle.color,
-        licensePlate: vehicle.licensePlate,
-        createdAt: vehicle.createdAt
-      }
+      data: vehicle
     });
   } catch (error) {
     console.error('❌ Error creando vehículo:', error);
