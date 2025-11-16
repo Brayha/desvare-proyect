@@ -45,6 +45,11 @@
       "descripcion": "Vehículos de carga y comerciales"
     },
     {
+      "id": "BUSES",
+      "name": "Buses",
+      "descripcion": "Buses de pasajeros y transporte público"
+    },
+    {
       "id": "ELECTRICOS",
       "name": "Vehículos Eléctricos e Híbridos",
       "descripcion": "Tecnologías limpias y sostenibles"
@@ -72,7 +77,7 @@
       "name": "Toyota",
       "pais_origen": "Japón",
       "participacion_mercado": 10.1,
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "ELECTRICOS"],
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES", "ELECTRICOS"],
       "modelos_destacados_2025": ["Corolla Cross", "Hilux", "Fortuner"]
     },
     {
@@ -80,7 +85,7 @@
       "name": "Chevrolet",
       "pais_origen": "USA",
       "participacion_mercado": 8.8,
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "ELECTRICOS"],
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES", "ELECTRICOS"],
       "modelos_destacados_2025": ["Onix", "Tracker", "Montana"]
     },
     {
@@ -108,7 +113,7 @@
       "id": "FORD",
       "name": "Ford",
       "pais_origen": "USA",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES", "ELECTRICOS"]
     },
     {
       "id": "VOLKSWAGEN",
@@ -174,7 +179,7 @@
       "id": "MERCEDES_BENZ",
       "name": "Mercedes-Benz",
       "pais_origen": "Alemania",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES", "ELECTRICOS"]
     },
     {
       "id": "AUDI",
@@ -186,7 +191,7 @@
       "id": "JAC",
       "name": "JAC Motors",
       "pais_origen": "China",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "CHERY",
@@ -246,7 +251,7 @@
       "id": "VOLVO",
       "name": "Volvo",
       "pais_origen": "Suecia",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "TESLA",
@@ -336,7 +341,7 @@
       "id": "GMC",
       "name": "GMC",
       "pais_origen": "USA",
-      "categories": ["CAMIONETAS", "CAMIONES"]
+      "categories": ["CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "DODGE",
@@ -492,37 +497,37 @@
       "id": "MAHINDRA",
       "name": "Mahindra",
       "pais_origen": "India",
-      "categories": ["CAMIONETAS", "CAMIONES"]
+      "categories": ["CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "TATA",
       "name": "Tata Motors",
       "pais_origen": "India",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "FOTON",
       "name": "Foton",
       "pais_origen": "China",
-      "categories": ["CAMIONETAS", "CAMIONES"]
+      "categories": ["CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "JMC",
       "name": "JMC",
       "pais_origen": "China",
-      "categories": ["CAMIONETAS", "CAMIONES"]
+      "categories": ["CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "DFSK",
       "name": "DFSK",
       "pais_origen": "China",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "DONGFENG",
       "name": "Dongfeng",
       "pais_origen": "China",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "BRILLIANCE",
@@ -613,6 +618,7 @@
       { "id": "NHR", "name": "NHR", "category": "CAMIONES", "tipo_combustible": "Diesel" },
       { "id": "NPR", "name": "NPR", "category": "CAMIONES", "tipo_combustible": "Diesel" },
       { "id": "FRR", "name": "FRR", "category": "CAMIONES", "tipo_combustible": "Diesel" },
+      { "id": "NQR", "name": "NQR", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "BOLT_EV", "name": "Bolt EV", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2017-2024" },
       { "id": "BOLT_EUV", "name": "Bolt EUV", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
     ],
@@ -693,6 +699,7 @@
       { "id": "SIENNA", "name": "Sienna", "category": "CAMIONETAS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2010-2024" },
       { "id": "DYNA", "name": "Dyna", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "HIACE", "name": "Hiace", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
+      { "id": "COASTER", "name": "Coaster", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "BZ4X", "name": "bZ4X", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
     ],
     "NISSAN": [
