@@ -1,0 +1,115 @@
+.vehicle-specifics-form {
+  width: 100%;
+}
+
+.vehicle-specifics-section {
+  padding: 16px 0;
+}
+
+.specifics-field {
+  margin-bottom: 24px;
+}
+
+.specifics-label {
+  display: block;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--ion-text-color, #000);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.specifics-label .required {
+  color: var(--ion-color-danger, #ef4444);
+  margin-left: 2px;
+}
+
+.specifics-item {
+  --background: var(--ion-color-light, #f4f5f8);
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --min-height: 56px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.specifics-item:hover {
+  --background: #e8e9ec;
+}
+
+.specifics-item.ion-focused {
+  --background: #fff;
+  border-color: var(--desvare-primary, #4F46E5);
+}
+
+.specifics-item.ion-invalid {
+  border-color: var(--ion-color-danger, #ef4444);
+  --background: #fef2f2;
+}
+
+.specifics-item ion-select,
+.specifics-item ion-input {
+  font-size: 15px;
+  color: var(--ion-text-color, #000);
+}
+
+.specifics-item ion-label[slot="end"] {
+  font-size: 14px;
+  color: var(--ion-color-medium, #92949c);
+  margin-left: 8px;
+}
+
+.specifics-helper {
+  display: block;
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
+.specifics-helper p {
+  font-size: 12px;
+  color: var(--ion-color-medium, #92949c);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.specifics-error {
+  display: block;
+  margin-top: 6px;
+  padding: 0 4px;
+}
+
+.specifics-error p {
+  font-size: 12px;
+  color: var(--ion-color-danger, #ef4444);
+  margin: 0;
+  animation: shake 0.3s ease;
+}
+
+/* Toggle personalizado */
+.specifics-item ion-toggle {
+  --handle-width: 24px;
+  --handle-height: 24px;
+  --handle-spacing: 4px;
+}
+
+/* Animación shake para error */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .specifics-item {
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --min-height: 52px;
+  }
+
+  .specifics-field {
+    margin-bottom: 20px;
+  }
+}
+

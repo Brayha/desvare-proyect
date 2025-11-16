@@ -10,4 +10,6 @@ export { default as VehicleCategorySelector } from './VehicleCategorySelector/Ve
 export { default as VehicleBrandSelector } from './VehicleBrandSelector/VehicleBrandSelector';
 export { default as VehicleModelSelector } from './VehicleModelSelector/VehicleModelSelector';
 export { default as VehiclePlateInput } from './VehiclePlateInput/VehiclePlateInput';
+export { default as VehicleSpecificsForm } from './VehicleSpecificsForm/VehicleSpecificsForm';
+export { default as ServiceDetailsForm } from './ServiceDetailsForm/ServiceDetailsForm';
 
