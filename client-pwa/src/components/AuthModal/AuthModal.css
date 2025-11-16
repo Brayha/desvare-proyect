@@ -1,0 +1,89 @@
+/* AuthModal Styles */
+.auth-modal {
+  --width: 100%;
+  --height: 100%;
+  --border-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .auth-modal {
+    --width: 500px;
+    --height: auto;
+    --max-height: 80vh;
+    --border-radius: 12px;
+  }
+}
+
+.auth-modal ion-header {
+  box-shadow: var(--ion-box-shadow);
+}
+
+.auth-modal ion-toolbar {
+  --background: var(--ion-color-light);
+}
+
+.auth-modal ion-content {
+  --background: var(--ion-background-color);
+}
+
+/* Segmento de autenticación */
+.auth-segment {
+  margin: 16px 0 24px;
+}
+
+/* Formulario */
+.auth-form {
+  padding: 16px 0;
+}
+
+.auth-subtitle {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.custom-input-item {
+  --background: var(--ion-color-light);
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.auth-button {
+  margin-top: 24px;
+  --border-radius: 8px;
+  font-weight: 600;
+}
+
+/* OTP Form */
+.otp-form {
+  padding: 16px 0;
+  text-align: center;
+}
+
+.otp-subtitle {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.otp-hint {
+  display: block;
+  margin-bottom: 24px;
+  font-size: 12px;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .auth-modal ion-toolbar {
+    --background: var(--ion-card-background, #1e1e1e);
+  }
+
+  .custom-input-item {
+    --background: rgba(255, 255, 255, 0.05);
+  }
+}
+
