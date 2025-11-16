@@ -299,6 +299,22 @@ const VehicleWizardModal = ({
   };
 
   const handleAddNewVehicle = () => {
+    // Reset datos del vehículo anterior
+    setSelectedVehicle(null);
+    setVehicleData({
+      category: null,
+      brand: null,
+      model: null,
+      licensePlate: '',
+      year: '',
+      color: '',
+      specifics: {},
+    });
+    setServiceDetails({
+      problem: '',
+      basement: { isInBasement: false, level: null },
+      truckCurrentState: { isLoaded: false, currentWeight: null },
+    });
     setIsCreatingNew(true);
     setCurrentStep(0);
   };
