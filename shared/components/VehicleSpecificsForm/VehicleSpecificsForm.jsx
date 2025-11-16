@@ -15,16 +15,26 @@ import './VehicleSpecificsForm.css';
  * Muestra campos específicos según la categoría seleccionada
  * 
  * @param {Object} category - Categoría del vehículo { id, name }
- * @param {Object} data - Datos actuales del formulario
- * @param {Function} onChange - Callback cuando cambian los datos
+ * @param {Object} initialData - Datos iniciales del formulario
+ * @param {Function} onDataChange - Callback cuando cambian los datos
  * @param {Object} errors - Objeto con errores de validación
  */
-const VehicleSpecificsForm = ({ category, data, onChange, errors = {} }) => {
+const VehicleSpecificsForm = ({ category, initialData = {}, onDataChange, errors = {} }) => {
   const categoryId = category?.id;
+  const [data, setData] = useState(initialData);
+
+  // Actualizar datos cuando cambien desde fuera
+  React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
 
   // Handler para cambios en el formulario
   const handleChange = (field, value) => {
-    onChange({ ...data, [field]: value });
+    const newData = { ...data, [field]: value };
+    setData(newData);
+    if (onDataChange) {
+      onDataChange(newData);
+    }
   };
 
   // Renderizar campos según la categoría
@@ -275,7 +285,14 @@ const VehicleSpecificsForm = ({ category, data, onChange, errors = {} }) => {
     }
 
     // Para MOTOS no hay campos específicos
-    return null;
+    return (
+      <div className="vehicle-specifics-empty">
+        <IonText color="medium" className="empty-message">
+          <p>Las motocicletas no requieren información adicional específica.</p>
+          <p>Presiona "Siguiente" para continuar.</p>
+        </IonText>
+      </div>
+    );
   };
 
   return (
