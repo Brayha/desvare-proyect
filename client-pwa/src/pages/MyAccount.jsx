@@ -96,8 +96,7 @@ const MyAccount = () => {
   };
 
   const handleMyGarage = () => {
-    // TODO: Implementar en FASE 7
-    console.log('🚗 Ir a Mi Garaje (próximamente)');
+    history.push('/my-garage');
   };
 
   // Vista cuando NO está logueado (se muestra el modal automáticamente)
@@ -198,7 +197,7 @@ const MyAccount = () => {
               className="action-button"
             >
               <IonIcon icon={carOutline} slot="start" />
-              Mi Garaje (Próximamente)
+              Mi Garaje
             </Button>
 
             <Button
