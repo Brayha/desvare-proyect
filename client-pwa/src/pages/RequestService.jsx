@@ -397,9 +397,12 @@ const RequestService = () => {
         origin,
         destination,
         routeInfo,
-        vehicleData, // Incluir datos del vehículo
       })
     );
+
+    // Guardar vehicleData por separado (para que RequestAuth pueda leerlo)
+    localStorage.setItem("vehicleData", JSON.stringify(vehicleData));
+    console.log("💾 vehicleData guardado en localStorage");
 
     showSuccess("✅ Datos guardados");
 
