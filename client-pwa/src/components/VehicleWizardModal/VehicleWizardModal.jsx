@@ -364,27 +364,47 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
           licensePlate: vehicleData.licensePlate,
           year: vehicleData.year || null,
           color: vehicleData.color || null,
-          ...vehicleData.specifics,
         };
+
+        // Agregar campos específicos según la categoría
+        const categoryId = vehicleData.category?.id;
+        if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
+          newVehiclePayload.isArmored = vehicleData.specifics?.isArmored || false;
+        } else if (categoryId === 'CAMIONES' && vehicleData.specifics?.truckData) {
+          newVehiclePayload.truckData = vehicleData.specifics.truckData;
+        } else if (categoryId === 'BUSES' && vehicleData.specifics?.busData) {
+          newVehiclePayload.busData = vehicleData.specifics.busData;
+        }
 
         console.log('📤 Guardando nuevo vehículo:', newVehiclePayload);
         const response = await vehicleAPI.createVehicle(newVehiclePayload);
-        vehicleId = response.data._id;
+        vehicleId = response.data.data?._id || response.data._id;
         showSuccess('✅ Vehículo guardado en tu garaje');
       }
 
       // Preparar datos completos para enviar al padre
+      const vehicleSnapshot = {
+        category: vehicleData.category,
+        brand: vehicleData.brand,
+        model: vehicleData.model,
+        licensePlate: vehicleData.licensePlate,
+        year: vehicleData.year || null,
+        color: vehicleData.color || null,
+      };
+
+      // Agregar campos específicos al snapshot según la categoría
+      const categoryId = vehicleData.category?.id;
+      if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
+        vehicleSnapshot.isArmored = vehicleData.specifics?.isArmored || false;
+      } else if (categoryId === 'CAMIONES' && vehicleData.specifics?.truckData) {
+        vehicleSnapshot.truckData = vehicleData.specifics.truckData;
+      } else if (categoryId === 'BUSES' && vehicleData.specifics?.busData) {
+        vehicleSnapshot.busData = vehicleData.specifics.busData;
+      }
+
       const completeData = {
         vehicleId, // ID del vehículo (null si usuario no está logueado)
-        vehicleSnapshot: {
-          category: vehicleData.category,
-          brand: vehicleData.brand,
-          model: vehicleData.model,
-          licensePlate: vehicleData.licensePlate,
-          year: vehicleData.year || null,
-          color: vehicleData.color || null,
-          ...vehicleData.specifics,
-        },
+        vehicleSnapshot,
         serviceDetails: {
           problem: serviceDetails.problem.trim(),
           basement: serviceDetails.basement,
