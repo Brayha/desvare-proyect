@@ -38,13 +38,15 @@ import './VehicleWizardModal.css';
  * @param {function} onComplete - Callback con datos completos del vehículo y servicio
  * @param {string} userId - ID del usuario (null si no está logueado)
  * @param {string} context - Contexto de uso: 'garage' o 'service' (default: 'service')
+ * @param {function} onRequestAuth - Callback cuando usuario no logueado quiere iniciar sesión (opcional)
  */
 const VehicleWizardModal = ({ 
   isOpen, 
   onDismiss, 
   onComplete, 
   userId, 
-  context = 'service' 
+  context = 'service',
+  onRequestAuth 
 }) => {
   const { showSuccess, showError, showWarning } = useToast();
 
@@ -206,7 +208,23 @@ const VehicleWizardModal = ({
 
   // Auto-detectar si usuario no tiene vehículos en modo servicio
   useEffect(() => {
-    if (isOpen && userId && context === 'service' && userVehicles.length === 0 && !isLoading) {
+    // Solo ejecutar si:
+    // 1. Modal está abierto
+    // 2. Usuario está logueado
+    // 3. Estamos en modo servicio
+    // 4. No estamos cargando
+    // 5. Ya se cargaron los vehículos (userVehicles no es undefined)
+    // 6. No hay vehículos
+    // 7. No estamos ya en modo crear
+    if (
+      isOpen && 
+      userId && 
+      context === 'service' && 
+      !isLoading && 
+      userVehicles !== undefined && 
+      userVehicles.length === 0 && 
+      !isCreatingNew
+    ) {
       // Si no tiene vehículos, ir directo a crear
       console.log('🚗 Usuario sin vehículos → Ir directo a crear');
       setIsCreatingNew(true);
@@ -414,8 +432,10 @@ const VehicleWizardModal = ({
           brand: vehicleData.brand,
           model: vehicleData.model,
           licensePlate: vehicleData.licensePlate,
-          year: vehicleData.year || null,
-          color: vehicleData.color || null,
+          // Convertir year a número o null (no string vacío)
+          year: vehicleData.year ? parseInt(vehicleData.year, 10) : null,
+          // Convertir color a string válido o null (no string vacío)
+          color: vehicleData.color?.trim() || null,
         };
 
         // Agregar campos específicos según la categoría
@@ -440,8 +460,9 @@ const VehicleWizardModal = ({
         brand: vehicleData.brand,
         model: vehicleData.model,
         licensePlate: vehicleData.licensePlate,
-        year: vehicleData.year || null,
-        color: vehicleData.color || null,
+        // Asegurar tipos correctos
+        year: vehicleData.year ? parseInt(vehicleData.year, 10) : null,
+        color: vehicleData.color?.trim() || null,
       };
 
       // Agregar campos específicos al snapshot según la categoría
@@ -608,8 +629,12 @@ const VehicleWizardModal = ({
               <IonButton 
                 onClick={() => {
                   onDismiss();
-                  // TODO: Abrir AuthModal (implementar callback como prop si es necesario)
-                  console.log('🔐 Usuario quiere iniciar sesión');
+                  // Llamar callback si existe, si no, redirigir a /request-auth
+                  if (onRequestAuth) {
+                    onRequestAuth();
+                  } else {
+                    console.log('🔐 Usuario quiere iniciar sesión → Redireccionar a /request-auth');
+                  }
                 }}
                 size="small"
               >

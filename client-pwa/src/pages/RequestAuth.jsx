@@ -200,6 +200,44 @@ const RequestAuth = () => {
       localStorage.setItem('user', JSON.stringify(user));
       console.log('💾 Token y usuario guardados');
       
+      // 2.5. Si hay vehículo en localStorage, guardarlo en BD con el nuevo userId
+      if (vehicleData && vehicleData.vehicleSnapshot && !vehicleData.vehicleId) {
+        console.log('🚗 Usuario nuevo con vehículo → Guardar en BD...');
+        try {
+          const { vehicleAPI } = await import('../services/vehicleAPI');
+          const newVehiclePayload = {
+            userId: user.id,
+            category: vehicleData.vehicleSnapshot.category,
+            brand: vehicleData.vehicleSnapshot.brand,
+            model: vehicleData.vehicleSnapshot.model,
+            licensePlate: vehicleData.vehicleSnapshot.licensePlate,
+            year: vehicleData.vehicleSnapshot.year,
+            color: vehicleData.vehicleSnapshot.color,
+          };
+          
+          // Agregar campos específicos según categoría
+          const categoryId = vehicleData.vehicleSnapshot.category?.id;
+          if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
+            newVehiclePayload.isArmored = vehicleData.vehicleSnapshot.isArmored || false;
+          } else if (categoryId === 'CAMIONES' && vehicleData.vehicleSnapshot.truckData) {
+            newVehiclePayload.truckData = vehicleData.vehicleSnapshot.truckData;
+          } else if (categoryId === 'BUSES' && vehicleData.vehicleSnapshot.busData) {
+            newVehiclePayload.busData = vehicleData.vehicleSnapshot.busData;
+          }
+          
+          const vehicleResponse = await vehicleAPI.createVehicle(newVehiclePayload);
+          const savedVehicleId = vehicleResponse.data.data?._id || vehicleResponse.data._id;
+          console.log('✅ Vehículo guardado en BD con ID:', savedVehicleId);
+          
+          // Actualizar vehicleData con el ID real
+          vehicleData.vehicleId = savedVehicleId;
+          localStorage.setItem('vehicleData', JSON.stringify(vehicleData));
+        } catch (vehicleError) {
+          console.error('⚠️ Error guardando vehículo (continuar de todos modos):', vehicleError);
+          // No bloqueamos el flujo si falla el guardado del vehículo
+        }
+      }
+      
       // 3. Enviar solicitud a conductores
       console.log('🚀 Enviando solicitud a conductores...');
       await sendRequestToDrivers(user);
