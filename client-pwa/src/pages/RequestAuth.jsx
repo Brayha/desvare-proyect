@@ -200,9 +200,12 @@ const RequestAuth = () => {
       localStorage.setItem('user', JSON.stringify(user));
       console.log('💾 Token y usuario guardados');
       
-      // 2.5. Si hay vehículo en localStorage, guardarlo en BD con el nuevo userId
+      // 2.5. Si hay vehículo en localStorage sin ID, guardarlo en BD
+      // Esto aplica TANTO para registro nuevo COMO para login (usuario creó vehículo antes de autenticarse)
       if (vehicleData && vehicleData.vehicleSnapshot && !vehicleData.vehicleId) {
-        console.log('🚗 Usuario nuevo con vehículo → Guardar en BD...');
+        console.log('🚗 Guardando vehículo creado antes de autenticación...');
+        console.log('   📋 Snapshot:', vehicleData.vehicleSnapshot);
+        
         try {
           const { vehicleAPI } = await import('../services/vehicleAPI');
           const newVehiclePayload = {
@@ -245,6 +248,22 @@ const RequestAuth = () => {
             }
           }
           
+          // VALIDAR payload antes de enviar
+          console.log('📤 Payload a enviar al backend:');
+          console.log(JSON.stringify(newVehiclePayload, null, 2));
+          
+          // Verificar que NO haya campos no deseados
+          if (newVehiclePayload.truckData && categoryId !== 'CAMIONES') {
+            console.error('⚠️ ERROR: truckData presente en vehículo que NO es camión');
+            delete newVehiclePayload.truckData;
+            console.log('🧹 truckData eliminado del payload');
+          }
+          if (newVehiclePayload.busData && categoryId !== 'BUSES') {
+            console.error('⚠️ ERROR: busData presente en vehículo que NO es bus');
+            delete newVehiclePayload.busData;
+            console.log('🧹 busData eliminado del payload');
+          }
+          
           const vehicleResponse = await vehicleAPI.createVehicle(newVehiclePayload);
           const savedVehicleId = vehicleResponse.data.data?._id || vehicleResponse.data._id;
           console.log('✅ Vehículo guardado en BD con ID:', savedVehicleId);
@@ -252,9 +271,16 @@ const RequestAuth = () => {
           // Actualizar vehicleData con el ID real
           vehicleData.vehicleId = savedVehicleId;
           localStorage.setItem('vehicleData', JSON.stringify(vehicleData));
+          showSuccess('✅ Vehículo guardado en tu garaje');
         } catch (vehicleError) {
-          console.error('⚠️ Error guardando vehículo (continuar de todos modos):', vehicleError);
-          // No bloqueamos el flujo si falla el guardado del vehículo
+          console.error('❌ Error guardando vehículo:', vehicleError);
+          console.error('   Detalles:', vehicleError.response?.data);
+          
+          // Mostrar error específico al usuario
+          const errorMsg = vehicleError.response?.data?.error || 'No se pudo guardar el vehículo';
+          showError(`⚠️ ${errorMsg}. El servicio continuará pero el vehículo no se guardó.`);
+          
+          // Continuar con el flujo (no bloqueamos la solicitud)
         }
       }
       

@@ -166,6 +166,15 @@ const VehicleWizardModal = ({
   // Cargar categorías y vehículos del usuario cuando se abre el modal
   useEffect(() => {
     if (isOpen) {
+      // LIMPIAR localStorage corrupto para evitar errores de data vieja
+      // Solo limpiamos vehicleData si ya existe routeData (estamos en flujo de servicio)
+      const routeData = localStorage.getItem('routeData');
+      if (routeData && !userId) {
+        // Usuario no logueado con ruta activa: limpiar vehicleData viejo
+        localStorage.removeItem('vehicleData');
+        console.log('🧹 localStorage.vehicleData limpiado (prevenir data corrupta)');
+      }
+      
       loadCategories();
       
       if (userId) {
@@ -255,6 +264,19 @@ const VehicleWizardModal = ({
 
   const handleSelectExistingVehicle = (vehicle) => {
     setSelectedVehicle(vehicle);
+    
+    // Crear specifics limpio: solo incluir campos que existen
+    const specifics = {};
+    if (vehicle.isArmored !== undefined) {
+      specifics.isArmored = vehicle.isArmored;
+    }
+    if (vehicle.truckData && Object.keys(vehicle.truckData).length > 0) {
+      specifics.truckData = vehicle.truckData;
+    }
+    if (vehicle.busData && Object.keys(vehicle.busData).length > 0) {
+      specifics.busData = vehicle.busData;
+    }
+    
     setVehicleData({
       category: vehicle.category,
       brand: vehicle.brand,
@@ -262,11 +284,7 @@ const VehicleWizardModal = ({
       licensePlate: vehicle.licensePlate,
       year: vehicle.year,
       color: vehicle.color,
-      specifics: {
-        isArmored: vehicle.isArmored,
-        truckData: vehicle.truckData,
-        busData: vehicle.busData,
-      },
+      specifics,
     });
   };
 
