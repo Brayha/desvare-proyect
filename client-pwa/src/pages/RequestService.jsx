@@ -18,13 +18,12 @@ import {
   IonButton,
 } from "@ionic/react";
 import {
-  arrowBack,
-  closeOutline,
   navigateCircleOutline,
   add,
 } from "ionicons/icons";
 import { Location } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
+import VehicleWizardModal from "../components/VehicleWizardModal/VehicleWizardModal";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useToast } from "@hooks/useToast";
 import { IonProgressBar } from "@ionic/react";
@@ -90,6 +89,10 @@ const RequestService = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isSendingRequest, setIsSendingRequest] = useState(false); // Para detectar cambios reales
+
+  // Estados del wizard de vehículos
+  const [showVehicleWizard, setShowVehicleWizard] = useState(false);
+  const [vehicleData, setVehicleData] = useState(null); // Datos completos del vehículo y servicio
 
   // Actualizar ubicación de origen cuando se obtiene geolocalización
   useEffect(() => {
@@ -241,10 +244,30 @@ const RequestService = () => {
     setRouteInfo(null);
   };
 
+  // Handlers del wizard de vehículos
+  const handleOpenVehicleWizard = () => {
+    setShowVehicleWizard(true);
+  };
+
+  const handleVehicleWizardComplete = (data) => {
+    console.log('✅ Vehículo y servicio configurados:', data);
+    setVehicleData(data);
+    showSuccess('✅ Vehículo agregado correctamente');
+  };
+
+  const handleVehicleWizardDismiss = () => {
+    setShowVehicleWizard(false);
+  };
+
   // Función para enviar solicitud directamente (usuario ya logueado)
   const sendRequestDirectly = async () => {
     if (!currentUser || !origin || !destination || !routeInfo) {
       showError("Faltan datos para enviar la solicitud");
+      return;
+    }
+
+    if (!vehicleData) {
+      showError("Agrega tu vehículo primero");
       return;
     }
 
@@ -257,7 +280,7 @@ const RequestService = () => {
       socketService.registerClient(currentUser.id);
       console.log("👤 Cliente registrado en Socket.IO:", currentUser.id);
 
-      // Crear objeto de solicitud
+      // Crear objeto de solicitud con datos del vehículo
       const requestPayload = {
         clientId: currentUser.id,
         clientName: currentUser.name,
@@ -273,6 +296,9 @@ const RequestService = () => {
         },
         distance: routeInfo.distance,
         duration: routeInfo.duration,
+        vehicleId: vehicleData.vehicleId,
+        vehicleSnapshot: vehicleData.vehicleSnapshot,
+        serviceDetails: vehicleData.serviceDetails,
       };
 
       console.log("📦 Payload de solicitud:", requestPayload);
@@ -298,7 +324,7 @@ const RequestService = () => {
       console.log("📡 Enviando evento Socket.IO a conductores...");
       console.log("🎯 Request ID:", requestId);
 
-      // Emitir evento de nueva solicitud vía Socket.IO con TODOS los datos incluyendo coordenadas
+      // Emitir evento de nueva solicitud vía Socket.IO con TODOS los datos incluyendo vehículo
       socketService.sendNewRequest({
         requestId: requestId,
         clientId: currentUser.id,
@@ -315,6 +341,8 @@ const RequestService = () => {
         },
         distance: routeInfo.distance,
         duration: routeInfo.duration,
+        vehicleSnapshot: vehicleData.vehicleSnapshot,
+        serviceDetails: vehicleData.serviceDetails,
       });
 
       console.log("✅ Solicitud enviada correctamente");
@@ -344,7 +372,13 @@ const RequestService = () => {
       return;
     }
 
+    if (!vehicleData) {
+      showError("⚠️ Agrega tu vehículo primero");
+      return;
+    }
+
     console.log("📦 RouteInfo que se guardará:", routeInfo);
+    console.log("📦 VehicleData que se guardará:", vehicleData);
 
     // Si el usuario YA está logueado, enviar solicitud directamente
     if (isLoggedIn && currentUser) {
@@ -363,10 +397,11 @@ const RequestService = () => {
         origin,
         destination,
         routeInfo,
+        vehicleData, // Incluir datos del vehículo
       })
     );
 
-    showSuccess("✅ Ruta confirmada");
+    showSuccess("✅ Datos guardados");
 
     // Navegar a la página de autenticación/confirmación
     history.push("/request-auth");
@@ -507,11 +542,15 @@ const RequestService = () => {
                 {/* Botón de add vehicle */}
                 <div
                   className="search-button"
+                  onClick={handleOpenVehicleWizard}
                 >
                   <div className="search-button-content">
-                    <h2>Agrega tu vehículo</h2>
+                    <h2>{vehicleData ? 'Cambiar vehículo' : 'Agrega tu vehículo'}</h2>
                     <p>
-                    Moto, carro, camioneta, bus o camión?
+                      {vehicleData 
+                        ? `${vehicleData.vehicleSnapshot.brand.name} ${vehicleData.vehicleSnapshot.model.name} - ${vehicleData.vehicleSnapshot.licensePlate}`
+                        : 'Moto, carro, camioneta, bus o camión?'
+                      }
                     </p>
                   </div>
 
@@ -525,7 +564,7 @@ const RequestService = () => {
                   expand="block"
                   size="large"
                   onClick={handleConfirmRoute}
-                  disabled={!routeInfo || isSendingRequest}
+                  disabled={!routeInfo || !vehicleData || isSendingRequest}
                   className="confirm-button"
                 >
                   {isSendingRequest ? (
@@ -539,7 +578,7 @@ const RequestService = () => {
                   ) : isLoggedIn ? (
                     "🚀 Buscar Cotizaciones"
                   ) : (
-                    "Confirmo la ruta"
+                    "Confirmar y continuar"
                   )}
                 </IonButton>
               </div>
@@ -648,6 +687,14 @@ const RequestService = () => {
             )}
           </IonContent>
         </IonModal>
+
+        {/* Modal de wizard de vehículos */}
+        <VehicleWizardModal
+          isOpen={showVehicleWizard}
+          onDismiss={handleVehicleWizardDismiss}
+          onComplete={handleVehicleWizardComplete}
+          userId={currentUser?.id || null}
+        />
       </IonContent>
     </IonPage>
   );

@@ -1,0 +1,172 @@
+/* ========================================
+   Vehicle Wizard Modal Styles
+   ======================================== */
+
+.vehicle-wizard-modal {
+  --height: 90%;
+  --border-radius: 20px 20px 0 0;
+}
+
+.vehicle-wizard-modal ion-header {
+  box-shadow: none;
+}
+
+.vehicle-wizard-modal ion-toolbar {
+  --background: #fff;
+  --border-width: 0;
+  padding: 8px 16px;
+}
+
+.vehicle-wizard-modal ion-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.vehicle-wizard-modal ion-progress-bar {
+  height: 4px;
+}
+
+/* ========================================
+   Wizard Content
+   ======================================== */
+
+.wizard-content {
+  --background: #f9fafb;
+}
+
+.wizard-step-description {
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.wizard-step-description p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* ========================================
+   Form Container (para inputs)
+   ======================================== */
+
+.wizard-form-container {
+  padding: 20px;
+  background: #fff;
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
+   Footer (Botón de siguiente)
+   ======================================== */
+
+.wizard-footer {
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.wizard-footer ion-toolbar {
+  --background: #fff;
+  --border-width: 0;
+  padding: 12px 20px 20px 20px;
+}
+
+.wizard-next-button {
+  --background: #3880ff;
+  --background-hover: #3171e0;
+  --background-activated: #2a5ec8;
+  --border-radius: 12px;
+  --box-shadow: 0 2px 8px rgba(56, 128, 255, 0.3);
+  height: 50px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.wizard-next-button[disabled] {
+  --background: #e5e7eb;
+  --color: #9ca3af;
+  --box-shadow: none;
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (min-width: 768px) {
+  .vehicle-wizard-modal {
+    --width: 600px;
+    --height: 85%;
+    --border-radius: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .vehicle-wizard-modal {
+    --width: 700px;
+    --height: 80%;
+  }
+}
+
+/* ========================================
+   Loading State
+   ======================================== */
+
+.wizard-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* ========================================
+   Adjustments for child components
+   ======================================== */
+
+/* VehicleList dentro del wizard */
+.wizard-content .vehicle-list-container {
+  padding: 16px;
+}
+
+/* Category selector dentro del wizard */
+.wizard-content .vehicle-category-grid {
+  padding: 16px;
+}
+
+/* Brand/Model selectors dentro del wizard */
+.wizard-content .vehicle-brand-selector,
+.wizard-content .vehicle-model-selector {
+  padding: 0;
+  background: transparent;
+}
+
+.wizard-content .vehicle-brand-selector ion-searchbar,
+.wizard-content .vehicle-model-selector ion-searchbar {
+  padding: 16px 16px 8px 16px;
+}
+
+.wizard-content .brand-list,
+.wizard-content .model-list {
+  background: transparent;
+}
+
+/* Specifics form dentro del wizard */
+.wizard-content .vehicle-specifics-form {
+  background: transparent;
+  padding: 0;
+}
+
+/* Service details form dentro del wizard */
+.wizard-content .service-details-form {
+  background: transparent;
+  padding: 0;
+}
+
