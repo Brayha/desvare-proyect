@@ -14,17 +14,27 @@ import './ServiceDetailsForm.css';
  * ServiceDetailsForm - Formulario para detalles del servicio actual
  * Pregunta cosas que cambian por servicio: problema, sótano, peso
  * 
- * @param {Object} category - Categoría del vehículo { id, name }
- * @param {Object} data - Datos actuales del formulario
- * @param {Function} onChange - Callback cuando cambian los datos
+ * @param {Object} vehicleCategory - Categoría del vehículo { id, name }
+ * @param {Object} initialData - Datos iniciales del formulario
+ * @param {Function} onDataChange - Callback cuando cambian los datos
  * @param {Object} errors - Objeto con errores de validación
  */
-const ServiceDetailsForm = ({ category, data, onChange, errors = {} }) => {
-  const categoryId = category?.id;
+const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, errors = {} }) => {
+  const categoryId = vehicleCategory?.id;
+  const [data, setData] = React.useState(initialData);
+
+  // Actualizar datos cuando cambien desde fuera
+  React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
 
   // Handler para cambios en el formulario
   const handleChange = (field, value) => {
-    onChange({ ...data, [field]: value });
+    const newData = { ...data, [field]: value };
+    setData(newData);
+    if (onDataChange) {
+      onDataChange(newData);
+    }
   };
 
   // Verificar si el vehículo puede estar en sótano
