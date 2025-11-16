@@ -100,8 +100,9 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getCategories();
-      setCategories(response.data || []);
-      console.log('✅ Categorías cargadas:', response.data.length);
+      const categoriesData = response.data?.data || [];
+      setCategories(categoriesData);
+      console.log('✅ Categorías cargadas:', categoriesData.length);
     } catch (error) {
       console.error('❌ Error cargando categorías:', error);
       showError('Error al cargar categorías');
@@ -115,8 +116,9 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getUserVehicles(userId);
-      setUserVehicles(response.data || []);
-      console.log('✅ Vehículos del usuario cargados:', response.data.length);
+      const vehiclesData = response.data?.data || [];
+      setUserVehicles(vehiclesData);
+      console.log('✅ Vehículos del usuario cargados:', vehiclesData.length);
     } catch (error) {
       console.error('❌ Error cargando vehículos:', error);
       // Si no hay vehículos, no es error crítico
@@ -130,8 +132,9 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getBrands(categoryId);
-      setBrands(response.data || []);
-      console.log(`✅ ${response.data.length} marcas cargadas para ${categoryId}`);
+      const brandsData = response.data?.data || [];
+      setBrands(brandsData);
+      console.log(`✅ ${brandsData.length} marcas cargadas para ${categoryId}`);
     } catch (error) {
       console.error('❌ Error cargando marcas:', error);
       showError('Error al cargar marcas');
@@ -145,8 +148,9 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getModels(brandId, categoryId);
-      setModels(response.data || []);
-      console.log(`✅ ${response.data.length} modelos cargados`);
+      const modelsData = response.data?.data || [];
+      setModels(modelsData);
+      console.log(`✅ ${modelsData.length} modelos cargados`);
     } catch (error) {
       console.error('❌ Error cargando modelos:', error);
       showError('Error al cargar modelos');
