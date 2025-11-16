@@ -190,7 +190,14 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
 
   // Handlers de selección
   const handleSelectCategory = (category) => {
-    setVehicleData({ ...vehicleData, category, brand: null, model: null });
+    // Limpiar specifics al cambiar de categoría para evitar datos residuales
+    setVehicleData({ 
+      ...vehicleData, 
+      category, 
+      brand: null, 
+      model: null,
+      specifics: {} // Resetear specifics
+    });
   };
 
   const handleSelectBrand = (brand) => {
