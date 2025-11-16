@@ -21,7 +21,7 @@ import {
   IonSegment,
   IonSegmentButton,
 } from "@ionic/react";
-import { arrowBack, locationOutline, navigateOutline, timeOutline, mapOutline } from "ionicons/icons";
+import { arrowBack, locationOutline, navigateOutline, timeOutline, mapOutline, carOutline } from "ionicons/icons";
 import { useToast } from "@hooks/useToast";
 import { authAPI, requestAPI } from "../services/api";
 import socketService from "../services/socket";
@@ -32,8 +32,9 @@ const RequestAuth = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
   
-  // Datos de la ruta (desde localStorage)
+  // Datos de la ruta y vehículo (desde localStorage)
   const [routeData, setRouteData] = useState(null);
+  const [vehicleData, setVehicleData] = useState(null);
   
   // Estado de autenticación OTP (2 pasos)
   const [authMode, setAuthMode] = useState("login"); // "login" o "register"
@@ -81,6 +82,21 @@ const RequestAuth = () => {
       console.error('❌ Error al parsear requestData:', error);
       showError('Error al cargar datos de la ruta');
       history.replace('/request-service');
+    }
+
+    // Cargar datos del vehículo (si existen)
+    const storedVehicleData = localStorage.getItem('vehicleData');
+    if (storedVehicleData) {
+      try {
+        const parsedVehicleData = JSON.parse(storedVehicleData);
+        console.log('🚗 Datos de vehículo cargados:', parsedVehicleData);
+        setVehicleData(parsedVehicleData);
+      } catch (error) {
+        console.error('⚠️ Error al parsear vehicleData:', error);
+        // No bloqueamos el flujo si falla la carga de vehículo
+      }
+    } else {
+      console.log('⚠️ No hay datos de vehículo en localStorage');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // ✅ Sin dependencias para ejecutar solo una vez al montar y evitar loops
@@ -238,6 +254,14 @@ const RequestAuth = () => {
         distance: routeData.routeInfo.distance,
         duration: routeData.routeInfo.duration,
       };
+
+      // 3.1. Agregar datos del vehículo si existen
+      if (vehicleData) {
+        console.log('🚗 Incluyendo datos del vehículo en la solicitud...');
+        requestData.vehicleId = vehicleData.vehicleId || null;
+        requestData.vehicleSnapshot = vehicleData.vehicleSnapshot;
+        requestData.serviceDetails = vehicleData.serviceDetails;
+      }
       
       console.log('📦 Request payload:', JSON.stringify(requestData, null, 2));
       
@@ -251,7 +275,7 @@ const RequestAuth = () => {
 
       // 5. Emitir evento Socket.IO a conductores
       console.log('📡 Emitiendo request:new via Socket.IO...');
-      socketService.sendNewRequest({
+      const socketData = {
         requestId: requestId,
         clientId: user.id,
         clientName: user.name,
@@ -267,7 +291,16 @@ const RequestAuth = () => {
         },
         distance: routeData.routeInfo.distance,
         duration: routeData.routeInfo.duration,
-      });
+      };
+
+      // 5.1. Agregar datos del vehículo al Socket.IO si existen
+      if (vehicleData) {
+        console.log('🚗 Incluyendo datos del vehículo en Socket.IO...');
+        socketData.vehicleSnapshot = vehicleData.vehicleSnapshot;
+        socketData.serviceDetails = vehicleData.serviceDetails;
+      }
+
+      socketService.sendNewRequest(socketData);
 
       console.log('✅ sendRequestToDrivers completado exitosamente');
       
@@ -347,6 +380,35 @@ const RequestAuth = () => {
                 <IonText>{routeData.routeInfo.durationText}</IonText>
               </div>
             </div>
+
+            {/* Información del vehículo */}
+            {vehicleData && vehicleData.vehicleSnapshot && (
+              <>
+                <div className="divider"></div>
+                <div className="route-detail">
+                  <IonIcon icon={carOutline} className="detail-icon" />
+                  <div className="detail-content">
+                    <IonLabel className="detail-label">Vehículo</IonLabel>
+                    <IonText className="detail-text">
+                      {vehicleData.vehicleSnapshot.brand.name} {vehicleData.vehicleSnapshot.model.name}
+                    </IonText>
+                    <IonText className="detail-subtext">
+                      {vehicleData.vehicleSnapshot.category.name} • {vehicleData.vehicleSnapshot.licensePlate}
+                    </IonText>
+                  </div>
+                </div>
+                
+                {/* Problema del vehículo */}
+                {vehicleData.serviceDetails && vehicleData.serviceDetails.problem && (
+                  <div className="route-detail">
+                    <div className="detail-content" style={{ marginLeft: '36px' }}>
+                      <IonLabel className="detail-label">Problema</IonLabel>
+                      <IonText className="detail-text">{vehicleData.serviceDetails.problem}</IonText>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </IonCardContent>
         </IonCard>
 
