@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonModal,
   IonContent,
@@ -95,8 +95,8 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
   const progress = ((currentStep + 1) / totalSteps) * 100;
   const currentStepInfo = STEPS[currentStep];
 
-  // Funciones de carga con useCallback para evitar warnings de dependencias
-  const loadCategories = useCallback(async () => {
+  // Funciones de carga - NO usar useCallback para evitar loops infinitos
+  const loadCategories = async () => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getCategories();
@@ -110,9 +110,10 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [showError]);
+  };
 
-  const loadUserVehicles = useCallback(async () => {
+  const loadUserVehicles = async () => {
+    if (!userId) return;
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getUserVehicles(userId);
@@ -126,9 +127,9 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  };
 
-  const loadBrands = useCallback(async (categoryId) => {
+  const loadBrands = async (categoryId) => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getBrands(categoryId);
@@ -142,9 +143,9 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [showError]);
+  };
 
-  const loadModels = useCallback(async (brandId, categoryId) => {
+  const loadModels = async (brandId, categoryId) => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getModels(brandId, categoryId);
@@ -158,7 +159,7 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [showError]);
+  };
 
   // Cargar categorías y vehículos del usuario cuando se abre el modal
   useEffect(() => {
@@ -168,21 +169,24 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId }) => {
         loadUserVehicles();
       }
     }
-  }, [isOpen, userId, loadCategories, loadUserVehicles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, userId]);
 
   // Cargar marcas cuando se selecciona categoría
   useEffect(() => {
     if (vehicleData.category) {
       loadBrands(vehicleData.category.id);
     }
-  }, [vehicleData.category, loadBrands]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehicleData.category]);
 
   // Cargar modelos cuando se selecciona marca
   useEffect(() => {
     if (vehicleData.brand && vehicleData.category) {
       loadModels(vehicleData.brand.id, vehicleData.category.id);
     }
-  }, [vehicleData.brand, vehicleData.category, loadModels]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehicleData.brand, vehicleData.category]);
 
   // Handlers de selección
   const handleSelectCategory = (category) => {
