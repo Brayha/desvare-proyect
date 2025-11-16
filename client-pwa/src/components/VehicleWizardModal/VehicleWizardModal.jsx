@@ -306,12 +306,8 @@ const VehicleWizardModal = ({ isOpen, onDismiss, onComplete, userId, skipService
               return;
             }
           }
-          
-          // Si skipServiceDetails es true, este es el último paso
-          if (skipServiceDetails) {
-            await handleComplete();
-            return;
-          }
+          // La lógica de handleComplete se ejecuta automáticamente
+          // en las líneas 366-371 si es el último paso
           break;
         }
         case 'service':
