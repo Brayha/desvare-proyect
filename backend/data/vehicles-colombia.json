@@ -137,7 +137,7 @@
       "id": "MITSUBISHI",
       "name": "Mitsubishi",
       "pais_origen": "Japón",
-      "categories": ["AUTOS", "CAMIONETAS"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"]
     },
     {
       "id": "FIAT",
@@ -769,7 +769,7 @@
       { "id": "F350", "name": "F-350", "category": "CAMIONETAS", "tipo_combustible": "Diesel", "anos_populares": "2011-2024" },
       { "id": "MAVERICK", "name": "Maverick", "category": "CAMIONETAS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2022-2024" },
       { "id": "CARGO", "name": "Cargo", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
-      { "id": "TRANSIT", "name": "Transit", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2015-2024" },
+      { "id": "TRANSIT", "name": "Transit", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2015-2024" },
       { "id": "MUSTANG_MACH_E", "name": "Mustang Mach-E", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
       { "id": "F150_LIGHTNING", "name": "F-150 Lightning", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
     ],
@@ -869,7 +869,10 @@
       { "id": "OUTLANDER", "name": "Outlander", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "ECLIPSE_CROSS", "name": "Eclipse Cross", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "MONTERO", "name": "Montero", "category": "CAMIONETAS", "tipo_combustible": "Diesel" },
-      { "id": "L200", "name": "L200", "category": "CAMIONETAS", "tipo_combustible": "Diesel" }
+      { "id": "L200", "name": "L200", "category": "CAMIONETAS", "tipo_combustible": "Diesel" },
+      { "id": "CANTER", "name": "Canter", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
+      { "id": "FUSO", "name": "Fuso", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
+      { "id": "ROSA", "name": "Rosa", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" }
     ],
     "FIAT": [
       { "id": "MOBI", "name": "Mobi", "category": "AUTOS", "tipo_combustible": "Gasolina" },
@@ -1008,7 +1011,9 @@
       { "id": "EQC", "name": "EQC", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
       { "id": "EQS", "name": "EQS", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
       { "id": "SPRINTER", "name": "Sprinter", "category": "CAMIONES", "tipo_combustible": "Diesel" },
-      { "id": "ACTROS", "name": "Actros", "category": "CAMIONES", "tipo_combustible": "Diesel" }
+      { "id": "ACTROS", "name": "Actros", "category": "CAMIONES", "tipo_combustible": "Diesel" },
+      { "id": "OF_1724", "name": "OF 1724", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
+      { "id": "LO_916", "name": "LO 916", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" }
     ],
     "AUDI": [
       { "id": "A1", "name": "A1", "category": "AUTOS", "tipo_combustible": "Gasolina" },
@@ -1351,7 +1356,9 @@
       { "id": "XC40", "name": "XC40", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "XC60", "name": "XC60", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "XC90", "name": "XC90", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "FH", "name": "FH", "category": "CAMIONES", "tipo_combustible": "Diesel" }
+      { "id": "FH", "name": "FH", "category": "CAMIONES", "tipo_combustible": "Diesel" },
+      { "id": "B7R", "name": "B7R", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
+      { "id": "B9R", "name": "B9R", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" }
     ],
     "MINI": [
       { "id": "COOPER", "name": "Cooper", "category": "AUTOS", "tipo_combustible": "Gasolina" },
