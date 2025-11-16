@@ -114,26 +114,6 @@ const Home = () => {
     }
   };
 
-  const handleLogout = () => {
-    console.log("👋 Cerrando sesión...");
-
-    // Limpiar TODOS los datos de localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("requestData");
-    localStorage.removeItem("currentRequestId");
-
-    // NO desconectar Socket.IO aquí - se maneja en App.jsx al desmontar
-    // Solo limpiar listeners locales
-    socketService.offQuoteReceived();
-
-    // Redirigir al home
-    history.replace("/home");
-
-    // Recargar para actualizar el estado
-    window.location.reload();
-  };
-
   return (
     <IonPage>
       <IonContent className="home-container">
@@ -176,17 +156,6 @@ const Home = () => {
               >
                 Cotizar servicio de grúa
               </Button>
-
-              {isLoggedIn && (
-                <Button
-                  variant="secondary"
-                  size="large"
-                  expand="block"
-                  onClick={handleLogout}
-                >
-                  Cerrar sesión
-                </Button>
-              )}
             </div>
           </div>
         </div>
