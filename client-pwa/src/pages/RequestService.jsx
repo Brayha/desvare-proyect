@@ -18,7 +18,7 @@ import {
   IonButton,
 } from "@ionic/react";
 import { navigateCircleOutline, add } from "ionicons/icons";
-import { Location } from "iconsax-react";
+import { Location, Refresh } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import VehicleWizardModal from "../components/VehicleWizardModal/VehicleWizardModal";
 import { useGeolocation } from "../hooks/useGeolocation";
@@ -543,11 +543,19 @@ const RequestService = () => {
                 {/* Card vehículo agregado - Solo si hay vehículo */}
                 {vehicleData?.vehicleSnapshot && (
                   <div className="vehicle-added-card">
-                    <div className="vehicle-added-card-content">
+                    <div
+                      className="vehicle-added-card-content"
+                      onClick={handleOpenVehicleWizard}
+                    >
                       <div className="vehicle-added-card-content-image-container">
                         <img
-                          src={getVehicleImageFromVehicle(vehicleData.vehicleSnapshot)}
-                          alt={vehicleData.vehicleSnapshot.category?.name || 'Vehículo'}
+                          src={getVehicleImageFromVehicle(
+                            vehicleData.vehicleSnapshot
+                          )}
+                          alt={
+                            vehicleData.vehicleSnapshot.category?.name ||
+                            "Vehículo"
+                          }
                         />
                         <div className="vehicle-added-card-content-text">
                           <h3 className="marca">
@@ -558,24 +566,19 @@ const RequestService = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="placa">
-                        <p>{vehicleData.vehicleSnapshot.licensePlate}</p>
+
+                      <div className="vehicle-added-card-content-buttons">
+                        <div className="placa">
+                          <p>{vehicleData.vehicleSnapshot.licensePlate}</p>
+                        </div>
+                        <Refresh size="20" color="#9CA3AF" variant="Linear" />
                       </div>
+
                     </div>
                     <div className="problem-card">
                       <h4>Problema</h4>
                       <p>{vehicleData.serviceDetails.problem}</p>
                     </div>
-                    
-                    {/* Botón cambiar vehículo */}
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={handleOpenVehicleWizard}
-                      style={{ marginTop: '8px' }}
-                    >
-                      Cambiar vehículo
-                    </Button>
                   </div>
                 )}
 

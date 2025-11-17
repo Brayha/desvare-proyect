@@ -565,6 +565,12 @@
   background: #f7f7f7;
 }
 
+.vehicle-added-card-content-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .vehicle-added-card-content-image-container {
   display: flex;
   align-items: center;
