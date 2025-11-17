@@ -43,7 +43,7 @@ const VehicleWizardModal = ({
   onComplete
 }) => {
   const { showSuccess, showError, showWarning } = useToast();
-  const { user, vehicles: userVehicles } = useAuth();
+  const { user, vehicles: userVehicles, refreshVehicles } = useAuth();
   
   // Obtener userId dinámicamente del contexto (se actualiza después del login)
   const userId = user?.id || null;
@@ -514,6 +514,11 @@ const VehicleWizardModal = ({
         }
         const response = await vehicleAPI.createVehicle(newVehiclePayload);
         vehicleId = response.data.data?._id || response.data._id;
+        
+        // Actualizar lista global de vehículos en el contexto
+        await refreshVehicles();
+        console.log('✅ Lista de vehículos actualizada en el contexto');
+        
         showSuccess('✅ Vehículo guardado en tu garaje');
       }
 
