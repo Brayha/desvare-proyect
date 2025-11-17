@@ -28,7 +28,6 @@ import RequestAuth from './pages/RequestAuth';
 import RequestConfirmation from './pages/RequestConfirmation';
 import WaitingQuotes from './pages/WaitingQuotes';
 import TabLayout from './components/TabLayout/TabLayout';
-import MyGarage from './pages/MyGarage';
 
 setupIonicReact();
 
@@ -63,7 +62,6 @@ function App() {
           <Route exact path="/request-auth" component={RequestAuth} />
           <Route exact path="/request-confirmation" component={RequestConfirmation} />
           <Route exact path="/waiting-quotes" component={WaitingQuotes} />
-          <Route exact path="/my-garage" component={MyGarage} />
           
           {/* Tabs (Desvare + Mi cuenta) */}
           <Route path="/tabs" component={TabLayout} />
