@@ -200,6 +200,35 @@ const VehicleWizardModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userVehicles, isOpen, userId, isLoading]);
 
+  // CRÍTICO: Detectar login durante el wizard y cambiar a modo lista
+  useEffect(() => {
+    // Detectar cuando usuario hace login desde el wizard:
+    // 1. Modal está abierto
+    // 2. userId cambió a un valor (ya no es null)
+    // 3. Estamos en modo crear
+    // 4. Hay vehículos disponibles
+    if (isOpen && userId && isCreatingNew && userVehicles && userVehicles.length > 0) {
+      console.log('🔄 Usuario hizo login durante wizard → Cambiar a modo lista de vehículos');
+      
+      // Resetear datos del formulario de creación (evitar data corrupta)
+      setVehicleData({
+        category: null,
+        brand: null,
+        model: null,
+        licensePlate: '',
+        year: '',
+        color: '',
+        specifics: {},
+      });
+      
+      // Cambiar a modo selección
+      setIsCreatingNew(false);
+      setCurrentStep(0); // Volver al primer paso (lista de vehículos)
+      setSelectedVehicle(null); // Limpiar selección previa
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, isOpen, isCreatingNew, userVehicles]);
+
   // Cargar marcas cuando se selecciona categoría
   useEffect(() => {
     if (vehicleData.category) {
