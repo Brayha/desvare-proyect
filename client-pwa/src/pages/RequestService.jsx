@@ -34,12 +34,14 @@ import {
 } from "../utils/mapbox";
 import { requestAPI } from "../services/api";
 import socketService from "../services/socket";
+import { useAuth } from "../contexts/AuthContext";
 import "./RequestService.css";
 import logo from "@shared/src/img/Desvare.svg";
 
 const RequestService = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
+  const { user: currentUser, isLoggedIn } = useAuth();
 
   // Geolocalización
   const {
@@ -55,23 +57,6 @@ const RequestService = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Verificar si el usuario ya está logueado
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-
-    if (userData && token) {
-      const parsedUser = JSON.parse(userData);
-      setIsLoggedIn(true);
-      setCurrentUser(parsedUser);
-      console.log("✅ Usuario ya logueado:", parsedUser.name);
-    } else {
-      setIsLoggedIn(false);
-      setCurrentUser(null);
-      console.log("ℹ️ Usuario no logueado");
-    }
-  }, []);
-
   // Estados del formulario
   const [origin, setOrigin] = useState(null); // { lat, lng, address }
   const [destination, setDestination] = useState(null); // { lat, lng, address }
@@ -85,9 +70,6 @@ const RequestService = () => {
   const [lastSearchQuery, setLastSearchQuery] = useState("");
   const [isEditingOrigin, setIsEditingOrigin] = useState(false); // Para saber si estamos editando origen o destino
 
-  // Estado de usuario logueado
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
   const [isSendingRequest, setIsSendingRequest] = useState(false); // Para detectar cambios reales
 
   // Estados del wizard de vehículos
