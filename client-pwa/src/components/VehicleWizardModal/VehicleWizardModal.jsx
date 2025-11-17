@@ -51,6 +51,7 @@ const VehicleWizardModal = ({
   // Estados del wizard
   const [currentStep, setCurrentStep] = useState(0);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [intentionalCreate, setIntentionalCreate] = useState(false); // Para diferenciar creación manual vs auto-redirect
 
   // Estados de datos del vehículo
   const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -207,7 +208,15 @@ const VehicleWizardModal = ({
     // 2. userId cambió a un valor (ya no es null)
     // 3. Estamos en modo crear
     // 4. Hay vehículos disponibles
-    if (isOpen && userId && isCreatingNew && userVehicles && userVehicles.length > 0) {
+    // 5. NO es una creación intencional (click en "Agregar otro vehículo")
+    if (
+      isOpen && 
+      userId && 
+      isCreatingNew && 
+      userVehicles && 
+      userVehicles.length > 0 &&
+      !intentionalCreate // ← NUEVO: Solo revertir si NO es intencional
+    ) {
       console.log('🔄 Usuario hizo login durante wizard → Cambiar a modo lista de vehículos');
       
       // Resetear datos del formulario de creación (evitar data corrupta)
@@ -226,8 +235,7 @@ const VehicleWizardModal = ({
       setCurrentStep(0); // Volver al primer paso (lista de vehículos)
       setSelectedVehicle(null); // Limpiar selección previa
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, isOpen, isCreatingNew, userVehicles]);
+  }, [userId, isOpen, isCreatingNew, userVehicles, intentionalCreate]);
 
   // Cargar marcas cuando se selecciona categoría
   useEffect(() => {
@@ -304,6 +312,11 @@ const VehicleWizardModal = ({
   };
 
   const handleAddNewVehicle = () => {
+    console.log('➕ Usuario hace click en "Agregar otro vehículo"');
+    
+    // Marcar como creación intencional para evitar que el useEffect lo revierta
+    setIntentionalCreate(true);
+    
     // Reset datos del vehículo anterior
     setSelectedVehicle(null);
     setVehicleData({
@@ -571,6 +584,7 @@ const VehicleWizardModal = ({
     // Reset states
     setCurrentStep(0);
     setIsCreatingNew(false);
+    setIntentionalCreate(false); // ← NUEVO: Resetear bandera de creación intencional
     setSelectedVehicle(null);
     setVehicleData({
       category: null,
