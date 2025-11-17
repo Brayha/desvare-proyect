@@ -24,6 +24,7 @@ import {
 } from '@components';
 import { vehicleAPI } from '../../services/vehicleAPI';
 import { useToast } from '@hooks/useToast';
+import { useAuth } from '../../contexts/AuthContext';
 import './VehicleWizardModal.css';
 
 /**
@@ -45,13 +46,13 @@ const VehicleWizardModal = ({
   onRequestAuth 
 }) => {
   const { showSuccess, showError, showWarning } = useToast();
+  const { vehicles: userVehicles } = useAuth();
 
   // Estados del wizard
   const [currentStep, setCurrentStep] = useState(0);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   // Estados de datos del vehículo
-  const [userVehicles, setUserVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [vehicleData, setVehicleData] = useState({
     category: null,
@@ -114,22 +115,6 @@ const VehicleWizardModal = ({
     }
   };
 
-  const loadUserVehicles = async () => {
-    if (!userId) return;
-    try {
-      setIsLoading(true);
-      const response = await vehicleAPI.getUserVehicles(userId);
-      const vehiclesData = response.data?.data || [];
-      setUserVehicles(vehiclesData);
-      console.log('✅ Vehículos del usuario cargados:', vehiclesData.length);
-    } catch (error) {
-      console.error('❌ Error cargando vehículos:', error);
-      // Si no hay vehículos, no es error crítico
-      setUserVehicles([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const loadBrands = async (categoryId) => {
     try {
@@ -163,7 +148,7 @@ const VehicleWizardModal = ({
     }
   };
 
-  // Cargar categorías y vehículos del usuario cuando se abre el modal
+  // Cargar categorías cuando se abre el modal
   useEffect(() => {
     if (isOpen) {
       // LIMPIAR localStorage corrupto para evitar errores de data vieja
@@ -177,14 +162,12 @@ const VehicleWizardModal = ({
       
       loadCategories();
       
-      if (userId) {
-        // Usuario logueado: cargar sus vehículos
-        loadUserVehicles();
-      } else {
+      if (!userId) {
         // Usuario no logueado: ir directo a crear vehículo
         setIsCreatingNew(true);
         setCurrentStep(0);
       }
+      // Si está logueado, los vehículos ya están disponibles desde AuthContext
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, userId]);

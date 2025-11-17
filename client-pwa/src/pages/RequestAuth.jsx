@@ -25,12 +25,14 @@ import { arrowBack, locationOutline, navigateOutline, timeOutline, mapOutline, c
 import { useToast } from "@hooks/useToast";
 import { authAPI, requestAPI } from "../services/api";
 import socketService from "../services/socket";
+import { useAuth } from "../contexts/AuthContext";
 import { PhoneInput, OTPInput } from "../../../shared/components";
 import "./RequestAuth.css";
 
 const RequestAuth = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
+  const { login: authLogin, refreshVehicles } = useAuth();
   
   // Datos de la ruta y vehículo (desde localStorage)
   const [routeData, setRouteData] = useState(null);
@@ -200,6 +202,10 @@ const RequestAuth = () => {
       localStorage.setItem('user', JSON.stringify(user));
       console.log('💾 Token y usuario guardados');
       
+      // 2.1. Actualizar contexto de autenticación
+      await authLogin(user);
+      console.log('✅ Contexto de autenticación actualizado');
+      
       // 2.5. Si hay vehículo en localStorage sin ID, guardarlo en BD
       // Esto aplica TANTO para registro nuevo COMO para login (usuario creó vehículo antes de autenticarse)
       if (vehicleData && vehicleData.vehicleSnapshot && !vehicleData.vehicleId) {
@@ -278,6 +284,11 @@ const RequestAuth = () => {
           // Actualizar vehicleData con el ID real
           vehicleData.vehicleId = savedVehicleId;
           localStorage.setItem('vehicleData', JSON.stringify(vehicleData));
+          
+          // Refrescar vehículos en el contexto
+          await refreshVehicles();
+          console.log('✅ Lista de vehículos refrescada en contexto');
+          
           showSuccess('✅ Vehículo guardado en tu garaje');
         } catch (vehicleError) {
           console.error('❌ Error guardando vehículo:', vehicleError);

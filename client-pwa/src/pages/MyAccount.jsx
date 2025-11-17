@@ -29,64 +29,29 @@ import {
 import { Button } from '@components';
 import AuthModal from '../components/AuthModal/AuthModal';
 import socketService from '../services/socket';
-import { vehicleAPI } from '../services/vehicleAPI';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@hooks/useToast';
 import './MyAccount.css';
 
 const MyAccount = () => {
   const history = useHistory();
   const { showSuccess } = useToast();
+  const { user, isLoggedIn, vehicles, isLoadingVehicles, login, logout } = useAuth();
   
-  const [user, setUser] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [vehicles, setVehicles] = useState([]);
-  const [isLoadingVehicles, setIsLoadingVehicles] = useState(false);
 
   useEffect(() => {
-    const initAuth = async () => {
-      const userData = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
-
-      if (userData && token) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        setIsLoggedIn(true);
-        // Cargar vehículos del usuario
-        await loadVehicles(parsedUser.id);
-      } else {
-        setIsLoggedIn(false);
-        // Mostrar modal de autenticación si no está logueado
-        setShowAuthModal(true);
-      }
-    };
-
-    initAuth();
-  }, []);
-
-  const loadVehicles = async (userId) => {
-    setIsLoadingVehicles(true);
-    try {
-      const response = await vehicleAPI.getUserVehicles(userId);
-      const vehiclesData = response.data?.data || [];
-      setVehicles(vehiclesData);
-      console.log('✅ Vehículos cargados:', vehiclesData.length);
-    } catch (error) {
-      console.error('❌ Error cargando vehículos:', error);
-      setVehicles([]);
-    } finally {
-      setIsLoadingVehicles(false);
+    // Si no está logueado, mostrar modal de autenticación
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
     }
-  };
+  }, [isLoggedIn]);
 
   const handleAuthSuccess = async (userData) => {
     console.log('✅ Usuario autenticado:', userData);
-    setUser(userData);
-    setIsLoggedIn(true);
+    await login(userData);
     setShowAuthModal(false);
     showSuccess('¡Bienvenido!');
-    // Cargar vehículos después de auth
-    await loadVehicles(userData.id);
   };
 
   const handleAuthModalDismiss = () => {
@@ -100,19 +65,11 @@ const MyAccount = () => {
   const handleLogout = () => {
     console.log('👋 Cerrando sesión...');
 
-    // Limpiar TODOS los datos de localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('requestData');
-    localStorage.removeItem('vehicleData');
-    localStorage.removeItem('currentRequestId');
-
     // Limpiar listeners de Socket.IO
     socketService.offQuoteReceived();
 
-    // Actualizar estado
-    setUser(null);
-    setIsLoggedIn(false);
+    // Usar el logout del contexto (limpia todo)
+    logout();
 
     // Redirigir a home
     history.replace('/home');

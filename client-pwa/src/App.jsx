@@ -3,6 +3,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
 import { useEffect } from 'react';
 import socketService from './services/socket';
+import { AuthProvider } from './contexts/AuthContext';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -51,26 +52,28 @@ function App() {
   }, []);
 
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          {/* Páginas sin tabs */}
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/register" component={Register} />
-          <Route exact path="/home" component={Home} />
-          <Route exact path="/location-permission" component={LocationPermission} />
-          <Route exact path="/request-auth" component={RequestAuth} />
-          <Route exact path="/request-confirmation" component={RequestConfirmation} />
-          <Route exact path="/waiting-quotes" component={WaitingQuotes} />
-          
-          {/* Tabs (Desvare + Mi cuenta) */}
-          <Route path="/tabs" component={TabLayout} />
-          
-          {/* Redirección inicial */}
-          <Route exact path="/" component={InitialRedirect} />
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
+    <AuthProvider>
+      <IonApp>
+        <IonReactRouter>
+          <IonRouterOutlet>
+            {/* Páginas sin tabs */}
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/register" component={Register} />
+            <Route exact path="/home" component={Home} />
+            <Route exact path="/location-permission" component={LocationPermission} />
+            <Route exact path="/request-auth" component={RequestAuth} />
+            <Route exact path="/request-confirmation" component={RequestConfirmation} />
+            <Route exact path="/waiting-quotes" component={WaitingQuotes} />
+            
+            {/* Tabs (Desvare + Mi cuenta) */}
+            <Route path="/tabs" component={TabLayout} />
+            
+            {/* Redirección inicial */}
+            <Route exact path="/" component={InitialRedirect} />
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </IonApp>
+    </AuthProvider>
   );
 }
 
