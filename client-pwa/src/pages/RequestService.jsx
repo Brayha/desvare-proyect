@@ -696,7 +696,6 @@ const RequestService = () => {
           isOpen={showVehicleWizard}
           onDismiss={handleVehicleWizardDismiss}
           onComplete={handleVehicleWizardComplete}
-          userId={currentUser?.id || null}
         />
       </IonContent>
     </IonPage>

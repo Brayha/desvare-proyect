@@ -36,16 +36,17 @@ import './VehicleWizardModal.css';
  * @param {boolean} isOpen - Controla si el modal está abierto
  * @param {function} onDismiss - Callback al cerrar el modal
  * @param {function} onComplete - Callback con datos completos del vehículo y servicio
- * @param {string} userId - ID del usuario (null si no está logueado)
  */
 const VehicleWizardModal = ({ 
   isOpen, 
   onDismiss, 
-  onComplete, 
-  userId
+  onComplete
 }) => {
   const { showSuccess, showError, showWarning } = useToast();
-  const { vehicles: userVehicles } = useAuth();
+  const { user, vehicles: userVehicles } = useAuth();
+  
+  // Obtener userId dinámicamente del contexto (se actualiza después del login)
+  const userId = user?.id || null;
 
   // Estados del wizard
   const [currentStep, setCurrentStep] = useState(0);

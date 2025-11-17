@@ -71,8 +71,9 @@ const MyAccount = () => {
     // Usar el logout del contexto (limpia todo)
     logout();
 
-    // Redirigir a home
-    history.replace('/home');
+    // Forzar recarga completa para limpiar estado
+    // Usamos window.location para asegurar un inicio limpio
+    window.location.href = '/home';
   };
 
   // Vista cuando NO está logueado (se muestra el modal automáticamente)
