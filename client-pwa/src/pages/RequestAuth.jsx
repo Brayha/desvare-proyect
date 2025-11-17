@@ -204,7 +204,10 @@ const RequestAuth = () => {
       // Esto aplica TANTO para registro nuevo COMO para login (usuario creó vehículo antes de autenticarse)
       if (vehicleData && vehicleData.vehicleSnapshot && !vehicleData.vehicleId) {
         console.log('🚗 Guardando vehículo creado antes de autenticación...');
-        console.log('   📋 Snapshot:', vehicleData.vehicleSnapshot);
+        console.log('   📋 Snapshot COMPLETO:', JSON.stringify(vehicleData.vehicleSnapshot, null, 2));
+        console.log('   🔍 Keys del snapshot:', Object.keys(vehicleData.vehicleSnapshot));
+        console.log('   ❓ ¿Tiene truckData?:', vehicleData.vehicleSnapshot.truckData);
+        console.log('   ❓ ¿Tiene busData?:', vehicleData.vehicleSnapshot.busData);
         
         try {
           const { vehicleAPI } = await import('../services/vehicleAPI');
@@ -249,7 +252,7 @@ const RequestAuth = () => {
           }
           
           // VALIDAR payload antes de enviar
-          console.log('📤 Payload a enviar al backend:');
+          console.log('📤 Payload INICIAL:');
           console.log(JSON.stringify(newVehiclePayload, null, 2));
           
           // Verificar que NO haya campos no deseados
@@ -263,6 +266,10 @@ const RequestAuth = () => {
             delete newVehiclePayload.busData;
             console.log('🧹 busData eliminado del payload');
           }
+          
+          console.log('📤 Payload FINAL (después de validación):');
+          console.log(JSON.stringify(newVehiclePayload, null, 2));
+          console.log('🔍 Keys del payload:', Object.keys(newVehiclePayload));
           
           const vehicleResponse = await vehicleAPI.createVehicle(newVehiclePayload);
           const savedVehicleId = vehicleResponse.data.data?._id || vehicleResponse.data._id;
