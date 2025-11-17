@@ -259,24 +259,6 @@ const RequestService = () => {
     setShowVehicleWizard(false);
   };
 
-  const handleRequestAuth = () => {
-    // Guardar datos de ruta para RequestAuth
-    localStorage.setItem(
-      "requestData",
-      JSON.stringify({
-        origin,
-        destination,
-        routeInfo,
-      })
-    );
-    // Guardar vehicleData si existe
-    if (vehicleData) {
-      localStorage.setItem("vehicleData", JSON.stringify(vehicleData));
-    }
-    // Redirigir a RequestAuth
-    history.push("/request-auth");
-  };
-
   // Función para enviar solicitud directamente (usuario ya logueado)
   const sendRequestDirectly = async () => {
     if (!currentUser || !origin || !destination || !routeInfo) {
@@ -715,7 +697,6 @@ const RequestService = () => {
           onDismiss={handleVehicleWizardDismiss}
           onComplete={handleVehicleWizardComplete}
           userId={currentUser?.id || null}
-          onRequestAuth={handleRequestAuth}
         />
       </IonContent>
     </IonPage>

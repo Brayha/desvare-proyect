@@ -25,6 +25,7 @@ import {
 import { vehicleAPI } from '../../services/vehicleAPI';
 import { useToast } from '@hooks/useToast';
 import { useAuth } from '../../contexts/AuthContext';
+import AuthModal from '../AuthModal/AuthModal';
 import './VehicleWizardModal.css';
 
 /**
@@ -36,14 +37,12 @@ import './VehicleWizardModal.css';
  * @param {function} onDismiss - Callback al cerrar el modal
  * @param {function} onComplete - Callback con datos completos del vehículo y servicio
  * @param {string} userId - ID del usuario (null si no está logueado)
- * @param {function} onRequestAuth - Callback cuando usuario no logueado quiere iniciar sesión (opcional)
  */
 const VehicleWizardModal = ({ 
   isOpen, 
   onDismiss, 
   onComplete, 
-  userId, 
-  onRequestAuth 
+  userId
 }) => {
   const { showSuccess, showError, showWarning } = useToast();
   const { vehicles: userVehicles } = useAuth();
@@ -76,6 +75,9 @@ const VehicleWizardModal = ({
   const [brands, setBrands] = useState([]);
   const [models, setModels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Estado para modal de autenticación
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Definir pasos del wizard (siempre incluye servicio)
   const STEPS = isCreatingNew
@@ -407,6 +409,16 @@ const VehicleWizardModal = ({
     }
   };
 
+  // Función para manejar login exitoso desde el modal
+  const handleAuthSuccess = async (userData) => {
+    console.log('✅ Usuario autenticado desde wizard:', userData);
+    setShowAuthModal(false);
+    showSuccess('¡Sesión iniciada! Ahora puedes seleccionar tu vehículo');
+    
+    // El AuthContext ya actualizó los vehículos
+    // El wizard se re-renderiza automáticamente mostrando la lista
+  };
+
   const handleComplete = async () => {
     try {
       setIsLoading(true);
@@ -632,6 +644,7 @@ const VehicleWizardModal = ({
   };
 
   return (
+    <>
     <IonModal
       isOpen={isOpen}
       onDidDismiss={handleCloseModal}
@@ -647,17 +660,12 @@ const VehicleWizardModal = ({
           </IonButtons>
           <IonTitle>{currentStepInfo.title}</IonTitle>
           <IonButtons slot="end">
-            {/* Botón "Ya tienes cuenta" si no está logueado en modo servicio */}
+            {/* Botón "Ya tienes cuenta" si no está logueado */}
             {!userId && currentStep === 0 ? (
               <IonButton 
                 onClick={() => {
-                  onDismiss();
-                  // Llamar callback si existe
-                  if (onRequestAuth) {
-                    onRequestAuth();
-                  } else {
-                    console.log('🔐 Usuario quiere iniciar sesión → Redireccionar a /request-auth');
-                  }
+                  console.log('🔐 Usuario quiere iniciar sesión → Abriendo modal de auth');
+                  setShowAuthModal(true);
                 }}
                 size="small"
               >
@@ -707,6 +715,14 @@ const VehicleWizardModal = ({
         </IonToolbar>
       </IonFooter>
     </IonModal>
+
+    {/* Modal de autenticación */}
+    <AuthModal
+      isOpen={showAuthModal}
+      onDismiss={() => setShowAuthModal(false)}
+      onSuccess={handleAuthSuccess}
+    />
+    </>
   );
 };
 
