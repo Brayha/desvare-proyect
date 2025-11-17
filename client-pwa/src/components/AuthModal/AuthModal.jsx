@@ -20,10 +20,12 @@ import { closeOutline } from 'ionicons/icons';
 import { PhoneInput, OTPInput } from '@components';
 import { authAPI } from '../../services/api';
 import { useToast } from '@hooks/useToast';
+import { useAuth } from '../../contexts/AuthContext';
 import './AuthModal.css';
 
 const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
   const { showSuccess, showError } = useToast();
+  const { login: authLogin } = useAuth();
 
   const [authMode, setAuthMode] = useState('login'); // "login" o "register"
   const [step, setStep] = useState(1); // 1: formulario, 2: OTP
@@ -127,12 +129,16 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
 
       const { token, user } = response.data;
 
-      // Guardar token y usuario
+      // Guardar token y usuario en localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      console.log('💾 Token y usuario guardados');
+      console.log('💾 Token y usuario guardados en localStorage');
 
-      // Llamar al callback de éxito
+      // CRÍTICO: Actualizar AuthContext para que toda la app lo detecte
+      await authLogin(user);
+      console.log('✅ AuthContext actualizado - Usuario logueado globalmente');
+
+      // Llamar al callback de éxito (para UI específica)
       if (onSuccess) {
         onSuccess(user);
       }
