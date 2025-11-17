@@ -55,71 +55,63 @@ const vehicleSchema = new mongoose.Schema({
   
   // Solo para CAMIONES
   truckData: {
-    trailerType: { 
-      type: String, 
-      enum: ['varillaje', 'caja_metalica'],
-      required: function() {
-        return this.category && this.category.id === 'CAMIONES';
+    type: {
+      trailerType: { 
+        type: String, 
+        enum: ['varillaje', 'caja_metalica'],
+        required: true
+      },
+      length: { 
+        type: Number,  // metros (decimal permitido)
+        min: 1,
+        max: 20,
+        required: true
+      },
+      height: { 
+        type: Number,  // metros (decimal permitido)
+        min: 1,
+        max: 6,
+        required: true
+      },
+      axleType: { 
+        type: String, 
+        enum: ['sencilla', 'doble'],
+        required: true
       }
     },
-    length: { 
-      type: Number,  // metros (decimal permitido)
-      min: 1,
-      max: 20,
-      required: function() {
-        return this.category && this.category.id === 'CAMIONES';
-      }
-    },
-    height: { 
-      type: Number,  // metros (decimal permitido)
-      min: 1,
-      max: 6,
-      required: function() {
-        return this.category && this.category.id === 'CAMIONES';
-      }
-    },
-    axleType: { 
-      type: String, 
-      enum: ['sencilla', 'doble'],
-      required: function() {
-        return this.category && this.category.id === 'CAMIONES';
-      }
-    }
+    required: false,
+    default: undefined  // NO crear objeto vacío por defecto
   },
   
   // Solo para BUSES
   busData: {
-    length: { 
-      type: Number,  // metros (decimal permitido)
-      min: 5,
-      max: 20,
-      required: function() {
-        return this.category && this.category.id === 'BUSES';
+    type: {
+      length: { 
+        type: Number,  // metros (decimal permitido)
+        min: 5,
+        max: 20,
+        required: true
+      },
+      height: { 
+        type: Number,  // metros (decimal permitido)
+        min: 2,
+        max: 5,
+        required: true
+      },
+      axleType: { 
+        type: String, 
+        enum: ['sencilla', 'doble'],
+        required: true
+      },
+      passengerCapacity: { 
+        type: Number,
+        min: 10,
+        max: 100,
+        required: true
       }
     },
-    height: { 
-      type: Number,  // metros (decimal permitido)
-      min: 2,
-      max: 5,
-      required: function() {
-        return this.category && this.category.id === 'BUSES';
-      }
-    },
-    axleType: { 
-      type: String, 
-      enum: ['sencilla', 'doble'],
-      required: function() {
-        return this.category && this.category.id === 'BUSES';
-      }
-    },
-    passengerCapacity: { 
-      type: Number,
-      min: 10,
-      max: 100,
-      required: function() {
-        return this.category && this.category.id === 'BUSES';
-      }
-    }
+    required: false,
+    default: undefined  // NO crear objeto vacío por defecto
   },
   
   // Metadata
