@@ -17,10 +17,7 @@ import {
   IonIcon,
   IonButton,
 } from "@ionic/react";
-import {
-  navigateCircleOutline,
-  add,
-} from "ionicons/icons";
+import { navigateCircleOutline, add } from "ionicons/icons";
 import { Location } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import VehicleWizardModal from "../components/VehicleWizardModal/VehicleWizardModal";
@@ -35,6 +32,7 @@ import {
 import { requestAPI } from "../services/api";
 import socketService from "../services/socket";
 import { useAuth } from "../contexts/AuthContext";
+import { getVehicleImageFromVehicle } from "../utils/vehicleImages";
 import "./RequestService.css";
 import logo from "@shared/src/img/Desvare.svg";
 
@@ -232,9 +230,9 @@ const RequestService = () => {
   };
 
   const handleVehicleWizardComplete = (data) => {
-    console.log('✅ Vehículo y servicio configurados:', data);
+    console.log("✅ Vehículo y servicio configurados:", data);
     setVehicleData(data);
-    showSuccess('✅ Vehículo agregado correctamente');
+    showSuccess("✅ Vehículo agregado correctamente");
   };
 
   const handleVehicleWizardDismiss = () => {
@@ -530,17 +528,45 @@ const RequestService = () => {
                   onClick={handleOpenVehicleWizard}
                 >
                   <div className="search-button-content">
-                    <h2>{vehicleData ? 'Cambiar vehículo' : 'Agrega tu vehículo'}</h2>
+                    <h2>
+                      {vehicleData ? "Cambiar vehículo" : "Agrega tu vehículo"}
+                    </h2>
                     <p>
-                      {vehicleData 
+                      {vehicleData
                         ? `${vehicleData.vehicleSnapshot.brand.name} ${vehicleData.vehicleSnapshot.model.name} - ${vehicleData.vehicleSnapshot.licensePlate}`
-                        : 'Moto, carro, camioneta, bus o camión?'
-                      }
+                        : "Moto, carro, camioneta, bus o camión?"}
                     </p>
                   </div>
 
                   <div className="add-button">
                     <IonIcon icon={add} />
+                  </div>
+                </div>
+
+                {/* card vehiculo agregado correctamente */}
+                <div className="vehicle-added-card">
+                  <div className="vehicle-added-card-content">
+                    <div className="vehicle-added-card-content-image-container">
+                      <img
+                        src={getVehicleImageFromVehicle(vehicleData.vehicleSnapshot)}
+                        alt={vehicleData.vehicleSnapshot.category?.name || 'Vehículo'}
+                      />
+                      <div className="vehicle-added-card-content-text">
+                        <h3 className="marca">
+                          {vehicleData.vehicleSnapshot.brand.name}
+                        </h3>
+                        <p className="modelo">
+                          {vehicleData.vehicleSnapshot.model.name}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="placa">
+                      <p>{vehicleData.vehicleSnapshot.licensePlate}</p>
+                    </div>
+                  </div>
+                  <div className="problem-card">
+                    <h4>Problema</h4>
+                    <p>{vehicleData.serviceDetails.problem}</p>
                   </div>
                 </div>
 

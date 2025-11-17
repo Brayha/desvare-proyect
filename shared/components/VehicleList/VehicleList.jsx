@@ -11,6 +11,7 @@ import {
   IonCardContent
 } from '@ionic/react';
 import { addOutline, trashOutline } from 'ionicons/icons';
+import { getVehicleImage } from '../../../client-pwa/src/utils/vehicleImages';
 import './VehicleList.css';
 
 /**
@@ -34,17 +35,9 @@ const VehicleList = ({
   loading = false,
   showDelete = false
 }) => {
-  // Obtener icono según la categoría
-  const getCategoryIcon = (categoryId) => {
-    const icons = {
-      'MOTOS': '🏍️',
-      'AUTOS': '🚗',
-      'CAMIONETAS': '🚙',
-      'CAMIONES': '🚚',
-      'BUSES': '🚌',
-      'ELECTRICOS': '⚡'
-    };
-    return icons[categoryId] || '🚗';
+  // Obtener imagen SVG según la categoría
+  const getCategoryImage = (categoryId) => {
+    return getVehicleImage(categoryId);
   };
 
   // Obtener etiquetas adicionales del vehículo
@@ -118,7 +111,11 @@ const VehicleList = ({
               <IonCardContent className="vehicle-card-content">
                 <div className="vehicle-info">
                   <div className="vehicle-icon">
-                    {getCategoryIcon(vehicle.category?.id)}
+                    <img 
+                      src={getCategoryImage(vehicle.category?.id)} 
+                      alt={vehicle.category?.name || 'Vehículo'}
+                      style={{ width: '60px', height: '60px', objectFit: 'contain' }}
+                    />
                   </div>
                   
                   <div className="vehicle-details">

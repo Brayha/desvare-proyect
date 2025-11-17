@@ -31,6 +31,7 @@ import AuthModal from '../components/AuthModal/AuthModal';
 import socketService from '../services/socket';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@hooks/useToast';
+import { getVehicleImage } from '../utils/vehicleImages';
 import './MyAccount.css';
 
 const MyAccount = () => {
@@ -190,7 +191,12 @@ const MyAccount = () => {
               <IonList lines="full">
                 {vehicles.map((vehicle) => (
                   <IonItem key={vehicle._id}>
-                    <IonIcon icon={carOutline} slot="start" color="primary" />
+                    <img 
+                      src={getVehicleImage(vehicle.category?.id)} 
+                      alt={vehicle.category?.name || 'Vehículo'}
+                      slot="start"
+                      style={{ width: '50px', height: '50px', objectFit: 'contain', marginRight: '12px' }}
+                    />
                     <IonLabel>
                       <h2>{vehicle.brand?.name || 'N/A'} {vehicle.model?.name || ''}</h2>
                       <p>Placa: {vehicle.licensePlate || 'N/A'}</p>
