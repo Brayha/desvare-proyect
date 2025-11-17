@@ -285,7 +285,7 @@
 .location-input .input-content input {
   border: none;
   background: transparent;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--ion-text-color);
   outline: none;
