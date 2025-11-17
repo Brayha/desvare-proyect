@@ -1,5 +1,6 @@
 import React from 'react';
 import { IonGrid, IonRow, IonCol, IonCard, IonCardContent, IonText } from '@ionic/react';
+import { getVehicleImage } from '../../../client-pwa/src/utils/vehicleImages';
 import './VehicleCategorySelector.css';
 
 /**
@@ -11,17 +12,9 @@ import './VehicleCategorySelector.css';
  * @param {Function} onSelect - Callback cuando se selecciona una categoría
  */
 const VehicleCategorySelector = ({ categories, selectedCategory, onSelect }) => {
-  // Mapeo de iconos según la categoría (usando iconsax-react)
-  const getCategoryIcon = (categoryId) => {
-    const icons = {
-      'MOTOS': '🏍️',
-      'AUTOS': '🚗',
-      'CAMIONETAS': '🚙',
-      'CAMIONES': '🚚',
-      'BUSES': '🚌',
-      'ELECTRICOS': '⚡'
-    };
-    return icons[categoryId] || '🚗';
+  // Obtener imagen SVG según la categoría
+  const getCategoryImage = (categoryId) => {
+    return getVehicleImage(categoryId);
   };
 
   if (!categories || categories.length === 0) {
@@ -49,7 +42,11 @@ const VehicleCategorySelector = ({ categories, selectedCategory, onSelect }) => 
               >
                 <IonCardContent className="category-card-content">
                   <div className="category-icon">
-                    {getCategoryIcon(category.id)}
+                    <img 
+                      src={getCategoryImage(category.id)} 
+                      alt={category.name}
+                      style={{ width: '80px', height: '80px', objectFit: 'contain' }}
+                    />
                   </div>
                   <IonText>
                     <h3 className="category-name">{category.name}</h3>
