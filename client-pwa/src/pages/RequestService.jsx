@@ -33,6 +33,7 @@ import { requestAPI } from "../services/api";
 import socketService from "../services/socket";
 import { useAuth } from "../contexts/AuthContext";
 import { getVehicleImageFromVehicle } from "../utils/vehicleImages";
+import { Button } from "@components";
 import "./RequestService.css";
 import logo from "@shared/src/img/Desvare.svg";
 
@@ -522,28 +523,24 @@ const RequestService = () => {
                   </div>
                 )}
 
-                {/* Botón de add vehicle */}
-                <div
-                  className="search-button"
-                  onClick={handleOpenVehicleWizard}
-                >
-                  <div className="search-button-content">
-                    <h2>
-                      {vehicleData ? "Cambiar vehículo" : "Agrega tu vehículo"}
-                    </h2>
-                    <p>
-                      {vehicleData
-                        ? `${vehicleData.vehicleSnapshot.brand.name} ${vehicleData.vehicleSnapshot.model.name} - ${vehicleData.vehicleSnapshot.licensePlate}`
-                        : "Moto, carro, camioneta, bus o camión?"}
-                    </p>
-                  </div>
+                {/* Botón de agregar vehículo - Solo si NO hay vehículo */}
+                {!vehicleData && (
+                  <div
+                    className="search-button"
+                    onClick={handleOpenVehicleWizard}
+                  >
+                    <div className="search-button-content">
+                      <h2>Agrega tu vehículo</h2>
+                      <p>Moto, carro, camioneta, bus o camión?</p>
+                    </div>
 
-                  <div className="add-button">
-                    <IonIcon icon={add} />
+                    <div className="add-button">
+                      <IonIcon icon={add} />
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* card vehiculo agregado correctamente */}
+                {/* Card vehículo agregado - Solo si hay vehículo */}
                 {vehicleData?.vehicleSnapshot && (
                   <div className="vehicle-added-card">
                     <div className="vehicle-added-card-content">
@@ -561,7 +558,7 @@ const RequestService = () => {
                           </p>
                         </div>
                       </div>
-                      <div class="placa">
+                      <div className="placa">
                         <p>{vehicleData.vehicleSnapshot.licensePlate}</p>
                       </div>
                     </div>
@@ -569,31 +566,34 @@ const RequestService = () => {
                       <h4>Problema</h4>
                       <p>{vehicleData.serviceDetails.problem}</p>
                     </div>
+                    
+                    {/* Botón cambiar vehículo */}
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={handleOpenVehicleWizard}
+                      style={{ marginTop: '8px' }}
+                    >
+                      Cambiar vehículo
+                    </Button>
                   </div>
                 )}
 
-                {/* Botón de confirmar */}
-                <IonButton
-                  expand="block"
-                  size="large"
-                  onClick={handleConfirmRoute}
-                  disabled={!routeInfo || !vehicleData || isSendingRequest}
-                  className="confirm-button"
-                >
-                  {isSendingRequest ? (
-                    <>
-                      <IonSpinner
-                        name="crescent"
-                        style={{ marginRight: "8px" }}
-                      />
-                      Enviando solicitud...
-                    </>
-                  ) : isLoggedIn ? (
-                    "🚀 Buscar Cotizaciones"
-                  ) : (
-                    "Confirmar y continuar"
-                  )}
-                </IonButton>
+                {/* Botón Buscar Cotizaciones - Solo si hay vehículo */}
+                {vehicleData?.vehicleSnapshot && (
+                  <Button
+                    variant="primary"
+                    size="large"
+                    fullWidth
+                    onClick={handleConfirmRoute}
+                    disabled={!routeInfo || isSendingRequest}
+                    loading={isSendingRequest}
+                  >
+                    {isSendingRequest
+                      ? "Enviando solicitud..."
+                      : "🚀 Buscar Cotizaciones"}
+                  </Button>
+                )}
               </div>
             </div>
           )}
