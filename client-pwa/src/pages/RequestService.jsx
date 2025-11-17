@@ -544,31 +544,33 @@ const RequestService = () => {
                 </div>
 
                 {/* card vehiculo agregado correctamente */}
-                <div className="vehicle-added-card">
-                  <div className="vehicle-added-card-content">
-                    <div className="vehicle-added-card-content-image-container">
-                      <img
-                        src={getVehicleImageFromVehicle(vehicleData.vehicleSnapshot)}
-                        alt={vehicleData.vehicleSnapshot.category?.name || 'Vehículo'}
-                      />
-                      <div className="vehicle-added-card-content-text">
-                        <h3 className="marca">
-                          {vehicleData.vehicleSnapshot.brand.name}
-                        </h3>
-                        <p className="modelo">
-                          {vehicleData.vehicleSnapshot.model.name}
-                        </p>
+                {vehicleData?.vehicleSnapshot && (
+                  <div className="vehicle-added-card">
+                    <div className="vehicle-added-card-content">
+                      <div className="vehicle-added-card-content-image-container">
+                        <img
+                          src={getVehicleImageFromVehicle(vehicleData.vehicleSnapshot)}
+                          alt={vehicleData.vehicleSnapshot.category?.name || 'Vehículo'}
+                        />
+                        <div className="vehicle-added-card-content-text">
+                          <h3 className="marca">
+                            {vehicleData.vehicleSnapshot.brand.name}
+                          </h3>
+                          <p className="modelo">
+                            {vehicleData.vehicleSnapshot.model.name}
+                          </p>
+                        </div>
+                      </div>
+                      <div class="placa">
+                        <p>{vehicleData.vehicleSnapshot.licensePlate}</p>
                       </div>
                     </div>
-                    <div class="placa">
-                      <p>{vehicleData.vehicleSnapshot.licensePlate}</p>
+                    <div className="problem-card">
+                      <h4>Problema</h4>
+                      <p>{vehicleData.serviceDetails.problem}</p>
                     </div>
                   </div>
-                  <div className="problem-card">
-                    <h4>Problema</h4>
-                    <p>{vehicleData.serviceDetails.problem}</p>
-                  </div>
-                </div>
+                )}
 
                 {/* Botón de confirmar */}
                 <IonButton
