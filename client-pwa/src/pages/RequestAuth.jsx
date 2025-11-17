@@ -302,11 +302,29 @@ const RequestAuth = () => {
         }
       }
       
-      // 3. Enviar solicitud a conductores
+      // 3. Verificar si hay datos de vehículo para crear solicitud
+      if (!vehicleData || !vehicleData.vehicleSnapshot || !vehicleData.serviceDetails || !vehicleData.serviceDetails.problem) {
+        console.log('⚠️ No hay vehicleData completo - Login exitoso pero sin solicitud');
+        showSuccess('✅ Sesión iniciada correctamente');
+        
+        // Si hay routeData, volver al mapa para que complete el flujo
+        if (routeData) {
+          console.log('🔄 Redirigiendo al mapa para completar datos del vehículo...');
+          await new Promise(resolve => setTimeout(resolve, 100));
+          history.replace('/tabs/desvare');
+        } else {
+          // Si no hay ruta, ir a home
+          console.log('🔄 Redirigiendo a home...');
+          history.replace('/tabs/desvare');
+        }
+        return;
+      }
+      
+      // 4. Enviar solicitud a conductores
       console.log('🚀 Enviando solicitud a conductores...');
       await sendRequestToDrivers(user);
       
-      // 4. Redirigir a WaitingQuotes
+      // 5. Redirigir a WaitingQuotes
       console.log('🔄 Redirigiendo a /waiting-quotes...');
       await new Promise(resolve => setTimeout(resolve, 100)); // Delay para sincronizar localStorage
       history.replace('/waiting-quotes');
