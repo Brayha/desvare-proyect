@@ -309,6 +309,10 @@ const VehicleWizardModal = ({
       color: vehicle.color,
       specifics,
     });
+
+    // 🚀 Avanzar automáticamente al siguiente paso (service details)
+    console.log('✅ Vehículo seleccionado, avanzando automáticamente...');
+    setCurrentStep(currentStep + 1);
   };
 
   const handleAddNewVehicle = () => {
@@ -410,10 +414,7 @@ const VehicleWizardModal = ({
       // Flujo de seleccionar vehículo existente
       switch (currentStepInfo.id) {
         case 'list':
-          if (!selectedVehicle) {
-            showWarning('Selecciona un vehículo o agrega uno nuevo');
-            return;
-          }
+          // No validar aquí, el avance es automático al seleccionar
           break;
         case 'service':
           if (!serviceDetails.problem || serviceDetails.problem.trim().length < 10) {

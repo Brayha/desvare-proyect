@@ -3,22 +3,25 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: #f7f7f7;
+  padding: 10px;
 }
 
 .vehicles-list-container {
-  flex: 1;
-  overflow-y: auto;
-  max-height: 500px;
-  padding: 8px;
+  display: flex;
+  padding: 5px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  align-self: stretch;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: #f7f7f7;
 }
 
 .vehicle-card {
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  margin: 0;
 }
 
 .vehicle-card:hover {
@@ -27,12 +30,18 @@
 }
 
 .vehicle-card-selected {
-  border-color: var(--desvare-primary, #4F46E5);
-  background: var(--ion-color-primary-tint, #ede7f6);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  border-radius: 15px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
 .vehicle-card-content {
-  padding: 16px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -46,9 +55,13 @@
 }
 
 .vehicle-icon {
-  font-size: 40px;
-  line-height: 1;
-  flex-shrink: 0;
+  display: flex;
+  width: 60px;
+  height: 60px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8.571px;
 }
 
 .vehicle-details {
@@ -64,23 +77,20 @@
   margin-bottom: 4px;
 }
 
-.vehicle-name {
-  font-size: 16px;
-  font-weight: var(--font-weight-semibold, 600);
-  color: var(--ion-text-color, #000);
-  margin: 0;
-  white-space: nowrap;
+.vehicle-brand-name {
   overflow: hidden;
+  color: #4b5563 ;
   text-overflow: ellipsis;
-}
-
-.vehicle-card-selected .vehicle-name {
-  color: var(--desvare-primary, #4F46E5);
+  font-size: 16px;
+  font-style: Bold;
+  font-weight: 700;
+  line-height: 24px; /* 150% */
+  margin: 0;
 }
 
 .vehicle-check {
   font-size: 20px;
-  color: var(--desvare-primary, #4F46E5);
+  color: var(--desvare-primary, #4f46e5);
   font-weight: bold;
   flex-shrink: 0;
 }
@@ -181,7 +191,7 @@
 /* Responsive */
 @media (max-width: 576px) {
   .vehicles-list-container {
-    padding: 4px;
+    padding: 5px;
   }
 
   .vehicle-card {
@@ -198,10 +208,6 @@
 
   .vehicle-icon {
     font-size: 36px;
-  }
-
-  .vehicle-name {
-    font-size: 15px;
   }
 
   .vehicle-plate {
@@ -225,4 +231,3 @@
     font-size: 13px;
   }
 }
-

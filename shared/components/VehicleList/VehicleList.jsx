@@ -120,9 +120,9 @@ const VehicleList = ({
                   
                   <div className="vehicle-details">
                     <div className="vehicle-header">
-                      <h3 className="vehicle-name">
+                      <h3 className="vehicle-brand-name">
                         {vehicle.brand?.name} {vehicle.model?.name}
-                      </h3>
+                      </h3> 
                       {isSelected && (
                         <div className="vehicle-check">✓</div>
                       )}
