@@ -640,6 +640,7 @@ const VehicleWizardModal = ({
             brands={brands}
             onSelect={handleSelectBrand}
             selectedBrand={vehicleData.brand}
+            selectedCategory={vehicleData.category}
             isLoading={isLoading}
           />
         );
@@ -650,6 +651,8 @@ const VehicleWizardModal = ({
             models={models}
             onSelect={handleSelectModel}
             selectedModel={vehicleData.model}
+            selectedCategory={vehicleData.category}
+            selectedBrand={vehicleData.brand}
             isLoading={isLoading}
           />
         );

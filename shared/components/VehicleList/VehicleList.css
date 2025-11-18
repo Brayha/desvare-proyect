@@ -33,6 +33,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px;
   align-self: stretch;
   border-radius: 15px;
   border: 1px solid #e5e7eb;
@@ -65,8 +66,10 @@
 }
 
 .vehicle-details {
-  flex: 1;
-  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 0 0;
 }
 
 .vehicle-header {
@@ -79,7 +82,7 @@
 
 .vehicle-brand-name {
   overflow: hidden;
-  color: #4b5563 ;
+  color: #4b5563;
   text-overflow: ellipsis;
   font-size: 16px;
   font-style: Bold;
@@ -88,25 +91,22 @@
   margin: 0;
 }
 
-.vehicle-check {
-  font-size: 20px;
-  color: var(--desvare-primary, #4f46e5);
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
 .vehicle-plate {
-  font-size: 14px;
-  font-weight: var(--font-weight-semibold, 600);
-  color: var(--ion-color-medium, #92949c);
-  margin: 0 0 8px 0;
-  letter-spacing: 1px;
+  overflow: hidden;
+  color: #9ca3af;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0;
 }
 
 .vehicle-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  padding: 5px 0;
 }
 
 .vehicle-badge {
@@ -192,14 +192,6 @@
 @media (max-width: 576px) {
   .vehicles-list-container {
     padding: 5px;
-  }
-
-  .vehicle-card {
-    margin-bottom: 8px;
-  }
-
-  .vehicle-card-content {
-    padding: 12px;
   }
 
   .vehicle-info {

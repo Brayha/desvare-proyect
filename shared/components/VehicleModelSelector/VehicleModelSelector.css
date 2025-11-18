@@ -5,10 +5,46 @@
   flex-direction: column;
 }
 
+.vehicle-list-type {
+  padding: 0;
+  border-bottom: 1px solid var(--ion-color-light, #f4f5f8);
+}
+
+.select-vehicle-added-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vehicle-added-card-content-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vehicle-added-card-content-text {
+  flex: 1;
+}
+
+.vehicle-brand-name {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--ion-text-color, #000);
+  margin: 0 0 4px 0;
+}
+
+.vehicle-brand-subtext {
+  font-size: 14px;
+  font-weight: var(--font-weight-normal, 400);
+  color: var(--ion-color-medium, #92949c);
+  margin: 0;
+}
+
 .model-searchbar {
   padding: 8px 16px;
-  --background: var(--ion-color-light, #f4f5f8);
-  --border-radius: 12px;
+  --background: var(--ion-color-light, #fff);
+  --border-radius: 20px;
+  border: 1px solid #e5e7eb;
 }
 
 .model-list {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   IonList,
   IonItem,
@@ -8,16 +8,16 @@ import {
   IonIcon,
   IonSpinner,
   IonCard,
-  IonCardContent
-} from '@ionic/react';
-import { addOutline, trashOutline } from 'ionicons/icons';
-import { getVehicleImage } from '../../../client-pwa/src/utils/vehicleImages';
-import './VehicleList.css';
+  IonCardContent,
+} from "@ionic/react";
+import { addOutline, trashOutline, add } from "ionicons/icons";
+import { getVehicleImage } from "../../../client-pwa/src/utils/vehicleImages";
+import "./VehicleList.css";
 
 /**
  * VehicleList - Lista de vehículos guardados del usuario
  * Permite seleccionar un vehículo existente o agregar uno nuevo
- * 
+ *
  * @param {Array} vehicles - Lista de vehículos del usuario
  * @param {Object} selectedVehicle - Vehículo seleccionado
  * @param {Function} onSelect - Callback cuando se selecciona un vehículo
@@ -26,14 +26,14 @@ import './VehicleList.css';
  * @param {Boolean} loading - Estado de carga
  * @param {Boolean} showDelete - Mostrar botón de eliminar (default: false)
  */
-const VehicleList = ({ 
-  vehicles, 
-  selectedVehicle, 
-  onSelect, 
+const VehicleList = ({
+  vehicles,
+  selectedVehicle,
+  onSelect,
   onAddNew,
   onDelete,
   loading = false,
-  showDelete = false
+  showDelete = false,
 }) => {
   // Obtener imagen SVG según la categoría
   const getCategoryImage = (categoryId) => {
@@ -46,18 +46,21 @@ const VehicleList = ({
 
     // Blindado
     if (vehicle.isArmored) {
-      badges.push({ text: 'Blindado', color: 'warning' });
+      badges.push({ text: "Blindado", color: "warning" });
     }
 
     // Camión
     if (vehicle.truckData) {
-      badges.push({ text: vehicle.truckData.trailerType, color: 'medium' });
-      badges.push({ text: `${vehicle.truckData.length}m`, color: 'medium' });
+      badges.push({ text: vehicle.truckData.trailerType, color: "medium" });
+      badges.push({ text: `${vehicle.truckData.length}m`, color: "medium" });
     }
 
     // Bus
     if (vehicle.busData) {
-      badges.push({ text: `${vehicle.busData.passengerCapacity} pasajeros`, color: 'medium' });
+      badges.push({
+        text: `${vehicle.busData.passengerCapacity} pasajeros`,
+        color: "medium",
+      });
     }
 
     return badges;
@@ -98,43 +101,41 @@ const VehicleList = ({
     <div className="vehicle-list">
       <IonList className="vehicles-list-container">
         {vehicles.map((vehicle) => {
-          const isSelected = selectedVehicle?.id === vehicle.id || selectedVehicle?._id === vehicle._id;
+          const isSelected =
+            selectedVehicle?.id === vehicle.id ||
+            selectedVehicle?._id === vehicle._id;
           const badges = getVehicleBadges(vehicle);
 
           return (
-            <IonCard
+            <div
               key={vehicle.id || vehicle._id}
               button
-              className={`vehicle-card ${isSelected ? 'vehicle-card-selected' : ''}`}
+              className="vehicle-added-card-content"
               onClick={() => onSelect(vehicle)}
             >
-              <IonCardContent className="vehicle-card-content">
-                <div className="vehicle-info">
-                  <div className="vehicle-icon">
-                    <img 
-                      src={getCategoryImage(vehicle.category?.id)} 
-                      alt={vehicle.category?.name || 'Vehículo'}
-                      style={{ width: '60px', height: '60px', objectFit: 'contain' }}
-                    />
-                  </div>
-                  
-                  <div className="vehicle-details">
-                    <div className="vehicle-header">
-                      <h3 className="vehicle-brand-name">
-                        {vehicle.brand?.name} {vehicle.model?.name}
-                      </h3> 
-                      {isSelected && (
-                        <div className="vehicle-check">✓</div>
-                      )}
+                  <div className="vehicle-added-card-content-image-container">
+                    <div className="vehicle-icon">
+                      <img
+                        src={getCategoryImage(vehicle.category?.id)}
+                        alt={vehicle.category?.name || "Vehículo"}
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          objectFit: "contain",
+                        }}
+                      />
                     </div>
-                    
+
+                        <div className="vehicle-added-card-content-text">
+                    <h3 className="vehicle-brand-name">
+                      {vehicle.brand?.name} {vehicle.model?.name}
+                    </h3>
                     <p className="vehicle-plate">{vehicle.licensePlate}</p>
-                    
                     {badges.length > 0 && (
                       <div className="vehicle-badges">
                         {badges.map((badge, index) => (
-                          <span 
-                            key={index} 
+                          <span
+                            key={index}
                             className={`vehicle-badge badge-${badge.color}`}
                           >
                             {badge.text}
@@ -142,8 +143,12 @@ const VehicleList = ({
                         ))}
                       </div>
                     )}
+                    </div>
                   </div>
-                </div>
+
+                  <div className="placa">
+                    <p>{vehicle.licensePlate}</p>
+                  </div>
 
                 {showDelete && onDelete && (
                   <IonButton
@@ -159,28 +164,24 @@ const VehicleList = ({
                     <IonIcon icon={trashOutline} slot="icon-only" />
                   </IonButton>
                 )}
-              </IonCardContent>
-            </IonCard>
+            </div>
           );
         })}
-      </IonList>
 
-      {/* Botón para agregar nuevo vehículo */}
-      <div className="vehicle-list-footer">
-        <IonButton
-          expand="block"
-          fill="outline"
-          onClick={onAddNew}
-          className="add-vehicle-button"
-        >
-          <IonIcon icon={addOutline} slot="start" />
-          Agregar otro vehículo
-        </IonButton>
-      </div>
+        <div className="search-button" onClick={onAddNew}>
+          <div className="search-button-content">
+            <h2>Agrega tu vehículo</h2>
+            <p>Moto, carro, camioneta, bus o camión?</p>
+          </div>
+
+          <div className="add-button">
+            <IonIcon icon={add} />
+          </div>
+        </div>
+      </IonList>
     </div>
   );
 };
 
 export { VehicleList };
 export default VehicleList;
-
