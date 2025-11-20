@@ -4,29 +4,33 @@ import "./VehiclePlateInput.css";
 import { getVehicleImage } from "../../../client-pwa/src/utils/vehicleImages";
 /**
  * VehiclePlateInput - Input para placa de vehículo
- * Validación flexible: ABC-123, GIQ-79F, AB2-123
+ * Formato automático con guión: ABC-123, GIQ-79F, AB2-123
  * Auto-uppercase y formato automático
  *
  * @param {string} value - Valor de la placa (string)
  * @param {function} onChange - Callback cuando cambia el valor
  * @param {object} vehicleData - Datos del vehículo (category, brand, model)
- * @param {string} error - Mensaje de error (opcional)
- * @param {string} placeholder - Placeholder (default: "ABC 123")
+ * @param {string} placeholder - Placeholder (default: "ABC-123")
  */
 const VehiclePlateInput = ({
   value,
   onChange,
   vehicleData,
-  error,
-  placeholder = "ABC 123",
+  placeholder = "ABC-123",
 }) => {
-  // Validación de formato de placa
-  const validatePlate = (plate) => {
-    if (!plate) return true; // Permitir vacío para validación en tiempo real
-
-    // Formato flexible: 2-3 caracteres alfanuméricos, guión opcional, 2-4 caracteres alfanuméricos
-    const plateRegex = /^[A-Z0-9]{2,3}-?[A-Z0-9]{2,4}$/;
-    return plateRegex.test(plate);
+  // Función para formatear la placa con guión automático (ABC-123)
+  const formatPlate = (plate) => {
+    if (!plate) return '';
+    
+    // Remover guiones existentes para trabajar con caracteres limpios
+    const cleanPlate = plate.replace(/-/g, '');
+    
+    // Si tiene más de 3 caracteres, agregar guión automáticamente
+    if (cleanPlate.length > 3) {
+      return cleanPlate.slice(0, 3) + '-' + cleanPlate.slice(3);
+    }
+    
+    return cleanPlate;
   };
 
   const handleInput = (e) => {
@@ -37,15 +41,17 @@ const VehiclePlateInput = ({
 
     // Permitir solo letras, números y guión
     rawValue = rawValue.replace(/[^A-Z0-9-]/g, "");
+    
+    // Remover guiones para contar solo caracteres reales
+    const cleanValue = rawValue.replace(/-/g, "");
+    
+    // Limitar longitud máxima (7 caracteres alfanuméricos)
+    const limitedValue = cleanValue.slice(0, 7);
 
-    // Limitar longitud máxima (ABC-123F = 8 caracteres)
-    rawValue = rawValue.slice(0, 8);
-
-    onChange(rawValue);
+    // Formatear con guión automático y enviar al padre
+    const formattedValue = formatPlate(limitedValue);
+    onChange(formattedValue);
   };
-
-  const isValid = !value || validatePlate(value);
-  const showError = error || (!isValid && value && value.length >= 5);
 
   return (
     <div className="vehicle-plate-container">
@@ -84,9 +90,7 @@ const VehiclePlateInput = ({
           </IonText>
         </div>
         <IonItem
-          className={`plate-input-item ${showError ? "ion-invalid" : ""} ${
-            isValid && value ? "ion-valid" : ""
-          }`}
+          className="plate-input-item"
           lines="none"
         >
           <IonInput
@@ -97,19 +101,9 @@ const VehiclePlateInput = ({
             value={value}
             onIonInput={handleInput}
             className="plate-input-field"
+            aria-label="Placa del vehículo"
           />
-          {isValid && value && value.length >= 5 && (
-            <div className="plate-valid-icon" slot="end">
-              ✓
-            </div>
-          )}
         </IonItem>
-
-        {showError && (
-          <IonText color="danger" className="plate-error-message">
-            <p>{error || "Formato de placa inválido (ej: ABC-123)"}</p>
-          </IonText>
-        )}
       </div>
     </div>
   );

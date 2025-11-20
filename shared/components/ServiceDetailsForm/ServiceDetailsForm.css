@@ -2,15 +2,88 @@
   width: 100%;
 }
 
+/* Tarjeta del vehículo */
+.vehicle-added-card-content {
+  display: flex;
+  padding: 16px;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}
+
+.vehicle-added-card-content-image-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vehicle-added-card-content-image-container img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.vehicle-added-card-content-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vehicle-added-card-content-text h3.marca {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.vehicle-added-card-content-text p.modelo {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.vehicle-added-card-content-buttons .placa {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.20);
+  background: #F6C343;
+}
+
+.vehicle-added-card-content-buttons .placa p {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.8);
+  margin: 0;
+  letter-spacing: 0px;
+  text-align: center;
+}
+
+.vehicle-added-card-content-buttons .placa p.placa-value {
+  color: #1a1a1a;
+  font-weight: 800;
+}
+
 .service-field {
-  margin-bottom: 24px;
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  align-self: stretch;
+  gap: 5px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
 }
 
 .service-field-nested {
   margin-top: 16px;
-  margin-left: 24px;
+  margin-left: 20px;
   padding-left: 16px;
-  border-left: 3px solid var(--desvare-primary, #4F46E5);
+  border-left: 3px solid var(--desvare-primary, #4f46e5);
 }
 
 .service-label {
@@ -18,7 +91,7 @@
   font-size: 14px;
   font-weight: var(--font-weight-semibold, 600);
   color: var(--ion-text-color, #000);
-  margin-bottom: 8px;
+  margin: 0;
   padding: 0 4px;
 }
 
@@ -49,7 +122,7 @@
 
 .service-item.ion-focused {
   --background: #fff;
-  border-color: var(--desvare-primary, #4F46E5);
+  border-color: var(--desvare-primary, #4f46e5);
 }
 
 .service-item.ion-invalid {
@@ -58,7 +131,7 @@
 }
 
 .service-item ion-textarea {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--ion-text-color, #000);
   --padding-start: 0;
   --padding-end: 0;
@@ -102,14 +175,9 @@
   animation: shake 0.3s ease;
 }
 
-/* Checkbox personalizado */
-.service-checkbox-wrapper {
-  margin-bottom: 8px;
-}
-
 .service-checkbox {
   --size: 24px;
-  --checkbox-background-checked: var(--desvare-primary, #4F46E5);
+  --checkbox-background-checked: var(--desvare-primary, #4f46e5);
   margin: 0;
 }
 
@@ -139,9 +207,16 @@
 
 /* Animación shake para error */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 /* Responsive */
@@ -157,13 +232,8 @@
     --padding-bottom: 10px;
   }
 
-  .service-field {
-    margin-bottom: 20px;
-  }
-
   .service-field-nested {
     margin-left: 16px;
     padding-left: 12px;
   }
 }
-

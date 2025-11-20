@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   IonItem,
   IonLabel,
@@ -6,20 +6,28 @@ import {
   IonCheckbox,
   IonInput,
   IonToggle,
-  IonText
-} from '@ionic/react';
-import './ServiceDetailsForm.css';
+  IonText,
+} from "@ionic/react";
+import { getVehicleImage } from "../../../client-pwa/src/utils/vehicleImages";
+import "./ServiceDetailsForm.css";
 
 /**
  * ServiceDetailsForm - Formulario para detalles del servicio actual
  * Pregunta cosas que cambian por servicio: problema, sótano, peso
- * 
+ *
  * @param {Object} vehicleCategory - Categoría del vehículo { id, name }
+ * @param {Object} vehicleData - Datos completos del vehículo { category, brand, model, licensePlate }
  * @param {Object} initialData - Datos iniciales del formulario
  * @param {Function} onDataChange - Callback cuando cambian los datos
  * @param {Object} errors - Objeto con errores de validación
  */
-const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, errors = {} }) => {
+const ServiceDetailsForm = ({
+  vehicleCategory,
+  vehicleData,
+  initialData = {},
+  onDataChange,
+  errors = {},
+}) => {
   const categoryId = vehicleCategory?.id;
   const [data, setData] = React.useState(initialData);
 
@@ -38,25 +46,61 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
   };
 
   // Verificar si el vehículo puede estar en sótano
-  const canBeInBasement = ['MOTOS', 'AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId);
+  const canBeInBasement = [
+    "MOTOS",
+    "AUTOS",
+    "CAMIONETAS",
+    "ELECTRICOS",
+  ].includes(categoryId);
 
   // Verificar si es camión (pregunta peso)
-  const isTruck = categoryId === 'CAMIONES';
+  const isTruck = categoryId === "CAMIONES";
 
   return (
     <div className="service-details-form">
+      {/* Tarjeta del vehículo */}
+      {vehicleData && (
+        <div className="vehicle-added-card-content">
+          <div className="vehicle-added-card-content-image-container">
+            <img
+              src={getVehicleImage(vehicleData.category?.id)}
+              alt={vehicleData.category?.name || "Vehículo"}
+            />
+            <div className="vehicle-added-card-content-text">
+              <h3 className="marca">{vehicleData.brand?.name}</h3>
+              <p className="modelo">{vehicleData.model?.name}</p>
+            </div>
+          </div>
+
+          <div className="vehicle-added-card-content-buttons">
+            <div className="placa">
+              <p className="placa-value">
+                {vehicleData.licensePlate || "ABC-123"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Problema actual - TODOS los vehículos */}
-      <div className="service-field">
-        <IonLabel className="service-label">
-          ¿Cuál es el problema? <span className="required">*</span>
-        </IonLabel>
-        <IonItem 
-          lines="none" 
-          className={`service-item textarea-item ${errors.problem ? 'ion-invalid' : ''}`}
+      <div className="service-field ion-margin-top">
+        <div className="plate-input-container-header">
+          <IonText className="section-emoji-title">
+            <h3>🪝 ¿Cuál es el problema?</h3>
+          </IonText>
+          <IonText color="medium" className="section-description">
+            <p>Describe el problema de tú vehiculo, lo más claro posible</p>
+          </IonText>
+        </div>
+        <IonItem
+          lines="none"
+          className={`service-item textarea-item ${
+            errors.problem ? "ion-invalid" : ""
+          }`}
         >
           <IonTextarea
-            value={data?.problem || ''}
-            onIonInput={(e) => handleChange('problem', e.detail.value)}
+            value={data?.problem || ""}
+            onIonInput={(e) => handleChange("problem", e.detail.value)}
             placeholder="Ej: Se descompuso la batería del carro"
             rows={4}
             maxlength={500}
@@ -69,7 +113,7 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
             </IonText>
           ) : (
             <IonText className="service-helper">
-              <p>{(data?.problem?.length || 0)}/500 caracteres</p>
+              <p>{data?.problem?.length || 0}/500 caracteres</p>
             </IonText>
           )}
         </div>
@@ -81,11 +125,13 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
           <div className="service-checkbox-wrapper">
             <IonCheckbox
               checked={data?.basement?.isInBasement || false}
-              onIonChange={(e) => handleChange('basement', {
-                ...data?.basement,
-                isInBasement: e.detail.checked,
-                level: e.detail.checked ? data?.basement?.level : null
-              })}
+              onIonChange={(e) =>
+                handleChange("basement", {
+                  ...data?.basement,
+                  isInBasement: e.detail.checked,
+                  level: e.detail.checked ? data?.basement?.level : null,
+                })
+              }
               labelPlacement="end"
               className="service-checkbox"
             >
@@ -103,19 +149,23 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
               </IonLabel>
               <IonItem
                 lines="none"
-                className={`service-item ${errors.basementLevel ? 'ion-invalid' : ''}`}
+                className={`service-item ${
+                  errors.basementLevel ? "ion-invalid" : ""
+                }`}
               >
                 <IonInput
                   type="number"
                   min="1"
                   max="10"
-                  value={data?.basement?.level ? Math.abs(data.basement.level) : ''}
+                  value={
+                    data?.basement?.level ? Math.abs(data.basement.level) : ""
+                  }
                   onIonInput={(e) => {
                     const positiveValue = parseInt(e.detail.value);
                     if (!isNaN(positiveValue) && positiveValue > 0) {
-                      handleChange('basement', {
+                      handleChange("basement", {
                         ...data?.basement,
-                        level: -Math.abs(positiveValue) // Convertir a negativo
+                        level: -Math.abs(positiveValue), // Convertir a negativo
                       });
                     }
                   }}
@@ -128,8 +178,15 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
                 </IonText>
               ) : (
                 <IonText className="service-helper">
-                  <p>Ingresa el número del nivel (ej: 1 para sótano -1, 2 para sótano -2)</p>
-                  <p><small>Los niveles inferiores incrementan el costo del servicio</small></p>
+                  <p>
+                    Ingresa el número del nivel (ej: 1 para sótano -1, 2 para
+                    sótano -2)
+                  </p>
+                  <p>
+                    <small>
+                      Los niveles inferiores incrementan el costo del servicio
+                    </small>
+                  </p>
                 </IonText>
               )}
             </div>
@@ -144,11 +201,15 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
             <IonLabel>¿El camión está cargado?</IonLabel>
             <IonToggle
               checked={data?.truckCurrentState?.isLoaded || false}
-              onIonChange={(e) => handleChange('truckCurrentState', {
-                ...data?.truckCurrentState,
-                isLoaded: e.detail.checked,
-                currentWeight: e.detail.checked ? data?.truckCurrentState?.currentWeight : null
-              })}
+              onIonChange={(e) =>
+                handleChange("truckCurrentState", {
+                  ...data?.truckCurrentState,
+                  isLoaded: e.detail.checked,
+                  currentWeight: e.detail.checked
+                    ? data?.truckCurrentState?.currentWeight
+                    : null,
+                })
+              }
               color="primary"
             />
           </IonItem>
@@ -159,9 +220,9 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
               <IonLabel className="service-label">
                 Peso actual <span className="required">*</span>
               </IonLabel>
-              <IonItem 
-                lines="none" 
-                className={`service-item ${errors.weight ? 'ion-invalid' : ''}`}
+              <IonItem
+                lines="none"
+                className={`service-item ${errors.weight ? "ion-invalid" : ""}`}
               >
                 <IonInput
                   type="number"
@@ -169,10 +230,12 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
                   min="0.5"
                   max="50"
                   value={data?.truckCurrentState?.currentWeight}
-                  onIonInput={(e) => handleChange('truckCurrentState', {
-                    ...data?.truckCurrentState,
-                    currentWeight: parseFloat(e.detail.value)
-                  })}
+                  onIonInput={(e) =>
+                    handleChange("truckCurrentState", {
+                      ...data?.truckCurrentState,
+                      currentWeight: parseFloat(e.detail.value),
+                    })
+                  }
                   placeholder="Ej: 12.5"
                 />
                 <IonLabel slot="end">toneladas</IonLabel>
@@ -192,4 +255,3 @@ const ServiceDetailsForm = ({ vehicleCategory, initialData = {}, onDataChange, e
 
 export { ServiceDetailsForm };
 export default ServiceDetailsForm;
-

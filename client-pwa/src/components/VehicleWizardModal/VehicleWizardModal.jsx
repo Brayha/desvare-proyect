@@ -757,6 +757,7 @@ const VehicleWizardModal = ({
           <div className="wizard-form-container">
             <ServiceDetailsForm
               vehicleCategory={vehicleData.category}
+              vehicleData={vehicleData}
               onDataChange={handleServiceDetailsChange}
               initialData={serviceDetails}
             />

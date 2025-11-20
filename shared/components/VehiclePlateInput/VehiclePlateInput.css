@@ -42,62 +42,16 @@
   border-color: var(--desvare-primary, #4f46e5);
 }
 
-.plate-input-item.ion-valid {
-  border-color: var(--ion-color-success, #10b981);
-}
-
-.plate-input-item.ion-invalid {
-  border-color: var(--ion-color-danger, #ef4444);
-  --background: #fef2f2;
-}
-
 .plate-input-field {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: var(--font-weight-semibold, 600);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   color: var(--ion-text-color, #000);
+  font-family: 'Courier New', monospace;
 }
 
-.plate-valid-icon {
-  font-size: 20px;
-  color: var(--ion-color-success, #10b981);
-  font-weight: bold;
-}
 
-.plate-input-error {
-  font-size: 12px;
-  color: var(--ion-color-danger, #ef4444);
-  margin-top: 6px;
-  padding: 0 4px;
-  animation: shake 0.3s ease;
-}
-
-.plate-input-helper {
-  display: block;
-  margin-top: 6px;
-  padding: 0 4px;
-}
-
-.plate-input-helper p {
-  font-size: 12px;
-  color: var(--ion-color-medium, #92949c);
-  margin: 0;
-}
-
-/* Animación shake para error */
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
-}
 
 /* Responsive */
 @media (max-width: 576px) {
@@ -122,19 +76,6 @@
   border: 1px solid #e5e7eb;
   background: #fff;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
-}
-
-.plate-error-message {
-  display: block;
-  margin-top: 6px;
-  padding: 0 4px;
-}
-
-.plate-error-message p {
-  font-size: 12px;
-  color: var(--ion-color-danger, #ef4444);
-  margin: 0;
-  animation: shake 0.3s ease;
 }
 
 /* Estilos para la tarjeta del vehículo */
@@ -181,24 +122,27 @@
 }
 
 .vehicle-added-card-content-buttons .placa {
-  padding: 10px;
+  padding:  8px 10px;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.20);
   background: #F6C343;
 }
 
 .vehicle-added-card-content-buttons .placa p {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
-  color: #92400e;
+  color: rgba(0, 0, 0, 0.8);
   margin: 0;
-  letter-spacing: 1px;
+  letter-spacing: 0px;
+  text-align: center;
 }
 
 .vehicle-added-card-content-buttons .placa p.placa-disabled {
   color: #9ca3af;
+  opacity: 0.6;
 }
 
 .vehicle-added-card-content-buttons .placa p.placa-value {
-  color: #92400e;
+  color: #1a1a1a;
+  font-weight: 800;
 }
