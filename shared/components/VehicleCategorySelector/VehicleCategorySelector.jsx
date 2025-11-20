@@ -56,41 +56,6 @@ const VehicleCategorySelector = ({
           </div>
         </div>
       ))}
-
-      {/* <IonGrid>
-        <IonRow>
-          {categories.map((category) => (
-            <IonCol size="6" size-md="4" key={category.id}>
-              <IonCard
-                button
-                className={`category-card ${
-                  selectedCategory?.id === category.id
-                    ? "category-card-selected"
-                    : ""
-                }`}
-                onClick={() => onSelect(category)}
-              >
-                <IonCardContent className="category-card-content">
-                  <div className="category-icon">
-                    <img
-                      src={getCategoryImage(category.id)}
-                      alt={category.name}
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        objectFit: "contain",
-                      }}
-                    />
-                  </div>
-                  <IonText>
-                    <h3 className="category-name">{category.name}</h3>
-                  </IonText>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-          ))}
-        </IonRow>
-      </IonGrid> */}
     </div>
   );
 };

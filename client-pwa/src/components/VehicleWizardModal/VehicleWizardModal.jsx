@@ -10,7 +10,6 @@ import {
   IonIcon,
   IonText,
   IonProgressBar,
-  IonFooter,
 } from '@ionic/react';
 import { closeOutline, arrowBackOutline, checkmarkOutline } from 'ionicons/icons';
 import {
@@ -21,6 +20,7 @@ import {
   VehicleSpecificsForm,
   ServiceDetailsForm,
   VehicleList,
+  Button,
 } from '@components';
 import { vehicleAPI } from '../../services/vehicleAPI';
 import { useToast } from '@hooks/useToast';
@@ -88,8 +88,7 @@ const VehicleWizardModal = ({
         { id: 'category', title: 'Categoría', description: '¿Qué tipo de vehículo es?' },
         { id: 'brand', title: 'Marca', description: 'Selecciona la marca' },
         { id: 'model', title: 'Modelo', description: 'Selecciona el modelo' },
-        { id: 'plate', title: 'Placa', description: 'Ingresa la placa' },
-        { id: 'specifics', title: 'Detalles', description: 'Información adicional' },
+        { id: 'plate', title: 'Detalles', description: 'Datos del vehículo' },
         { id: 'service', title: 'Servicio', description: '¿Qué problema tiene?' },
       ]
     : [
@@ -263,14 +262,29 @@ const VehicleWizardModal = ({
       model: null,
       specifics: {} // Resetear specifics
     });
+    
+    // 🚀 Avanzar automáticamente después de seleccionar
+    setTimeout(() => {
+      setCurrentStep(currentStep + 1);
+    }, 300); // Pequeño delay para feedback visual
   };
 
   const handleSelectBrand = (brand) => {
     setVehicleData({ ...vehicleData, brand, model: null });
+    
+    // 🚀 Avanzar automáticamente después de seleccionar
+    setTimeout(() => {
+      setCurrentStep(currentStep + 1);
+    }, 300);
   };
 
   const handleSelectModel = (model) => {
     setVehicleData({ ...vehicleData, model });
+    
+    // 🚀 Avanzar automáticamente después de seleccionar
+    setTimeout(() => {
+      setCurrentStep(currentStep + 1);
+    }, 300);
   };
 
   const handlePlateChange = (plate) => {
@@ -364,31 +378,56 @@ const VehicleWizardModal = ({
             return;
           }
           break;
-        case 'plate':
+        case 'plate': {
+          // Validar placa
           if (!vehicleData.licensePlate || vehicleData.licensePlate.length < 5) {
             showWarning('Ingresa una placa válida');
             return;
           }
-          break;
-        case 'specifics': {
+          
           // Validar campos específicos según categoría
           const category = vehicleData.category.id;
+          
           if (category === 'CAMIONES') {
             const { truckData } = vehicleData.specifics;
-            if (!truckData || !truckData.trailerType || !truckData.length || !truckData.height || !truckData.axleType) {
-              showWarning('Completa todos los campos del camión');
+            if (!truckData?.trailerType) {
+              showWarning('Selecciona el tipo de furgón');
+              return;
+            }
+            if (!truckData?.length || truckData.length < 1 || truckData.length > 20) {
+              showWarning('Ingresa un largo válido (1-20 metros)');
+              return;
+            }
+            if (!truckData?.height || truckData.height < 1 || truckData.height > 6) {
+              showWarning('Ingresa un alto válido (1-6 metros)');
+              return;
+            }
+            if (!truckData?.axleType) {
+              showWarning('Selecciona el tipo de pacha');
               return;
             }
           }
+          
           if (category === 'BUSES') {
             const { busData } = vehicleData.specifics;
-            if (!busData || !busData.length || !busData.height || !busData.axleType || !busData.passengerCapacity) {
-              showWarning('Completa todos los campos del bus');
+            if (!busData?.length || busData.length < 5 || busData.length > 20) {
+              showWarning('Ingresa un largo válido (5-20 metros)');
+              return;
+            }
+            if (!busData?.height || busData.height < 2 || busData.height > 5) {
+              showWarning('Ingresa un alto válido (2-5 metros)');
+              return;
+            }
+            if (!busData?.axleType) {
+              showWarning('Selecciona el tipo de pacha');
+              return;
+            }
+            if (!busData?.passengerCapacity || busData.passengerCapacity < 10 || busData.passengerCapacity > 100) {
+              showWarning('Ingresa una capacidad válida (10-100 pasajeros)');
               return;
             }
           }
-          // La lógica de handleComplete se ejecuta automáticamente
-          // en las líneas 366-371 si es el último paso
+          // Para AUTOS, CAMIONETAS, ELECTRICOS: isArmored es opcional, no requiere validación
           break;
         }
         case 'service':
@@ -612,6 +651,33 @@ const VehicleWizardModal = ({
     onDismiss();
   };
 
+  // Renderizar botón de siguiente/confirmar usando componente Button de @shared
+  const renderNextButton = () => {
+    const isLastStep = currentStep === totalSteps - 1;
+    
+    return (
+      <div className="wizard-button-wrapper">
+        <Button
+          variant="primary"
+          size="large"
+          expand="block"
+          onClick={handleNext}
+          disabled={isLoading}
+          loading={isLoading}
+          className="wizard-next-button-inline"
+        >
+          {!isLoading && isLastStep && (
+            <IonIcon icon={checkmarkOutline} slot="start" style={{ marginRight: '8px' }} />
+          )}
+          {isLastStep ? 'Confirmar' : 'Siguiente'}
+        </Button>
+      </div>
+    );
+  };
+
+  // Nota: El botón "Siguiente/Confirmar" ahora está inline dentro del contenido
+  // Ya no usamos IonFooter para los pasos de formulario
+
   // Renderizar contenido del paso actual
   const renderStepContent = () => {
     switch (currentStepInfo.id) {
@@ -660,23 +726,29 @@ const VehicleWizardModal = ({
       case 'plate':
         return (
           <div className="wizard-form-container">
-            <VehiclePlateInput
-              value={vehicleData.licensePlate}
-              onChange={handlePlateChange}
-              label="Placa del vehículo"
-              placeholder="ABC-123, GIQ-79F, AB2-123"
-            />
-          </div>
-        );
+            {/* Sección de Placa */}
+            <div className="plate-section">
+              <VehiclePlateInput
+                value={vehicleData.licensePlate}
+                onChange={handlePlateChange}
+                vehicleData={vehicleData}
+                placeholder="ABC 123"
+              />
+            </div>
 
-      case 'specifics':
-        return (
-          <div className="wizard-form-container">
-            <VehicleSpecificsForm
-              category={vehicleData.category}
-              onDataChange={handleSpecificsChange}
-              initialData={vehicleData.specifics}
-            />
+            {/* Sección de Datos Específicos - Se muestra dinámicamente según categoría */}
+            {vehicleData.category?.id && vehicleData.category.id !== 'MOTOS' && (
+              <div className="specifics-section">
+                <VehicleSpecificsForm
+                  category={vehicleData.category}
+                  onDataChange={handleSpecificsChange}
+                  initialData={vehicleData.specifics}
+                />
+              </div>
+            )}
+
+            {/* Botón "Siguiente" inline */}
+            {renderNextButton()}
           </div>
         );
 
@@ -688,6 +760,9 @@ const VehicleWizardModal = ({
               onDataChange={handleServiceDetailsChange}
               initialData={serviceDetails}
             />
+
+            {/* Botón "Confirmar" inline */}
+            {renderNextButton()}
           </div>
         );
 
@@ -736,7 +811,7 @@ const VehicleWizardModal = ({
         <IonProgressBar value={progress / 100} color="primary" />
       </IonHeader>
 
-      <IonContent mode="ios" className="wizard-content">
+      <IonContent mode="ios" className="wizard-content" key={currentStep}>
         <div className="wizard-step-description">
           <IonText color="medium">
             <p>{currentStepInfo.description}</p>
@@ -746,27 +821,7 @@ const VehicleWizardModal = ({
         {renderStepContent()}
       </IonContent>
 
-      <IonFooter mode="ios" className="wizard-footer">
-        <IonToolbar mode="ios">
-          <IonButton
-            expand="block"
-            onClick={handleNext}
-            disabled={isLoading}
-            className="wizard-next-button"
-          >
-            {isLoading ? (
-              'Guardando...'
-            ) : currentStep === totalSteps - 1 ? (
-              <>
-                <IonIcon icon={checkmarkOutline} slot="start" />
-                Confirmar
-              </>
-            ) : (
-              'Siguiente'
-            )}
-          </IonButton>
-        </IonToolbar>
-      </IonFooter>
+      {/* El botón ahora está inline dentro del contenido de cada paso */}
     </IonModal>
 
     {/* Modal de autenticación */}

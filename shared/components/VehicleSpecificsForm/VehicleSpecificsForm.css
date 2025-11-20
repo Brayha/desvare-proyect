@@ -3,11 +3,31 @@
 }
 
 .vehicle-specifics-section {
-  padding: 16px 0;
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  align-self: stretch;
+  gap: 20px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
-.specifics-field {
-  margin-bottom: 24px;
+.specifics-section-title h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+}
+
+.specifics-section-description p {
+  overflow: hidden;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0;
 }
 
 .specifics-label {
@@ -25,22 +45,22 @@
 }
 
 .specifics-item {
-  --background: var(--ion-color-light, #f4f5f8);
-  --border-radius: 12px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --min-height: 56px;
-  border: 2px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.specifics-item:hover {
-  --background: #e8e9ec;
+  display: flex;
+  padding: 0px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  align-self: stretch;
+  border-radius: 15px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
 .specifics-item.ion-focused {
   --background: #fff;
-  border-color: var(--desvare-primary, #4F46E5);
+  border-color: var(--desvare-primary, #4f46e5);
 }
 
 .specifics-item.ion-invalid {
@@ -50,7 +70,8 @@
 
 .specifics-item ion-select,
 .specifics-item ion-input {
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 400;
   color: var(--ion-text-color, #000);
 }
 
@@ -58,6 +79,7 @@
   font-size: 14px;
   color: var(--ion-color-medium, #92949c);
   margin-left: 8px;
+  font-weight: 600;
 }
 
 .specifics-helper {
@@ -95,9 +117,16 @@
 
 /* Animación shake para error */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 /* Responsive */
@@ -107,9 +136,4 @@
     --padding-end: 14px;
     --min-height: 52px;
   }
-
-  .specifics-field {
-    margin-bottom: 20px;
-  }
 }
-

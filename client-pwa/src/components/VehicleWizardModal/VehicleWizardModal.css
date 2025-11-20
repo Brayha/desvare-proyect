@@ -34,6 +34,19 @@
 
 .wizard-content {
   --background: #f7f7f7;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Animación fadeInUp para transiciones de pasos */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .wizard-step-description {
@@ -56,39 +69,68 @@
    ======================================== */
 
 .wizard-form-container {
-  padding: 20px;
-  background: #f7f7f7;
-  margin: 16px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  margin: 0 10px 10px 10px;
+}
+
+.plate-section,
+.specifics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-emoji-title h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.section-description p {
+  font-size: 14px;
+  margin: 4px 0 0 0;
+  color: #666;
+}
+
+/* Contenedor del botón inline */
+.wizard-button-wrapper {
+  padding: 0;
+  margin-top: 5px;
+  animation: fadeInUp 0.4s ease-out;
+  animation-delay: 0.2s;
+  animation-fill-mode: backwards;
+}
+
+/* Botón "Siguiente/Confirmar" inline */
+.wizard-next-button-inline {
+  --border-radius: 12px;
+  --box-shadow: 0 2px 8px rgba(56, 128, 255, 0.3);
+  height: 52px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.wizard-next-button-inline:hover {
+  --box-shadow: 0 4px 12px rgba(56, 128, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.wizard-next-button-inline:active {
+  transform: translateY(0);
+  --box-shadow: 0 1px 4px rgba(56, 128, 255, 0.3);
 }
 
 /* ========================================
-   Footer (Botón de siguiente)
+   Nota: El footer fue eliminado.
+   El botón ahora está inline dentro del contenido.
    ======================================== */
-
-.wizard-footer ion-toolbar {
-  --background: #f7f7f7;
-  --border-width: 0;
-  padding: 12px 20px calc(12px + env(safe-area-inset-bottom)) 20px;
-}
-
-.wizard-next-button {
-  --background: #3880ff;
-  --background-hover: #3171e0;
-  --background-activated: #2a5ec8;
-  --border-radius: 12px;
-  --box-shadow: 0 2px 8px rgba(56, 128, 255, 0.3);
-  height: 50px;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.wizard-next-button[disabled] {
-  --background: #e5e7eb;
-  --color: #9ca3af;
-  --box-shadow: none;
-}
 
 /* ========================================
    Responsive
@@ -153,6 +195,32 @@
   border-radius: 20px;
 }
 
+/* Feedback visual para elementos seleccionados en pasos de selección */
+.wizard-content .category-card:active,
+.wizard-content .brand-card:active,
+.wizard-content .model-card:active {
+  transform: scale(0.98);
+  transition: transform 0.15s ease;
+}
+
+.wizard-content .category-card.selected,
+.wizard-content .brand-card.selected,
+.wizard-content .model-card.selected {
+  animation: pulse-selection 0.3s ease;
+}
+
+@keyframes pulse-selection {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* Specifics form dentro del wizard */
 .wizard-content .vehicle-specifics-form {
   background: transparent;
@@ -168,4 +236,3 @@
 .searchbar-input {
   background-color: #fff !important;
 }
-

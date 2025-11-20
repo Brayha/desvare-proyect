@@ -584,7 +584,7 @@
 
 .vehicle-added-card-content {
   display: flex;
-  padding: 5px 20px 5px 10px;
+  padding: 10px 20px 10px 10px;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -648,6 +648,10 @@
   line-height: 20px; /* 142.857% */
   margin: 0;
   text-align: center;
+}
+
+.placa-disabled {
+  color: rgba(0, 0, 0, 0.06) !important;
 }
 
 .problem-card {

@@ -59,7 +59,7 @@ const VehicleModelSelector = ({
   }
 
   return (
-    <div className="vehicle-model-selector">
+    <div className="vehicle-brand-selector">
       {selectedCategory && selectedBrand && (
         <div className="vehicle-list-type">
           <div className="select-vehicle-added-card-content">
@@ -71,52 +71,51 @@ const VehicleModelSelector = ({
               />
             </div>
             <div className="vehicle-added-card-content-text">
-              <h3 className="vehicle-brand-name">{selectedCategory.name}</h3>
-              <p className="vehicle-brand-subtext">{selectedBrand.name}</p>
+              <h3 className="vehicle-brand-name">{selectedBrand.name}</h3>
             </div>
           </div>
         </div>
       )}
 
-      <div className="searchbar-input-container-filter">
+      <div className="filter-container">
         <IonSearchbar
           value={searchText}
           onIonInput={(e) => setSearchText(e.detail.value)}
           placeholder="Buscar modelo..."
           debounce={300}
-          className="model-searchbar-filter"
+          className="brand-searchbar"
         />
-      </div>
 
-      {filteredModels.length === 0 ? (
-        <div className="vehicle-model-empty">
-          <IonText color="medium">
-            <p>No se encontraron modelos con "{searchText}"</p>
-          </IonText>
-        </div>
-      ) : (
-        <IonList className="model-list">
-          {filteredModels.map((model) => (
-            <IonItem
-              key={model.id}
-              button
-              className={`model-item ${
-                selectedModel?.id === model.id ? "model-item-selected" : ""
-              }`}
-              onClick={() => onSelect(model)}
-            >
-              <IonLabel>
-                <h3 className="model-name">{model.name}</h3>
-              </IonLabel>
-              {selectedModel?.id === model.id && (
-                <div className="model-check" slot="end">
-                  ✓
-                </div>
-              )}
-            </IonItem>
-          ))}
-        </IonList>
-      )}
+        {filteredModels.length === 0 ? (
+          <div className="vehicle-model-empty">
+            <IonText color="medium">
+              <p>No se encontraron modelos con "{searchText}"</p>
+            </IonText>
+          </div>
+        ) : (
+          <IonList className="model-list">
+            {filteredModels.map((model) => (
+              <IonItem
+                key={model.id}
+                button
+                className={`model-item ${
+                  selectedModel?.id === model.id ? "model-item-selected" : ""
+                }`}
+                onClick={() => onSelect(model)}
+              >
+                <IonLabel>
+                  <h3 className="model-name">{model.name}</h3>
+                </IonLabel>
+                {selectedModel?.id === model.id && (
+                  <div className="model-check" slot="end">
+                    ✓
+                  </div>
+                )}
+              </IonItem>
+            ))}
+          </IonList>
+        )}
+      </div>
     </div>
   );
 };
