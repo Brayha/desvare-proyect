@@ -1,0 +1,155 @@
+/* MyAccount Page Styles */
+.my-account-page {
+  --background: var(--ion-color-light);
+}
+
+/* Empty state (not logged in) */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 32px;
+}
+
+.empty-icon {
+  font-size: 80px;
+  color: var(--ion-color-medium);
+  margin-bottom: 24px;
+}
+
+.empty-state h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--ion-color-dark);
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin-bottom: 24px;
+}
+
+/* Profile Header */
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px 24px;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  background: var(--ion-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-avatar ion-icon {
+  font-size: 60px;
+  color: white;
+}
+
+.profile-name {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--ion-color-dark);
+}
+
+.profile-subtitle {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
+/* Profile Card */
+.profile-card {
+  margin: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card ion-card-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.profile-card ion-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 12px;
+}
+
+.profile-card ion-item:last-child {
+  margin-bottom: 0;
+}
+
+.profile-card ion-icon {
+  font-size: 24px;
+  margin-right: 16px;
+}
+
+.profile-card ion-label p {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ion-color-medium);
+  margin-bottom: 4px;
+}
+
+.profile-card ion-label h2 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ion-color-dark);
+}
+
+/* Actions Card */
+.actions-card {
+  margin: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-button {
+  margin-bottom: 12px;
+}
+
+.action-button:last-child {
+  margin-bottom: 0;
+}
+
+.logout-button {
+  margin-top: 16px;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .my-account-page {
+    --background: var(--ion-background-color);
+  }
+
+  .profile-card,
+  .actions-card {
+    background: var(--ion-card-background, #1e1e1e);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .profile-card,
+  .actions-card {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+

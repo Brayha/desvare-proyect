@@ -1,0 +1,238 @@
+/* ========================================
+   Vehicle Wizard Modal Styles
+   ======================================== */
+
+.vehicle-wizard-modal {
+  --height: 100%;
+  --border-radius: 20px 20px 0 0;
+  --background: #f7f7f7;
+}
+
+.vehicle-wizard-modal ion-header {
+  box-shadow: none;
+}
+
+.vehicle-wizard-modal ion-toolbar {
+  --background: #f7f7f7;
+  --border-width: 0;
+  padding: 8px 16px;
+}
+
+.vehicle-wizard-modal ion-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.vehicle-wizard-modal ion-progress-bar {
+  height: 4px;
+}
+
+/* ========================================
+   Wizard Content
+   ======================================== */
+
+.wizard-content {
+  --background: #f7f7f7;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Animación fadeInUp para transiciones de pasos */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wizard-step-description {
+  padding: 20px 10px;
+  background: #f7f7f7;
+}
+
+.wizard-step-description p {
+  color: #223d62;
+  text-align: center;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 24px; /* 150% */
+  margin: 0;
+}
+
+/* ========================================
+   Form Container (para inputs)
+   ======================================== */
+
+.wizard-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  margin: 0 10px 10px 10px;
+}
+
+.plate-section,
+.specifics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-emoji-title h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.section-description p {
+  font-size: 14px;
+  margin: 4px 0 0 0;
+  color: #666;
+}
+
+/* Contenedor del botón inline */
+.wizard-button-wrapper {
+  padding: 0;
+  margin-top: 5px;
+  animation: fadeInUp 0.4s ease-out;
+  animation-delay: 0.2s;
+  animation-fill-mode: backwards;
+}
+
+/* Botón "Siguiente/Confirmar" inline */
+.wizard-next-button-inline {
+  --border-radius: 12px;
+  --box-shadow: 0 2px 8px rgba(56, 128, 255, 0.3);
+  height: 52px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.wizard-next-button-inline:hover {
+  --box-shadow: 0 4px 12px rgba(56, 128, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.wizard-next-button-inline:active {
+  transform: translateY(0);
+  --box-shadow: 0 1px 4px rgba(56, 128, 255, 0.3);
+}
+
+/* ========================================
+   Nota: El footer fue eliminado.
+   El botón ahora está inline dentro del contenido.
+   ======================================== */
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (min-width: 768px) {
+  .vehicle-wizard-modal {
+    --width: 600px;
+    --height: 85%;
+    --border-radius: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .vehicle-wizard-modal {
+    --width: 700px;
+    --height: 80%;
+  }
+}
+
+/* ========================================
+   Loading State
+   ======================================== */
+
+.wizard-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* ========================================
+   Adjustments for child components
+   ======================================== */
+
+/* VehicleList dentro del wizard */
+.wizard-content .vehicle-list-container {
+  padding: 16px;
+}
+
+/* Category selector dentro del wizard */
+.wizard-content .vehicle-category-grid {
+  padding: 16px;
+}
+
+/* Brand/Model selectors dentro del wizard */
+.wizard-content .vehicle-brand-selector,
+.wizard-content .vehicle-model-selector {
+  padding: 0;
+  background: transparent;
+}
+
+.wizard-content .brand-list,
+.wizard-content .model-list {
+  background: transparent;
+  border-radius: 20px;
+}
+
+/* Feedback visual para elementos seleccionados en pasos de selección */
+.wizard-content .category-card:active,
+.wizard-content .brand-card:active,
+.wizard-content .model-card:active {
+  transform: scale(0.98);
+  transition: transform 0.15s ease;
+}
+
+.wizard-content .category-card.selected,
+.wizard-content .brand-card.selected,
+.wizard-content .model-card.selected {
+  animation: pulse-selection 0.3s ease;
+}
+
+@keyframes pulse-selection {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Specifics form dentro del wizard */
+.wizard-content .vehicle-specifics-form {
+  background: transparent;
+  padding: 0;
+}
+
+/* Service details form dentro del wizard */
+.wizard-content .service-details-form {
+  background: transparent;
+  padding: 0;
+}
+
+.searchbar-input {
+  background-color: #fff !important;
+}

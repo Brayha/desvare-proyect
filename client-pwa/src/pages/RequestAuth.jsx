@@ -21,19 +21,22 @@ import {
   IonSegment,
   IonSegmentButton,
 } from "@ionic/react";
-import { arrowBack, locationOutline, navigateOutline, timeOutline, mapOutline } from "ionicons/icons";
+import { arrowBack, locationOutline, navigateOutline, timeOutline, mapOutline, carOutline } from "ionicons/icons";
 import { useToast } from "@hooks/useToast";
 import { authAPI, requestAPI } from "../services/api";
 import socketService from "../services/socket";
+import { useAuth } from "../contexts/AuthContext";
 import { PhoneInput, OTPInput } from "../../../shared/components";
 import "./RequestAuth.css";
 
 const RequestAuth = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
+  const { login: authLogin, refreshVehicles } = useAuth();
   
-  // Datos de la ruta (desde localStorage)
+  // Datos de la ruta y vehículo (desde localStorage)
   const [routeData, setRouteData] = useState(null);
+  const [vehicleData, setVehicleData] = useState(null);
   
   // Estado de autenticación OTP (2 pasos)
   const [authMode, setAuthMode] = useState("login"); // "login" o "register"
@@ -81,6 +84,21 @@ const RequestAuth = () => {
       console.error('❌ Error al parsear requestData:', error);
       showError('Error al cargar datos de la ruta');
       history.replace('/request-service');
+    }
+
+    // Cargar datos del vehículo (si existen)
+    const storedVehicleData = localStorage.getItem('vehicleData');
+    if (storedVehicleData) {
+      try {
+        const parsedVehicleData = JSON.parse(storedVehicleData);
+        console.log('🚗 Datos de vehículo cargados:', parsedVehicleData);
+        setVehicleData(parsedVehicleData);
+      } catch (error) {
+        console.error('⚠️ Error al parsear vehicleData:', error);
+        // No bloqueamos el flujo si falla la carga de vehículo
+      }
+    } else {
+      console.log('⚠️ No hay datos de vehículo en localStorage');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // ✅ Sin dependencias para ejecutar solo una vez al montar y evitar loops
@@ -184,11 +202,129 @@ const RequestAuth = () => {
       localStorage.setItem('user', JSON.stringify(user));
       console.log('💾 Token y usuario guardados');
       
-      // 3. Enviar solicitud a conductores
+      // 2.1. Actualizar contexto de autenticación
+      await authLogin(user);
+      console.log('✅ Contexto de autenticación actualizado');
+      
+      // 2.5. Si hay vehículo en localStorage sin ID, guardarlo en BD
+      // Esto aplica TANTO para registro nuevo COMO para login (usuario creó vehículo antes de autenticarse)
+      if (vehicleData && vehicleData.vehicleSnapshot && !vehicleData.vehicleId) {
+        console.log('🚗 Guardando vehículo creado antes de autenticación...');
+        console.log('   📋 Snapshot COMPLETO:', JSON.stringify(vehicleData.vehicleSnapshot, null, 2));
+        console.log('   🔍 Keys del snapshot:', Object.keys(vehicleData.vehicleSnapshot));
+        console.log('   ❓ ¿Tiene truckData?:', vehicleData.vehicleSnapshot.truckData);
+        console.log('   ❓ ¿Tiene busData?:', vehicleData.vehicleSnapshot.busData);
+        
+        try {
+          const { vehicleAPI } = await import('../services/vehicleAPI');
+          const newVehiclePayload = {
+            userId: user.id,
+            category: vehicleData.vehicleSnapshot.category,
+            brand: vehicleData.vehicleSnapshot.brand,
+            model: vehicleData.vehicleSnapshot.model,
+            licensePlate: vehicleData.vehicleSnapshot.licensePlate,
+            year: vehicleData.vehicleSnapshot.year,
+            color: vehicleData.vehicleSnapshot.color,
+          };
+          
+          // Agregar campos específicos según categoría
+          const categoryId = vehicleData.vehicleSnapshot.category?.id;
+          if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
+            newVehiclePayload.isArmored = vehicleData.vehicleSnapshot.isArmored || false;
+          } else if (categoryId === 'CAMIONES' && vehicleData.vehicleSnapshot.truckData) {
+            // Filtrar solo propiedades con valor
+            const validTruckData = Object.keys(vehicleData.vehicleSnapshot.truckData)
+              .filter(key => vehicleData.vehicleSnapshot.truckData[key] != null && vehicleData.vehicleSnapshot.truckData[key] !== '')
+              .reduce((obj, key) => {
+                obj[key] = vehicleData.vehicleSnapshot.truckData[key];
+                return obj;
+              }, {});
+            
+            if (Object.keys(validTruckData).length > 0) {
+              newVehiclePayload.truckData = validTruckData;
+            }
+          } else if (categoryId === 'BUSES' && vehicleData.vehicleSnapshot.busData) {
+            // Filtrar solo propiedades con valor
+            const validBusData = Object.keys(vehicleData.vehicleSnapshot.busData)
+              .filter(key => vehicleData.vehicleSnapshot.busData[key] != null && vehicleData.vehicleSnapshot.busData[key] !== '')
+              .reduce((obj, key) => {
+                obj[key] = vehicleData.vehicleSnapshot.busData[key];
+                return obj;
+              }, {});
+            
+            if (Object.keys(validBusData).length > 0) {
+              newVehiclePayload.busData = validBusData;
+            }
+          }
+          
+          // VALIDAR payload antes de enviar
+          console.log('📤 Payload INICIAL:');
+          console.log(JSON.stringify(newVehiclePayload, null, 2));
+          
+          // Verificar que NO haya campos no deseados
+          if (newVehiclePayload.truckData && categoryId !== 'CAMIONES') {
+            console.error('⚠️ ERROR: truckData presente en vehículo que NO es camión');
+            delete newVehiclePayload.truckData;
+            console.log('🧹 truckData eliminado del payload');
+          }
+          if (newVehiclePayload.busData && categoryId !== 'BUSES') {
+            console.error('⚠️ ERROR: busData presente en vehículo que NO es bus');
+            delete newVehiclePayload.busData;
+            console.log('🧹 busData eliminado del payload');
+          }
+          
+          console.log('📤 Payload FINAL (después de validación):');
+          console.log(JSON.stringify(newVehiclePayload, null, 2));
+          console.log('🔍 Keys del payload:', Object.keys(newVehiclePayload));
+          
+          const vehicleResponse = await vehicleAPI.createVehicle(newVehiclePayload);
+          const savedVehicleId = vehicleResponse.data.data?._id || vehicleResponse.data._id;
+          console.log('✅ Vehículo guardado en BD con ID:', savedVehicleId);
+          
+          // Actualizar vehicleData con el ID real
+          vehicleData.vehicleId = savedVehicleId;
+          localStorage.setItem('vehicleData', JSON.stringify(vehicleData));
+          
+          // Refrescar vehículos en el contexto
+          await refreshVehicles();
+          console.log('✅ Lista de vehículos refrescada en contexto');
+          
+          showSuccess('✅ Vehículo guardado en tu garaje');
+        } catch (vehicleError) {
+          console.error('❌ Error guardando vehículo:', vehicleError);
+          console.error('   Detalles:', vehicleError.response?.data);
+          
+          // Mostrar error específico al usuario
+          const errorMsg = vehicleError.response?.data?.error || 'No se pudo guardar el vehículo';
+          showError(`⚠️ ${errorMsg}. El servicio continuará pero el vehículo no se guardó.`);
+          
+          // Continuar con el flujo (no bloqueamos la solicitud)
+        }
+      }
+      
+      // 3. Verificar si hay datos de vehículo para crear solicitud
+      if (!vehicleData || !vehicleData.vehicleSnapshot || !vehicleData.serviceDetails || !vehicleData.serviceDetails.problem) {
+        console.log('⚠️ No hay vehicleData completo - Login exitoso pero sin solicitud');
+        showSuccess('✅ Sesión iniciada correctamente');
+        
+        // Si hay routeData, volver al mapa para que complete el flujo
+        if (routeData) {
+          console.log('🔄 Redirigiendo al mapa para completar datos del vehículo...');
+          await new Promise(resolve => setTimeout(resolve, 100));
+          history.replace('/tabs/desvare');
+        } else {
+          // Si no hay ruta, ir a home
+          console.log('🔄 Redirigiendo a home...');
+          history.replace('/tabs/desvare');
+        }
+        return;
+      }
+      
+      // 4. Enviar solicitud a conductores
       console.log('🚀 Enviando solicitud a conductores...');
       await sendRequestToDrivers(user);
       
-      // 4. Redirigir a WaitingQuotes
+      // 5. Redirigir a WaitingQuotes
       console.log('🔄 Redirigiendo a /waiting-quotes...');
       await new Promise(resolve => setTimeout(resolve, 100)); // Delay para sincronizar localStorage
       history.replace('/waiting-quotes');
@@ -238,6 +374,14 @@ const RequestAuth = () => {
         distance: routeData.routeInfo.distance,
         duration: routeData.routeInfo.duration,
       };
+
+      // 3.1. Agregar datos del vehículo si existen
+      if (vehicleData) {
+        console.log('🚗 Incluyendo datos del vehículo en la solicitud...');
+        requestData.vehicleId = vehicleData.vehicleId || null;
+        requestData.vehicleSnapshot = vehicleData.vehicleSnapshot;
+        requestData.serviceDetails = vehicleData.serviceDetails;
+      }
       
       console.log('📦 Request payload:', JSON.stringify(requestData, null, 2));
       
@@ -251,7 +395,7 @@ const RequestAuth = () => {
 
       // 5. Emitir evento Socket.IO a conductores
       console.log('📡 Emitiendo request:new via Socket.IO...');
-      socketService.sendNewRequest({
+      const socketData = {
         requestId: requestId,
         clientId: user.id,
         clientName: user.name,
@@ -267,7 +411,16 @@ const RequestAuth = () => {
         },
         distance: routeData.routeInfo.distance,
         duration: routeData.routeInfo.duration,
-      });
+      };
+
+      // 5.1. Agregar datos del vehículo al Socket.IO si existen
+      if (vehicleData) {
+        console.log('🚗 Incluyendo datos del vehículo en Socket.IO...');
+        socketData.vehicleSnapshot = vehicleData.vehicleSnapshot;
+        socketData.serviceDetails = vehicleData.serviceDetails;
+      }
+
+      socketService.sendNewRequest(socketData);
 
       console.log('✅ sendRequestToDrivers completado exitosamente');
       
@@ -347,6 +500,35 @@ const RequestAuth = () => {
                 <IonText>{routeData.routeInfo.durationText}</IonText>
               </div>
             </div>
+
+            {/* Información del vehículo */}
+            {vehicleData && vehicleData.vehicleSnapshot && (
+              <>
+                <div className="divider"></div>
+                <div className="route-detail">
+                  <IonIcon icon={carOutline} className="detail-icon" />
+                  <div className="detail-content">
+                    <IonLabel className="detail-label">Vehículo</IonLabel>
+                    <IonText className="detail-text">
+                      {vehicleData.vehicleSnapshot.brand.name} {vehicleData.vehicleSnapshot.model.name}
+                    </IonText>
+                    <IonText className="detail-subtext">
+                      {vehicleData.vehicleSnapshot.category.name} • {vehicleData.vehicleSnapshot.licensePlate}
+                    </IonText>
+                  </div>
+                </div>
+                
+                {/* Problema del vehículo */}
+                {vehicleData.serviceDetails && vehicleData.serviceDetails.problem && (
+                  <div className="route-detail">
+                    <div className="detail-content" style={{ marginLeft: '36px' }}>
+                      <IonLabel className="detail-label">Problema</IonLabel>
+                      <IonText className="detail-text">{vehicleData.serviceDetails.problem}</IonText>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </IonCardContent>
         </IonCard>
 

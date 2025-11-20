@@ -1,0 +1,139 @@
+.vehicle-specifics-form {
+  width: 100%;
+}
+
+.vehicle-specifics-section {
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  align-self: stretch;
+  gap: 20px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}
+
+.specifics-section-title h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+}
+
+.specifics-section-description p {
+  overflow: hidden;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0;
+}
+
+.specifics-label {
+  display: block;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--ion-text-color, #000);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.specifics-label .required {
+  color: var(--ion-color-danger, #ef4444);
+  margin-left: 2px;
+}
+
+.specifics-item {
+  display: flex;
+  padding: 0px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  align-self: stretch;
+  border-radius: 15px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}
+
+.specifics-item.ion-focused {
+  --background: #fff;
+  border-color: var(--desvare-primary, #4f46e5);
+}
+
+.specifics-item.ion-invalid {
+  border-color: var(--ion-color-danger, #ef4444);
+  --background: #fef2f2;
+}
+
+.specifics-item ion-select,
+.specifics-item ion-input {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--ion-text-color, #000);
+}
+
+.specifics-item ion-label[slot="end"] {
+  font-size: 14px;
+  color: var(--ion-color-medium, #92949c);
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.specifics-helper {
+  display: block;
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
+.specifics-helper p {
+  font-size: 12px;
+  color: var(--ion-color-medium, #92949c);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.specifics-error {
+  display: block;
+  margin-top: 6px;
+  padding: 0 4px;
+}
+
+.specifics-error p {
+  font-size: 12px;
+  color: var(--ion-color-danger, #ef4444);
+  margin: 0;
+  animation: shake 0.3s ease;
+}
+
+/* Toggle personalizado */
+.specifics-item ion-toggle {
+  --handle-width: 24px;
+  --handle-height: 24px;
+  --handle-spacing: 4px;
+}
+
+/* Animación shake para error */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .specifics-item {
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --min-height: 52px;
+  }
+}
