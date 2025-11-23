@@ -1,68 +1,110 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from "react";
 import {
   IonModal,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-  IonButton,
-  IonIcon,
   IonContent,
+  IonText,
+  IonSpinner,
   IonSegment,
   IonSegmentButton,
   IonLabel,
-  IonItem,
-  IonInput,
-  IonText,
-  IonSpinner,
-} from '@ionic/react';
-import { closeOutline } from 'ionicons/icons';
-import { PhoneInput, OTPInput } from '@components';
-import { authAPI } from '../../services/api';
-import { useToast } from '@hooks/useToast';
-import { useAuth } from '../../contexts/AuthContext';
-import './AuthModal.css';
+} from "@ionic/react";
+import { Profile, Call, Sms, Lock } from "iconsax-react";
+import { authAPI } from "../../services/api";
+import { useToast } from "@hooks/useToast";
+import { useAuth } from "../../contexts/AuthContext";
+import "./AuthModal.css";
+import logo from "@shared/src/img/Desvare.svg";
 
 const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
   const { showSuccess, showError } = useToast();
   const { login: authLogin } = useAuth();
 
-  const [authMode, setAuthMode] = useState('login'); // "login" o "register"
+  const [authMode, setAuthMode] = useState("login"); // "login" o "register"
   const [step, setStep] = useState(1); // 1: formulario, 2: OTP
   const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Formulario de login
-  const [loginPhone, setLoginPhone] = useState('');
+  const [loginPhone, setLoginPhone] = useState("");
 
   // Formulario de registro
-  const [registerName, setRegisterName] = useState('');
-  const [registerPhone, setRegisterPhone] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerName, setRegisterName] = useState("");
+  const [registerPhone, setRegisterPhone] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
 
   // OTP
-  const [otp, setOtp] = useState('');
-  const [otpError, setOtpError] = useState('');
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+
+  // Refs para OTP inputs
+  const otpRefs = useRef([]);
+
+  // Función para formatear teléfono
+  const formatPhone = (phone) => {
+    if (!phone) return "";
+    const cleaned = phone.replace(/\D/g, "");
+
+    if (cleaned.length <= 3) {
+      return cleaned;
+    } else if (cleaned.length <= 6) {
+      return `${cleaned.slice(0, 3)} ${cleaned.slice(3)}`;
+    } else if (cleaned.length <= 8) {
+      return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(
+        6
+      )}`;
+    } else {
+      return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(
+        6,
+        8
+      )} ${cleaned.slice(8, 10)}`;
+    }
+  };
+
+  // Función para manejar input de teléfono
+  const handlePhoneInput = (value, setter) => {
+    const cleaned = value.replace(/\D/g, "").slice(0, 10);
+    setter(cleaned);
+  };
+
+  // Funciones para manejar OTP
+  const handleOTPChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = otp.split("");
+    newOtp[index] = value;
+    setOtp(newOtp.join(""));
+    setOtpError("");
+
+    if (value && index < 3) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOTPKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
 
   const handleLoginSubmit = async () => {
-    console.log('📱 Iniciando login con teléfono:', loginPhone);
+    console.log("📱 Iniciando login con teléfono:", loginPhone);
 
     if (!loginPhone || loginPhone.length !== 10) {
-      showError('Ingresa un número de teléfono válido');
+      showError("Ingresa un número de teléfono válido");
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await authAPI.loginOTP({ phone: loginPhone });
-      console.log('✅ Login OTP - Respuesta:', response.data);
+      console.log("✅ Login OTP - Respuesta:", response.data);
 
       setUserId(response.data.userId);
       setStep(2);
-      showSuccess('Te enviamos un código de verificación');
+      showSuccess("Te enviamos un código de verificación");
     } catch (error) {
-      console.error('❌ Error en login OTP:', error);
-      const errorMsg = error.response?.data?.error || 'Error al iniciar sesión';
+      console.error("❌ Error en login OTP:", error);
+      const errorMsg = error.response?.data?.error || "Error al iniciar sesión";
       showError(errorMsg);
     } finally {
       setIsLoading(false);
@@ -70,10 +112,14 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
   };
 
   const handleRegisterSubmit = async () => {
-    console.log('📱 Iniciando registro:', { registerName, registerPhone, registerEmail });
+    console.log("📱 Iniciando registro:", {
+      registerName,
+      registerPhone,
+      registerEmail,
+    });
 
     if (!registerName || !registerPhone || registerPhone.length !== 10) {
-      showError('Nombre y teléfono válido son requeridos');
+      showError("Nombre y teléfono válido son requeridos");
       return;
     }
 
@@ -84,17 +130,19 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
         phone: registerPhone,
         email: registerEmail || undefined,
       });
-      console.log('✅ Registro OTP - Respuesta:', response.data);
+      console.log("✅ Registro OTP - Respuesta:", response.data);
 
       setUserId(response.data.userId);
       setStep(2);
-      showSuccess('Te enviamos un código de verificación');
+      showSuccess("Te enviamos un código de verificación");
     } catch (error) {
-      console.error('❌ Error en registro OTP:', error);
-      const errorMsg = error.response?.data?.error || 'Error al registrarte';
+      console.error("❌ Error en registro OTP:", error);
+      const errorMsg = error.response?.data?.error || "Error al registrarte";
 
-      if (errorMsg.includes('ya está registrado')) {
-        showError('Este número ya está registrado. Usa "Iniciar Sesión" en su lugar.');
+      if (errorMsg.includes("ya está registrado")) {
+        showError(
+          'Este número ya está registrado. Usa "Iniciar Sesión" en su lugar.'
+        );
       } else {
         showError(errorMsg);
       }
@@ -104,39 +152,39 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
   };
 
   const handleVerifyOTP = async () => {
-    console.log('🔐 Verificando OTP:', otp);
+    console.log("🔐 Verificando OTP:", otp);
 
     if (otp.length !== 4) {
-      setOtpError('Ingresa el código de 4 dígitos');
+      setOtpError("Ingresa el código de 4 dígitos");
       return;
     }
 
     if (!userId) {
-      setOtpError('Error: No se encontró el ID de usuario. Intenta de nuevo.');
+      setOtpError("Error: No se encontró el ID de usuario. Intenta de nuevo.");
       setStep(1);
       return;
     }
 
     setIsLoading(true);
-    setOtpError('');
+    setOtpError("");
 
     try {
       const response = await authAPI.verifyOTP({
         userId: userId,
         otp: otp,
       });
-      console.log('✅ OTP verificado - Respuesta:', response.data);
+      console.log("✅ OTP verificado - Respuesta:", response.data);
 
       const { token, user } = response.data;
 
       // Guardar token y usuario en localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      console.log('💾 Token y usuario guardados en localStorage');
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      console.log("💾 Token y usuario guardados en localStorage");
 
       // CRÍTICO: Actualizar AuthContext para que toda la app lo detecte
       await authLogin(user);
-      console.log('✅ AuthContext actualizado - Usuario logueado globalmente');
+      console.log("✅ AuthContext actualizado - Usuario logueado globalmente");
 
       // Llamar al callback de éxito (para UI específica)
       if (onSuccess) {
@@ -146,25 +194,26 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
       // Resetear el modal
       handleResetModal();
     } catch (error) {
-      console.error('❌ Error al verificar OTP:', error);
-      const errorMsg = error.response?.data?.error || 'Código inválido o expirado';
+      console.error("❌ Error al verificar OTP:", error);
+      const errorMsg =
+        error.response?.data?.error || "Código inválido o expirado";
       setOtpError(errorMsg);
-      setOtp('');
+      setOtp("");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleResetModal = () => {
-    setAuthMode('login');
+    setAuthMode("login");
     setStep(1);
     setUserId(null);
-    setLoginPhone('');
-    setRegisterName('');
-    setRegisterPhone('');
-    setRegisterEmail('');
-    setOtp('');
-    setOtpError('');
+    setLoginPhone("");
+    setRegisterName("");
+    setRegisterPhone("");
+    setRegisterEmail("");
+    setOtp("");
+    setOtpError("");
   };
 
   const handleDismiss = () => {
@@ -174,99 +223,162 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
     }
   };
 
-  const handleBack = () => {
-    if (step === 2) {
-      setStep(1);
-      setOtp('');
-      setOtpError('');
-    } else {
-      handleDismiss();
-    }
-  };
-
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={handleDismiss} className="auth-modal">
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton onClick={handleBack}>
-              {step === 2 ? 'Atrás' : <IonIcon icon={closeOutline} />}
-            </IonButton>
-          </IonButtons>
-          <IonTitle>{step === 1 ? 'Autenticación' : 'Verificación'}</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+    <IonModal
+      isOpen={isOpen}
+      onDidDismiss={handleDismiss}
+      className="auth-modal-modern"
+      breakpoints={[0, 0.6, 0.85, 1]}
+      initialBreakpoint={0.85}
+      handle={true}
+      handleBehavior="cycle"
+      backdropDismiss={true}
+      canDismiss={true}
+    >
+      <IonContent className="auth-modal-content">
+        {/* Logo Desvare centrado */}
+        <div className="auth-logo-container">
+          <img src={logo} alt="Desvare" className="auth-logo" />
+        </div>
 
-      <IonContent className="ion-padding">
-        {/* PASO 1: Formulario de Login o Registro */}
+        {/* Tabs: Registrarme / Ingresar usando IonSegment - Solo visible en paso 1 */}
+        {step === 1 && (
+          <IonSegment
+            value={authMode}
+            onIonChange={(e) => setAuthMode(e.detail.value)}
+            disabled={isLoading}
+            className="auth-segment"
+            mode="ios"
+          >
+            <IonSegmentButton value="register">
+              <IonLabel>Registrarme</IonLabel>
+            </IonSegmentButton>
+            <IonSegmentButton value="login">
+              <IonLabel>Ingresar</IonLabel>
+            </IonSegmentButton>
+          </IonSegment>
+        )}
+
+        {/* PASO 1: Formulario */}
         {step === 1 && (
           <>
-            <IonSegment
-              value={authMode}
-              onIonChange={(e) => setAuthMode(e.detail.value)}
-              className="auth-segment"
-            >
-              <IonSegmentButton value="login">
-                <IonLabel>Iniciar Sesión</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton value="register">
-                <IonLabel>Registrarse</IonLabel>
-              </IonSegmentButton>
-            </IonSegment>
+            {/* Título del formulario */}
+            <h2 className="auth-form-title">
+              {authMode === "register"
+                ? "Crea tu cuenta aquí"
+                : "Ingresa a tu cuenta"}
+            </h2>
 
-            {authMode === 'login' ? (
-              <div className="auth-form">
-                <IonText color="medium" className="auth-subtitle">
-                  Ingresa tu número de teléfono
-                </IonText>
+            {authMode === "register" ? (
+              <div className="auth-form-content">
+                {/* Input Nombre */}
+                <div className="auth-input-group">
+                  <div className="auth-input-icon">
+                    <Profile size="24" color="#9CA3AF" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Como te llamas?"
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
+                    className="auth-input"
+                    disabled={isLoading}
+                  />
+                </div>
 
-                <PhoneInput value={loginPhone} onChange={setLoginPhone} />
+                {/* Input Teléfono */}
+                <div className="auth-input-group">
+                  <div className="auth-input-icon">
+                    <Call size="24" color="#9CA3AF" />
+                  </div>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="000 000 00 00"
+                    value={formatPhone(registerPhone)}
+                    onChange={(e) =>
+                      handlePhoneInput(e.target.value, setRegisterPhone)
+                    }
+                    className="auth-input"
+                    maxLength={13}
+                    disabled={isLoading}
+                  />
+                </div>
 
-                <IonButton
-                  expand="block"
-                  onClick={handleLoginSubmit}
-                  disabled={isLoading || loginPhone.length !== 10}
-                  className="auth-button"
+                {/* Input Email */}
+                <div className="auth-input-group">
+                  <div className="auth-input-icon">
+                    <Sms size="24" color="#9CA3AF" />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="ejemplo@email.com"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    className="auth-input"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                {/* Términos y condiciones */}
+                <p className="auth-terms">
+                  Al continuar aceptas tomar nuestros servicios con nuestros{" "}
+                  <a href="/terms">términos y condiciones</a> y también que tus
+                  datos estarán seguros bajo nuestra{" "}
+                  <a href="/privacy">política de privacidad</a>
+                </p>
+
+                {/* Botón Registrarme */}
+                <button
+                  className="auth-submit-button"
+                  onClick={handleRegisterSubmit}
+                  disabled={
+                    isLoading || !registerName || registerPhone.length !== 10
+                  }
                 >
-                  {isLoading ? <IonSpinner /> : 'Continuar'}
-                </IonButton>
+                  {isLoading ? <IonSpinner name="crescent" /> : "Registrarme"}
+                </button>
               </div>
             ) : (
-              <div className="auth-form">
-                <IonText color="medium" className="auth-subtitle">
-                  Crea tu cuenta
-                </IonText>
-
-                <IonItem lines="none" className="custom-input-item">
-                  <IonLabel position="stacked">Nombre completo</IonLabel>
-                  <IonInput
-                    type="text"
-                    placeholder="Juan Pérez"
-                    value={registerName}
-                    onIonInput={(e) => setRegisterName(e.detail.value)}
+              <div className="auth-form-content">
+                {/* Input Teléfono */}
+                <div className="auth-input-group">
+                  <div className="auth-input-icon">
+                    <Call size="24" color="#9CA3AF" />
+                  </div>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="000 000 00 00"
+                    value={formatPhone(loginPhone)}
+                    onChange={(e) =>
+                      handlePhoneInput(e.target.value, setLoginPhone)
+                    }
+                    className="auth-input"
+                    maxLength={13}
+                    disabled={isLoading}
                   />
-                </IonItem>
+                </div>
 
-                <PhoneInput value={registerPhone} onChange={setRegisterPhone} />
-
-                <IonItem lines="none" className="custom-input-item">
-                  <IonLabel position="stacked">Email (opcional)</IonLabel>
-                  <IonInput
-                    type="email"
-                    placeholder="juan@ejemplo.com"
-                    value={registerEmail}
-                    onIonInput={(e) => setRegisterEmail(e.detail.value)}
-                  />
-                </IonItem>
-
-                <IonButton
-                  expand="block"
-                  onClick={handleRegisterSubmit}
-                  disabled={isLoading || !registerName || registerPhone.length !== 10}
-                  className="auth-button"
+                <button
+                  className="auth-submit-button"
+                  onClick={handleLoginSubmit}
+                  disabled={isLoading || loginPhone.length !== 10}
                 >
-                  {isLoading ? <IonSpinner /> : 'Crear Cuenta'}
-                </IonButton>
+                  {isLoading ? (
+                    <IonSpinner name="crescent" />
+                  ) : (
+                    "Validar número"
+                  )}
+                </button>
+
+                <button
+                  className="auth-secondary-button"
+                  onClick={handleDismiss}
+                  disabled={isLoading}
+                >
+                  No puedo ingresar
+                </button>
               </div>
             )}
           </>
@@ -274,44 +386,63 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
 
         {/* PASO 2: Verificación OTP */}
         {step === 2 && (
-          <div className="otp-form">
-            <IonText color="medium" className="otp-subtitle">
-              Ingresa el código de 4 dígitos
-            </IonText>
-            <IonText color="medium" className="otp-hint">
-              (Para pruebas usa: 0000)
-            </IonText>
+          <div className="auth-form-content">
+            <div className="auth-form-content-inner">
+              <div className="otp-icon-container">
+                <Lock size="48" color="#0055FF" variant="Bulk" />
+              </div>
 
-            <OTPInput
-              value={otp}
-              onChange={(value) => {
-                setOtp(value);
-                setOtpError('');
-              }}
-              error={otpError}
-            />
+              <h3 className="otp-title">Ingresa el código</h3>
+              <p className="otp-description">
+                A continuación debes ingresar el código de seguridad enviado a
+                tu número de celular{" "}
+                {formatPhone(authMode === "login" ? loginPhone : registerPhone)}
+              </p>
+            </div>
 
-            <IonButton
-              expand="block"
+            {/* Input OTP personalizado (4 dígitos) */}
+            <div className="otp-inputs-container">
+              {[0, 1, 2, 3].map((index) => (
+                <input
+                  key={index}
+                  ref={(el) => (otpRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  className="otp-input-box"
+                  value={otp[index] || ""}
+                  onChange={(e) => handleOTPChange(index, e.target.value)}
+                  onKeyDown={(e) => handleOTPKeyDown(index, e)}
+                  disabled={isLoading}
+                />
+              ))}
+            </div>
+
+            {otpError && (
+              <IonText color="danger" className="otp-error">
+                <small>{otpError}</small>
+              </IonText>
+            )}
+
+            <button
+              className="auth-submit-button"
               onClick={handleVerifyOTP}
               disabled={isLoading || otp.length !== 4}
-              className="auth-button"
             >
-              {isLoading ? <IonSpinner /> : 'Verificar'}
-            </IonButton>
+              {isLoading ? <IonSpinner name="crescent" /> : "Validar código"}
+            </button>
 
-            <IonButton
-              expand="block"
-              fill="clear"
+            <button
+              className="auth-secondary-button"
               onClick={() => {
                 setStep(1);
-                setOtp('');
-                setOtpError('');
+                setOtp("");
+                setOtpError("");
               }}
               disabled={isLoading}
             >
-              Cambiar número
-            </IonButton>
+              Cancelar
+            </button>
           </div>
         )}
       </IonContent>
@@ -320,4 +451,3 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
 };
 
 export default AuthModal;
-
