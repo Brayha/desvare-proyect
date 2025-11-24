@@ -1,0 +1,38 @@
+/* TabLayout Styles */
+.custom-tab-bar {
+  --background: var(--ion-background-color, #F7F7F7);
+  padding-bottom: env(safe-area-inset-bottom);
+  height: calc(80px + env(safe-area-inset-bottom));
+}
+
+.custom-tab-bar ion-tab-button {
+  --color: var(--ion-color-medium);
+  --color-selected: var(--ion-color-primary);
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  min-height: 80px;
+}
+
+.custom-tab-bar ion-tab-button ion-icon {
+  font-size: 24px;
+}
+
+.custom-tab-bar ion-tab-button ion-label {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* Active tab */
+.custom-tab-bar ion-tab-button.tab-selected {
+  --color-selected: var(--ion-color-primary);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .custom-tab-bar {
+    --background: var(--ion-background-color, #F7F7F7);
+    --border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+

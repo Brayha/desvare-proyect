@@ -1,33 +1,28 @@
 import React from 'react';
-import { IonItem, IonLabel, IonInput } from '@ionic/react';
+import { Call } from 'iconsax-react';
 import './PhoneInput.css';
 
 /**
- * Componente PhoneInput para números de teléfono colombianos
+ * Componente PhoneInput moderno para números de teléfono colombianos
  * Formato automático: 319 257 95 62
- * Prefijo fijo: 🇨🇴 +57
  * 
  * @param {string} value - Valor del teléfono (solo números, sin espacios)
  * @param {function} onChange - Callback cuando cambia el valor
  * @param {string} error - Mensaje de error (opcional)
- * @param {string} label - Label del input (opcional)
- * @param {string} placeholder - Placeholder (default: "319 257 95 62")
+ * @param {boolean} disabled - Si está deshabilitado
  */
 const PhoneInput = ({ 
   value, 
   onChange, 
-  error, 
-  label,
-  placeholder = "319 257 95 62"
+  error,
+  disabled = false
 }) => {
   const handleInput = (e) => {
-    const rawValue = e.detail.value || '';
-    // Solo números, máximo 10 dígitos
+    const rawValue = e.target.value || '';
     const cleaned = rawValue.replace(/\D/g, '').slice(0, 10);
     onChange(cleaned);
   };
 
-  // Formatear con espacios: 319 257 95 62
   const formatPhone = (phone) => {
     if (!phone) return '';
     const cleaned = phone.replace(/\D/g, '');
@@ -44,29 +39,24 @@ const PhoneInput = ({
   };
 
   return (
-    <div className="phone-input-wrapper">
-      {label && (
-        <IonLabel className="phone-input-label">{label}</IonLabel>
-      )}
-      <IonItem 
-        className={`phone-input-item ${error ? 'ion-invalid' : ''}`}
-        lines="none"
-      >
-        <div className="phone-prefix">🇨🇴 +57</div>
-        <IonInput
-          type="tel"
-          inputmode="numeric"
-          maxlength={13} // "319 257 95 62" = 13 caracteres con espacios
-          placeholder={placeholder}
-          value={formatPhone(value)}
-          onIonInput={handleInput}
-          className="phone-input-field"
-        />
-      </IonItem>
-      {error && (
-        <div className="phone-input-error">
-          {error}
+    <div className="modern-phone-input-wrapper">
+      <div className={`modern-phone-input-group ${error ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''}`}>
+        <div className="modern-phone-input-icon">
+          <Call size="24" color={error ? '#EF4444' : '#9CA3AF'} />
         </div>
+        <input
+          type="tel"
+          inputMode="numeric"
+          maxLength={13}
+          placeholder="000 000 00 00"
+          value={formatPhone(value)}
+          onChange={handleInput}
+          disabled={disabled}
+          className="modern-phone-input-field"
+        />
+      </div>
+      {error && (
+        <span className="modern-phone-input-error">{error}</span>
       )}
     </div>
   );
@@ -74,4 +64,3 @@ const PhoneInput = ({
 
 export { PhoneInput };
 export default PhoneInput;
-

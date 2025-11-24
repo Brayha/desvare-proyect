@@ -18,8 +18,7 @@ export default defineConfig({
     dedupe: ['react', 'react-dom', '@ionic/react'],
   },
   server: {
-    fs: {
-      allow: ['..'], // Permitir acceso a carpeta shared
-    },
+    host: '0.0.0.0', // Permite acceso desde red local
+    port: 5173,
   },
 })
