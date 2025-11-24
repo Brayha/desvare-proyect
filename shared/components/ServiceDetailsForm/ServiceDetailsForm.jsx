@@ -50,7 +50,6 @@ const ServiceDetailsForm = ({
     "MOTOS",
     "AUTOS",
     "CAMIONETAS",
-    "ELECTRICOS",
   ].includes(categoryId);
 
   // Verificar si es camión (pregunta peso)
@@ -119,7 +118,7 @@ const ServiceDetailsForm = ({
         </div>
       </div>
 
-      {/* Sótano - Para MOTOS, AUTOS, CAMIONETAS, ELECTRICOS */}
+      {/* Sótano - Para MOTOS, AUTOS y CAMIONETAS */}
       {canBeInBasement && (
         <div className="service-field">
           <div className="service-checkbox-wrapper">

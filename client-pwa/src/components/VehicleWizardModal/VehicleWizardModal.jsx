@@ -427,7 +427,7 @@ const VehicleWizardModal = ({
               return;
             }
           }
-          // Para AUTOS, CAMIONETAS, ELECTRICOS: isArmored es opcional, no requiere validación
+          // Para AUTOS y CAMIONETAS: isArmored es opcional, no requiere validación
           break;
         }
         case 'service':
@@ -525,7 +525,7 @@ const VehicleWizardModal = ({
         // Agregar campos específicos según la categoría
         const categoryId = vehicleData.category?.id;
         
-        if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
+        if (['AUTOS', 'CAMIONETAS'].includes(categoryId)) {
           newVehiclePayload.isArmored = vehicleData.specifics?.isArmored || false;
         } else if (categoryId === 'CAMIONES' && vehicleData.specifics?.truckData) {
           // Filtrar solo propiedades con valor

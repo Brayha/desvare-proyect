@@ -302,7 +302,7 @@ const RequestAuth = () => {
 
           // Agregar campos específicos según categoría
           const categoryId = vehicleData.vehicleSnapshot.category?.id;
-          if (["AUTOS", "CAMIONETAS", "ELECTRICOS"].includes(categoryId)) {
+          if (["AUTOS", "CAMIONETAS"].includes(categoryId)) {
             newVehiclePayload.isArmored =
               vehicleData.vehicleSnapshot.isArmored || false;
           } else if (

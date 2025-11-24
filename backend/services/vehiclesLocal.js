@@ -26,13 +26,19 @@ class VehiclesLocalService {
   }
 
   /**
-   * Obtener todas las categorías de vehículos
+   * Obtener todas las categorías de vehículos (excluye las deprecadas)
    */
   getCategories() {
-    return this.data.categories.map(cat => ({
-      id: cat.id,
-      name: cat.name
-    }));
+    return this.data.categories
+      .filter(cat => !cat.deprecated && !cat.hidden)
+      .map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        descripcion: cat.descripcion,
+        icon: cat.icon,
+        order: cat.order
+      }))
+      .sort((a, b) => (a.order || 999) - (b.order || 999));
   }
 
   /**

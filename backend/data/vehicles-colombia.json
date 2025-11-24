@@ -25,34 +25,51 @@
   },
   "categories": [
     {
-      "id": "AUTOS",
-      "name": "Automóviles",
-      "descripcion": "Vehículos particulares y familiares"
-    },
-    {
       "id": "MOTOS",
       "name": "Motocicletas",
-      "descripcion": "Motocicletas y ciclomotores"
+      "descripcion": "Motocicletas y ciclomotores",
+      "icon": "🏍️",
+      "order": 1
+    },
+    {
+      "id": "AUTOS",
+      "name": "Automóviles",
+      "descripcion": "Vehículos particulares y familiares (incluye gasolina, híbridos y eléctricos)",
+      "icon": "🚗",
+      "accepts_electric": true,
+      "order": 2
     },
     {
       "id": "CAMIONETAS",
-      "name": "Camionetas y SUVs",
-      "descripcion": "Camionetas, pickups y SUVs"
+      "name": "Camionetas",
+      "descripcion": "Camionetas, pickups y SUVs (incluye gasolina, híbridas y eléctricas)",
+      "icon": "🚙",
+      "accepts_electric": true,
+      "order": 3
     },
     {
       "id": "CAMIONES",
-      "name": "Camiones y Comerciales",
-      "descripcion": "Vehículos de carga y comerciales"
+      "name": "Camiones",
+      "descripcion": "Furgones, camiones de carga y volquetas",
+      "icon": "🚚",
+      "subtipos": ["furgon", "carga", "volqueta"],
+      "order": 4
     },
     {
       "id": "BUSES",
       "name": "Buses",
-      "descripcion": "Buses de pasajeros y transporte público"
+      "descripcion": "Buses y microbuses de pasajeros (más de 4 pasajeros)",
+      "icon": "🚌",
+      "min_passengers": 5,
+      "order": 5
     },
     {
       "id": "ELECTRICOS",
       "name": "Vehículos Eléctricos e Híbridos",
-      "descripcion": "Tecnologías limpias y sostenibles"
+      "descripcion": "DEPRECADO: Los vehículos eléctricos ahora están en AUTOS o CAMIONETAS con tipo_combustible='Eléctrico'",
+      "deprecated": true,
+      "hidden": true,
+      "order": 999
     }
   ],
   "brands": [
@@ -61,32 +78,36 @@
       "name": "Renault",
       "pais_origen": "Francia",
       "participacion_mercado": 14.1,
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"],
-      "modelos_destacados_2025": ["Duster", "Koleos", "Boreal"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"],
+      "modelos_destacados_2025": ["Duster", "Koleos", "Kwid"],
+      "has_electric": true
     },
     {
       "id": "KIA",
       "name": "Kia",
       "pais_origen": "Corea del Sur",
       "participacion_mercado": 13.3,
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"],
-      "modelos_destacados_2025": ["K3", "Picanto", "Sportage", "Seltos"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"],
+      "modelos_destacados_2025": ["K3", "Picanto", "Sportage", "Seltos"],
+      "has_electric": true
     },
     {
       "id": "TOYOTA",
       "name": "Toyota",
       "pais_origen": "Japón",
       "participacion_mercado": 10.1,
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES", "ELECTRICOS"],
-      "modelos_destacados_2025": ["Corolla Cross", "Hilux", "Fortuner"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Corolla Cross", "Hilux", "Fortuner"],
+      "has_electric": true
     },
     {
       "id": "CHEVROLET",
       "name": "Chevrolet",
       "pais_origen": "USA",
       "participacion_mercado": 8.8,
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES", "ELECTRICOS"],
-      "modelos_destacados_2025": ["Onix", "Tracker", "Montana"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Onix", "Tracker", "Montana"],
+      "has_electric": true
     },
     {
       "id": "MAZDA",
@@ -101,25 +122,33 @@
       "name": "Hyundai",
       "pais_origen": "Corea del Sur",
       "participacion_mercado": 6.5,
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"],
+      "modelos_destacados_2025": ["Accent", "Tucson", "Santa Fe", "Creta"],
+      "has_electric": true
     },
     {
       "id": "NISSAN",
       "name": "Nissan",
       "pais_origen": "Japón",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"],
+      "modelos_destacados_2025": ["Versa", "Kicks", "X-Trail", "Frontier"],
+      "has_electric": true
     },
     {
       "id": "FORD",
       "name": "Ford",
       "pais_origen": "USA",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Territory", "Ranger", "Bronco Sport"],
+      "has_electric": true
     },
     {
       "id": "VOLKSWAGEN",
       "name": "Volkswagen",
       "pais_origen": "Alemania",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES"],
+      "modelos_destacados_2025": ["Polo", "Virtus", "Taos", "Tiguan"],
+      "has_electric": true
     },
     {
       "id": "SUZUKI",
@@ -173,19 +202,25 @@
       "id": "BMW",
       "name": "BMW",
       "pais_origen": "Alemania",
-      "categories": ["AUTOS", "MOTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "MOTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["Serie 3", "X1", "X3", "X5"],
+      "has_electric": true
     },
     {
       "id": "MERCEDES_BENZ",
       "name": "Mercedes-Benz",
       "pais_origen": "Alemania",
-      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Clase A", "GLA", "GLC", "Sprinter"],
+      "has_electric": true
     },
     {
       "id": "AUDI",
       "name": "Audi",
       "pais_origen": "Alemania",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["A3", "Q3", "Q5", "Q7"],
+      "has_electric": true
     },
     {
       "id": "JAC",
@@ -209,13 +244,18 @@
       "id": "BYD",
       "name": "BYD",
       "pais_origen": "China",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS", "BUSES"],
+      "modelos_destacados_2025": ["Dolphin", "Seal", "Yuan Plus", "Tang"],
+      "has_electric": true,
+      "is_primarily_electric": true
     },
     {
       "id": "MG",
       "name": "MG Motor",
       "pais_origen": "China",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["MG5", "ZS", "HS", "RX5"],
+      "has_electric": true
     },
     {
       "id": "GEELY",
@@ -245,7 +285,9 @@
       "id": "PORSCHE",
       "name": "Porsche",
       "pais_origen": "Alemania",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["911", "Cayenne", "Macan", "Taycan"],
+      "has_electric": true
     },
     {
       "id": "VOLVO",
@@ -257,7 +299,10 @@
       "id": "TESLA",
       "name": "Tesla",
       "pais_origen": "USA",
-      "categories": ["ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["Model 3", "Model Y", "Model S", "Model X"],
+      "has_electric": true,
+      "is_primarily_electric": true
     },
     {
       "id": "MINI",
@@ -473,7 +518,9 @@
       "id": "LEXUS",
       "name": "Lexus",
       "pais_origen": "Japón",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["UX", "NX", "RX", "LX"],
+      "has_electric": true
     },
     {
       "id": "INFINITI",
@@ -491,7 +538,9 @@
       "id": "GENESIS",
       "name": "Genesis",
       "pais_origen": "Corea del Sur",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["G70", "G80", "GV70", "GV80"],
+      "has_electric": true
     },
     {
       "id": "MAHINDRA",
@@ -545,49 +594,190 @@
       "id": "OMODA",
       "name": "Omoda",
       "pais_origen": "China",
-      "categories": ["CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["Omoda 5", "Omoda C5"],
+      "has_electric": false
     },
     {
       "id": "LYNK_CO",
       "name": "Lynk & Co",
       "pais_origen": "China",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["01", "02", "03"],
+      "has_electric": true
     },
     {
       "id": "GAC",
       "name": "GAC Motor",
       "pais_origen": "China",
-      "categories": ["AUTOS", "CAMIONETAS", "ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["GA4", "GS3", "GS5", "GS8"],
+      "has_electric": false
     },
     {
       "id": "NIO",
       "name": "NIO",
       "pais_origen": "China",
-      "categories": ["ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["ET5", "ET7", "ES6", "ES8"],
+      "has_electric": true,
+      "is_primarily_electric": true
     },
     {
       "id": "XPENG",
       "name": "XPeng",
       "pais_origen": "China",
-      "categories": ["ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["P7", "G3", "G9"],
+      "has_electric": true,
+      "is_primarily_electric": true
     },
     {
       "id": "RIVIAN",
       "name": "Rivian",
       "pais_origen": "USA",
-      "categories": ["ELECTRICOS", "CAMIONETAS"]
+      "categories": ["CAMIONETAS"],
+      "modelos_destacados_2025": ["R1T", "R1S"],
+      "has_electric": true,
+      "is_primarily_electric": true
     },
     {
       "id": "LUCID",
       "name": "Lucid Motors",
       "pais_origen": "USA",
-      "categories": ["ELECTRICOS"]
+      "categories": ["AUTOS"],
+      "modelos_destacados_2025": ["Air", "Gravity"],
+      "has_electric": true,
+      "is_primarily_electric": true
     },
     {
       "id": "POLESTAR",
       "name": "Polestar",
       "pais_origen": "Suecia",
-      "categories": ["ELECTRICOS"]
+      "categories": ["AUTOS", "CAMIONETAS"],
+      "modelos_destacados_2025": ["Polestar 2", "Polestar 3", "Polestar 4"],
+      "has_electric": true,
+      "is_primarily_electric": true
+    },
+    {
+      "id": "HINO",
+      "name": "Hino",
+      "pais_origen": "Japón",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Serie 300", "Serie 500", "Serie 700", "FC9J"],
+      "has_electric": false
+    },
+    {
+      "id": "SCANIA",
+      "name": "Scania",
+      "pais_origen": "Suecia",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Serie P", "Serie G", "Serie R", "Serie S"],
+      "has_electric": false
+    },
+    {
+      "id": "ISUZU",
+      "name": "Isuzu",
+      "pais_origen": "Japón",
+      "categories": ["CAMIONES", "CAMIONETAS", "BUSES"],
+      "modelos_destacados_2025": ["NPR", "NQR", "FTR", "D-Max"],
+      "has_electric": false
+    },
+    {
+      "id": "FREIGHTLINER",
+      "name": "Freightliner",
+      "pais_origen": "USA",
+      "categories": ["CAMIONES"],
+      "modelos_destacados_2025": ["Cascadia", "M2 106", "Business Class M2", "Columbia"],
+      "has_electric": false
+    },
+    {
+      "id": "KENWORTH",
+      "name": "Kenworth",
+      "pais_origen": "USA",
+      "categories": ["CAMIONES"],
+      "modelos_destacados_2025": ["T680", "T800", "W900", "T370"],
+      "has_electric": false
+    },
+    {
+      "id": "MACK",
+      "name": "Mack Trucks",
+      "pais_origen": "USA",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Anthem", "Granite", "Pinnacle", "MD Series"],
+      "has_electric": false
+    },
+    {
+      "id": "INTERNATIONAL",
+      "name": "International",
+      "pais_origen": "USA",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["LT Series", "HV Series", "HX Series", "MV Series"],
+      "has_electric": false
+    },
+    {
+      "id": "VOLKSWAGEN_CAMIONES",
+      "name": "Volkswagen Camiones y Buses",
+      "pais_origen": "Brasil",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Constellation", "Delivery", "Worker", "Meteor"],
+      "has_electric": false
+    },
+    {
+      "id": "IVECO",
+      "name": "Iveco",
+      "pais_origen": "Italia",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Daily", "Eurocargo", "Trakker", "S-Way"],
+      "has_electric": false
+    },
+    {
+      "id": "MAN",
+      "name": "MAN",
+      "pais_origen": "Alemania",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["TGX", "TGS", "TGM", "TGL"],
+      "has_electric": false
+    },
+    {
+      "id": "SINOTRUK",
+      "name": "Sinotruk",
+      "pais_origen": "China",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Howo", "Hohan", "Sitrak", "T5G"],
+      "has_electric": false
+    },
+    {
+      "id": "SHACMAN",
+      "name": "Shacman",
+      "pais_origen": "China",
+      "categories": ["CAMIONES"],
+      "modelos_destacados_2025": ["X3000", "F3000", "M3000", "H3000"],
+      "has_electric": false
+    },
+    {
+      "id": "FAW",
+      "name": "FAW",
+      "pais_origen": "China",
+      "categories": ["CAMIONES", "BUSES", "CAMIONETAS"],
+      "modelos_destacados_2025": ["J6P", "J6M", "Tiger V", "Bestune"],
+      "has_electric": false
+    },
+    {
+      "id": "UD_TRUCKS",
+      "name": "UD Trucks",
+      "pais_origen": "Japón",
+      "categories": ["CAMIONES"],
+      "modelos_destacados_2025": ["Quester", "Croner", "Condor"],
+      "has_electric": false
+    },
+    {
+      "id": "FUSO",
+      "name": "Fuso",
+      "pais_origen": "Japón",
+      "categories": ["CAMIONES", "BUSES"],
+      "modelos_destacados_2025": ["Canter", "Fighter", "Super Great", "Rosa"],
+      "has_electric": false
     }
   ],
   "models": {
@@ -619,8 +809,8 @@
       { "id": "NPR", "name": "NPR", "category": "CAMIONES", "tipo_combustible": "Diesel" },
       { "id": "FRR", "name": "FRR", "category": "CAMIONES", "tipo_combustible": "Diesel" },
       { "id": "NQR", "name": "NQR", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
-      { "id": "BOLT_EV", "name": "Bolt EV", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2017-2024" },
-      { "id": "BOLT_EUV", "name": "Bolt EUV", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
+      { "id": "BOLT_EV", "name": "Bolt EV", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2017-2024" },
+      { "id": "BOLT_EUV", "name": "Bolt EUV", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
     ],
     "RENAULT": [
       { "id": "LOGAN", "name": "Logan", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
@@ -640,7 +830,7 @@
       { "id": "KWID", "name": "Kwid", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2017-2024" },
       { "id": "KANGOO", "name": "Kangoo", "category": "CAMIONES", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
       { "id": "MASTER", "name": "Master", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
-      { "id": "ZOE", "name": "Zoe", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" }
+      { "id": "ZOE", "name": "Zoe", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" }
     ],
     "MAZDA": [
       { "id": "MAZDA2", "name": "Mazda 2", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
@@ -672,9 +862,9 @@
       { "id": "CARNIVAL", "name": "Carnival", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2015-2024" },
       { "id": "SOUL", "name": "Soul", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
       { "id": "STONIC", "name": "Stonic", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2021-2024" },
-      { "id": "NIRO", "name": "Niro", "category": "ELECTRICOS", "tipo_combustible": "Híbrido", "anos_populares": "2017-2024" },
-      { "id": "EV6", "name": "EV6", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
-      { "id": "EV9", "name": "EV9", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2024" }
+      { "id": "NIRO", "name": "Niro", "category": "CAMIONETAS", "tipo_combustible": "Híbrido", "anos_populares": "2017-2024" },
+      { "id": "EV6", "name": "EV6", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "EV9", "name": "EV9", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2024" }
     ],
     "TOYOTA": [
       { "id": "YARIS", "name": "Yaris", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
@@ -682,7 +872,7 @@
       { "id": "COROLLA", "name": "Corolla", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
       { "id": "COROLLA_CROSS", "name": "Corolla Cross", "category": "CAMIONETAS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2021-2024" },
       { "id": "CAMRY", "name": "Camry", "category": "AUTOS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2010-2024" },
-      { "id": "PRIUS", "name": "Prius", "category": "ELECTRICOS", "tipo_combustible": "Híbrido", "anos_populares": "2010-2024" },
+      { "id": "PRIUS", "name": "Prius", "category": "AUTOS", "tipo_combustible": "Híbrido", "anos_populares": "2010-2024" },
       { "id": "PRIUS_C", "name": "Prius C", "category": "AUTOS", "tipo_combustible": "Híbrido", "anos_populares": "2012-2019" },
       { "id": "RAV4", "name": "RAV4", "category": "CAMIONETAS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2010-2024" },
       { "id": "CHR", "name": "C-HR", "category": "CAMIONETAS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2017-2024" },
@@ -700,7 +890,7 @@
       { "id": "DYNA", "name": "Dyna", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "HIACE", "name": "Hiace", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "COASTER", "name": "Coaster", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
-      { "id": "BZ4X", "name": "bZ4X", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
+      { "id": "BZ4X", "name": "bZ4X", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
     ],
     "NISSAN": [
       { "id": "MARCH", "name": "March", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2021" },
@@ -721,8 +911,8 @@
       { "id": "PATROL", "name": "Patrol", "category": "CAMIONETAS", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "NP300", "name": "NP300", "category": "CAMIONETAS", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "URVAN", "name": "Urvan", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
-      { "id": "LEAF", "name": "Leaf", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" },
-      { "id": "ARIYA", "name": "Ariya", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
+      { "id": "LEAF", "name": "Leaf", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" },
+      { "id": "ARIYA", "name": "Ariya", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
     ],
     "HYUNDAI": [
       { "id": "I10", "name": "i10", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
@@ -743,10 +933,10 @@
       { "id": "H1", "name": "H1", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "PORTER", "name": "Porter", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "MIGHTY", "name": "Mighty", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
-      { "id": "KONA_EV", "name": "Kona EV", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" },
-      { "id": "IONIQ", "name": "Ioniq", "category": "ELECTRICOS", "tipo_combustible": "Híbrido/Eléctrico", "anos_populares": "2017-2024" },
-      { "id": "IONIQ5", "name": "Ioniq 5", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
-      { "id": "IONIQ6", "name": "Ioniq 6", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
+      { "id": "KONA_EV", "name": "Kona EV", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" },
+      { "id": "IONIQ", "name": "Ioniq", "category": "AUTOS", "tipo_combustible": "Híbrido/Eléctrico", "anos_populares": "2017-2024" },
+      { "id": "IONIQ5", "name": "Ioniq 5", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "IONIQ6", "name": "Ioniq 6", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
     ],
     "FORD": [
       { "id": "FIESTA", "name": "Fiesta", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2019" },
@@ -770,8 +960,8 @@
       { "id": "MAVERICK", "name": "Maverick", "category": "CAMIONETAS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2022-2024" },
       { "id": "CARGO", "name": "Cargo", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "TRANSIT", "name": "Transit", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2015-2024" },
-      { "id": "MUSTANG_MACH_E", "name": "Mustang Mach-E", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
-      { "id": "F150_LIGHTNING", "name": "F-150 Lightning", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
+      { "id": "MUSTANG_MACH_E", "name": "Mustang Mach-E", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
+      { "id": "F150_LIGHTNING", "name": "F-150 Lightning", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
     ],
     "VOLKSWAGEN": [
       { "id": "GOL", "name": "Gol", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2022" },
@@ -791,9 +981,9 @@
       { "id": "TOUAREG", "name": "Touareg", "category": "CAMIONETAS", "tipo_combustible": "Diesel", "anos_populares": "2011-2024" },
       { "id": "TRANSPORTER", "name": "Transporter", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
       { "id": "CRAFTER", "name": "Crafter", "category": "CAMIONES", "tipo_combustible": "Diesel", "anos_populares": "2017-2024" },
-      { "id": "ID3", "name": "ID.3", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
-      { "id": "ID4", "name": "ID.4", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
-      { "id": "ID_BUZZ", "name": "ID. Buzz", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
+      { "id": "ID3", "name": "ID.3", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
+      { "id": "ID4", "name": "ID.4", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
+      { "id": "ID_BUZZ", "name": "ID. Buzz", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
     ],
     "SUZUKI": [
       { "id": "ALTO", "name": "Alto", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
@@ -841,7 +1031,7 @@
       { "id": "CIVIC", "name": "Civic", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
       { "id": "ACCORD", "name": "Accord", "category": "AUTOS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2013-2024" },
       { "id": "FIT", "name": "Fit", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2015-2020" },
-      { "id": "INSIGHT", "name": "Insight", "category": "ELECTRICOS", "tipo_combustible": "Híbrido", "anos_populares": "2019-2024" },
+      { "id": "INSIGHT", "name": "Insight", "category": "AUTOS", "tipo_combustible": "Híbrido", "anos_populares": "2019-2024" },
       { "id": "HRV", "name": "HR-V", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2016-2024" },
       { "id": "CRV", "name": "CR-V", "category": "CAMIONETAS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2010-2024" },
       { "id": "PILOT", "name": "Pilot", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2016-2024" },
@@ -890,8 +1080,8 @@
       { "id": "CHEROKEE", "name": "Cherokee", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "GRAND_CHEROKEE", "name": "Grand Cherokee", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "WRANGLER", "name": "Wrangler", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "GLADIATOR", "name": "Gladiator", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "WRANGLER_4XE", "name": "Wrangler 4xe", "category": "ELECTRICOS", "tipo_combustible": "Híbrido Enchufable" }
+      { "id": "GLADIATOR", "name": "Gladiator", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2020-2024" },
+      { "id": "WRANGLER_4XE", "name": "Wrangler 4xe", "category": "CAMIONETAS", "tipo_combustible": "Híbrido Enchufable", "anos_populares": "2021-2024" }
     ],
     "PEUGEOT": [
       { "id": "208", "name": "208", "category": "AUTOS", "tipo_combustible": "Gasolina" },
@@ -904,20 +1094,28 @@
       { "id": "PARTNER", "name": "Partner", "category": "CAMIONES", "tipo_combustible": "Diesel" }
     ],
     "BYD": [
-      { "id": "DOLPHIN", "name": "Dolphin", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "SEAL", "name": "Seal", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "HAN", "name": "Han", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "TANG", "name": "Tang", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "ATTO3", "name": "Atto 3", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "SONG_PLUS", "name": "Song Plus", "category": "ELECTRICOS", "tipo_combustible": "Híbrido Enchufable" }
+      { "id": "DOLPHIN", "name": "Dolphin", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
+      { "id": "SEAL", "name": "Seal", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "HAN", "name": "Han", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
+      { "id": "TANG", "name": "Tang", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2018-2024" },
+      { "id": "ATTO3", "name": "Atto 3", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "SONG_PLUS", "name": "Song Plus", "category": "CAMIONETAS", "tipo_combustible": "Híbrido Enchufable", "anos_populares": "2021-2024" },
+      { "id": "YUAN_PLUS", "name": "Yuan Plus", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
+      { "id": "E2", "name": "e2", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" },
+      { "id": "E3", "name": "e3", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "K8", "name": "K8", "category": "BUSES", "tipo_combustible": "Eléctrico", "pasajeros": "40-50", "anos_populares": "2018-2024" },
+      { "id": "K9", "name": "K9", "category": "BUSES", "tipo_combustible": "Eléctrico", "pasajeros": "50-60", "anos_populares": "2015-2024" }
     ],
     "MG": [
-      { "id": "MG5", "name": "MG5", "category": "AUTOS", "tipo_combustible": "Gasolina" },
-      { "id": "MG6", "name": "MG6", "category": "AUTOS", "tipo_combustible": "Gasolina" },
-      { "id": "ZS", "name": "ZS", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "HS", "name": "HS", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "MG4", "name": "MG4", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "ZS_EV", "name": "ZS EV", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" }
+      { "id": "MG5", "name": "MG5", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2020-2024" },
+      { "id": "MG6", "name": "MG6", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2018-2024" },
+      { "id": "MG3", "name": "MG3", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2017-2024" },
+      { "id": "ZS", "name": "ZS", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2018-2024" },
+      { "id": "HS", "name": "HS", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2019-2024" },
+      { "id": "RX5", "name": "RX5", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2017-2024" },
+      { "id": "MG4", "name": "MG4", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "ZS_EV", "name": "ZS EV", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
+      { "id": "MG_MARVEL_R", "name": "Marvel R", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" }
     ],
     "JAC": [
       { "id": "J2", "name": "J2", "category": "AUTOS", "tipo_combustible": "Gasolina" },
@@ -954,10 +1152,10 @@
       { "id": "POER", "name": "Poer", "category": "CAMIONETAS", "tipo_combustible": "Diesel" }
     ],
     "TESLA": [
-      { "id": "MODEL3", "name": "Model 3", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "MODELY", "name": "Model Y", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "MODELS", "name": "Model S", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "MODELX", "name": "Model X", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" }
+      { "id": "MODEL3", "name": "Model 3", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2017-2024" },
+      { "id": "MODELY", "name": "Model Y", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
+      { "id": "MODELS", "name": "Model S", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2012-2024" },
+      { "id": "MODELX", "name": "Model X", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2015-2024" }
     ],
     "BMW": [
       { "id": "SERIE_1", "name": "Serie 1", "category": "AUTOS", "tipo_combustible": "Gasolina" },
@@ -971,9 +1169,9 @@
       { "id": "X4", "name": "X4", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "X5", "name": "X5", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "X6", "name": "X6", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "I3", "name": "i3", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "I4", "name": "i4", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "IX", "name": "iX", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
+      { "id": "I3", "name": "i3", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2013-2022" },
+      { "id": "I4", "name": "i4", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "IX", "name": "iX", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
       { "id": "G310GS", "name": "G 310 GS", "category": "MOTOS", "cilindrada": "310cc", "tipo": "Adventure", "anos_populares": "2017-2024" },
       { "id": "G310R", "name": "G 310 R", "category": "MOTOS", "cilindrada": "310cc", "tipo": "Naked", "anos_populares": "2016-2024" },
       { "id": "F750GS", "name": "F 750 GS", "category": "MOTOS", "cilindrada": "750cc", "tipo": "Adventure", "anos_populares": "2018-2024" },
@@ -1008,8 +1206,9 @@
       { "id": "GLE", "name": "GLE", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "GLS", "name": "GLS", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "G_CLASS", "name": "Clase G", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "EQC", "name": "EQC", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "EQS", "name": "EQS", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
+      { "id": "EQC", "name": "EQC", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
+      { "id": "EQS", "name": "EQS", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
+      { "id": "EQE", "name": "EQE", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
       { "id": "SPRINTER", "name": "Sprinter", "category": "CAMIONES", "tipo_combustible": "Diesel" },
       { "id": "ACTROS", "name": "Actros", "category": "CAMIONES", "tipo_combustible": "Diesel" },
       { "id": "OF_1724", "name": "OF 1724", "category": "BUSES", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
@@ -1027,8 +1226,8 @@
       { "id": "Q5", "name": "Q5", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "Q7", "name": "Q7", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "Q8", "name": "Q8", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "E_TRON", "name": "e-tron", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" },
-      { "id": "E_TRON_GT", "name": "e-tron GT", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" }
+      { "id": "E_TRON", "name": "e-tron", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" },
+      { "id": "E_TRON_GT", "name": "e-tron GT", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" }
     ],
     "YAMAHA": [
       { "id": "CRYPTON", "name": "Crypton", "category": "MOTOS", "cilindrada": "115cc", "tipo": "Trabajo", "anos_populares": "2010-2024" },
@@ -1348,7 +1547,7 @@
       { "id": "911", "name": "911", "category": "AUTOS", "tipo_combustible": "Gasolina" },
       { "id": "MACAN", "name": "Macan", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
       { "id": "CAYENNE", "name": "Cayenne", "category": "CAMIONETAS", "tipo_combustible": "Gasolina" },
-      { "id": "TAYCAN", "name": "Taycan", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico" }
+      { "id": "TAYCAN", "name": "Taycan", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" }
     ],
     "VOLVO": [
       { "id": "S60", "name": "S60", "category": "AUTOS", "tipo_combustible": "Gasolina" },
@@ -1521,7 +1720,7 @@
       { "id": "RX", "name": "RX", "category": "CAMIONETAS", "tipo_combustible": "Gasolina/Híbrido", "anos_populares": "2010-2024" },
       { "id": "GX", "name": "GX", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
       { "id": "LX", "name": "LX", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2010-2024" },
-      { "id": "RZ", "name": "RZ", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
+      { "id": "RZ", "name": "RZ", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
     ],
     "INFINITI": [
       { "id": "Q50", "name": "Q50", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2013-2024" },
@@ -1541,10 +1740,10 @@
       { "id": "G70", "name": "G70", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2017-2024" },
       { "id": "G80", "name": "G80", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2016-2024" },
       { "id": "G90", "name": "G90", "category": "AUTOS", "tipo_combustible": "Gasolina", "anos_populares": "2016-2024" },
-      { "id": "GV60", "name": "GV60", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "GV60", "name": "GV60", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
       { "id": "GV70", "name": "GV70", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2021-2024" },
       { "id": "GV80", "name": "GV80", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2020-2024" },
-      { "id": "ELECTRIFIED_G80", "name": "Electrified G80", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
+      { "id": "ELECTRIFIED_G80", "name": "Electrified G80", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
     ],
     "MAHINDRA": [
       { "id": "SCORPIO", "name": "Scorpio", "category": "CAMIONETAS", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
@@ -1596,7 +1795,7 @@
     ],
     "OMODA": [
       { "id": "C5", "name": "C5", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2022-2024" },
-      { "id": "E5", "name": "E5", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
+      { "id": "E5", "name": "E5", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
     ],
     "LYNK_CO": [
       { "id": "01", "name": "01", "category": "CAMIONETAS", "tipo_combustible": "Híbrido", "anos_populares": "2020-2024" },
@@ -1608,32 +1807,139 @@
       { "id": "GS4", "name": "GS4", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2015-2024" },
       { "id": "GS5", "name": "GS5", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2018-2024" },
       { "id": "GS8", "name": "GS8", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2017-2024" },
-      { "id": "AION_S", "name": "Aion S", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" }
+      { "id": "AION_S", "name": "Aion S", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" }
     ],
     "NIO": [
-      { "id": "ET5", "name": "ET5", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
-      { "id": "ET7", "name": "ET7", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
-      { "id": "ES6", "name": "ES6", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" },
-      { "id": "ES8", "name": "ES8", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2018-2024" }
+      { "id": "ET5", "name": "ET5", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "ET7", "name": "ET7", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" },
+      { "id": "ES6", "name": "ES6", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2019-2024" },
+      { "id": "ES8", "name": "ES8", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2018-2024" },
+      { "id": "EC6", "name": "EC6", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" }
     ],
     "XPENG": [
-      { "id": "P5", "name": "P5", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
-      { "id": "P7", "name": "P7", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
-      { "id": "G3", "name": "G3", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2018-2024" },
-      { "id": "G9", "name": "G9", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
+      { "id": "P5", "name": "P5", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
+      { "id": "P7", "name": "P7", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
+      { "id": "G3", "name": "G3", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2018-2024" },
+      { "id": "G9", "name": "G9", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2022-2024" }
     ],
     "RIVIAN": [
-      { "id": "R1T", "name": "R1T", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
-      { "id": "R1S", "name": "R1S", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" }
+      { "id": "R1T", "name": "R1T", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
+      { "id": "R1S", "name": "R1S", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" }
     ],
     "LUCID": [
-      { "id": "AIR", "name": "Air", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
-      { "id": "GRAVITY", "name": "Gravity", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2024" }
+      { "id": "AIR", "name": "Air", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2021-2024" },
+      { "id": "GRAVITY", "name": "Gravity", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2024" }
     ],
     "POLESTAR": [
-      { "id": "1", "name": "1", "category": "ELECTRICOS", "tipo_combustible": "Híbrido", "anos_populares": "2019-2021" },
-      { "id": "2", "name": "2", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
-      { "id": "3", "name": "3", "category": "ELECTRICOS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" }
+      { "id": "POLESTAR_1", "name": "Polestar 1", "category": "AUTOS", "tipo_combustible": "Híbrido", "anos_populares": "2019-2021" },
+      { "id": "POLESTAR_2", "name": "Polestar 2", "category": "AUTOS", "tipo_combustible": "Eléctrico", "anos_populares": "2020-2024" },
+      { "id": "POLESTAR_3", "name": "Polestar 3", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2023-2024" },
+      { "id": "POLESTAR_4", "name": "Polestar 4", "category": "CAMIONETAS", "tipo_combustible": "Eléctrico", "anos_populares": "2024-2025" }
+    ],
+    "HINO": [
+      { "id": "SERIE_300", "name": "Serie 300", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "4-6", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "SERIE_500", "name": "Serie 500", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "8-12", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "SERIE_700", "name": "Serie 700", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "15-25", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "FC9J", "name": "FC9J", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "30-40", "anos_populares": "2015-2024" },
+      { "id": "AK8J", "name": "AK8J", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "20-30", "anos_populares": "2015-2024" }
+    ],
+    "SCANIA": [
+      { "id": "SERIE_P", "name": "Serie P", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "16-26", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "SERIE_G", "name": "Serie G", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-33", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "SERIE_R", "name": "Serie R", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" },
+      { "id": "SERIE_S", "name": "Serie S", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2016-2024" },
+      { "id": "K280", "name": "K280", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "40-50", "anos_populares": "2010-2024" },
+      { "id": "K360", "name": "K360", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "45-55", "anos_populares": "2015-2024" }
+    ],
+    "ISUZU": [
+      { "id": "NPR", "name": "NPR", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "3-5", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "NQR", "name": "NQR", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "5-7", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "FTR", "name": "FTR", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "8-12", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "FVR", "name": "FVR", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "10-14", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "D_MAX_ISUZU", "name": "D-Max", "category": "CAMIONETAS", "tipo_combustible": "Diesel", "anos_populares": "2010-2024" },
+      { "id": "ELF", "name": "Elf", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "20-30", "anos_populares": "2010-2024" }
+    ],
+    "FREIGHTLINER": [
+      { "id": "CASCADIA", "name": "Cascadia", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" },
+      { "id": "M2_106", "name": "M2 106", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "12-20", "tipo_carroceria": ["Carga", "Furgón", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "BUSINESS_CLASS_M2", "name": "Business Class M2", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "8-16", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "COLUMBIA", "name": "Columbia", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "20-33", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "CORONADO", "name": "Coronado", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" }
+    ],
+    "KENWORTH": [
+      { "id": "T680", "name": "T680", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2013-2024" },
+      { "id": "T800", "name": "T800", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "W900", "name": "W900", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" },
+      { "id": "T370", "name": "T370", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "12-20", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "T470", "name": "T470", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "16-26", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" }
+    ],
+    "MACK": [
+      { "id": "ANTHEM", "name": "Anthem", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2018-2024" },
+      { "id": "GRANITE", "name": "Granite", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "20-40", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "PINNACLE", "name": "Pinnacle", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" },
+      { "id": "MD_SERIES", "name": "MD Series", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "8-16", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "LR", "name": "LR", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "30-40", "anos_populares": "2010-2024" }
+    ],
+    "INTERNATIONAL": [
+      { "id": "LT_SERIES", "name": "LT Series", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Carga"], "anos_populares": "2017-2024" },
+      { "id": "HV_SERIES", "name": "HV Series", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "20-33", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2017-2024" },
+      { "id": "HX_SERIES", "name": "HX Series", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Volqueta"], "anos_populares": "2017-2024" },
+      { "id": "MV_SERIES", "name": "MV Series", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "8-16", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2013-2024" },
+      { "id": "IC_BUS", "name": "IC Bus", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "30-50", "anos_populares": "2010-2024" }
+    ],
+    "VOLKSWAGEN_CAMIONES": [
+      { "id": "CONSTELLATION", "name": "Constellation", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "13-31", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "DELIVERY", "name": "Delivery", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "3-9", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "WORKER", "name": "Worker", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "10-17", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "METEOR", "name": "Meteor", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-26", "tipo_carroceria": ["Carga"], "anos_populares": "2015-2024" },
+      { "id": "E_DELIVERY", "name": "e-Delivery", "category": "CAMIONES", "tipo_combustible": "Eléctrico", "toneladas": "11-14", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2020-2024" }
+    ],
+    "IVECO": [
+      { "id": "DAILY", "name": "Daily", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "3-7", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "EUROCARGO", "name": "Eurocargo", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "6-19", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "TRAKKER", "name": "Trakker", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "26-40", "tipo_carroceria": ["Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "S_WAY", "name": "S-Way", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-40", "tipo_carroceria": ["Carga"], "anos_populares": "2019-2024" },
+      { "id": "STRALIS", "name": "Stralis", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-40", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" },
+      { "id": "CROSSWAY", "name": "Crossway", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "35-59", "anos_populares": "2010-2024" }
+    ],
+    "MAN": [
+      { "id": "TGX", "name": "TGX", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-41", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" },
+      { "id": "TGS", "name": "TGS", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-41", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "TGM", "name": "TGM", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "12-26", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "TGL", "name": "TGL", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "7-12", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "LION_COACH", "name": "Lion's Coach", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "40-55", "anos_populares": "2010-2024" }
+    ],
+    "SINOTRUK": [
+      { "id": "HOWO", "name": "Howo", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "12-40", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "HOHAN", "name": "Hohan", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "15-35", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2015-2024" },
+      { "id": "SITRAK", "name": "Sitrak", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-40", "tipo_carroceria": ["Carga"], "anos_populares": "2016-2024" },
+      { "id": "T5G", "name": "T5G", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "8-20", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2015-2024" },
+      { "id": "C7H", "name": "C7H", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "40-50", "anos_populares": "2018-2024" }
+    ],
+    "SHACMAN": [
+      { "id": "X3000", "name": "X3000", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "25-40", "tipo_carroceria": ["Carga"], "anos_populares": "2015-2024" },
+      { "id": "F3000", "name": "F3000", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "15-30", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "M3000", "name": "M3000", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "10-20", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "H3000", "name": "H3000", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "20-35", "tipo_carroceria": ["Volqueta"], "anos_populares": "2012-2024" }
+    ],
+    "FAW": [
+      { "id": "J6P", "name": "J6P", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-40", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" },
+      { "id": "J6M", "name": "J6M", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "12-25", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2015-2024" },
+      { "id": "TIGER_V", "name": "Tiger V", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "5-12", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "BESTUNE", "name": "Bestune", "category": "CAMIONETAS", "tipo_combustible": "Gasolina", "anos_populares": "2019-2024" },
+      { "id": "CA1168", "name": "CA1168", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "35-50", "anos_populares": "2010-2024" }
+    ],
+    "UD_TRUCKS": [
+      { "id": "QUESTER", "name": "Quester", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-40", "tipo_carroceria": ["Carga"], "anos_populares": "2013-2024" },
+      { "id": "CRONER", "name": "Croner", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "8-16", "tipo_carroceria": ["Carga", "Furgón", "Volqueta"], "anos_populares": "2010-2024" },
+      { "id": "CONDOR", "name": "Condor", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "12-26", "tipo_carroceria": ["Carga", "Volqueta"], "anos_populares": "2010-2024" }
+    ],
+    "FUSO": [
+      { "id": "CANTER", "name": "Canter", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "3-7", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "FIGHTER", "name": "Fighter", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "8-16", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2010-2024" },
+      { "id": "SUPER_GREAT", "name": "Super Great", "category": "CAMIONES", "tipo_combustible": "Diesel", "toneladas": "18-40", "tipo_carroceria": ["Carga"], "anos_populares": "2010-2024" },
+      { "id": "ROSA", "name": "Rosa", "category": "BUSES", "tipo_combustible": "Diesel", "pasajeros": "20-30", "anos_populares": "2010-2024" },
+      { "id": "ECANTER", "name": "eCanter", "category": "CAMIONES", "tipo_combustible": "Eléctrico", "toneladas": "3-6", "tipo_carroceria": ["Carga", "Furgón"], "anos_populares": "2017-2024" }
     ]
   }
 }

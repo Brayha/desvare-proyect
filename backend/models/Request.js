@@ -103,7 +103,7 @@ const requestSchema = new mongoose.Schema({
       trim: true
     },
     
-    // Sótano (para MOTOS, AUTOS, CAMIONETAS, ELECTRICOS)
+    // Sótano (para MOTOS, AUTOS y CAMIONETAS)
     basement: {
       isInBasement: { 
         type: Boolean, 

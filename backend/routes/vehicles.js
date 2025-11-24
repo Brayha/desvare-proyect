@@ -194,7 +194,7 @@ router.post('/', async (req, res) => {
     };
 
     // Agregar campos específicos según categoría
-    if (['AUTOS', 'CAMIONETAS', 'ELECTRICOS'].includes(categoryId)) {
+    if (['AUTOS', 'CAMIONETAS'].includes(categoryId)) {
       vehicleData.isArmored = isArmored || false;
       console.log(`   Blindado: ${vehicleData.isArmored ? 'Sí' : 'No'}`);
     }

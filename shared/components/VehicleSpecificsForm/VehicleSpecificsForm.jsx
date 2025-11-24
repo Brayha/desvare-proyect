@@ -44,8 +44,8 @@ const VehicleSpecificsForm = ({
 
   // Renderizar campos según la categoría
   const renderFields = () => {
-    // Para AUTOS, CAMIONETAS, ELECTRICOS
-    if (["AUTOS", "CAMIONETAS", "ELECTRICOS"].includes(categoryId)) {
+    // Para AUTOS y CAMIONETAS
+    if (["AUTOS", "CAMIONETAS"].includes(categoryId)) {
       return (
         <IonItem
           lines="none"

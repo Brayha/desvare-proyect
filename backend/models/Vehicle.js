@@ -10,7 +10,7 @@ const vehicleSchema = new mongoose.Schema({
   
   // Datos básicos del vehículo
   category: {
-    id: { type: String, required: true }, // "AUTOS", "MOTOS", "CAMIONES", "BUSES", "ELECTRICOS"
+    id: { type: String, required: true }, // "AUTOS", "MOTOS", "CAMIONETAS", "CAMIONES", "BUSES" (ELECTRICOS deprecated)
     name: { type: String, required: true } // "Automóviles", "Motocicletas", etc.
   },
   
@@ -47,10 +47,17 @@ const vehicleSchema = new mongoose.Schema({
   // CAMPOS ESPECÍFICOS POR TIPO DE VEHÍCULO
   // ========================================
   
-  // Solo para AUTOS, CAMIONETAS, ELECTRICOS
+  // Solo para AUTOS y CAMIONETAS
   isArmored: { 
     type: Boolean, 
     default: false 
+  },
+  
+  // Tipo de combustible/energía
+  fuelType: {
+    type: String,
+    enum: ['Gasolina', 'Diesel', 'Eléctrico', 'Híbrido', 'Híbrido Enchufable', 'GNV', 'Gasolina/Híbrido', 'Híbrido/Eléctrico'],
+    required: false
   },
   
   // Solo para CAMIONES
@@ -58,7 +65,7 @@ const vehicleSchema = new mongoose.Schema({
     type: {
       trailerType: { 
         type: String, 
-        enum: ['varillaje', 'caja_metalica'],
+        enum: ['varillaje', 'caja_metalica', 'furgon', 'volqueta', 'carga'],
         required: true
       },
       length: { 
@@ -77,6 +84,10 @@ const vehicleSchema = new mongoose.Schema({
         type: String, 
         enum: ['sencilla', 'doble'],
         required: true
+      },
+      tonnage: {
+        type: String,  // Ej: "3-5", "8-12", "26-40"
+        required: false
       }
     },
     required: false,
