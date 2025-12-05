@@ -27,6 +27,9 @@ import { logOutOutline, carSportOutline, locationOutline } from 'ionicons/icons'
 import { requestAPI } from '../services/api';
 import socketService from '../services/socket';
 import { useDriverLocation } from '../hooks/useDriverLocation';
+import LocationBanner from '../components/LocationBanner';
+import LocationPermissionModal from '../components/LocationPermissionModal';
+import LocationMap from '../components/LocationMap';
 
 const Home = () => {
   const history = useHistory();
@@ -39,8 +42,21 @@ const Home = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [quoteAmount, setQuoteAmount] = useState('');
 
+  // 🆕 Estado para modal de permisos de ubicación
+  const [showLocationModal, setShowLocationModal] = useState(false);
+
   // Hook de geolocalización del conductor
-  const { location: driverLocation, loading: locationLoading, error: locationError } = useDriverLocation(10000);
+  const { location: driverLocation, loading: locationLoading, error: locationError, requestLocation } = useDriverLocation(10000);
+
+  // 🆕 Mostrar modal de permisos al entrar por primera vez
+  useEffect(() => {
+    const hasSeenLocationModal = localStorage.getItem('hasSeenLocationModal');
+    
+    // Si no ha visto el modal y hay error de ubicación, mostrarlo
+    if (!hasSeenLocationModal && locationError) {
+      setShowLocationModal(true);
+    }
+  }, [locationError]);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -129,6 +145,30 @@ const Home = () => {
     }
   }, [driverLocation, locationLoading]);
 
+  // 🆕 Manejar solicitud de permisos de ubicación
+  const handleRequestLocationPermission = () => {
+    localStorage.setItem('hasSeenLocationModal', 'true');
+    setShowLocationModal(false);
+    
+    // Intentar obtener ubicación nuevamente
+    if (requestLocation) {
+      requestLocation();
+    }
+    
+    // Mostrar mensaje informativo
+    present({
+      message: 'Por favor, permite el acceso a tu ubicación en el navegador',
+      duration: 3000,
+      color: 'primary',
+    });
+  };
+
+  // 🆕 Cerrar modal sin solicitar permisos
+  const handleDismissLocationModal = () => {
+    localStorage.setItem('hasSeenLocationModal', 'true');
+    setShowLocationModal(false);
+  };
+
   const handleRespondToRequest = (request) => {
     setSelectedRequest(request);
     setQuoteAmount('');
@@ -160,7 +200,7 @@ const Home = () => {
 
       // Preparar datos de la cotización
       const quoteData = {
-        driverId: user.id,
+        driverId: user._id, // ✅ Cambiado de user.id a user._id
         driverName: user.name,
         amount: parseFloat(quoteAmount),
         location: {
@@ -176,7 +216,7 @@ const Home = () => {
       socketService.sendQuote({
         requestId: selectedRequest.requestId,
         clientId: selectedRequest.clientId,
-        driverId: user.id,
+        driverId: user._id, // ✅ Cambiado de user.id a user._id
         driverName: user.name,
         amount: parseFloat(quoteAmount),
         location: {
@@ -252,6 +292,20 @@ const Home = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
+        {/* 🆕 Banner de estado de ubicación */}
+        <LocationBanner 
+          loading={locationLoading} 
+          error={locationError} 
+          location={driverLocation} 
+        />
+
+        {/* 🆕 Mapa de ubicación */}
+        <LocationMap 
+          location={driverLocation}
+          loading={locationLoading}
+          error={locationError}
+        />
+
         <IonCard>
           <IonCardHeader>
             <IonCardTitle>
@@ -328,6 +382,13 @@ const Home = () => {
             )}
           </IonContent>
         </IonModal>
+
+        {/* 🆕 Modal de permisos de ubicación */}
+        <LocationPermissionModal
+          isOpen={showLocationModal}
+          onDismiss={handleDismissLocationModal}
+          onRequestPermission={handleRequestLocationPermission}
+        />
       </IonContent>
     </IonPage>
   );

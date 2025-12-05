@@ -18,8 +18,14 @@ import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
-import Login from './pages/Login';
+import Splash from './pages/Splash';
+import Onboarding from './pages/Onboarding';
+import LoginOTP from './pages/LoginOTP';
 import Register from './pages/Register';
+import VerifyOTP from './pages/VerifyOTP';
+import CompleteRegistration from './pages/CompleteRegistration';
+import UnderReview from './pages/UnderReview';
+import Rejected from './pages/Rejected';
 import Home from './pages/Home';
 
 setupIonicReact();
@@ -29,11 +35,17 @@ function App() {
     <IonApp>
       <IonReactRouter>
         <IonRouterOutlet>
-          <Route exact path="/login" component={Login} />
+          <Route exact path="/splash" component={Splash} />
+          <Route exact path="/onboarding" component={Onboarding} />
+          <Route exact path="/login" component={LoginOTP} />
           <Route exact path="/register" component={Register} />
+          <Route exact path="/verify-otp" component={VerifyOTP} />
+          <Route exact path="/complete-registration" component={CompleteRegistration} />
+          <Route exact path="/under-review" component={UnderReview} />
+          <Route exact path="/rejected" component={Rejected} />
           <Route exact path="/home" component={Home} />
           <Route exact path="/">
-            <Redirect to="/login" />
+            <Redirect to="/splash" />
           </Route>
         </IonRouterOutlet>
       </IonReactRouter>

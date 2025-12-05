@@ -14,7 +14,10 @@ router.post('/new', async (req, res) => {
       destination,
       distance,
       duration,
-      notes
+      notes,
+      vehicleId,
+      vehicleSnapshot,
+      serviceDetails
     } = req.body;
 
     console.log('📦 Datos recibidos en el backend:', JSON.stringify(req.body, null, 2));
@@ -39,6 +42,13 @@ router.post('/new', async (req, res) => {
       });
     }
 
+    // Validar que serviceDetails esté presente
+    if (!serviceDetails || !serviceDetails.problem) {
+      return res.status(400).json({ 
+        error: 'serviceDetails con problem son requeridos' 
+      });
+    }
+
     // Crear nueva solicitud con todos los datos
     const request = new Request({
       clientId,
@@ -58,6 +68,9 @@ router.post('/new', async (req, res) => {
       distance: distance || 0,
       duration: duration || 0,
       notes: notes || '',
+      vehicleId: vehicleId || null,
+      vehicleSnapshot: vehicleSnapshot || null,
+      serviceDetails: serviceDetails,
       status: 'pending',
       quotes: []
     });
@@ -69,6 +82,10 @@ router.post('/new', async (req, res) => {
     console.log('📍 Destino:', destination.address);
     console.log('📏 Distancia:', distance, 'metros');
     console.log('⏱️ Duración:', duration, 'segundos');
+    if (vehicleSnapshot) {
+      console.log('🚗 Vehículo:', `${vehicleSnapshot.brand?.name} ${vehicleSnapshot.model?.name} (${vehicleSnapshot.licensePlate})`);
+      console.log('📝 Problema:', serviceDetails?.problem);
+    }
 
     res.status(201).json({
       message: 'Solicitud creada exitosamente',

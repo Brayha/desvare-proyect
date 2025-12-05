@@ -1,0 +1,38 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--admin-light);
+}
+
+/* Forzar margen izquierdo para IonContent */
+ion-content.admin-content {
+  --padding-start: 24px;
+  --padding-end: 24px;
+  --padding-top: 24px;
+  --padding-bottom: 24px;
+}
+
+/* Wrapper interno del IonContent */
+ion-content.admin-content::part(scroll) {
+  padding-left: var(--admin-sidebar-width) !important;
+}
+
+/* Alternativa: usar clase en el contenedor interno */
+.admin-content-wrapper {
+  margin-left: var(--admin-sidebar-width);
+  padding: 24px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+  background: #F7F7F7;
+}
+
+@media (max-width: 768px) {
+  ion-content.admin-content::part(scroll) {
+    padding-left: 0 !important;
+  }
+  
+  .admin-content-wrapper {
+    margin-left: 0;
+  }
+}
+

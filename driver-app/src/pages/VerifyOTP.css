@@ -1,0 +1,233 @@
+/* ======================================
+   VERIFY OTP PAGE (DRIVER APP)
+   ====================================== */
+
+.verify-otp-content {
+  --background: linear-gradient(135deg, #223D62 0%, #0055FF 100%);
+}
+
+.verify-otp-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  min-height: 100%;
+  position: relative;
+}
+
+/* ======================================
+   BOTÓN VOLVER
+   ====================================== */
+.verify-otp-back {
+  position: absolute;
+  top: 32px;
+  left: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.verify-otp-back:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.verify-otp-back:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.verify-otp-back:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   ÍCONO
+   ====================================== */
+.verify-otp-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  margin-top: 80px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(10px);
+}
+
+/* ======================================
+   TÍTULOS
+   ====================================== */
+.verify-otp-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  margin: 0 0 16px 0;
+}
+
+.verify-otp-description {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin: 0 0 40px 0;
+  line-height: 1.5;
+  max-width: 320px;
+}
+
+.verify-otp-description strong {
+  font-weight: 700;
+  color: white;
+}
+
+/* ======================================
+   OTP INPUTS
+   ====================================== */
+.verify-otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.verify-otp-input-box {
+  width: 64px;
+  height: 64px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.verify-otp-input-box::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.verify-otp-input-box:focus {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.verify-otp-input-box:not(:placeholder-shown) {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.verify-otp-input-box:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   ERROR
+   ====================================== */
+.verify-otp-error {
+  display: block;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: #FEF2F2;
+  font-weight: 500;
+  width: 100%;
+  max-width: 320px;
+  backdrop-filter: blur(10px);
+}
+
+/* ======================================
+   BOTÓN
+   ====================================== */
+.verify-otp-button {
+  --background: white;
+  --background-hover: #F3F4F6;
+  --background-activated: #E5E7EB;
+  --color: #223D62;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+  font-size: 16px;
+  height: 56px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 24px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.verify-otp-button::part(native) {
+  transition: all 0.2s ease;
+}
+
+.verify-otp-button:hover::part(native) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.verify-otp-button:active::part(native) {
+  transform: translateY(0);
+}
+
+/* ======================================
+   RESPONSIVE
+   ====================================== */
+@media (max-width: 375px) {
+  .verify-otp-container {
+    padding: 24px 16px;
+  }
+
+  .verify-otp-icon {
+    width: 100px;
+    height: 100px;
+    margin-top: 60px;
+  }
+
+  .verify-otp-title {
+    font-size: 24px;
+  }
+
+  .verify-otp-description {
+    font-size: 14px;
+  }
+
+  .verify-otp-input-box {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .verify-otp-inputs {
+    gap: 8px;
+  }
+}
+
+@media (min-height: 800px) {
+  .verify-otp-container {
+    justify-content: center;
+  }
+
+  .verify-otp-icon {
+    margin-top: 0;
+  }
+}
+

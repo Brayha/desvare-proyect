@@ -1,0 +1,162 @@
+.reports-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+}
+
+.date-range-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #F9FAFB;
+  border-radius: 10px;
+}
+
+.date-range-selector select {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--admin-dark);
+  cursor: pointer;
+  outline: none;
+}
+
+.reports-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.summary-label {
+  font-size: 14px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--admin-dark);
+}
+
+.summary-change {
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.summary-change.positive {
+  color: var(--admin-success);
+}
+
+.summary-change.negative {
+  color: var(--admin-danger);
+}
+
+.summary-change.neutral {
+  color: #9CA3AF;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 24px;
+}
+
+.chart-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.chart-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--admin-dark);
+  margin: 0 0 20px 0;
+}
+
+.top-drivers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.top-driver-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #F9FAFB;
+  border-radius: 12px;
+}
+
+.rank {
+  font-size: 32px;
+  width: 50px;
+  text-align: center;
+}
+
+.driver-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.driver-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--admin-dark);
+}
+
+.driver-services {
+  font-size: 13px;
+  color: #9CA3AF;
+}
+
+.driver-earnings {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--admin-success);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .reports-actions {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .reports-summary {
+    grid-template-columns: 1fr;
+  }
+}
+

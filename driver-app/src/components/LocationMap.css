@@ -1,0 +1,111 @@
+.location-map-card {
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.location-map-card.location-map-error {
+  border: 2px solid var(--ion-color-danger);
+}
+
+.location-map-title {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.location-map-title ion-icon {
+  font-size: 20px;
+  color: #667eea;
+}
+
+.location-map-content {
+  padding: 0 !important;
+}
+
+.location-map-container {
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.location-map-iframe {
+  border: none;
+  border-radius: 8px;
+}
+
+.location-map-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 8px;
+}
+
+.map-placeholder-icon {
+  font-size: 48px;
+  color: #667eea;
+}
+
+.map-placeholder-icon.spinning {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.location-coordinates {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(102, 126, 234, 0.05);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.coordinates-icon {
+  font-size: 24px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.coordinates-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.coordinates-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ion-color-medium);
+  display: block;
+}
+
+.coordinates-value {
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  color: var(--ion-color-dark);
+  display: block;
+}
+
+.location-accuracy {
+  padding: 8px 16px;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
