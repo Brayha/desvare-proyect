@@ -36,22 +36,33 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+// Aumentar límite para soportar imágenes en base64
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Configuración de Socket.IO
 const io = new Server(server, {
   cors: corsOptions
 });
 
+// 🆕 EXPORTAR io para usarlo en las rutas
+global.io = io;
+
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const requestRoutes = require('./routes/requests');
 const vehicleRoutes = require('./routes/vehicles');
+const driverRoutes = require('./routes/drivers');
+const citiesRoutes = require('./routes/cities');
+const adminRoutes = require('./routes/admin');
 
 // Usar rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/drivers', driverRoutes);
+app.use('/api/cities', citiesRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Proxy para Google Places API (evitar CORS en frontend)
 app.get('/api/google-places-proxy', async (req, res) => {
@@ -113,7 +124,9 @@ io.on('connection', (socket) => {
   socket.on('driver:register', (driverId) => {
     connectedDrivers.set(driverId, socket.id);
     console.log(`🚗 Conductor registrado: ${driverId}`);
-    socket.join('drivers'); // Unirse a la sala de conductores
+    socket.join('drivers'); // Unirse a la sala general de conductores
+    socket.join(`driver:${driverId}`); // 🆕 Unirse a sala personal del conductor
+    console.log(`✅ Conductor ${driverId} unido a salas: drivers, driver:${driverId}`);
   });
 
   // Registro de cliente

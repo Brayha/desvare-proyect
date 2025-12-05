@@ -1,0 +1,159 @@
+/* ======================================
+   LOGIN OTP PAGE (DRIVER APP)
+   ====================================== */
+
+.login-otp-content {
+  --background: linear-gradient(135deg, #223D62 0%, #0055FF 100%);
+}
+
+.login-otp-container {
+  display: flex;
+  flex-direction: column;
+  padding: 32px 24px;
+  min-height: 100%;
+}
+
+/* ======================================
+   LOGO
+   ====================================== */
+.login-otp-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+  margin-top: 20px;
+}
+
+.login-otp-logo {
+  width: 180px;
+  height: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* ======================================
+   TÍTULOS
+   ====================================== */
+.login-otp-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  margin: 0 0 8px 0;
+}
+
+.login-otp-subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin: 0 0 32px 0;
+}
+
+/* ======================================
+   FORMULARIO
+   ====================================== */
+.login-otp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Error general */
+.login-otp-error {
+  display: block;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  color: #FEF2F2;
+  font-weight: 500;
+}
+
+/* ======================================
+   BOTÓN
+   ====================================== */
+.login-otp-button {
+  --background: white;
+  --background-hover: #F3F4F6;
+  --background-activated: #E5E7EB;
+  --color: #223D62;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+  font-size: 16px;
+  height: 56px;
+  margin-top: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.login-otp-button::part(native) {
+  transition: all 0.2s ease;
+}
+
+.login-otp-button:hover::part(native) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.login-otp-button:active::part(native) {
+  transform: translateY(0);
+}
+
+/* ======================================
+   FOOTER
+   ====================================== */
+.login-otp-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.login-otp-link {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px;
+  transition: all 0.2s ease;
+}
+
+.login-otp-link:hover:not(:disabled) {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+.login-otp-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   RESPONSIVE
+   ====================================== */
+@media (max-width: 375px) {
+  .login-otp-container {
+    padding: 24px 16px;
+  }
+
+  .login-otp-title {
+    font-size: 24px;
+  }
+
+  .login-otp-subtitle {
+    font-size: 16px;
+  }
+
+  .login-otp-logo {
+    width: 150px;
+  }
+}
+
+@media (min-height: 800px) {
+  .login-otp-container {
+    justify-content: center;
+  }
+}

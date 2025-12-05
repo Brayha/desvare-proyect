@@ -23,15 +23,34 @@ api.interceptors.request.use(
   }
 );
 
-// API de autenticación
+// API de autenticación de conductores
 export const authAPI = {
-  register: (data) => api.post('/api/auth/register', data),
-  login: (data) => api.post('/api/auth/login', data),
+  // Registro inicial con OTP
+  registerDriverInitial: (data) => api.post('/api/drivers/register-initial', data),
+  verifyDriverOTP: (data) => api.post('/api/drivers/verify-otp', data),
+  
+  // Login con OTP (para conductores existentes)
+  loginDriverOTP: (data) => api.post('/api/drivers/login-otp', data),
+  
+  // Registro completo
+  registerDriverComplete: (data) => api.post('/api/drivers/register-complete', data),
+  uploadDriverDocuments: (data) => api.post('/api/drivers/upload-documents', data), // Ahora envía JSON con base64
+  setDriverCapabilities: (data) => api.post('/api/drivers/set-capabilities', data),
+  
+  // Estado del conductor
+  getDriverStatus: (userId) => api.get(`/api/drivers/status/${userId}`),
+  toggleDriverOnline: (data) => api.put('/api/drivers/toggle-online', data),
 };
 
 // API de solicitudes
 export const requestAPI = {
   addQuote: (requestId, data) => api.post(`/api/requests/${requestId}/quote`, data),
+};
+
+// API de ciudades
+export const citiesAPI = {
+  getAll: () => api.get('/api/cities'),
+  getByRegion: () => api.get('/api/cities/by-region'),
 };
 
 export default api;

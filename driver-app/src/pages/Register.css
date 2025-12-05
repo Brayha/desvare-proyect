@@ -1,0 +1,160 @@
+/* ======================================
+   REGISTER PAGE (DRIVER APP)
+   ====================================== */
+
+.register-content {
+  --background: linear-gradient(135deg, #223D62 0%, #0055FF 100%);
+}
+
+.register-container {
+  display: flex;
+  flex-direction: column;
+  padding: 32px 24px;
+  min-height: 100%;
+}
+
+/* ======================================
+   LOGO
+   ====================================== */
+.register-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+  margin-top: 20px;
+}
+
+.register-logo {
+  width: 180px;
+  height: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* ======================================
+   TÍTULOS
+   ====================================== */
+.register-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  margin: 0 0 8px 0;
+}
+
+.register-subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin: 0 0 32px 0;
+}
+
+/* ======================================
+   FORMULARIO
+   ====================================== */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Error general */
+.register-error {
+  display: block;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  color: #FEF2F2;
+  font-weight: 500;
+}
+
+/* ======================================
+   BOTÓN
+   ====================================== */
+.register-button {
+  --background: white;
+  --background-hover: #F3F4F6;
+  --background-activated: #E5E7EB;
+  --color: #223D62;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+  font-size: 16px;
+  height: 56px;
+  margin-top: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.register-button::part(native) {
+  transition: all 0.2s ease;
+}
+
+.register-button:hover::part(native) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.register-button:active::part(native) {
+  transform: translateY(0);
+}
+
+/* ======================================
+   FOOTER
+   ====================================== */
+.register-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.register-link {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px;
+  transition: all 0.2s ease;
+}
+
+.register-link:hover:not(:disabled) {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+.register-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   RESPONSIVE
+   ====================================== */
+@media (max-width: 375px) {
+  .register-container {
+    padding: 24px 16px;
+  }
+
+  .register-title {
+    font-size: 24px;
+  }
+
+  .register-subtitle {
+    font-size: 16px;
+  }
+
+  .register-logo {
+    width: 150px;
+  }
+}
+
+@media (min-height: 800px) {
+  .register-container {
+    justify-content: center;
+  }
+}
+

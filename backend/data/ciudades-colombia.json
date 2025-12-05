@@ -1,0 +1,229 @@
+{
+  "ciudades": [
+    {
+      "id": "bogota",
+      "name": "Bogotá D.C.",
+      "departamento": "Cundinamarca",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "medellin",
+      "name": "Medellín",
+      "departamento": "Antioquia",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "cali",
+      "name": "Cali",
+      "departamento": "Valle del Cauca",
+      "region": "Pacífica",
+      "enabled": true
+    },
+    {
+      "id": "barranquilla",
+      "name": "Barranquilla",
+      "departamento": "Atlántico",
+      "region": "Caribe",
+      "enabled": true
+    },
+    {
+      "id": "cartagena",
+      "name": "Cartagena",
+      "departamento": "Bolívar",
+      "region": "Caribe",
+      "enabled": true
+    },
+    {
+      "id": "bucaramanga",
+      "name": "Bucaramanga",
+      "departamento": "Santander",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "cucuta",
+      "name": "Cúcuta",
+      "departamento": "Norte de Santander",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "pereira",
+      "name": "Pereira",
+      "departamento": "Risaralda",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "santa_marta",
+      "name": "Santa Marta",
+      "departamento": "Magdalena",
+      "region": "Caribe",
+      "enabled": true
+    },
+    {
+      "id": "ibague",
+      "name": "Ibagué",
+      "departamento": "Tolima",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "manizales",
+      "name": "Manizales",
+      "departamento": "Caldas",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "villavicencio",
+      "name": "Villavicencio",
+      "departamento": "Meta",
+      "region": "Orinoquía",
+      "enabled": true
+    },
+    {
+      "id": "pasto",
+      "name": "Pasto",
+      "departamento": "Nariño",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "neiva",
+      "name": "Neiva",
+      "departamento": "Huila",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "armenia",
+      "name": "Armenia",
+      "departamento": "Quindío",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "valledupar",
+      "name": "Valledupar",
+      "departamento": "Cesar",
+      "region": "Caribe",
+      "enabled": true
+    },
+    {
+      "id": "monteria",
+      "name": "Montería",
+      "departamento": "Córdoba",
+      "region": "Caribe",
+      "enabled": true
+    },
+    {
+      "id": "sincelejo",
+      "name": "Sincelejo",
+      "departamento": "Sucre",
+      "region": "Caribe",
+      "enabled": true
+    },
+    {
+      "id": "popayan",
+      "name": "Popayán",
+      "departamento": "Cauca",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "tunja",
+      "name": "Tunja",
+      "departamento": "Boyacá",
+      "region": "Andina",
+      "enabled": true
+    },
+    {
+      "id": "florencia",
+      "name": "Florencia",
+      "departamento": "Caquetá",
+      "region": "Amazonía",
+      "enabled": true
+    },
+    {
+      "id": "riohacha",
+      "name": "Riohacha",
+      "departamento": "La Guajira",
+      "region": "Caribe",
+      "enabled": true
+    },
+    {
+      "id": "yopal",
+      "name": "Yopal",
+      "departamento": "Casanare",
+      "region": "Orinoquía",
+      "enabled": true
+    },
+    {
+      "id": "san_andres",
+      "name": "San Andrés",
+      "departamento": "San Andrés y Providencia",
+      "region": "Insular",
+      "enabled": true
+    },
+    {
+      "id": "quibdo",
+      "name": "Quibdó",
+      "departamento": "Chocó",
+      "region": "Pacífica",
+      "enabled": true
+    },
+    {
+      "id": "leticia",
+      "name": "Leticia",
+      "departamento": "Amazonas",
+      "region": "Amazonía",
+      "enabled": true
+    },
+    {
+      "id": "arauca",
+      "name": "Arauca",
+      "departamento": "Arauca",
+      "region": "Orinoquía",
+      "enabled": true
+    },
+    {
+      "id": "mocoa",
+      "name": "Mocoa",
+      "departamento": "Putumayo",
+      "region": "Amazonía",
+      "enabled": true
+    },
+    {
+      "id": "puerto_carreno",
+      "name": "Puerto Carreño",
+      "departamento": "Vichada",
+      "region": "Orinoquía",
+      "enabled": true
+    },
+    {
+      "id": "inirida",
+      "name": "Inírida",
+      "departamento": "Guainía",
+      "region": "Amazonía",
+      "enabled": true
+    },
+    {
+      "id": "mitu",
+      "name": "Mitú",
+      "departamento": "Vaupés",
+      "region": "Amazonía",
+      "enabled": true
+    },
+    {
+      "id": "san_jose_guaviare",
+      "name": "San José del Guaviare",
+      "departamento": "Guaviare",
+      "region": "Amazonía",
+      "enabled": true
+    }
+  ]
+}
+
