@@ -176,6 +176,14 @@ const requestSchema = new mongoose.Schema({
     length: 4
   },
   
+  // Expiración de la solicitud (24 horas por defecto)
+  expiresAt: { 
+    type: Date, 
+    default: function() {
+      return new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+    }
+  },
+  
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

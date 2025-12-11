@@ -27,6 +27,7 @@ import CompleteRegistration from './pages/CompleteRegistration';
 import UnderReview from './pages/UnderReview';
 import Rejected from './pages/Rejected';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
 
 setupIonicReact();
 
@@ -44,6 +45,7 @@ function App() {
           <Route exact path="/under-review" component={UnderReview} />
           <Route exact path="/rejected" component={Rejected} />
           <Route exact path="/home" component={Home} />
+          <Route exact path="/profile" component={Profile} />
           <Route exact path="/">
             <Redirect to="/splash" />
           </Route>

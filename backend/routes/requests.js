@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Request = require('../models/Request');
+const User = require('../models/User');
 
 // POST /api/requests/new - Crear nueva solicitud de cotización
 router.post('/new', async (req, res) => {
@@ -248,6 +249,118 @@ router.get('/:id', async (req, res) => {
     console.error('❌ Error al obtener solicitud:', error);
     res.status(500).json({ 
       error: 'Error al obtener solicitud',
+      details: error.message 
+    });
+  }
+});
+
+// GET /api/requests/nearby/:driverId - Obtener solicitudes cercanas a un conductor
+router.get('/nearby/:driverId', async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    
+    // Buscar al conductor para obtener su ubicación y capacidades
+    const driver = await User.findById(driverId);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    // Verificar que el conductor esté aprobado
+    if (driver.driverProfile.status !== 'approved') {
+      return res.status(403).json({ 
+        error: 'Conductor no está aprobado para recibir solicitudes' 
+      });
+    }
+
+    // Verificar que el conductor esté activo (isOnline)
+    if (!driver.driverProfile.isOnline) {
+      return res.json({
+        message: 'Conductor no está disponible (ocupado)',
+        count: 0,
+        requests: [],
+        driverStatus: 'offline'
+      });
+    }
+
+    // Obtener solicitudes pendientes (sin cotizar por este conductor y no expiradas)
+    const now = new Date();
+    const requests = await Request.find({
+      status: { $in: ['pending', 'quoted'] },
+      'quotes.driverId': { $ne: driverId }, // No cotizadas por este conductor
+      expiresAt: { $gt: now } // No expiradas
+    })
+    .sort({ createdAt: -1 }) // Más recientes primero
+    .limit(50); // Limitar a 50 solicitudes
+
+    // Función helper para obtener iconos según categoría
+    const getCategoryIcon = (categoryId) => {
+      const icons = {
+        'MOTOS': '🏍️',
+        'AUTOS': '🚗',
+        'CAMIONETAS': '🚙',
+        'CAMIONES': '🚚',
+        'BUSES': '🚌'
+      };
+      return icons[categoryId] || '🚗';
+    };
+
+    // Formatear para el frontend
+    const formattedRequests = requests.map(req => ({
+      id: req._id,
+      requestId: req._id,
+      timestamp: req.createdAt,
+      
+      // Cliente
+      clientId: req.clientId,
+      clientName: req.clientName,
+      clientPhone: req.clientPhone,
+      
+      // Vehículo
+      vehicle: req.vehicleSnapshot ? {
+        category: req.vehicleSnapshot.category?.name || 'N/A',
+        brand: req.vehicleSnapshot.brand?.name || 'N/A',
+        model: req.vehicleSnapshot.model?.name || 'N/A',
+        licensePlate: req.vehicleSnapshot.licensePlate || 'N/A',
+        icon: getCategoryIcon(req.vehicleSnapshot.category?.id)
+      } : null,
+      
+      // Ubicación
+      origin: {
+        address: req.origin.address,
+        coordinates: req.origin.coordinates
+      },
+      destination: {
+        address: req.destination.address,
+        coordinates: req.destination.coordinates
+      },
+      
+      // Distancia y tiempo
+      distance: req.distance, // metros
+      duration: req.duration, // segundos
+      distanceKm: (req.distance / 1000).toFixed(1),
+      durationMin: Math.round(req.duration / 60),
+      
+      // Problema
+      problem: req.serviceDetails?.problem || 'Sin descripción',
+      
+      // Estado
+      status: req.status,
+      quotesCount: req.quotes.length,
+      hasQuoted: false // Este conductor no ha cotizado
+    }));
+
+    console.log(`✅ ${formattedRequests.length} solicitudes cercanas para conductor ${driver.name}`);
+
+    res.json({
+      message: 'Solicitudes obtenidas exitosamente',
+      count: formattedRequests.length,
+      requests: formattedRequests
+    });
+
+  } catch (error) {
+    console.error('❌ Error al obtener solicitudes cercanas:', error);
+    res.status(500).json({ 
+      error: 'Error al obtener solicitudes',
       details: error.message 
     });
   }

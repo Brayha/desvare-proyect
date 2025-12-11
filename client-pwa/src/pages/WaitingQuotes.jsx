@@ -11,12 +11,14 @@ import {
   IonIcon,
   IonText,
   IonSpinner,
-  IonCard,
-  IonCardContent,
+  IonRefresher,
+  IonRefresherContent,
 } from "@ionic/react";
-import { arrowBack } from "ionicons/icons";
+import { arrowBack, chevronDownCircleOutline } from "ionicons/icons";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
+import { useNotification } from "../hooks/useNotification";
+import QuoteNotification from "../components/QuoteNotification/QuoteNotification";
 import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
 import "./WaitingQuotes.css";
@@ -71,6 +73,11 @@ const generateRandomQuotes = (originLat, originLng) => {
 const WaitingQuotes = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
+  const { 
+    activeNotifications, 
+    showQuoteNotification, 
+    closeNotification 
+  } = useNotification();
   
   const [user, setUser] = useState(null);
   const [routeData, setRouteData] = useState(null);
@@ -157,7 +164,15 @@ const WaitingQuotes = () => {
         console.log('📍 Ubicación del conductor:', quote.location);
         console.log('💵 Monto:', quote.amount);
         
+        // Agregar cotización a la lista
         setQuotesReceived((prev) => [...prev, quote]);
+        
+        // Mostrar notificación con sonido y vibración
+        showQuoteNotification(quote, {
+          playSound: true,
+          vibrate: true,
+          duration: 5000
+        });
       });
     }
 
@@ -236,6 +251,42 @@ const WaitingQuotes = () => {
     history.replace('/home');
   };
 
+  // Pull to Refresh - Recargar cotizaciones desde el backend
+  const handleRefresh = async (event) => {
+    console.log('🔄 Pull to refresh activado');
+    
+    try {
+      const currentRequestId = localStorage.getItem('currentRequestId');
+      
+      if (currentRequestId) {
+        // Llamar al backend para obtener cotizaciones actualizadas
+        const response = await fetch(`http://localhost:5001/api/requests/${currentRequestId}`);
+        const data = await response.json();
+        
+        if (response.ok && data.request) {
+          console.log('✅ Cotizaciones actualizadas:', data.request.quotes);
+          
+          // Actualizar lista con cotizaciones del backend
+          const formattedQuotes = data.request.quotes.map(q => ({
+            driverId: q.driverId,
+            driverName: q.driverName,
+            amount: q.amount,
+            location: q.location || null,
+            timestamp: q.timestamp
+          }));
+          
+          setQuotesReceived(formattedQuotes);
+          showSuccess(`${formattedQuotes.length} cotizaciones actualizadas`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error al refrescar cotizaciones:', error);
+      showError('Error al actualizar cotizaciones');
+    } finally {
+      event.detail.complete();
+    }
+  };
+
   // Estas funciones se usarán cuando implementemos el bottom sheet de detalles
   // const handleViewQuotes = () => {
   //   history.push('/home');
@@ -277,6 +328,26 @@ const WaitingQuotes = () => {
       </IonHeader>
 
       <IonContent className="waiting-quotes-page">
+        {/* Pull to Refresh */}
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent
+            pullingIcon={chevronDownCircleOutline}
+            pullingText="Desliza para actualizar"
+            refreshingSpinner="circles"
+            refreshingText="Actualizando cotizaciones..."
+          />
+        </IonRefresher>
+
+        {/* Notificaciones de cotizaciones */}
+        {activeNotifications.map((notification) => (
+          <QuoteNotification
+            key={notification.id}
+            quote={notification.quote}
+            duration={notification.duration}
+            onClose={() => closeNotification(notification.id)}
+          />
+        ))}
+
         {/* Mapa fullscreen - SOLO origen, sin destino ni ruta */}
         <div className={`map-container-fullscreen ${quotesReceived.length > 0 ? 'with-quotes' : ''}`}>
           <MapPicker

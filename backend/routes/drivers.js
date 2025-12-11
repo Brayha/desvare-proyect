@@ -635,5 +635,94 @@ router.put('/admin/reject/:userId', async (req, res) => {
   }
 });
 
+// ============================================
+// GESTIÓN DE ESTADO Y DISPONIBILIDAD
+// ============================================
+
+/**
+ * PATCH /api/drivers/toggle-availability
+ * Cambiar estado Ocupado/Activo del conductor
+ */
+router.patch('/toggle-availability', async (req, res) => {
+  try {
+    const { driverId, isOnline } = req.body;
+
+    if (!driverId || typeof isOnline !== 'boolean') {
+      return res.status(400).json({ 
+        error: 'driverId e isOnline son requeridos' 
+      });
+    }
+
+    const driver = await User.findById(driverId);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    // Actualizar estado
+    driver.driverProfile.isOnline = isOnline;
+    driver.driverProfile.lastOnlineAt = new Date();
+    await driver.save();
+
+    console.log(`🔄 Conductor ${driver.name} ahora está ${isOnline ? 'ACTIVO ✅' : 'OCUPADO 🔴'}`);
+
+    res.json({
+      message: 'Estado actualizado exitosamente',
+      driver: {
+        id: driver._id,
+        name: driver.name,
+        isOnline: driver.driverProfile.isOnline
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error al cambiar estado:', error);
+    res.status(500).json({ 
+      error: 'Error al cambiar estado',
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * GET /api/drivers/profile/:id
+ * Obtener perfil completo del conductor
+ */
+router.get('/profile/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const driver = await User.findById(id);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    res.json({
+      message: 'Perfil obtenido exitosamente',
+      driver: {
+        id: driver._id,
+        name: driver.name,
+        phone: driver.phone,
+        email: driver.email,
+        city: driver.driverProfile.city,
+        status: driver.driverProfile.status,
+        isOnline: driver.driverProfile.isOnline,
+        rating: driver.driverProfile.rating,
+        totalServices: driver.driverProfile.totalServices,
+        totalEarnings: driver.driverProfile.totalEarnings,
+        vehicleCapabilities: driver.driverProfile.vehicleCapabilities,
+        towTruck: driver.driverProfile.towTruck,
+        documents: driver.driverProfile.documents
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error al obtener perfil:', error);
+    res.status(500).json({ 
+      error: 'Error al obtener perfil',
+      details: error.message 
+    });
+  }
+});
+
 module.exports = router;
 

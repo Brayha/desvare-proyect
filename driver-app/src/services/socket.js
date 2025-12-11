@@ -38,6 +38,13 @@ class SocketService {
     }
   }
 
+  notifyAvailabilityChange(driverId, isOnline) {
+    if (this.socket) {
+      this.socket.emit('driver:availability-changed', { driverId, isOnline });
+      console.log(`📡 Notificado cambio de disponibilidad: ${isOnline ? 'ACTIVO' : 'OCUPADO'}`);
+    }
+  }
+
   sendQuote(data) {
     if (this.socket) {
       this.socket.emit('quote:send', data);

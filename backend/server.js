@@ -56,6 +56,9 @@ const driverRoutes = require('./routes/drivers');
 const citiesRoutes = require('./routes/cities');
 const adminRoutes = require('./routes/admin');
 
+// Importar middleware de expiración
+const { startExpirationChecker } = require('./middleware/requestExpiration');
+
 // Usar rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/requests', requestRoutes);
@@ -110,23 +113,67 @@ mongoose.connect(process.env.MONGODB_URI, {
   serverSelectionTimeoutMS: 30000, // 30 segundos para seleccionar servidor
   socketTimeoutMS: 45000, // 45 segundos para operaciones de socket
 })
-  .then(() => console.log('✅ Conectado a MongoDB Atlas'))
+  .then(() => {
+    console.log('✅ Conectado a MongoDB Atlas');
+    // Iniciar verificador de expiración cada 30 minutos
+    startExpirationChecker(30);
+  })
   .catch((err) => console.error('❌ Error conectando a MongoDB:', err));
 
 // Socket.IO - Manejo de conexiones en tiempo real
-const connectedDrivers = new Map(); // Almacena socket.id de conductores conectados
+const connectedDrivers = new Map(); // Almacena { driverId: { socketId, isOnline } }
 const connectedClients = new Map(); // Almacena socket.id de clientes conectados
 
 io.on('connection', (socket) => {
   console.log('🔌 Nuevo cliente conectado:', socket.id);
 
   // Registro de conductor
-  socket.on('driver:register', (driverId) => {
-    connectedDrivers.set(driverId, socket.id);
-    console.log(`🚗 Conductor registrado: ${driverId}`);
-    socket.join('drivers'); // Unirse a la sala general de conductores
-    socket.join(`driver:${driverId}`); // 🆕 Unirse a sala personal del conductor
-    console.log(`✅ Conductor ${driverId} unido a salas: drivers, driver:${driverId}`);
+  socket.on('driver:register', async (driverId) => {
+    try {
+      // Obtener info del conductor desde BD
+      const User = require('./models/User');
+      const driver = await User.findById(driverId);
+      
+      if (driver && driver.userType === 'driver') {
+        const isOnline = driver.driverProfile?.isOnline || false;
+        
+        connectedDrivers.set(driverId, {
+          socketId: socket.id,
+          isOnline: isOnline
+        });
+        
+        console.log(`🚗 Conductor registrado: ${driverId} - Estado: ${isOnline ? '🟢 ACTIVO' : '🔴 OCUPADO'}`);
+        
+        socket.join('drivers'); // Unirse a la sala general de conductores
+        socket.join(`driver:${driverId}`); // Unirse a sala personal del conductor
+        
+        // Solo unirse a 'active-drivers' si está activo
+        if (isOnline) {
+          socket.join('active-drivers');
+          console.log(`✅ Conductor ${driverId} unido a sala de conductores activos`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error registrando conductor:', error);
+    }
+  });
+  
+  // Actualizar estado de disponibilidad del conductor
+  socket.on('driver:availability-changed', ({ driverId, isOnline }) => {
+    const driverData = connectedDrivers.get(driverId);
+    if (driverData) {
+      driverData.isOnline = isOnline;
+      connectedDrivers.set(driverId, driverData);
+      
+      // Manejar salas de Socket.IO
+      if (isOnline) {
+        socket.join('active-drivers');
+        console.log(`🟢 Conductor ${driverId} ahora ACTIVO - Agregado a sala active-drivers`);
+      } else {
+        socket.leave('active-drivers');
+        console.log(`🔴 Conductor ${driverId} ahora OCUPADO - Removido de sala active-drivers`);
+      }
+    }
   });
 
   // Registro de cliente
@@ -139,10 +186,15 @@ io.on('connection', (socket) => {
   socket.on('request:new', (data) => {
     console.log('📢 Nueva solicitud de cotización recibida');
     console.log('📦 Datos completos:', JSON.stringify(data, null, 2));
-    console.log(`🚗 Conductores conectados en sala "drivers": ${io.sockets.adapter.rooms.get('drivers')?.size || 0}`);
     
-    // Enviar a todos los conductores conectados con TODOS los datos
-    io.to('drivers').emit('request:received', {
+    const activeDriversCount = io.sockets.adapter.rooms.get('active-drivers')?.size || 0;
+    const totalDriversCount = io.sockets.adapter.rooms.get('drivers')?.size || 0;
+    
+    console.log(`🚗 Conductores totales conectados: ${totalDriversCount}`);
+    console.log(`🟢 Conductores ACTIVOS: ${activeDriversCount}`);
+    
+    // Enviar SOLO a conductores activos (isOnline = true)
+    io.to('active-drivers').emit('request:received', {
       requestId: data.requestId,
       clientId: data.clientId,
       clientName: data.clientName,
@@ -153,7 +205,7 @@ io.on('connection', (socket) => {
       timestamp: new Date()
     });
     
-    console.log('✅ Solicitud emitida a conductores en sala "drivers"');
+    console.log(`✅ Solicitud emitida a ${activeDriversCount} conductores ACTIVOS`);
   });
 
   // Conductor envía respuesta
@@ -199,8 +251,8 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('🔌 Cliente desconectado:', socket.id);
     // Limpiar mapas
-    for (let [driverId, socketId] of connectedDrivers.entries()) {
-      if (socketId === socket.id) {
+    for (let [driverId, driverData] of connectedDrivers.entries()) {
+      if (driverData.socketId === socket.id) {
         connectedDrivers.delete(driverId);
         console.log(`🚗 Conductor desconectado: ${driverId}`);
       }
