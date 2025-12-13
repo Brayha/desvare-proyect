@@ -28,6 +28,7 @@ import LocationPermission from './pages/LocationPermission';
 import RequestAuth from './pages/RequestAuth';
 import RequestConfirmation from './pages/RequestConfirmation';
 import WaitingQuotes from './pages/WaitingQuotes';
+import DriverOnWay from './pages/DriverOnWay';
 import TabLayout from './components/TabLayout/TabLayout';
 
 setupIonicReact();
@@ -44,10 +45,11 @@ function App() {
     console.log('🚀 Inicializando Socket.IO...');
     socketService.connect();
     
-    // Cleanup al desmontar la app
+    // NO desconectar en cleanup - mantener conexión durante toda la sesión
+    // Socket.IO se desconectará solo cuando se cierre el navegador
     return () => {
-      console.log('👋 Cerrando Socket.IO...');
-      socketService.disconnect();
+      console.log('👋 App desmontándose (no cerrar Socket.IO)');
+      // socketService.disconnect(); // ← COMENTADO: NO desconectar
     };
   }, []);
 
@@ -64,6 +66,7 @@ function App() {
             <Route exact path="/request-auth" component={RequestAuth} />
             <Route exact path="/request-confirmation" component={RequestConfirmation} />
             <Route exact path="/waiting-quotes" component={WaitingQuotes} />
+            <Route exact path="/driver-on-way" component={DriverOnWay} />
             
             {/* Tabs (Desvare + Mi cuenta) */}
             <Route path="/tabs" component={TabLayout} />

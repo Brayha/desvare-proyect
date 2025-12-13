@@ -76,6 +76,34 @@ class SocketService {
       this.socket.off('request:cancelled');
     }
   }
+
+  onServiceAccepted(callback) {
+    if (this.socket) {
+      console.log('👂 Escuchando aceptaciones de servicio');
+      this.socket.on('service:accepted', callback);
+    }
+  }
+
+  offServiceAccepted() {
+    if (this.socket) {
+      console.log('🔇 Dejando de escuchar aceptaciones');
+      this.socket.off('service:accepted');
+    }
+  }
+
+  onServiceTaken(callback) {
+    if (this.socket) {
+      console.log('👂 Escuchando servicios tomados por otros');
+      this.socket.on('service:taken', callback);
+    }
+  }
+
+  offServiceTaken() {
+    if (this.socket) {
+      console.log('🔇 Dejando de escuchar servicios tomados');
+      this.socket.off('service:taken');
+    }
+  }
 }
 
 export default new SocketService();

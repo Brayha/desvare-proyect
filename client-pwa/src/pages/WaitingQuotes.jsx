@@ -13,12 +13,14 @@ import {
   IonSpinner,
   IonRefresher,
   IonRefresherContent,
+  useIonAlert,
 } from "@ionic/react";
 import { arrowBack, chevronDownCircleOutline } from "ionicons/icons";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import { useNotification } from "../hooks/useNotification";
 import QuoteNotification from "../components/QuoteNotification/QuoteNotification";
+import QuoteDetailSheet from "../components/QuoteDetailSheet/QuoteDetailSheet";
 import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
 import "./WaitingQuotes.css";
@@ -26,7 +28,7 @@ import "./WaitingQuotes.css";
 // ============================================
 // 🧪 EXPERIMENT-QUOTES: Flag para activar/desactivar
 // ============================================
-const EXPERIMENT_QUOTES = true; // ⚠️ Cambiar a false para desactivar el experimento
+const EXPERIMENT_QUOTES = false; // ⚠️ Desactivado para probar con conductores reales
 
 // 🧪 EXPERIMENT-QUOTES: Generar cotizaciones aleatorias cerca del origen
 const generateRandomQuotes = (originLat, originLng) => {
@@ -73,6 +75,7 @@ const generateRandomQuotes = (originLat, originLng) => {
 const WaitingQuotes = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
+  const [presentAlert] = useIonAlert();
   const { 
     activeNotifications, 
     showQuoteNotification, 
@@ -83,8 +86,11 @@ const WaitingQuotes = () => {
   const [routeData, setRouteData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [, setRequestSent] = useState(false);
-  const [, setRequestId] = useState(null);
+  const [requestId, setRequestId] = useState(null);
   const [quotesReceived, setQuotesReceived] = useState([]);
+  const [selectedQuote, setSelectedQuote] = useState(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
 
   useEffect(() => {
     let isMounted = true; // Flag para evitar actualizaciones si el componente se desmonta
@@ -136,7 +142,8 @@ const WaitingQuotes = () => {
       const parsedRouteData = JSON.parse(storedRouteData);
 
       console.log('📋 WaitingQuotes - Datos cargados:', {
-        user: parsedUser.name,
+        userId: parsedUser.id,        // ✅ Verificar que id existe
+        userName: parsedUser.name,
         requestId: currentRequestId,
         routeInfo: parsedRouteData.routeInfo
       });
@@ -287,6 +294,148 @@ const WaitingQuotes = () => {
     }
   };
 
+  // Manejar click en marcador del mapa
+  const handleQuoteClick = (quote) => {
+    console.log('💰 Click en cotización:', quote);
+    console.log('🔍 Estructura completa del quote:', {
+      driverId: quote.driverId,
+      driverName: quote.driverName,
+      amount: quote.amount,
+      todasLasPropiedades: Object.keys(quote)
+    });
+    setSelectedQuote(quote);
+    setSheetOpen(true);
+  };
+
+  // Aceptar cotización
+  const handleAcceptQuote = async (quote) => {
+    console.log('✅ Aceptando cotización:', quote);
+
+    // Confirmar con el usuario
+    presentAlert({
+      header: 'Confirmar Aceptación',
+      message: `¿Deseas aceptar la cotización de ${quote.driverName} por $${quote.amount.toLocaleString()}?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Aceptar',
+          handler: async () => {
+            await processAcceptance(quote);
+          }
+        }
+      ]
+    });
+  };
+
+  const processAcceptance = async (quote) => {
+    setIsAccepting(true);
+
+    try {
+      const currentRequestId = localStorage.getItem('currentRequestId');
+      
+      // ✅ VALIDACIÓN 1: Verificar requestId
+      if (!currentRequestId) {
+        console.error('❌ No hay currentRequestId en localStorage');
+        showError('Error: No se encontró la solicitud');
+        setIsAccepting(false);
+        return;
+      }
+
+      // ✅ VALIDACIÓN 2: Verificar que user existe y tiene id
+      if (!user || !user.id) {
+        console.error('❌ Usuario no cargado o sin id:', user);
+        showError('Error: Usuario no encontrado. Intenta recargar la página.');
+        setIsAccepting(false);
+        return;
+      }
+
+      // ✅ VALIDACIÓN 3: Verificar que quote existe y tiene driverId
+      if (!quote || !quote.driverId) {
+        console.error('❌ Cotización inválida o sin driverId:', quote);
+        showError('Error: Cotización inválida');
+        setIsAccepting(false);
+        return;
+      }
+
+      // ✅ LOG DE DEBUG: Mostrar exactamente qué vamos a enviar
+      console.log('📤 Enviando aceptación de cotización:', {
+        requestId: currentRequestId,
+        clientId: user.id,
+        driverId: quote.driverId,
+        amount: quote.amount,
+        driverName: quote.driverName
+      });
+
+      // Llamar al endpoint de aceptación
+      const response = await fetch(`http://localhost:5001/api/requests/${currentRequestId}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: user.id,
+          driverId: quote.driverId
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('✅ Cotización aceptada exitosamente:', data);
+
+        // Notificar por Socket.IO
+        socketService.acceptService({
+          requestId: currentRequestId,
+          clientId: user.id,
+          clientName: user.name,
+          acceptedDriverId: quote.driverId,
+          amount: quote.amount,
+          securityCode: data.request.securityCode,
+          origin: routeData.origin,
+          destination: routeData.destination,
+          otherDriverIds: data.otherDriverIds || []
+        });
+
+        // Guardar datos del servicio aceptado
+        localStorage.setItem('activeService', JSON.stringify({
+          requestId: currentRequestId,
+          driver: data.request.assignedDriver,
+          securityCode: data.request.securityCode,
+          amount: quote.amount,
+          origin: routeData.origin,
+          destination: routeData.destination
+        }));
+
+        // Cerrar sheet
+        setSheetOpen(false);
+
+        showSuccess('¡Cotización aceptada!');
+
+        // Navegar a vista "Conductor en Camino"
+        setTimeout(() => {
+          history.push('/driver-on-way');
+        }, 500);
+      } else {
+        // ❌ Error del backend - Mostrar detalles
+        console.error('❌ Backend rechazó la aceptación:', {
+          status: response.status,
+          error: data.error,
+          requestId: currentRequestId,
+          clientId: user.id,
+          driverId: quote.driverId
+        });
+        showError(data.error || 'Error al aceptar cotización');
+      }
+    } catch (error) {
+      // ❌ Error de red o JavaScript
+      console.error('❌ Error crítico al aceptar cotización:', error);
+      showError('Error de conexión. Verifica tu internet.');
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
   // Estas funciones se usarán cuando implementemos el bottom sheet de detalles
   // const handleViewQuotes = () => {
   //   history.push('/home');
@@ -355,10 +504,7 @@ const WaitingQuotes = () => {
             destination={null}
             onRouteCalculated={() => {}}
             quotes={quotesReceived}
-            onQuoteClick={(quote) => {
-              console.log('💰 Click en cotización:', quote);
-              // TODO: Abrir bottom sheet con detalles del conductor
-            }}
+            onQuoteClick={handleQuoteClick}
           />
 
           {/* Overlay de búsqueda - SOLO si NO hay cotizaciones */}
@@ -391,6 +537,15 @@ const WaitingQuotes = () => {
             </IonButton>
           </div>
         )}
+
+        {/* Sheet Modal con detalles de cotización */}
+        <QuoteDetailSheet
+          isOpen={sheetOpen}
+          onDismiss={() => setSheetOpen(false)}
+          quote={selectedQuote}
+          onAccept={handleAcceptQuote}
+          isAccepting={isAccepting}
+        />
       </IonContent>
     </IonPage>
   );

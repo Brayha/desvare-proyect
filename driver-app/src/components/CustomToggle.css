@@ -1,0 +1,84 @@
+.custom-toggle {
+  position: relative;
+  display: flex;
+  border: 1px solid #e5e7eb;
+  background: #f7f7f7;
+  border-radius: 40px;
+  padding: 4px;
+  width: 200px;
+  height: auto;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  animation: slideIn 0.3s ease;
+}
+
+.toggle-option {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 36px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #8e8e93;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.toggle-option.active {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+/* Slider animado */
+.toggle-slider {
+  position: absolute;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: white;
+  border-radius: 36px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  top: 4px;
+}
+
+.toggle-slider.left {
+  transform: translateX(0px);
+}
+
+.toggle-slider.right {
+  transform: translateX(calc(100% + 0px));
+}
+
+/* Hover effects (solo desktop) */
+@media (hover: hover) {
+  .toggle-option:hover {
+    color: #5a5a5f;
+  }
+
+  .toggle-option.active:hover {
+    color: #000;
+  }
+}
+
+/* Animación de entrada */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

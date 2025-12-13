@@ -190,6 +190,118 @@ router.post('/:id/quote', async (req, res) => {
   }
 });
 
+// POST /api/requests/:id/accept - Aceptar una cotización específica
+router.post('/:id/accept', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { clientId, driverId } = req.body;
+
+    // Validar campos requeridos
+    if (!clientId || !driverId) {
+      return res.status(400).json({ 
+        error: 'clientId y driverId son requeridos' 
+      });
+    }
+
+    // Buscar la solicitud
+    const request = await Request.findById(id);
+    if (!request) {
+      return res.status(404).json({ 
+        error: 'Solicitud no encontrada' 
+      });
+    }
+
+    // Verificar que la solicitud pertenece al cliente
+    if (request.clientId.toString() !== clientId) {
+      return res.status(403).json({ 
+        error: 'No tienes permiso para aceptar esta solicitud' 
+      });
+    }
+
+    // Verificar que la solicitud no esté ya aceptada
+    if (request.status === 'accepted') {
+      return res.status(400).json({ 
+        error: 'Esta solicitud ya fue aceptada' 
+      });
+    }
+
+    // Verificar que el conductor haya cotizado
+    const quote = request.quotes.find(q => q.driverId.toString() === driverId);
+    if (!quote) {
+      return res.status(404).json({ 
+        error: 'El conductor no ha enviado una cotización para esta solicitud' 
+      });
+    }
+
+    // Buscar al conductor
+    const driver = await User.findById(driverId);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ 
+        error: 'Conductor no encontrado' 
+      });
+    }
+
+    // Generar código de seguridad de 4 dígitos
+    const securityCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+    // Actualizar solicitud
+    request.status = 'accepted';
+    request.assignedDriverId = driverId;
+    request.securityCode = securityCode;
+    request.updatedAt = new Date();
+    await request.save();
+
+    // Cambiar conductor a OCUPADO automáticamente
+    driver.driverProfile.isOnline = false;
+    driver.driverProfile.currentServiceId = request._id;
+    driver.driverProfile.lastOnlineAt = new Date();
+    await driver.save();
+
+    console.log(`✅ Cotización aceptada para solicitud ${id}`);
+    console.log(`👤 Cliente: ${request.clientName}`);
+    console.log(`🚗 Conductor asignado: ${driver.name} (ahora OCUPADO)`);
+    console.log(`🔒 Código de seguridad: ${securityCode}`);
+
+    // Preparar datos del conductor para el cliente
+    const driverInfo = {
+      id: driver._id,
+      name: driver.name,
+      phone: driver.phone,
+      rating: driver.driverProfile.rating,
+      totalServices: driver.driverProfile.totalServices,
+      towTruck: driver.driverProfile.towTruck,
+      vehicleCapabilities: driver.driverProfile.vehicleCapabilities
+    };
+
+    // Preparar lista de otros conductores que cotizaron
+    const otherDriverIds = request.quotes
+      .filter(q => q.driverId.toString() !== driverId)
+      .map(q => q.driverId.toString());
+
+    res.json({
+      message: 'Cotización aceptada exitosamente',
+      request: {
+        id: request._id,
+        status: request.status,
+        securityCode: securityCode,
+        assignedDriver: driverInfo,
+        acceptedQuote: {
+          amount: quote.amount,
+          timestamp: quote.timestamp
+        }
+      },
+      otherDriverIds: otherDriverIds // Para notificar por Socket.IO
+    });
+
+  } catch (error) {
+    console.error('❌ Error al aceptar cotización:', error);
+    res.status(500).json({ 
+      error: 'Error al aceptar cotización',
+      details: error.message 
+    });
+  }
+});
+
 // GET /api/requests/client/:id - Obtener solicitudes de un cliente
 router.get('/client/:id', async (req, res) => {
   try {

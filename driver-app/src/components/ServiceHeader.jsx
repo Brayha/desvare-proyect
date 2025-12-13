@@ -1,5 +1,6 @@
-import { IonHeader, IonToolbar, IonToggle, IonAvatar, IonText } from '@ionic/react';
+import { IonHeader, IonToolbar, IonAvatar } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
+import CustomToggle from './CustomToggle';
 import './ServiceHeader.css';
 
 const ServiceHeader = ({ user, isOnline, onToggleAvailability }) => {
@@ -19,18 +20,10 @@ const ServiceHeader = ({ user, isOnline, onToggleAvailability }) => {
 
         {/* Toggle Ocupado / Activo */}
         <div className="toggle-container">
-          <IonText className={`status-label ${!isOnline ? 'occupied' : ''}`}>
-            Ocupado
-          </IonText>
-          <IonToggle
-            checked={isOnline}
-            onIonChange={(e) => onToggleAvailability(e.detail.checked)}
-            color="success"
-            className="availability-toggle"
+          <CustomToggle 
+            isActive={isOnline}
+            onToggle={onToggleAvailability}
           />
-          <IonText className={`status-label ${isOnline ? 'active' : ''}`}>
-            Activo
-          </IonText>
         </div>
 
         {/* Avatar del conductor */}

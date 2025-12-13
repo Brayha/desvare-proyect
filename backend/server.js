@@ -247,6 +247,58 @@ io.on('connection', (socket) => {
     console.log('✅ Notificación de cancelación enviada a conductores');
   });
 
+  // Cliente acepta una cotización
+  socket.on('service:accept', (data) => {
+    console.log('✅ Cliente aceptó cotización:', data);
+    console.log(`👤 Cliente: ${data.clientId}`);
+    console.log(`🚗 Conductor aceptado: ${data.acceptedDriverId}`);
+    console.log(`❌ Otros conductores: ${data.otherDriverIds?.length || 0}`);
+    
+    // Notificar al conductor aceptado
+    const driverData = connectedDrivers.get(data.acceptedDriverId);
+    if (driverData) {
+      io.to(driverData.socketId).emit('service:accepted', {
+        requestId: data.requestId,
+        clientName: data.clientName,
+        securityCode: data.securityCode,
+        amount: data.amount,
+        origin: data.origin,
+        destination: data.destination,
+        timestamp: new Date()
+      });
+      
+      console.log(`✅ Conductor ${data.acceptedDriverId} notificado de aceptación`);
+      
+      // Actualizar estado en memoria y remover de sala active-drivers
+      driverData.isOnline = false;
+      connectedDrivers.set(data.acceptedDriverId, driverData);
+      
+      const driverSocket = io.sockets.sockets.get(driverData.socketId);
+      if (driverSocket) {
+        driverSocket.leave('active-drivers');
+        console.log(`🔴 Conductor ${data.acceptedDriverId} removido de active-drivers (ahora OCUPADO)`);
+      }
+    } else {
+      console.log(`⚠️ Conductor ${data.acceptedDriverId} no está conectado`);
+    }
+    
+    // Notificar a otros conductores que el servicio ya fue tomado
+    if (data.otherDriverIds && data.otherDriverIds.length > 0) {
+      data.otherDriverIds.forEach(driverId => {
+        const otherDriverData = connectedDrivers.get(driverId);
+        if (otherDriverData) {
+          io.to(otherDriverData.socketId).emit('service:taken', {
+            requestId: data.requestId,
+            message: 'Este servicio ya fue tomado por otro conductor',
+            timestamp: new Date()
+          });
+        }
+      });
+      
+      console.log(`📢 ${data.otherDriverIds.length} conductores notificados que el servicio fue tomado`);
+    }
+  });
+
   // Desconexión
   socket.on('disconnect', () => {
     console.log('🔌 Cliente desconectado:', socket.id);

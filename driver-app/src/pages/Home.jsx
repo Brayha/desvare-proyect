@@ -50,6 +50,47 @@ const Home = () => {
     requestLocation 
   } = useDriverLocation(10000);
 
+  // Cargar imagen de perfil solo si no existe (sin romper nada)
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const parsedUser = JSON.parse(userData);
+    
+    // Si ya tiene selfie, no hacer nada
+    if (parsedUser.driverProfile?.documents?.selfie) {
+      return;
+    }
+
+    // Solo si NO tiene selfie, cargarlo del backend
+    const loadProfileImage = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/drivers/profile/${parsedUser._id}`);
+        if (response.ok) {
+          const data = await response.json();
+          const selfie = data.driver?.driverProfile?.documents?.selfie;
+          
+          if (selfie) {
+            // Actualizar solo el selfie en localStorage
+            const updatedUser = { ...parsedUser };
+            if (!updatedUser.driverProfile.documents) {
+              updatedUser.driverProfile.documents = {};
+            }
+            updatedUser.driverProfile.documents.selfie = selfie;
+            
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+            console.log('✅ Imagen de perfil cargada');
+          }
+        }
+      } catch (error) {
+        console.log('ℹ️ No se pudo cargar imagen de perfil (no crítico)');
+      }
+    };
+
+    loadProfileImage();
+  }, []); // Solo se ejecuta una vez
+
   // Cargar usuario y solicitudes al montar
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -72,18 +113,31 @@ const Home = () => {
     // Escuchar nuevas solicitudes
     socketService.onRequestReceived((request) => {
       console.log('📥 Nueva solicitud recibida:', request);
-      setRequests((prev) => [request, ...prev]);
       
-      presentAlert({
-        header: '¡Nueva Solicitud!',
-        message: `${request.clientName} está solicitando una cotización`,
-        buttons: ['OK']
-      });
-
+      // Normalizar la solicitud para asegurar que tenga todos los campos necesarios
+      const normalizedRequest = {
+        ...request,
+        status: request.status || 'pending', // Asegurar que tenga status
+        quotesCount: request.quotesCount || 0 // Asegurar contador de cotizaciones
+      };
+      
+      console.log('✅ Solicitud normalizada:', normalizedRequest);
+      setRequests((prev) => [normalizedRequest, ...prev]);
+      
+      // Toast con botón "Ver" interactivo
       present({
-        message: `Nueva solicitud de ${request.clientName}`,
-        duration: 3000,
+        message: `🚗 Nueva solicitud de ${normalizedRequest.clientName}`,
+        duration: 5000,
+        position: 'bottom',
         color: 'primary',
+        buttons: [
+          {
+            text: 'Ver',
+            handler: () => {
+              handleQuote(normalizedRequest);
+            }
+          }
+        ]
       });
     });
 
@@ -104,9 +158,54 @@ const Home = () => {
       });
     });
 
+    // Escuchar cuando tu cotización es aceptada
+    socketService.onServiceAccepted((data) => {
+      console.log('🎉 ¡Tu cotización fue aceptada!', data);
+      
+      presentAlert({
+        header: '🎉 ¡Cotización Aceptada!',
+        message: `${data.clientName} aceptó tu cotización. Ve a recoger el vehículo.`,
+        buttons: ['OK']
+      });
+
+      present({
+        message: `¡Tu cotización fue aceptada! Cliente: ${data.clientName}`,
+        duration: 5000,
+        color: 'success',
+      });
+
+      // Guardar datos del servicio activo
+      localStorage.setItem('activeService', JSON.stringify(data));
+
+      // Actualizar estado a OCUPADO
+      setIsOnline(false);
+      const updatedUser = { ...parsedUser };
+      updatedUser.driverProfile.isOnline = false;
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // TODO: Navegar a vista de servicio activo
+      // history.push('/active-service');
+    });
+
+    // Escuchar cuando otro conductor tomó el servicio
+    socketService.onServiceTaken((data) => {
+      console.log('❌ Servicio tomado por otro conductor:', data.requestId);
+      
+      // Remover de la lista
+      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      
+      present({
+        message: 'Este servicio ya fue tomado por otro conductor',
+        duration: 3000,
+        color: 'medium',
+      });
+    });
+
     return () => {
       socketService.offRequestReceived();
       socketService.offRequestCancelled();
+      socketService.offServiceAccepted();
+      socketService.offServiceTaken();
       socketService.disconnect();
     };
   }, [history, present, presentAlert]);
@@ -261,11 +360,17 @@ const Home = () => {
   };
 
   // Refrescar solicitudes
-  const handleRefresh = (event) => {
-    loadRequests(user._id);
-    setTimeout(() => {
-      event.detail.complete();
-    }, 1000);
+  const handleRefresh = async (event) => {
+    console.log('🔄 Pull to refresh activado en driver-app');
+    await loadRequests(user._id);
+    
+    present({
+      message: `${requests.length} solicitudes actualizadas`,
+      duration: 2000,
+      color: 'success',
+    });
+    
+    event.detail.complete();
   };
 
   // Manejar solicitud de permisos de ubicación

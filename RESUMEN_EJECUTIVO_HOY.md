@@ -1,4 +1,4 @@
-# 📊 Resumen Ejecutivo - Implementación del Día
+`# 📊 Resumen Ejecutivo - Implementación del Día
 
 **Fecha:** Diciembre 10, 2025  
 **Desarrollador:** Asistente IA + Brayan Garcia  
