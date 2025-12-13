@@ -54,9 +54,19 @@ class SocketService {
 
   disconnect() {
     if (this.socket) {
-      console.log('🔌 Desconectando Socket.IO...');
+      console.log('🔌 Desconectando Socket.IO (solo llamar al cerrar app)...');
       this.socket.disconnect();
       this.socket = null;
+    }
+  }
+
+  // Método para mantener conexión activa (no desconectar)
+  keepAlive() {
+    if (!this.socket || !this.socket.connected) {
+      console.log('🔄 Socket desconectado, reconectando...');
+      this.connect();
+    } else {
+      console.log('✅ Socket.IO conectado y activo');
     }
   }
 
@@ -92,6 +102,15 @@ class SocketService {
       this.socket.emit('request:cancel', { requestId });
     } else {
       console.warn('⚠️ No se puede cancelar solicitud: Socket no conectado');
+    }
+  }
+
+  acceptService(data) {
+    if (this.socket && this.socket.connected) {
+      console.log('✅ Aceptando servicio:', data.requestId);
+      this.socket.emit('service:accept', data);
+    } else {
+      console.warn('⚠️ No se puede aceptar servicio: Socket no conectado');
     }
   }
 

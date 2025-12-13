@@ -3,6 +3,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
 import { useEffect } from 'react';
 import socketService from './services/socket';
+import { AuthProvider } from './contexts/AuthContext';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -24,10 +25,11 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import LocationPermission from './pages/LocationPermission';
-import RequestService from './pages/RequestService';
 import RequestAuth from './pages/RequestAuth';
 import RequestConfirmation from './pages/RequestConfirmation';
 import WaitingQuotes from './pages/WaitingQuotes';
+import DriverOnWay from './pages/DriverOnWay';
+import TabLayout from './components/TabLayout/TabLayout';
 
 setupIonicReact();
 
@@ -43,29 +45,38 @@ function App() {
     console.log('🚀 Inicializando Socket.IO...');
     socketService.connect();
     
-    // Cleanup al desmontar la app
+    // NO desconectar en cleanup - mantener conexión durante toda la sesión
+    // Socket.IO se desconectará solo cuando se cierre el navegador
     return () => {
-      console.log('👋 Cerrando Socket.IO...');
-      socketService.disconnect();
+      console.log('👋 App desmontándose (no cerrar Socket.IO)');
+      // socketService.disconnect(); // ← COMENTADO: NO desconectar
     };
   }, []);
 
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/register" component={Register} />
-          <Route exact path="/home" component={Home} />
-          <Route exact path="/location-permission" component={LocationPermission} />
-          <Route exact path="/request-service" component={RequestService} />
-          <Route exact path="/request-auth" component={RequestAuth} />
-          <Route exact path="/request-confirmation" component={RequestConfirmation} />
-          <Route exact path="/waiting-quotes" component={WaitingQuotes} />
-          <Route exact path="/" component={InitialRedirect} />
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
+    <AuthProvider>
+      <IonApp>
+        <IonReactRouter>
+          <IonRouterOutlet>
+            {/* Páginas sin tabs */}
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/register" component={Register} />
+            <Route exact path="/home" component={Home} />
+            <Route exact path="/location-permission" component={LocationPermission} />
+            <Route exact path="/request-auth" component={RequestAuth} />
+            <Route exact path="/request-confirmation" component={RequestConfirmation} />
+            <Route exact path="/waiting-quotes" component={WaitingQuotes} />
+            <Route exact path="/driver-on-way" component={DriverOnWay} />
+            
+            {/* Tabs (Desvare + Mi cuenta) */}
+            <Route path="/tabs" component={TabLayout} />
+            
+            {/* Redirección inicial */}
+            <Route exact path="/" component={InitialRedirect} />
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </IonApp>
+    </AuthProvider>
   );
 }
 

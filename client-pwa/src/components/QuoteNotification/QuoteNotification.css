@@ -1,0 +1,153 @@
+.quote-notification {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  z-index: 10000;
+  width: calc(100% - 32px);
+  max-width: 400px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease;
+  opacity: 0;
+}
+
+.quote-notification.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.quote-notification.closing {
+  transform: translateX(-50%) translateY(-120%);
+  opacity: 0;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 12px;
+  position: relative;
+}
+
+.notification-icon {
+  font-size: 40px;
+  flex-shrink: 0;
+  animation: bounce 0.6s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.notification-body {
+  flex: 1;
+  color: white;
+}
+
+.notification-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.notification-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.info-icon {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.info-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.info-text.bold {
+  font-weight: 700;
+  font-size: 16px;
+  color: #FFD700;
+}
+
+.info-text.small {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.notification-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.notification-close:hover {
+  opacity: 1;
+}
+
+.notification-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  width: 100%;
+  transform-origin: left;
+  animation: progress linear forwards;
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .quote-notification {
+    top: 70px;
+    width: calc(100% - 24px);
+  }
+
+  .notification-content {
+    padding: 12px;
+  }
+
+  .notification-icon {
+    font-size: 32px;
+  }
+
+  .notification-title {
+    font-size: 14px;
+  }
+
+  .info-text {
+    font-size: 13px;
+  }
+}

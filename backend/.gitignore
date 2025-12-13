@@ -3,4 +3,11 @@ node_modules/
 *.log
 .DS_Store
 
+# Firebase credentials
+firebase-service-account.json
+*-firebase-adminsdk-*.json
+
+# Uploads temporales
+uploads/
+temp/
 
