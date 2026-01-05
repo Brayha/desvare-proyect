@@ -86,8 +86,17 @@ const WaitingQuotes = () => {
   const [routeData, setRouteData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [, setRequestSent] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [requestId, setRequestId] = useState(null);
-  const [quotesReceived, setQuotesReceived] = useState([]);
+  
+  // ✅ CRÍTICO: Inicializar con función para limpiar ANTES del primer render
+  const [quotesReceived, setQuotesReceived] = useState(() => {
+    // Limpiar localStorage inmediatamente al crear el estado
+    localStorage.removeItem('quotesReceived');
+    console.log('🗑️ Limpieza preventiva: quotesReceived eliminado del localStorage');
+    return [];
+  });
+  
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
@@ -97,6 +106,18 @@ const WaitingQuotes = () => {
     console.log('🔄 WaitingQuotes - useEffect ejecutándose');
 
     const initializeData = () => {
+      // ✅ LIMPIAR cotizaciones y estado al montar el componente
+      console.log('🧹 Limpiando estado anterior de cotizaciones');
+      
+      // ✅ CRÍTICO: Limpiar localStorage de cotizaciones antiguas
+      localStorage.removeItem('quotesReceived');
+      console.log('🗑️ quotesReceived eliminado del localStorage');
+      
+      setQuotesReceived([]);
+      setSelectedQuote(null);
+      setSheetOpen(false);
+      setIsAccepting(false);
+      
       // Verificar que tengamos todos los datos necesarios
       const userData = localStorage.getItem('user');
       const storedRouteData = localStorage.getItem('requestData');
@@ -121,18 +142,18 @@ const WaitingQuotes = () => {
 
       if (!storedRouteData) {
         if (isMounted) {
-          console.log('❌ No hay datos de ruta, redirigiendo a /request-service');
+          console.log('❌ No hay datos de ruta, redirigiendo a /home');
           showError("No se encontraron datos de la ruta");
-          history.push('/request-service');
+          history.push('/home');
         }
         return false;
       }
 
       if (!currentRequestId) {
         if (isMounted) {
-          console.log('❌ No hay requestId, redirigiendo a /request-service');
+          console.log('❌ No hay requestId, redirigiendo a /home');
           showError("No se encontró la solicitud. Por favor, intenta de nuevo.");
-          history.push('/request-service');
+          history.push('/home');
         }
         return false;
       }
@@ -166,10 +187,26 @@ const WaitingQuotes = () => {
     // Solo registrar listener si la inicialización fue exitosa
     if (success) {
       console.log('👂 Registrando listener de cotizaciones');
+      
+      // Obtener el requestId actual para validación
+      const currentRequestId = localStorage.getItem('currentRequestId');
+      console.log('🎯 Listener configurado para requestId:', currentRequestId);
+      
       socketService.onQuoteReceived((quote) => {
         console.log('💰 Cotización recibida en WaitingQuotes:', quote);
         console.log('📍 Ubicación del conductor:', quote.location);
         console.log('💵 Monto:', quote.amount);
+        
+        // ✅ VALIDACIÓN CRÍTICA: Verificar que la cotización sea del request actual
+        if (quote.requestId !== currentRequestId) {
+          console.warn('⚠️ Cotización de request antiguo IGNORADA:', {
+            cotizacionRequestId: quote.requestId,
+            actualRequestId: currentRequestId
+          });
+          return; // ← IGNORAR cotizaciones de otros requests
+        }
+        
+        console.log('✅ Cotización válida para el request actual');
         
         // Agregar cotización a la lista
         setQuotesReceived((prev) => [...prev, quote]);
@@ -192,6 +229,36 @@ const WaitingQuotes = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar al montar el componente
+
+  // ✅ SEGUNDO useEffect: Detectar cambio de requestId y limpiar estado
+  useEffect(() => {
+    const currentRequestId = localStorage.getItem('currentRequestId');
+    
+    console.log('🔄 Detectando cambios en requestId:', {
+      requestIdEnEstado: requestId,
+      requestIdEnStorage: currentRequestId,
+      cotizacionesActuales: quotesReceived.length
+    });
+    
+    // Si hay cotizaciones pero el requestId cambió, limpiar
+    if (quotesReceived.length > 0 && requestId && requestId !== currentRequestId) {
+      console.warn('⚠️ RequestId cambió! Limpiando cotizaciones antiguas:', {
+        requestIdAntiguo: requestId,
+        requestIdNuevo: currentRequestId,
+        cotizacionesALimpiar: quotesReceived.length
+      });
+      
+      setQuotesReceived([]);
+      setSelectedQuote(null);
+      setSheetOpen(false);
+    }
+    
+    // Actualizar requestId en el estado si cambió
+    if (requestId !== currentRequestId) {
+      console.log('🆕 Actualizando requestId en estado:', currentRequestId);
+      setRequestId(currentRequestId);
+    }
+  }, [requestId, quotesReceived.length]); // ← Se ejecuta cuando cambia requestId o cantidad de cotizaciones
 
   // ============================================
   // 🧪 EXPERIMENT-QUOTES: Enviar cotizaciones aleatorias después de la primera real
@@ -239,22 +306,58 @@ const WaitingQuotes = () => {
   const handleCancelRequest = () => {
     console.log('🚫 Cancelando solicitud...');
     
-    // Obtener el requestId antes de limpiar
+    // Obtener el requestId y datos antes de limpiar
     const currentRequestId = localStorage.getItem('currentRequestId');
+    const requestData = localStorage.getItem('requestData');
     
     if (currentRequestId) {
-      // Emitir evento de cancelación a conductores via Socket.IO
-      socketService.cancelRequest(currentRequestId);
-      console.log('📡 Evento de cancelación enviado a conductores');
+      // Parsear datos para obtener información del cliente y vehículo
+      let clientName = user?.name || 'Cliente';
+      let vehicle = null;
+      let origin = null;
+      let destination = null;
+      let problem = null;
+      
+      if (requestData) {
+        try {
+          const parsed = JSON.parse(requestData);
+          vehicle = parsed.vehicleSnapshot;
+          origin = parsed.origin;
+          destination = parsed.destination;
+          problem = parsed.serviceDetails?.problem;
+        } catch (error) {
+          console.error('Error al parsear requestData:', error);
+        }
+      }
+      
+      // Emitir evento de cancelación con detalles completos
+      socketService.cancelServiceWithDetails({
+        requestId: currentRequestId,
+        reason: 'cliente_cancelo_busqueda',
+        customReason: 'El cliente canceló mientras esperaba cotizaciones',
+        clientName: clientName,
+        vehicle: vehicle,
+        origin: origin,
+        destination: destination,
+        problem: problem
+      });
+      console.log('📡 Evento de cancelación con detalles enviado a conductores');
     }
     
-    // Limpiar datos de la solicitud
+    // ✅ Limpiar TODO completamente (incluye quotesReceived)
     localStorage.removeItem('requestData');
     localStorage.removeItem('currentRequestId');
+    localStorage.removeItem('activeService');
+    localStorage.removeItem('quotesReceived'); // ← NUEVO: Limpiar cotizaciones en localStorage
+    
+    // ✅ Limpiar estado de cotizaciones en memoria
+    setQuotesReceived([]);
+    setSelectedQuote(null);
+    setSheetOpen(false);
     
     showSuccess('Solicitud cancelada');
     
-    // Volver al Home para reiniciar el proceso
+    // ✅ Volver al Home REPLACE para forzar reinicio completo (no permite volver atrás)
     history.replace('/home');
   };
 
@@ -406,13 +509,18 @@ const WaitingQuotes = () => {
           origin: routeData.origin,
           destination: routeData.destination
         }));
+        
+        // ✅ CRÍTICO: Limpiar cotizaciones del localStorage
+        localStorage.removeItem('quotesReceived');
+        localStorage.removeItem('requestData');
+        console.log('🗑️ Cotizaciones y requestData limpiados del localStorage');
 
         // Cerrar sheet
         setSheetOpen(false);
 
         showSuccess('¡Cotización aceptada!');
 
-        // Navegar a vista "Conductor en Camino"
+        // Navegar a vista "Conductor en Camino" usando tabs
         setTimeout(() => {
           history.push('/driver-on-way');
         }, 500);

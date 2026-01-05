@@ -28,6 +28,7 @@ import UnderReview from './pages/UnderReview';
 import Rejected from './pages/Rejected';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
+import ActiveService from './pages/ActiveService';
 
 setupIonicReact();
 
@@ -46,6 +47,7 @@ function App() {
           <Route exact path="/rejected" component={Rejected} />
           <Route exact path="/home" component={Home} />
           <Route exact path="/profile" component={Profile} />
+          <Route exact path="/active-service" component={ActiveService} />
           <Route exact path="/">
             <Redirect to="/splash" />
           </Route>

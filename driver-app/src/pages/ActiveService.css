@@ -1,0 +1,138 @@
+.active-service-page {
+  --background: #f5f5f5;
+}
+
+/* Cards */
+.client-card,
+.location-card,
+.vehicle-card,
+.security-card,
+.amount-card {
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Headers */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.header-icon {
+  font-size: 24px;
+  color: var(--ion-color-primary);
+}
+
+/* Info Rows */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row .label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.info-row .value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: right;
+  max-width: 60%;
+}
+
+/* Security Code Display */
+.security-code-display {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.code-digit-large {
+  width: 60px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.code-instruction {
+  text-align: center;
+  font-size: 13px;
+  margin: 12px 0 16px 0;
+  line-height: 1.5;
+}
+
+.verify-button {
+  margin-top: 8px;
+}
+
+/* Amount Display */
+.amount-display {
+  text-align: center;
+  font-size: 36px;
+  font-weight: bold;
+  color: var(--ion-color-success);
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(46, 213, 115, 0.1) 0%, rgba(46, 213, 115, 0.05) 100%);
+  border-radius: 12px;
+}
+
+/* Action Buttons Container */
+.action-buttons-container {
+  padding: 16px;
+  padding-bottom: 32px;
+}
+
+.action-button {
+  margin-bottom: 12px;
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+}
+
+.complete-button {
+  margin-top: 8px;
+}
+
+/* Responsive */
+@media (max-width: 375px) {
+  .code-digit-large {
+    width: 50px;
+    height: 60px;
+    font-size: 28px;
+  }
+  
+  .amount-display {
+    font-size: 28px;
+  }
+}

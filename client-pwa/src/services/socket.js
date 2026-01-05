@@ -105,6 +105,17 @@ class SocketService {
     }
   }
 
+  // Método para cancelar servicio con detalles completos (razón, vehículo, etc.)
+  cancelServiceWithDetails(data) {
+    if (this.socket && this.socket.connected) {
+      console.log('🚫 Cancelando servicio con detalles:', data.requestId);
+      console.log('📝 Razón:', data.reason, data.customReason || '');
+      this.socket.emit('request:cancel', data);
+    } else {
+      console.warn('⚠️ No se puede cancelar servicio: Socket no conectado');
+    }
+  }
+
   acceptService(data) {
     if (this.socket && this.socket.connected) {
       console.log('✅ Aceptando servicio:', data.requestId);

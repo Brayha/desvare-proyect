@@ -184,6 +184,22 @@ const requestSchema = new mongoose.Schema({
     }
   },
   
+  // Información de cancelación
+  cancelledAt: { 
+    type: Date,
+    default: null
+  },
+  cancellationReason: {
+    type: String,
+    enum: ['resuelto', 'conductor_no_viene', 'conductor_no_responde', 'otra_grua', 'muy_caro', 'muy_lejos', 'otro', null],
+    default: null
+  },
+  cancellationCustomReason: {
+    type: String,
+    maxlength: 200,
+    default: null
+  },
+  
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

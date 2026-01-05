@@ -26,6 +26,7 @@ import ServiceHeader from '../components/ServiceHeader';
 import RequestCard from '../components/RequestCard';
 import LocationBanner from '../components/LocationBanner';
 import LocationPermissionModal from '../components/LocationPermissionModal';
+import CancellationDetailModal from '../components/CancellationDetailModal';
 import './Home.css';
 
 const Home = () => {
@@ -41,6 +42,10 @@ const Home = () => {
   const [quoteAmount, setQuoteAmount] = useState('');
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [loadingRequests, setLoadingRequests] = useState(true);
+  
+  // Estados para modal de cancelación
+  const [showCancellationModal, setShowCancellationModal] = useState(false);
+  const [cancellationData, setCancellationData] = useState(null);
 
   // Hook de geolocalización del conductor
   const { 
@@ -143,37 +148,70 @@ const Home = () => {
 
     // Escuchar cancelaciones
     socketService.onRequestCancelled((data) => {
-      console.log('🚫 Solicitud cancelada:', data.requestId);
-      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      console.log('🚫 EVENTO CANCELACIÓN RECIBIDO');
+      console.log('📝 RequestId recibido:', data.requestId);
+      console.log('📝 Razón:', data.reason);
+      console.log('📝 Razón custom:', data.customReason);
+      console.log('📋 Requests actuales:', requests.map(r => r.requestId));
       
-      if (selectedRequest && selectedRequest.requestId === data.requestId) {
+      // ✅ Remover de la lista con conversión a String para evitar problemas de comparación
+      setRequests((prev) => {
+        const filtered = prev.filter(req => 
+          req.requestId?.toString() !== data.requestId?.toString()
+        );
+        console.log('📊 Requests después de filtrar:', filtered.map(r => r.requestId));
+        return filtered;
+      });
+      
+      // Cerrar modal de cotización si estaba abierto
+      if (selectedRequest && selectedRequest.requestId?.toString() === data.requestId?.toString()) {
+        console.log('🔒 Cerrando modal de cotización');
         setShowQuoteModal(false);
         setSelectedRequest(null);
       }
       
-      present({
-        message: data.message || 'Servicio cancelado por el cliente',
-        duration: 4000,
-        color: 'warning',
-      });
+      // ✅ NUEVO: Verificar si es el servicio activo
+      const activeServiceData = localStorage.getItem('activeService');
+      if (activeServiceData) {
+        try {
+          const activeService = JSON.parse(activeServiceData);
+          if (activeService.requestId?.toString() === data.requestId?.toString()) {
+            console.log('🚨 Servicio activo cancelado por el cliente');
+            
+            // Limpiar servicio activo
+            localStorage.removeItem('activeService');
+            
+            // Actualizar estado a ACTIVO
+            setIsOnline(true);
+            const updatedUser = { ...parsedUser };
+            updatedUser.driverProfile.isOnline = true;
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            
+            // Si está en /active-service, redirigir a /home
+            if (window.location.pathname === '/active-service') {
+              console.log('🔄 Redirigiendo desde /active-service a /home');
+              history.push('/home');
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error al verificar servicio activo:', error);
+        }
+      }
+      
+      // ✅ Mostrar modal detallado con información de cancelación
+      console.log('📱 Abriendo modal de detalle de cancelación');
+      setCancellationData(data);
+      setShowCancellationModal(true);
+      console.log('✅ Modal de cancelación configurado para mostrarse');
     });
 
     // Escuchar cuando tu cotización es aceptada
     socketService.onServiceAccepted((data) => {
       console.log('🎉 ¡Tu cotización fue aceptada!', data);
       
-      presentAlert({
-        header: '🎉 ¡Cotización Aceptada!',
-        message: `${data.clientName} aceptó tu cotización. Ve a recoger el vehículo.`,
-        buttons: ['OK']
-      });
-
-      present({
-        message: `¡Tu cotización fue aceptada! Cliente: ${data.clientName}`,
-        duration: 5000,
-        color: 'success',
-      });
-
+      // ✅ NUEVO: Remover la solicitud de la bandeja
+      setRequests((prev) => prev.filter(req => req.requestId?.toString() !== data.requestId?.toString()));
+      
       // Guardar datos del servicio activo
       localStorage.setItem('activeService', JSON.stringify(data));
 
@@ -183,8 +221,15 @@ const Home = () => {
       updatedUser.driverProfile.isOnline = false;
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      // TODO: Navegar a vista de servicio activo
-      // history.push('/active-service');
+      // ✅ NUEVO: Navegar a vista de servicio activo
+      history.push('/active-service');
+      
+      // Mostrar notificación
+      present({
+        message: `¡Tu cotización fue aceptada! Cliente: ${data.clientName}`,
+        duration: 3000,
+        color: 'success',
+      });
     });
 
     // Escuchar cuando otro conductor tomó el servicio
@@ -516,6 +561,13 @@ const Home = () => {
           isOpen={showLocationModal}
           onDismiss={handleDismissLocationModal}
           onRequestPermission={handleRequestLocationPermission}
+        />
+
+        {/* Modal de detalle de cancelación */}
+        <CancellationDetailModal
+          isOpen={showCancellationModal}
+          onDismiss={() => setShowCancellationModal(false)}
+          cancellationData={cancellationData}
         />
       </IonContent>
     </IonPage>

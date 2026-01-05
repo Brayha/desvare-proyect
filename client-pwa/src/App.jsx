@@ -65,7 +65,11 @@ function App() {
             <Route exact path="/location-permission" component={LocationPermission} />
             <Route exact path="/request-auth" component={RequestAuth} />
             <Route exact path="/request-confirmation" component={RequestConfirmation} />
-            <Route exact path="/waiting-quotes" component={WaitingQuotes} />
+            <Route exact path="/waiting-quotes" render={(props) => {
+              // ✅ Usar requestId como key para forzar remount cuando cambie
+              const requestId = localStorage.getItem('currentRequestId') || 'default';
+              return <WaitingQuotes key={requestId} {...props} />;
+            }} />
             <Route exact path="/driver-on-way" component={DriverOnWay} />
             
             {/* Tabs (Desvare + Mi cuenta) */}

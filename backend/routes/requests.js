@@ -397,13 +397,15 @@ router.get('/nearby/:driverId', async (req, res) => {
     // Obtener solicitudes pendientes (sin cotizar por este conductor y no expiradas)
     const now = new Date();
     const requests = await Request.find({
-      status: { $in: ['pending', 'quoted'] },
+      status: { $in: ['pending', 'quoted'] }, // ✅ Solo pending y quoted (excluye accepted, cancelled, completed)
       'quotes.driverId': { $ne: driverId }, // No cotizadas por este conductor
       expiresAt: { $gt: now } // No expiradas
     })
     .sort({ createdAt: -1 }) // Más recientes primero
     .limit(50); // Limitar a 50 solicitudes
 
+    console.log(`🔍 Solicitudes encontradas antes de formatear: ${requests.length}`);
+    
     // Función helper para obtener iconos según categoría
     const getCategoryIcon = (categoryId) => {
       const icons = {

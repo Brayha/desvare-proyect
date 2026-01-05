@@ -233,18 +233,88 @@ io.on('connection', (socket) => {
   });
 
   // Cliente cancela solicitud
-  socket.on('request:cancel', (data) => {
+  socket.on('request:cancel', async (data) => {
     console.log('🚫 Solicitud cancelada por cliente:', data.requestId);
-    console.log('📢 Notificando a todos los conductores...');
+    console.log('📝 Razón:', data.reason, data.customReason || '');
     
-    // Notificar a TODOS los conductores que el servicio fue cancelado
-    io.to('drivers').emit('request:cancelled', {
-      requestId: data.requestId,
-      message: 'Servicio cancelado por el cliente',
-      timestamp: new Date()
-    });
-    
-    console.log('✅ Notificación de cancelación enviada a conductores');
+    try {
+      const Request = require('./models/Request');
+      const User = require('./models/User');
+      
+      // ✅ Actualizar estado de la solicitud en la base de datos
+      const request = await Request.findByIdAndUpdate(
+        data.requestId,
+        {
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          cancellationReason: data.reason,
+          cancellationCustomReason: data.customReason || null,
+          updatedAt: new Date()
+        },
+        { new: true }
+      );
+      
+      if (!request) {
+        console.error('❌ Solicitud no encontrada para cancelar:', data.requestId);
+        return;
+      }
+      
+      console.log('✅ Solicitud actualizada a estado "cancelled" en DB');
+      
+      // ✅ Si había conductor asignado, liberarlo y ponerlo en ACTIVO
+      if (request.assignedDriverId) {
+        await User.findByIdAndUpdate(
+          request.assignedDriverId,
+          {
+            'driverProfile.isOnline': true,
+            'driverProfile.currentServiceId': null,
+            'driverProfile.lastOnlineAt': new Date()
+          }
+        );
+        
+        console.log(`🟢 Conductor ${request.assignedDriverId} liberado y puesto en ACTIVO`);
+        
+        // Actualizar estado en memoria
+        const driverData = connectedDrivers.get(request.assignedDriverId.toString());
+        if (driverData) {
+          driverData.isOnline = true;
+          connectedDrivers.set(request.assignedDriverId.toString(), driverData);
+          
+          // Unir a sala de conductores activos
+          const driverSocket = io.sockets.sockets.get(driverData.socketId);
+          if (driverSocket) {
+            driverSocket.join('active-drivers');
+            console.log(`✅ Conductor ${request.assignedDriverId} agregado a sala active-drivers`);
+          }
+        }
+      }
+      
+      // ✅ Convertir requestId a String para evitar problemas de comparación
+      const requestIdStr = data.requestId.toString();
+      
+      console.log('📢 Notificando a todos los conductores...');
+      
+      // Notificar a TODOS los conductores con información detallada
+      io.to('drivers').emit('request:cancelled', {
+        requestId: requestIdStr, // ✅ String
+        reason: data.reason,
+        customReason: data.customReason || null,
+        clientName: data.clientName,
+        vehicle: data.vehicle,
+        origin: data.origin,
+        destination: data.destination,
+        problem: data.problem,
+        message: 'Servicio cancelado por el cliente',
+        cancelledAt: new Date(),
+        timestamp: new Date()
+      });
+      
+      console.log('✅ Notificación de cancelación enviada a conductores');
+      
+    } catch (error) {
+      console.error('❌ Error al procesar cancelación:', error);
+      console.error('Stack:', error.stack);
+    }
   });
 
   // Cliente acepta una cotización

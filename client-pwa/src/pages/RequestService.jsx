@@ -299,6 +299,8 @@ const RequestService = () => {
           origin,
           destination,
           routeInfo,
+          vehicleSnapshot: vehicleData.vehicleSnapshot,
+          serviceDetails: vehicleData.serviceDetails,
         })
       );
 
