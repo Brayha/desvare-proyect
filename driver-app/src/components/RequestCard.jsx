@@ -48,18 +48,18 @@ const RequestCard = ({ request, onQuote }) => {
           </div>
           <div className="vehicle-details">
             <IonText className="vehicle-model">
-              <strong>{request.vehicle?.brand} {request.vehicle?.model}</strong>
+              <strong>{request.vehicle?.brand || 'N/A'} {request.vehicle?.model || 'N/A'}</strong>
             </IonText>
             <IonText className="vehicle-plate" color="medium">
-              {request.vehicle?.licensePlate}
+              {request.vehicle?.licensePlate || 'N/A'}
             </IonText>
           </div>
           <div className="distance-info">
             <IonText className="distance">
-              <strong>{request.durationMin} MIN</strong>
+              <strong>{request.durationMin || 'N/A'} MIN</strong>
             </IonText>
             <IonText className="distance-km" color="medium">
-              {request.distanceKm} km
+              {request.distanceKm || 'N/A'} km
             </IonText>
           </div>
         </div>
@@ -70,7 +70,7 @@ const RequestCard = ({ request, onQuote }) => {
             Problema
           </IonText>
           <IonText className="problem-text">
-            {request.problem}
+            {request.problem || 'Sin descripción'}
           </IonText>
         </div>
 

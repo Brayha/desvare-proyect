@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
-  IonModal,
+  IonPage,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -9,21 +11,37 @@ import {
   IonCardContent,
   IonText,
   IonIcon,
+  IonButtons,
+  IonBackButton,
 } from '@ionic/react';
-import { closeCircleOutline, carOutline, personOutline, timeOutline } from 'ionicons/icons';
-import './CancellationDetailModal.css';
+import { closeCircleOutline, carOutline, personOutline, timeOutline, homeOutline } from 'ionicons/icons';
+import './CancellationDetail.css';
 
-const CancellationDetailModal = ({ isOpen, onDismiss, cancellationData }) => {
-  console.log('🎨 CancellationDetailModal - Render');
-  console.log('  isOpen:', isOpen);
-  console.log('  cancellationData:', cancellationData);
-  
-  if (!cancellationData) {
-    console.log('⚠️ CancellationDetailModal: No hay cancellationData');
-    return null;
-  }
+const CancellationDetail = () => {
+  const history = useHistory();
+  const [cancellationData, setCancellationData] = useState(null);
 
-  console.log('📋 CancellationDetailModal renderizando modal completo');
+  useEffect(() => {
+    console.log('📋 CancellationDetail - Cargando datos...');
+    
+    // Cargar datos de cancelación desde localStorage
+    const data = localStorage.getItem('lastCancellation');
+    
+    if (!data) {
+      console.log('⚠️ No hay datos de cancelación, redirigiendo a home');
+      history.replace('/home');
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(data);
+      console.log('✅ Datos de cancelación cargados:', parsed);
+      setCancellationData(parsed);
+    } catch (error) {
+      console.error('❌ Error parseando datos de cancelación:', error);
+      history.replace('/home');
+    }
+  }, [history]);
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -49,18 +67,31 @@ const CancellationDetailModal = ({ isOpen, onDismiss, cancellationData }) => {
     return reasons[reason] || `❓ ${reason}`;
   };
 
+  const handleGoHome = () => {
+    // Limpiar datos de cancelación
+    localStorage.removeItem('lastCancellation');
+    history.replace('/home');
+  };
+
+  if (!cancellationData) {
+    return null;
+  }
+
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={onDismiss} className="cancellation-modal">
+    <IonPage>
       <IonHeader>
         <IonToolbar color="danger">
+          <IonButtons slot="start">
+            <IonBackButton defaultHref="/home" />
+          </IonButtons>
           <IonTitle>
-            <IonIcon icon={closeCircleOutline} style={{ marginRight: '8px' }} />
+            <IonIcon icon={closeCircleOutline} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
             Servicio Cancelado
           </IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent className="ion-padding cancellation-content">
+      <IonContent className="cancellation-detail-page">
         {/* Razón de Cancelación */}
         <div className="cancellation-reason-section">
           <IonText color="danger">
@@ -157,19 +188,21 @@ const CancellationDetailModal = ({ isOpen, onDismiss, cancellationData }) => {
           </IonText>
         </div>
 
-        {/* Botón de Cierre */}
+        {/* Botón Volver al Home */}
         <IonButton 
           expand="block" 
-          onClick={onDismiss}
+          onClick={handleGoHome}
           color="primary"
-          className="close-button"
+          className="home-button"
           size="large"
         >
-          Entendido
+          <IonIcon icon={homeOutline} slot="start" />
+          Volver a la Bandeja
         </IonButton>
       </IonContent>
-    </IonModal>
+    </IonPage>
   );
 };
 
-export default CancellationDetailModal;
+export default CancellationDetail;
+

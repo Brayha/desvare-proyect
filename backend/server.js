@@ -193,7 +193,19 @@ io.on('connection', (socket) => {
     console.log(`🚗 Conductores totales conectados: ${totalDriversCount}`);
     console.log(`🟢 Conductores ACTIVOS: ${activeDriversCount}`);
     
-    // Enviar SOLO a conductores activos (isOnline = true)
+    // Helper para obtener icono según categoría
+    const getCategoryIcon = (categoryId) => {
+      const icons = {
+        'MOTOS': '🏍️',
+        'AUTOS': '🚗',
+        'CAMIONETAS': '🚙',
+        'CAMIONES': '🚚',
+        'BUSES': '🚌'
+      };
+      return icons[categoryId] || '🚗';
+    };
+    
+    // Enviar SOLO a conductores activos (isOnline = true) con datos completos del vehículo
     io.to('active-drivers').emit('request:received', {
       requestId: data.requestId,
       clientId: data.clientId,
@@ -202,6 +214,19 @@ io.on('connection', (socket) => {
       destination: data.destination,
       distance: data.distance,
       duration: data.duration,
+      // ✅ AGREGADO: Datos del vehículo
+      vehicle: data.vehicleSnapshot ? {
+        category: data.vehicleSnapshot.category?.name || 'N/A',
+        brand: data.vehicleSnapshot.brand?.name || 'N/A',
+        model: data.vehicleSnapshot.model?.name || 'N/A',
+        licensePlate: data.vehicleSnapshot.licensePlate || 'N/A',
+        icon: getCategoryIcon(data.vehicleSnapshot.category?.id)
+      } : null,
+      // ✅ AGREGADO: Datos del servicio (problema)
+      problem: data.serviceDetails?.problem || 'Sin descripción',
+      // Distancia y tiempo formateados
+      distanceKm: (data.distance / 1000).toFixed(1),
+      durationMin: Math.round(data.duration / 60),
       timestamp: new Date()
     });
     

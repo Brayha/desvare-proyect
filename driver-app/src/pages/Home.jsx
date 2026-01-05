@@ -122,8 +122,22 @@ const Home = () => {
       // Normalizar la solicitud para asegurar que tenga todos los campos necesarios
       const normalizedRequest = {
         ...request,
-        status: request.status || 'pending', // Asegurar que tenga status
-        quotesCount: request.quotesCount || 0 // Asegurar contador de cotizaciones
+        id: request.requestId,
+        requestId: request.requestId,
+        status: request.status || 'pending',
+        quotesCount: request.quotesCount || 0,
+        // ✅ Asegurar que vehicle existe con valores por defecto
+        vehicle: request.vehicle || {
+          icon: '🚗',
+          brand: 'N/A',
+          model: 'N/A',
+          licensePlate: 'N/A'
+        },
+        // ✅ Asegurar que problem existe
+        problem: request.problem || 'Sin descripción',
+        // ✅ Asegurar que distanceKm y durationMin existen
+        distanceKm: request.distanceKm || (request.distance ? (request.distance / 1000).toFixed(1) : 'N/A'),
+        durationMin: request.durationMin || (request.duration ? Math.round(request.duration / 60) : 'N/A')
       };
       
       console.log('✅ Solicitud normalizada:', normalizedRequest);
@@ -152,6 +166,7 @@ const Home = () => {
       console.log('📝 RequestId recibido:', data.requestId);
       console.log('📝 Razón:', data.reason);
       console.log('📝 Razón custom:', data.customReason);
+      console.log('📦 Datos completos de cancelación:', data);
       console.log('📋 Requests actuales:', requests.map(r => r.requestId));
       
       // ✅ Remover de la lista con conversión a String para evitar problemas de comparación
@@ -192,17 +207,28 @@ const Home = () => {
               console.log('🔄 Redirigiendo desde /active-service a /home');
               history.push('/home');
             }
+            
+            // ✅ NUEVO: Guardar datos y redirigir a vista dedicada
+            console.log('💾 Guardando datos de cancelación en localStorage');
+            localStorage.setItem('lastCancellation', JSON.stringify(data));
+            
+            setTimeout(() => {
+              console.log('🎯 Redirigiendo a /cancellation-detail');
+              history.push('/cancellation-detail');
+            }, 500); // Pequeño delay para asegurar que se complete la navegación previa
+            
+            return; // ← IMPORTANTE: Salir aquí para evitar doble ejecución
           }
         } catch (error) {
           console.error('❌ Error al verificar servicio activo:', error);
         }
       }
       
-      // ✅ Mostrar modal detallado con información de cancelación
-      console.log('📱 Abriendo modal de detalle de cancelación');
-      setCancellationData(data);
-      setShowCancellationModal(true);
-      console.log('✅ Modal de cancelación configurado para mostrarse');
+      // ✅ Si NO es servicio activo, guardar y redirigir inmediatamente
+      console.log('💾 Guardando datos de cancelación (solicitud en bandeja)');
+      localStorage.setItem('lastCancellation', JSON.stringify(data));
+      console.log('🎯 Redirigiendo a /cancellation-detail');
+      history.push('/cancellation-detail');
     });
 
     // Escuchar cuando tu cotización es aceptada

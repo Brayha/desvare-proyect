@@ -11,12 +11,7 @@
 
 /* Overlay del conductor */
 .driver-info-overlay {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  right: 16px;
-  z-index: 10;
-  pointer-events: none;
+  display: block;
 }
 
 .driver-card {
@@ -126,7 +121,10 @@
 
 /* Información del servicio */
 .service-info-section {
-  padding: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .security-code-container {

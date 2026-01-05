@@ -1,23 +1,10 @@
-/* Modal Container */
-.cancellation-modal {
-  --width: 90%;
-  --max-width: 500px;
-  --height: auto;
-  --max-height: 85vh;
-  --border-radius: 16px;
-  z-index: 99999 !important; /* ✅ AGREGADO: Asegurar que esté encima de todo */
-}
-
-.cancellation-modal::part(backdrop) {
-  background: rgba(0, 0, 0, 0.7) !important; /* ✅ Backdrop más visible */
-  z-index: 99998 !important;
-}
-
-.cancellation-content {
+/* Page Container */
+.cancellation-detail-page {
   --padding-start: 16px;
   --padding-end: 16px;
   --padding-top: 20px;
   --padding-bottom: 20px;
+  --background: #f5f5f5;
 }
 
 /* Sections */
@@ -138,8 +125,8 @@
   margin-bottom: 20px;
 }
 
-/* Close Button */
-.close-button {
+/* Home Button */
+.home-button {
   margin-top: 8px;
   --border-radius: 12px;
   --box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -151,24 +138,33 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
 }
 
-.cancellation-modal ion-content {
+.cancellation-detail-page ion-card {
   animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.cancellation-detail-page ion-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.cancellation-detail-page ion-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.cancellation-detail-page ion-card:nth-child(3) {
+  animation-delay: 0.3s;
 }
 
 /* Responsive */
 @media (max-width: 576px) {
-  .cancellation-modal {
-    --width: 95%;
-  }
-
   .reason-main {
     font-size: 16px;
   }
@@ -177,3 +173,4 @@
     font-size: 18px;
   }
 }
+
