@@ -53,6 +53,13 @@ export const citiesAPI = {
   getByRegion: () => api.get('/api/cities/by-region'),
 };
 
+// 🆕 API de vehículos (para catálogo de marcas/modelos de grúas)
+export const vehicleAPI = {
+  getCategories: () => api.get('/api/vehicles/options/categories'),
+  getBrands: (categoryId) => api.get(`/api/vehicles/options/brands?categoryId=${categoryId}`),
+  getModels: (brandId, categoryId) => api.get(`/api/vehicles/options/models?brandId=${brandId}&categoryId=${categoryId}`),
+};
+
 export default api;
 
 

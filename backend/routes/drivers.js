@@ -239,10 +239,12 @@ router.post('/register-complete', async (req, res) => {
       entityType,
       companyInfo,
       city,
-      address
+      address,
+      towTruck // 🆕 NUEVO: Datos de la grúa
     } = req.body;
 
     console.log('📝 Completando registro conductor:', userId);
+    console.log('🚚 Datos de grúa recibidos:', towTruck);
 
     if (!userId || !entityType || !city) {
       return res.status(400).json({
@@ -269,6 +271,52 @@ router.post('/register-complete', async (req, res) => {
       };
     }
 
+    // 🆕 NUEVO: Guardar datos de la grúa si están presentes
+    if (towTruck) {
+      console.log('🚚 Guardando datos de grúa...');
+      
+      // Validar que tenga al menos tipo y placa
+      if (!towTruck.truckType || !towTruck.licensePlate) {
+        return res.status(400).json({
+          error: 'Tipo de grúa y placa son requeridos'
+        });
+      }
+
+      driver.driverProfile.towTruck = {
+        truckType: towTruck.truckType,
+        licensePlate: towTruck.licensePlate.toUpperCase(),
+        year: towTruck.year || null,
+      };
+
+      // Si tiene marca/modelo de catálogo
+      if (towTruck.baseBrandId && towTruck.baseModelId) {
+        driver.driverProfile.towTruck.baseBrandId = towTruck.baseBrandId;
+        driver.driverProfile.towTruck.baseModelId = towTruck.baseModelId;
+        driver.driverProfile.towTruck.baseBrand = towTruck.baseBrand;
+        driver.driverProfile.towTruck.baseModel = towTruck.baseModel;
+        console.log(`   ✅ Marca/Modelo: ${towTruck.baseBrand} ${towTruck.baseModel}`);
+      }
+
+      // Si tiene marca/modelo personalizado ("Otro")
+      if (towTruck.customBrand) {
+        driver.driverProfile.towTruck.customBrand = towTruck.customBrand;
+        console.log(`   ✅ Marca personalizada: ${towTruck.customBrand}`);
+      }
+      if (towTruck.customModel) {
+        driver.driverProfile.towTruck.customModel = towTruck.customModel;
+        console.log(`   ✅ Modelo personalizado: ${towTruck.customModel}`);
+      }
+
+      // Capacidades opcionales
+      if (towTruck.maxWeight) driver.driverProfile.towTruck.maxWeight = towTruck.maxWeight;
+      if (typeof towTruck.hasWinch === 'boolean') driver.driverProfile.towTruck.hasWinch = towTruck.hasWinch;
+      if (typeof towTruck.hasFlatbed === 'boolean') driver.driverProfile.towTruck.hasFlatbed = towTruck.hasFlatbed;
+      if (typeof towTruck.hasHook === 'boolean') driver.driverProfile.towTruck.hasHook = towTruck.hasHook;
+
+      console.log(`   ✅ Tipo: ${towTruck.truckType}`);
+      console.log(`   ✅ Placa: ${towTruck.licensePlate}`);
+    }
+
     await driver.save();
 
     console.log(`✅ Datos básicos guardados para conductor ${userId}`);
@@ -280,7 +328,8 @@ router.post('/register-complete', async (req, res) => {
         name: driver.name,
         entityType: driver.driverProfile.entityType,
         city: driver.driverProfile.city,
-        status: driver.driverProfile.status
+        status: driver.driverProfile.status,
+        towTruck: driver.driverProfile.towTruck // Incluir datos de grúa en respuesta
       }
     });
 

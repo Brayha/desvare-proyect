@@ -2,19 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonProgressBar, IonText, IonSelect, IonSelectOption, IonItem, IonLabel } from '@ionic/react';
 import { Profile, Location, Building, DocumentText, Camera, Truck } from 'iconsax-react';
-import { authAPI, citiesAPI } from '../services/api';
+import { authAPI, citiesAPI, vehicleAPI } from '../services/api';
 import { Input } from '../../../shared/components';
+import TruckTypeSelector from '../components/TruckTypeSelector';
+import TruckBrandSelector from '../components/TruckBrandSelector';
+import TruckModelSelector from '../components/TruckModelSelector';
+import TruckPlateInput from '../components/TruckPlateInput';
 import './CompleteRegistration.css';
 
 /**
- * Flujo de Registro Completo para Conductores (6 pasos)
+ * Flujo de Registro Completo para Conductores (10 pasos)
  * 
  * Paso 1: Tipo de entidad (Natural / Jurídica)
  * Paso 2: Datos personales / empresa
  * Paso 3: Ubicación (ciudad, dirección)
  * Paso 4: Documentos del conductor
  * Paso 5: Documentos y fotos de la grúa
- * Paso 6: Capacidades del vehículo (qué puede llevar)
+ * Paso 6: Tipo de grúa (Liviana / Pesada) 🆕
+ * Paso 7: Marca del vehículo base 🆕
+ * Paso 8: Modelo del vehículo base 🆕
+ * Paso 9: Placa de la grúa 🆕
+ * Paso 10: Capacidades del vehículo (qué puede llevar)
  */
 
 const CompleteRegistration = () => {
@@ -51,7 +59,23 @@ const CompleteRegistration = () => {
   const [seguroTodoRiesgo, setSeguroTodoRiesgo] = useState(null);
   const [towTruckPhoto, setTowTruckPhoto] = useState(null);
   
-  // Paso 6: Capacidades del vehículo
+  // 🆕 Paso 6: Tipo de grúa
+  const [truckType, setTruckType] = useState(''); // 'GRUA_LIVIANA' | 'GRUA_PESADA'
+  
+  // 🆕 Paso 7: Marca del vehículo base
+  const [truckBrand, setTruckBrand] = useState(null); // { id, name }
+  const [customBrand, setCustomBrand] = useState(''); // Para marca "Otro"
+  const [truckBrands, setTruckBrands] = useState([]);
+  
+  // 🆕 Paso 8: Modelo del vehículo base
+  const [truckModel, setTruckModel] = useState(null); // { id, name }
+  const [customModel, setCustomModel] = useState(''); // Para modelo "Otro"
+  const [truckModels, setTruckModels] = useState([]);
+  
+  // 🆕 Paso 9: Placa de la grúa
+  const [truckPlate, setTruckPlate] = useState('');
+  
+  // Paso 10: Capacidades del vehículo
   const [vehicleCapabilities, setVehicleCapabilities] = useState({
     MOTOS: false,
     AUTOS: false,
@@ -80,6 +104,42 @@ const CompleteRegistration = () => {
     setCities(fallbackCities);
   };
 
+  // 🆕 Función para cargar marcas de grúas según el tipo
+  const loadTruckBrands = async (type) => {
+    try {
+      setIsLoading(true);
+      console.log('🔄 Cargando marcas para:', type);
+      const response = await vehicleAPI.getBrands(type);
+      const brandsData = response.data?.data || [];
+      setTruckBrands(brandsData);
+      console.log(`✅ ${brandsData.length} marcas cargadas para ${type}`);
+    } catch (error) {
+      console.error('❌ Error cargando marcas de grúas:', error);
+      setTruckBrands([]);
+      alert('Error al cargar marcas. Intenta de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 🆕 Función para cargar modelos de grúas según la marca
+  const loadTruckModels = async (brandId, type) => {
+    try {
+      setIsLoading(true);
+      console.log('🔄 Cargando modelos para marca:', brandId);
+      const response = await vehicleAPI.getModels(brandId, type);
+      const modelsData = response.data?.data || [];
+      setTruckModels(modelsData);
+      console.log(`✅ ${modelsData.length} modelos cargados`);
+    } catch (error) {
+      console.error('❌ Error cargando modelos de grúas:', error);
+      setTruckModels([]);
+      alert('Error al cargar modelos. Intenta de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Cargar ciudades al montar el componente
   useEffect(() => {
     const loadCities = async () => {
@@ -105,7 +165,32 @@ const CompleteRegistration = () => {
     loadCities();
   }, []);
 
-  const totalSteps = 6;
+  // 🆕 Cargar marcas cuando se seleccione el tipo de grúa
+  useEffect(() => {
+    if (truckType) {
+      console.log('🚚 Tipo de grúa seleccionado:', truckType);
+      loadTruckBrands(truckType);
+      // Reset marca y modelo al cambiar tipo
+      setTruckBrand(null);
+      setTruckModel(null);
+      setCustomBrand('');
+      setCustomModel('');
+    }
+  }, [truckType]);
+
+  // 🆕 Cargar modelos cuando se seleccione la marca
+  useEffect(() => {
+    if (truckBrand && truckBrand.id !== 'OTHER' && truckType) {
+      console.log('🚚 Marca seleccionada:', truckBrand.name);
+      loadTruckModels(truckBrand.id, truckType);
+      // Reset modelo al cambiar marca
+      setTruckModel(null);
+      setCustomModel('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [truckBrand]);
+
+  const totalSteps = 10; // 🆕 Actualizado de 6 a 10 pasos
   const progress = currentStep / totalSteps;
 
   const validateStep = () => {
@@ -146,7 +231,46 @@ const CompleteRegistration = () => {
         if (!towTruckPhoto) newErrors.towTruckPhoto = 'Sube una foto de tu grúa';
         break;
       
-      case 6: {
+      // 🆕 Paso 6: Tipo de grúa
+      case 6:
+        if (!truckType) {
+          newErrors.truckType = 'Selecciona el tipo de grúa';
+        }
+        break;
+      
+      // 🆕 Paso 7: Marca del vehículo
+      case 7:
+        if (!truckBrand) {
+          newErrors.truckBrand = 'Selecciona la marca del vehículo';
+        } else if (truckBrand.id === 'OTHER' && !customBrand.trim()) {
+          newErrors.customBrand = 'Escribe la marca de tu vehículo';
+        }
+        break;
+      
+      // 🆕 Paso 8: Modelo del vehículo
+      case 8:
+        if (!truckModel) {
+          newErrors.truckModel = 'Selecciona el modelo del vehículo';
+        } else if (truckModel.id === 'OTHER' && !customModel.trim()) {
+          newErrors.customModel = 'Escribe el modelo de tu vehículo';
+        }
+        break;
+      
+      // 🆕 Paso 9: Placa de la grúa
+      case 9: {
+        if (!truckPlate || truckPlate.length < 6) {
+          newErrors.truckPlate = 'Ingresa una placa válida (6 caracteres)';
+        }
+        // Validar formato colombiano básico: 3 letras + 3 números/letras
+        const plateRegex = /^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$/;
+        if (truckPlate && !plateRegex.test(truckPlate)) {
+          newErrors.truckPlate = 'Formato inválido. Usa ABC123 o ABC12D';
+        }
+        break;
+      }
+      
+      // Paso 10: Capacidades (antes era paso 6)
+      case 10: {
         const hasCapability = Object.values(vehicleCapabilities).some(v => v);
         if (!hasCapability) {
           newErrors.capabilities = 'Selecciona al menos un tipo de vehículo que puedas llevar';
@@ -202,7 +326,32 @@ const CompleteRegistration = () => {
 
       console.log('👤 Usuario ID:', userId);
 
-      // Paso A: Enviar datos básicos
+      // Paso A: Enviar datos básicos + datos de grúa
+      const towTruckData = {
+        truckType,
+        licensePlate: truckPlate,
+      };
+
+      // Si seleccionó marca/modelo del catálogo
+      if (truckBrand && truckBrand.id !== 'OTHER') {
+        towTruckData.baseBrandId = truckBrand.id;
+        towTruckData.baseBrand = truckBrand.name;
+      }
+      if (truckModel && truckModel.id !== 'OTHER') {
+        towTruckData.baseModelId = truckModel.id;
+        towTruckData.baseModel = truckModel.name;
+      }
+
+      // Si seleccionó "Otro" en marca/modelo
+      if (truckBrand?.id === 'OTHER' && customBrand) {
+        towTruckData.customBrand = customBrand;
+      }
+      if (truckModel?.id === 'OTHER' && customModel) {
+        towTruckData.customModel = customModel;
+      }
+
+      console.log('🚚 Datos de grúa a enviar:', towTruckData);
+
       await authAPI.registerDriverComplete({
         userId,
         entityType,
@@ -215,6 +364,7 @@ const CompleteRegistration = () => {
             legalRepresentative: companyName, // Por ahora usamos el mismo nombre, después se puede pedir por separado
           },
         }),
+        towTruck: towTruckData, // 🆕 Incluir datos de la grúa
       });
 
       console.log('✅ Datos básicos guardados');
@@ -566,7 +716,57 @@ const CompleteRegistration = () => {
           </div>
         );
 
+      // 🆕 Paso 6: Tipo de grúa
       case 6:
+        return (
+          <TruckTypeSelector
+            selectedType={truckType}
+            onSelect={setTruckType}
+            error={errors.truckType}
+          />
+        );
+
+      // 🆕 Paso 7: Marca del vehículo base
+      case 7:
+        return (
+          <TruckBrandSelector
+            brands={truckBrands}
+            selectedBrand={truckBrand}
+            customBrand={customBrand}
+            onSelect={setTruckBrand}
+            onCustomBrandChange={setCustomBrand}
+            isLoading={isLoading}
+            error={errors.truckBrand || errors.customBrand}
+          />
+        );
+
+      // 🆕 Paso 8: Modelo del vehículo base
+      case 8:
+        return (
+          <TruckModelSelector
+            models={truckModels}
+            selectedModel={truckModel}
+            customModel={customModel}
+            brandName={truckBrand?.id === 'OTHER' ? customBrand : truckBrand?.name}
+            onSelect={setTruckModel}
+            onCustomModelChange={setCustomModel}
+            isLoading={isLoading}
+            error={errors.truckModel || errors.customModel}
+          />
+        );
+
+      // 🆕 Paso 9: Placa de la grúa
+      case 9:
+        return (
+          <TruckPlateInput
+            plate={truckPlate}
+            onPlateChange={setTruckPlate}
+            plateError={errors.truckPlate}
+          />
+        );
+
+      // Paso 10: Capacidades (antes era paso 6)
+      case 10: {
         return (
           <div className="step-content">
             <div className="step-icon">
@@ -604,6 +804,7 @@ const CompleteRegistration = () => {
             )}
           </div>
         );
+      }
 
       default:
         return null;

@@ -47,11 +47,24 @@ class VehiclesLocalService {
   getBrands(categoryId = null) {
     let brands = this.data.brands;
 
+    console.log(`🔍 getBrands llamado con categoryId: ${categoryId}`);
+    console.log(`📊 Total marcas disponibles: ${brands.length}`);
+
     // Filtrar por categoría si se especifica
     if (categoryId) {
-      brands = brands.filter(brand => 
-        brand.categories.includes(categoryId)
-      );
+      brands = brands.filter(brand => {
+        const hasCategories = brand.categories && Array.isArray(brand.categories);
+        const includes = hasCategories && brand.categories.includes(categoryId);
+        
+        // Debug para marcas de grúas
+        if (categoryId.includes('GRUA') && brand.name) {
+          console.log(`   🔧 Marca: ${brand.name}, categories: ${JSON.stringify(brand.categories)}, includes: ${includes}`);
+        }
+        
+        return includes;
+      });
+      
+      console.log(`✅ Marcas filtradas para ${categoryId}: ${brands.length}`);
     }
 
     // Retornar solo id y name, ordenado alfabéticamente

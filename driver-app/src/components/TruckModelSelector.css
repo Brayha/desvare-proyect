@@ -1,0 +1,194 @@
+/* Reutilizar estilos similares a TruckBrandSelector */
+.truck-model-selector {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
+
+.selector-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.selector-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.selector-header p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 4px 0 0 0;
+}
+
+.model-searchbar {
+  --background: #f3f4f6;
+  --border-radius: 12px;
+  --box-shadow: none;
+  --icon-color: #667eea;
+  padding: 0;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 16px;
+}
+
+.models-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: 20px;
+}
+
+.model-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.model-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  transform: translateX(4px);
+}
+
+.model-item.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.model-item-other {
+  border-style: dashed;
+  border-color: #9ca3af;
+}
+
+.model-item-other:hover {
+  border-color: #667eea;
+  border-style: solid;
+}
+
+.model-content {
+  flex: 1;
+}
+
+.model-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.model-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #667eea;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  flex-shrink: 0;
+  animation: checkPop 0.3s ease;
+}
+
+@keyframes checkPop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.no-results {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.no-results p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.custom-model-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px dashed #667eea;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-model-input label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.custom-input {
+  --background: white;
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.error-message {
+  margin-top: -8px;
+  padding: 0 4px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .truck-model-selector {
+    padding: 16px;
+  }
+
+  .selector-header h2 {
+    font-size: 20px;
+  }
+
+  .model-name {
+    font-size: 15px;
+  }
+}
+

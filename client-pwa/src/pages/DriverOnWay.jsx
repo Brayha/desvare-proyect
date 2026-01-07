@@ -20,31 +20,24 @@ import {
   IonRadio,
   IonTextarea,
   IonButtons,
-  useIonAlert,
 } from "@ionic/react";
-import {
-  call,
-  chatbubbleEllipses,
-  star,
-  person,
-  location,
-  closeOutline,
-  alertCircleOutline,
-} from "ionicons/icons";
+import { call, star, closeOutline, alertCircleOutline } from "ionicons/icons";
+import { Moneys, Refresh2 } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import socketService from "../services/socket";
 import "./DriverOnWay.css";
 
+import logo from "@shared/src/img/Desvare.svg";
+
 const DriverOnWay = () => {
   const history = useHistory();
-  const { showSuccess, showError, showInfo } = useToast();
-  const [presentAlert] = useIonAlert();
+  const { showSuccess, showError } = useToast();
 
   const [serviceData, setServiceData] = useState(null);
-  const [driverLocation, setDriverLocation] = useState(null);
+  // const [driverLocation, setDriverLocation] = useState(null); // ← No usado aún
   const [isLoading, setIsLoading] = useState(true);
-  const [estimatedTime, setEstimatedTime] = useState("Calculando...");
+  // const [estimatedTime, setEstimatedTime] = useState("Calculando..."); // ← No usado aún
 
   // Estados del modal de cancelación
   const [showCancellationModal, setShowCancellationModal] = useState(false);
@@ -91,6 +84,7 @@ const DriverOnWay = () => {
     return () => {
       console.log("🧹 DriverOnWay - Cleanup");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCall = () => {
@@ -101,37 +95,13 @@ const DriverOnWay = () => {
     }
   };
 
-  const handleChat = () => {
-    showInfo("Chat próximamente disponible");
-  };
+  // const handleChat = () => {
+  //   showInfo("Chat próximamente disponible");
+  // };
 
-  const handleCancelService = async () => {
-    console.log("🚨 handleCancelService llamado");
-
-    // Confirmación previa
-    presentAlert({
-      header: "⚠️ ¿Cancelar servicio?",
-      message: `<strong>${
-        serviceData.driver?.name || "El conductor"
-      }</strong> ya viene en camino a recogerte. ¿Estás seguro de que deseas cancelar?`,
-      buttons: [
-        {
-          text: "No, volver",
-          role: "cancel",
-          handler: () => {
-            console.log("❌ Usuario decidió no cancelar");
-          },
-        },
-        {
-          text: "Sí, cancelar",
-          role: "confirm",
-          handler: () => {
-            console.log("✅ Usuario confirmó, abriendo modal de razones");
-            setShowCancellationModal(true);
-          },
-        },
-      ],
-    });
+  const handleCancelService = () => {
+    console.log("🚨 handleCancelService llamado - Abriendo modal de razones");
+    setShowCancellationModal(true);
   };
 
   const handleCallFromModal = () => {
@@ -195,14 +165,14 @@ const DriverOnWay = () => {
     setCustomReason("");
   };
 
-  const formatAmount = (amount) => {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  // const formatAmount = (amount) => {
+  //   return new Intl.NumberFormat("es-CO", {
+  //     style: "currency",
+  //     currency: "COP",
+  //     minimumFractionDigits: 0,
+  //     maximumFractionDigits: 0,
+  //   }).format(amount);
+  // };
 
   const isConfirmDisabled =
     !selectedReason || (selectedReason === "otro" && !customReason.trim());
@@ -229,125 +199,106 @@ const DriverOnWay = () => {
   return (
     <IonPage>
       <IonContent className="driver-on-way-page" fullscreen>
+        <div className="logo-content" onClick={() => history.replace("/home")}>
+          <img src={logo} alt="logo" />
+        </div>
         {/* Mapa con tracking en tiempo real */}
         <div className="map-container-tracking">
           <MapPicker
             origin={serviceData.origin}
             destination={null}
             onRouteCalculated={() => {}}
-            quotes={
-              driverLocation
-                ? [
-                    {
-                      driverId: serviceData.driver?.id,
-                      driverName: serviceData.driver?.name,
-                      location: driverLocation,
-                      amount: serviceData.amount,
-                    },
-                  ]
-                : []
-            }
+            quotes={[]} // ← Sin ubicación del conductor por ahora
             onQuoteClick={null}
           />
 
           {/* Información del servicio */}
           <div className="service-info-section">
             {/* Overlay con info del conductor */}
-            <div className="driver-info-overlay">
-              <IonCard className="driver-card">
-                <IonCardContent>
-                  <div className="driver-header-compact">
-                    <div className="driver-avatar-small">
-                      {serviceData.driver?.name?.charAt(0) || "C"}
-                    </div>
-                    <div className="driver-details">
-                      <h3>{serviceData.driver?.name}</h3>
-                      <div className="driver-meta">
-                        <IonIcon icon={star} className="star-icon" />
-                        <span>{serviceData.driver?.rating || "4.8"}</span>
-                        <span className="separator">•</span>
-                        <span>
-                          {serviceData.driver?.totalServices || "0"} servicios
-                        </span>
-                      </div>
+            <div className="confirm-driver-info-section">
+              <div className="confirm-driver-info-header">
+                <div className="confirm-driver-info-header-compact">
+                  <div className="driver-avatar-small">
+                    {serviceData.driver?.name?.charAt(0) || "C"}
+                  </div>
+                  <div className="confirm-driver-info-details">
+                    <h3>{serviceData.driver?.name}</h3>
+                    <div className="confirm-driver-info-meta">
+                      <IonIcon icon={star} className="star-icon" />
+                      <span>{serviceData.driver?.rating || "4.8"}</span>
+                      <span className="separator">•</span>
+                      <span>
+                        {serviceData.driver?.totalServices || "0"} servicios
+                      </span>
                     </div>
                   </div>
-
-                  <div className="eta-section">
-                    <IonIcon icon={location} className="eta-icon" />
-                    <div className="eta-info">
-                      <p className="eta-label">Llegada estimada</p>
-                      <p className="eta-time">{estimatedTime}</p>
-                    </div>
-                  </div>
-
-                  <div className="action-buttons">
-                    <IonButton
-                      expand="block"
-                      onClick={handleCall}
-                      className="call-button"
-                    >
-                      <IonIcon icon={call} slot="start" />
-                      Llamar
-                    </IonButton>
-                    <IonButton
-                      expand="block"
-                      fill="outline"
-                      onClick={handleChat}
-                      className="chat-button"
-                    >
-                      <IonIcon icon={chatbubbleEllipses} slot="start" />
-                      Chat
-                    </IonButton>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-            </div>
-          </div>
-
-          <div className="security-code-container">
-            <IonText color="medium">
-              <p className="code-label">🔒 Código de Seguridad</p>
-            </IonText>
-            <div className="security-code">
-              {serviceData.securityCode?.split("").map((digit, index) => (
-                <div key={index} className="code-digit">
-                  {digit}
                 </div>
-              ))}
-            </div>
-            <IonText color="medium">
-              <p className="code-instruction">
-                Dale este código al conductor cuando llegue
-              </p>
-            </IonText>
-          </div>
+              </div>
 
-          <div className="service-details">
-            <div className="detail-row">
-              <span className="detail-label">Monto acordado</span>
-              <span className="detail-value">
-                {formatAmount(serviceData.amount)}
-              </span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">Grúa</span>
-              <span className="detail-value">
-                {serviceData.driver?.towTruck?.type || "Grúa"} •
-                {serviceData.driver?.towTruck?.licensePlate || "N/A"}
-              </span>
+              <IonButton
+                expand="block"
+                onClick={handleCall}
+                className="call-button"
+              >
+                <IonIcon icon={call} slot="start" />
+                Llamar
+              </IonButton>
+              {/* <IonButton
+                expand="block"
+                fill="outline"
+                onClick={handleChat}
+                className="chat-button"
+              >
+                <IonIcon icon={chatbubbleEllipses} slot="start" />
+                Chat
+              </IonButton> */}
+
+              <div className="quote-summary-container">
+                <div className="box-items">
+                  <div className="info-items">
+                    <div className="info-item">
+                      <p>Valor</p>
+                      <h4>$90.000</h4>
+                    </div>
+                  </div>
+                  <div className="info-items">
+                    <div className="info-item">
+                      <p>Método de pago</p>
+                      <h4>Efectivo</h4>
+                    </div>
+                  </div>
+                </div>
+                <div className="code-box">
+                  <div className="box-info">
+                    <h4>🔒 Código de Seguridad</h4>
+                    <div className="code-digits">
+                      {serviceData.securityCode
+                        ?.split("")
+                        .map((digit, index) => (
+                          <div key={index} className="digit">
+                            {digit}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                  <p>
+                    Cuando tu vehículo este sobre la grúa, dale este código al
+                    condutor para habilitarle el destino
+                  </p>
+                </div>
+              </div>
+
+              <IonButton
+                expand="block"
+                fill="clear"
+                color="danger"
+                onClick={handleCancelService}
+                className="cancel-service-button"
+              >
+                Cancelar Servicio
+              </IonButton>
             </div>
           </div>
-
-          <IonButton
-            expand="block"
-            fill="clear"
-            color="danger"
-            onClick={handleCancelService}
-            className="cancel-service-button"
-          >
-            Cancelar Servicio
-          </IonButton>
         </div>
       </IonContent>
 

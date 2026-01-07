@@ -65,11 +65,6 @@
   transition: all 0.2s ease;
 }
 
-.origin-display:hover {
-  background-color: var(--ion-color-light);
-  transform: scale(1.02);
-}
-
 .origin-icon {
   display: flex;
   align-items: center;

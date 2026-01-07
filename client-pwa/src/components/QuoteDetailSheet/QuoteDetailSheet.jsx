@@ -1,30 +1,52 @@
-import { IonModal, IonContent, IonIcon, IonButton, IonChip, IonText, IonSpinner } from '@ionic/react';
-import { close, star, location, call, checkmarkCircle } from 'ionicons/icons';
-import './QuoteDetailSheet.css';
+import {
+  IonModal,
+  IonContent,
+  IonIcon,
+  IonButton,
+  IonChip,
+  IonText,
+  IonSpinner,
+} from "@ionic/react";
+import { close, star } from "ionicons/icons";
+import { Moneys, Refresh2 } from "iconsax-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
+
+// Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/autoplay";
+import "./QuoteDetailSheet.css";
 
 /**
  * Sheet Modal para mostrar detalles de una cotización
  * Permite al usuario revisar información del conductor y aceptar la cotización
  */
-const QuoteDetailSheet = ({ 
-  isOpen, 
-  onDismiss, 
-  quote, 
+const QuoteDetailSheet = ({
+  isOpen,
+  onDismiss,
+  quote,
   onAccept,
-  isAccepting = false 
+  isAccepting = false,
 }) => {
+  // ✅ Early return (sin hooks innecesarios)
   if (!quote) return null;
 
   const formatAmount = (amount) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
   const formatDistance = (distanceKm) => {
+    // ✅ Validar que distanceKm existe y es un número
+    if (!distanceKm || typeof distanceKm !== "number") {
+      return "Calculando...";
+    }
+
     if (distanceKm < 1) {
       return `${Math.round(distanceKm * 1000)} m`;
     }
@@ -32,6 +54,11 @@ const QuoteDetailSheet = ({
   };
 
   const formatDuration = (minutes) => {
+    // ✅ Validar que minutes existe y es un número
+    if (!minutes || typeof minutes !== "number") {
+      return "Calculando...";
+    }
+
     if (minutes < 60) {
       return `${Math.round(minutes)} min`;
     }
@@ -41,8 +68,54 @@ const QuoteDetailSheet = ({
   };
 
   // Calcular distancia aproximada (temporal - se puede mejorar con API)
-  const estimatedDistance = quote.location ? '8.5 km' : 'Calculando...';
-  const estimatedTime = quote.location ? '15 min' : 'Calculando...';
+  const estimatedDistance = quote.location ? "8.5 km" : "Calculando...";
+  const estimatedTime = quote.location ? "15 min" : "Calculando...";
+
+  // ✅ Array de reseñas (en el futuro vendrá del backend: quote.reviews)
+  const reviews = [
+    {
+      id: 1,
+      name: "Juan P.",
+      rating: "⭐⭐⭐⭐⭐",
+      text: "Excelente servicio, muy profesional y rápido. Llegó en el tiempo estimado.",
+      date: "Hace 2 semanas",
+    },
+    {
+      id: 2,
+      name: "María G.",
+      rating: "⭐⭐⭐⭐⭐",
+      text: "Muy amable y cuidadoso con mi vehículo. Lo recomiendo 100%.",
+      date: "Hace 1 mes",
+    },
+    {
+      id: 3,
+      name: "Carlos R.",
+      rating: "⭐⭐⭐⭐",
+      text: "Buen servicio, aunque llegó 10 minutos tarde. Pero muy profesional.",
+      date: "Hace 2 meses",
+    },
+    {
+      id: 4,
+      name: "Carlos R.",
+      rating: "⭐⭐⭐⭐",
+      text: "Buen servicio, aunque llegó 10 minutos tarde. Pero muy profesional.",
+      date: "Hace 2 meses",
+    },
+    {
+      id: 5,
+      name: "Carlos R.",
+      rating: "⭐⭐⭐⭐",
+      text: "Buen servicio, aunque llegó 10 minutos tarde. Pero muy profesional.",
+      date: "Hace 2 meses",
+    },
+    {
+      id: 6,
+      name: "Carlos R.",
+      rating: "⭐⭐⭐⭐",
+      text: "Buen servicio, aunque llegó 10 minutos tarde. Pero muy profesional.",
+      date: "Hace 2 meses",
+    },
+  ];
 
   return (
     <IonModal
@@ -56,152 +129,127 @@ const QuoteDetailSheet = ({
       className="quote-detail-sheet"
     >
       <IonContent className="quote-detail-content">
-        {/* Header - Visible en todos los breakpoints */}
-        <div className="sheet-header">
-          <button className="close-button" onClick={onDismiss}>
-            <IonIcon icon={close} />
-          </button>
-        </div>
-
         {/* Resumen - Visible en breakpoint 0.3 */}
         <div className="quote-summary">
-          <div className="driver-header">
-            <div className="driver-avatar">
-              {quote.driverName?.charAt(0) || 'C'}
-            </div>
-            <div className="driver-info-compact">
-              <h3>{quote.driverName}</h3>
-              <div className="rating-compact">
-                <IonIcon icon={star} className="star-icon" />
-                <span>4.8</span>
-                <span className="service-count">(127 servicios)</span>
+          <div className="quote-summary-header">
+            <div className="driver-header">
+              <div className="driver-avatar">
+                {quote.driverName?.charAt(0) || "C"}
+              </div>
+              <div className="driver-info-compact">
+                <h3>{quote.driverName}</h3>
+                <div className="rating-compact">
+                  <IonIcon icon={star} className="star-icon" />
+                  <span>4.8</span>
+                  <span className="service-count">(127 servicios)</span>
+                </div>
               </div>
             </div>
+            <button className="close-button" onClick={onDismiss}>
+              <IonIcon icon={close} />
+            </button>
           </div>
 
-          <div className="price-highlight">
-            <span className="price-label">Cotización</span>
-            <span className="price-amount">{formatAmount(quote.amount)}</span>
-          </div>
-
-          <div className="quick-info">
-            <div className="info-item">
-              <IonIcon icon={location} />
-              <span>{estimatedTime} • {estimatedDistance}</span>
+          <div className="quote-summary-container">
+            <div className="box-items">
+              <div className="info-items">
+                <div className="info-item">
+                  <p>Valor</p>
+                  <h4>{formatAmount(quote.amount)}</h4>
+                </div>
+              </div>
+              <div className="info-items">
+                <div className="info-item">
+                  <p>Distancia</p>
+                  <h4>
+                    {quote.distanceKm
+                      ? formatDistance(quote.distanceKm)
+                      : estimatedDistance}
+                  </h4>
+                </div>
+              </div>
+              <div className="info-items">
+                <div className="info-item">
+                  <p>Tiempo est.</p>
+                  <h4>
+                    {quote.durationMin
+                      ? formatDuration(quote.durationMin)
+                      : estimatedTime}
+                  </h4>
+                </div>
+              </div>
+            </div>
+            <div className="type-payment-method">
+              <Moneys size="24" variant="Bold" color="#22C55E" />
+              <div className="payment-info">
+                <p>Método de pago</p>
+                <h4>Efectivo</h4>
+              </div>
+              {/* <Refresh2 size="20" variant="Outline" color="#667eea" /> */}
             </div>
           </div>
         </div>
 
-        {/* Detalles - Visible desde breakpoint 0.6 */}
-        <div className="quote-details">
-          <div className="section">
-            <h4>Información del Conductor</h4>
-            <div className="detail-grid">
-              <div className="detail-item">
-                <IonIcon icon={star} className="detail-icon" />
-                <div>
-                  <p className="detail-label">Calificación</p>
-                  <p className="detail-value">⭐ 4.8 (127 servicios)</p>
-                </div>
-              </div>
-              <div className="detail-item">
-                <IonIcon icon={checkmarkCircle} className="detail-icon" />
-                <div>
-                  <p className="detail-label">Miembro desde</p>
-                  <p className="detail-value">2023</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="section">
-            <h4>Información de la Grúa</h4>
-            <div className="truck-info">
-              <p><strong>Tipo:</strong> Grúa Mediana</p>
-              <p><strong>Placa:</strong> ABC123</p>
-              <p><strong>Capacidad:</strong> 3 toneladas</p>
-            </div>
-          </div>
-
-          <div className="section">
-            <h4>Puede Recoger</h4>
-            <div className="capabilities">
-              <IonChip color="primary">🚗 Autos</IonChip>
-              <IonChip color="primary">🚙 Camionetas</IonChip>
-              <IonChip color="primary">🛡️ Blindados</IonChip>
-              <IonChip color="primary">🏢 Sótanos -3</IonChip>
-            </div>
-          </div>
-        </div>
-
-        {/* Reviews - Visible solo en breakpoint 1.0 */}
+        {/* Reviews Slider con Swiper */}
         <div className="quote-reviews">
           <div className="section">
             <h4>Reseñas Recientes</h4>
-            <div className="review-list">
-              <div className="review-item">
-                <div className="review-header">
-                  <span className="reviewer-name">Juan P.</span>
-                  <span className="review-stars">⭐⭐⭐⭐⭐</span>
-                </div>
-                <p className="review-text">
-                  "Excelente servicio, muy profesional y rápido. Llegó en el tiempo estimado."
-                </p>
-                <p className="review-date">Hace 2 semanas</p>
-              </div>
 
-              <div className="review-item">
-                <div className="review-header">
-                  <span className="reviewer-name">María G.</span>
-                  <span className="review-stars">⭐⭐⭐⭐⭐</span>
-                </div>
-                <p className="review-text">
-                  "Muy amable y cuidadoso con mi vehículo. Lo recomiendo 100%."
-                </p>
-                <p className="review-date">Hace 1 mes</p>
-              </div>
-
-              <div className="review-item">
-                <div className="review-header">
-                  <span className="reviewer-name">Carlos R.</span>
-                  <span className="review-stars">⭐⭐⭐⭐</span>
-                </div>
-                <p className="review-text">
-                  "Buen servicio, aunque llegó 10 minutos tarde. Pero muy profesional."
-                </p>
-                <p className="review-date">Hace 2 meses</p>
-              </div>
-            </div>
+            <Swiper
+              modules={[Pagination, Autoplay]}
+              autoplay={{
+                delay: 2000, // 2 segundos
+                disableOnInteraction: false, // Continúa después de interacción
+              }}
+              slidesPerView={1.2} // Muestra 1 completa + 0.2 de la siguiente
+              spaceBetween={10}
+              centeredSlides={true}
+              className="reviews-swiper"
+              loop={true}
+            >
+              {reviews.map((review) => (
+                <SwiperSlide key={review.id}>
+                  <div className="review-item-slider">
+                    <div className="review-header">
+                      <span className="reviewer-name">{review.name}</span>
+                      <span className="review-stars">{review.rating}</span>
+                    </div>
+                    <p className="review-text">{review.text}</p>
+                    <p className="review-date">{review.date}</p>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
-        </div>
 
-        {/* Botón de Aceptar - Sticky en la parte inferior */}
-        <div className="sheet-actions">
-          <IonButton 
-            expand="block" 
-            size="large"
-            onClick={() => onAccept(quote)}
-            disabled={isAccepting}
-            className="accept-button"
-          >
-            {isAccepting ? (
-              <>
-                <IonSpinner name="crescent" />
-                <span style={{ marginLeft: '8px' }}>Aceptando...</span>
-              </>
-            ) : (
-              `Aceptar por ${formatAmount(quote.amount)}`
-            )}
-          </IonButton>
-          
-          <IonButton 
-            expand="block" 
-            fill="clear" 
-            onClick={onDismiss}
-            disabled={isAccepting}
-          >
-            Cancelar
-          </IonButton>
+          <div className="button-actions">
+            <button
+              expand="block"
+              size="large"
+              onClick={() => onAccept(quote)}
+              disabled={isAccepting}
+              className="accept-button"
+            >
+              {isAccepting ? (
+                <>
+                  <IonSpinner name="crescent" />
+                  <span style={{ marginLeft: "8px" }}>Aceptando...</span>
+                </>
+              ) : (
+                `Aceptar por ${formatAmount(quote.amount)}`
+              )}
+            </button>
+
+            <button
+              expand="block"
+              fill="clear"
+              onClick={onDismiss}
+              disabled={isAccepting}
+              className="cancel-button"
+            >
+              Cancelar
+            </button>
+          </div>
         </div>
       </IonContent>
     </IonModal>

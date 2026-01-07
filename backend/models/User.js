@@ -112,11 +112,42 @@ const userSchema = new mongoose.Schema({
     // GRÚA DEL CONDUCTOR
     // ========================================
     towTruck: {
-      brand: String,
-      model: String,
-      licensePlate: String,
+      // Tipo de grúa (Liviana o Pesada)
+      truckType: {
+        type: String,
+        enum: ['GRUA_LIVIANA', 'GRUA_PESADA'],
+        required: false // Se completa en el registro
+      },
+      
+      // Marca y modelo del vehículo BASE (antes de modificar a grúa)
+      baseBrandId: String, // ID del catálogo local (ej: "GRUA_PESADA_MITSUBISHI")
+      baseModelId: String, // ID del catálogo local (ej: "GRUA_PESADA_MITSUBISHI_CANTER")
+      baseBrand: String, // Nombre legible (ej: "Mitsubishi")
+      baseModel: String, // Nombre legible (ej: "Canter")
+      
+      // Campos "Otro" para marcas/modelos no listados
+      customBrand: String, // Si el usuario selecciona "Otro" en marca
+      customModel: String, // Si el usuario selecciona "Otro" en modelo
+      
+      // Placa y año
+      licensePlate: {
+        type: String,
+        uppercase: true
+      },
       year: Number,
-      photoUrl: String
+      
+      // Foto de la grúa
+      photoUrl: String,
+      
+      // Capacidades de la grúa (opcionales, para futuro)
+      maxWeight: Number, // Toneladas que puede cargar
+      hasWinch: { type: Boolean, default: true }, // Tiene guinche
+      hasFlatbed: { type: Boolean, default: false }, // Tiene planchón
+      hasHook: { type: Boolean, default: false }, // Tiene gancho
+      
+      // DEPRECATED - Mantener por compatibilidad
+      brand: String,
+      model: String
     },
     
     // ========================================

@@ -13,6 +13,8 @@ const DriverDetail = () => {
   const [driver, setDriver] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   useEffect(() => {
     loadDriverDetail();
@@ -96,6 +98,16 @@ const DriverDetail = () => {
       alert('❌ Error al eliminar: ' + (error.response?.data?.error || error.message));
       setIsProcessing(false);
     }
+  };
+
+  const handleImageClick = (imageUrl, title) => {
+    setSelectedImage({ url: imageUrl, title });
+    setShowImageModal(true);
+  };
+
+  const closeImageModal = () => {
+    setShowImageModal(false);
+    setTimeout(() => setSelectedImage(null), 300);
   };
 
   if (isLoading) {
@@ -234,7 +246,12 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.cedula?.front ? (
               <div className="document-item">
                 <p className="document-label">✅ Cédula (Frente)</p>
-                <img src={driver.driverProfile.documents.cedula.front} alt="Cédula Frente" />
+                <img 
+                  src={driver.driverProfile.documents.cedula.front} 
+                  alt="Cédula Frente" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.cedula.front, 'Cédula (Frente)')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -246,7 +263,12 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.cedula?.back ? (
               <div className="document-item">
                 <p className="document-label">✅ Cédula (Atrás)</p>
-                <img src={driver.driverProfile.documents.cedula.back} alt="Cédula Atrás" />
+                <img 
+                  src={driver.driverProfile.documents.cedula.back} 
+                  alt="Cédula Atrás" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.cedula.back, 'Cédula (Atrás)')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -258,7 +280,12 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.selfie ? (
               <div className="document-item">
                 <p className="document-label">✅ Selfie</p>
-                <img src={driver.driverProfile.documents.selfie} alt="Selfie" />
+                <img 
+                  src={driver.driverProfile.documents.selfie} 
+                  alt="Selfie" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.selfie, 'Selfie')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -274,7 +301,12 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.licenciaTransito?.front ? (
               <div className="document-item">
                 <p className="document-label">✅ Licencia de Tránsito (Frente)</p>
-                <img src={driver.driverProfile.documents.licenciaTransito.front} alt="Licencia Frente" />
+                <img 
+                  src={driver.driverProfile.documents.licenciaTransito.front} 
+                  alt="Licencia Frente" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.licenciaTransito.front, 'Licencia de Tránsito (Frente)')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -286,7 +318,12 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.licenciaTransito?.back ? (
               <div className="document-item">
                 <p className="document-label">✅ Licencia de Tránsito (Atrás)</p>
-                <img src={driver.driverProfile.documents.licenciaTransito.back} alt="Licencia Atrás" />
+                <img 
+                  src={driver.driverProfile.documents.licenciaTransito.back} 
+                  alt="Licencia Atrás" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.licenciaTransito.back, 'Licencia de Tránsito (Atrás)')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -298,7 +335,12 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.soat?.url ? (
               <div className="document-item">
                 <p className="document-label">✅ SOAT</p>
-                <img src={driver.driverProfile.documents.soat.url} alt="SOAT" />
+                <img 
+                  src={driver.driverProfile.documents.soat.url} 
+                  alt="SOAT" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.soat.url, 'SOAT')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -310,7 +352,12 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.tarjetaPropiedad?.front ? (
               <div className="document-item">
                 <p className="document-label">✅ Tarjeta de Propiedad (Frente)</p>
-                <img src={driver.driverProfile.documents.tarjetaPropiedad.front} alt="Tarjeta Frente" />
+                <img 
+                  src={driver.driverProfile.documents.tarjetaPropiedad.front} 
+                  alt="Tarjeta Frente" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.tarjetaPropiedad.front, 'Tarjeta de Propiedad (Frente)')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -322,7 +369,12 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.tarjetaPropiedad?.back ? (
               <div className="document-item">
                 <p className="document-label">✅ Tarjeta de Propiedad (Atrás)</p>
-                <img src={driver.driverProfile.documents.tarjetaPropiedad.back} alt="Tarjeta Atrás" />
+                <img 
+                  src={driver.driverProfile.documents.tarjetaPropiedad.back} 
+                  alt="Tarjeta Atrás" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.tarjetaPropiedad.back, 'Tarjeta de Propiedad (Atrás)')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -334,14 +386,24 @@ const DriverDetail = () => {
             {driver.driverProfile.documents.seguroTodoRiesgo?.url && (
               <div className="document-item">
                 <p className="document-label">✅ Seguro Todo Riesgo (Opcional)</p>
-                <img src={driver.driverProfile.documents.seguroTodoRiesgo.url} alt="Seguro" />
+                <img 
+                  src={driver.driverProfile.documents.seguroTodoRiesgo.url} 
+                  alt="Seguro" 
+                  onClick={() => handleImageClick(driver.driverProfile.documents.seguroTodoRiesgo.url, 'Seguro Todo Riesgo')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             )}
             
             {driver.driverProfile.towTruck?.photoUrl ? (
               <div className="document-item">
                 <p className="document-label">✅ Foto de la Grúa</p>
-                <img src={driver.driverProfile.towTruck.photoUrl} alt="Grúa" />
+                <img 
+                  src={driver.driverProfile.towTruck.photoUrl} 
+                  alt="Grúa" 
+                  onClick={() => handleImageClick(driver.driverProfile.towTruck.photoUrl, 'Foto de la Grúa')}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
             ) : (
               <div className="document-item missing">
@@ -352,10 +414,38 @@ const DriverDetail = () => {
           </div>
         </div>
 
+        {/* Tow Truck Details */}
+        {driver.driverProfile.towTruck && (
+          <div className="detail-section">
+            <h3>🚛 Información de la Grúa</h3>
+            <p className="section-subtitle">Detalles del vehículo de remolque</p>
+            <div className="info-grid">
+              <div className="info-item">
+                <span className="info-label">Tipo de Grúa</span>
+                <span className="info-value">
+                  {driver.driverProfile.towTruck.truckType === 'GRUA_LIVIANA' ? '🚙 Grúa Liviana' : '🚛 Grúa Pesada'}
+                </span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Marca</span>
+                <span className="info-value">{driver.driverProfile.towTruck.baseBrand || 'N/A'}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Modelo</span>
+                <span className="info-value">{driver.driverProfile.towTruck.baseModel || 'N/A'}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Placa</span>
+                <span className="info-value">{driver.driverProfile.towTruck.licensePlate || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Vehicle Capabilities */}
         {driver.driverProfile.vehicleCapabilities && driver.driverProfile.vehicleCapabilities.length > 0 && (
           <div className="detail-section">
-            <h3>🚛 Capacidades de la Grúa</h3>
+            <h3>🚚 Capacidades de la Grúa</h3>
             <p className="section-subtitle">Tipos de vehículos que puede transportar</p>
             <div className="capabilities-list">
               {driver.driverProfile.vehicleCapabilities.map((cap, index) => (
@@ -367,6 +457,23 @@ const DriverDetail = () => {
           </div>
         )}
         </div>
+
+        {/* Image Modal */}
+        {showImageModal && selectedImage && (
+          <div className="image-modal-overlay" onClick={closeImageModal}>
+            <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="image-modal-close" onClick={closeImageModal}>
+                ✕
+              </button>
+              <h3 className="image-modal-title">{selectedImage.title}</h3>
+              <img 
+                src={selectedImage.url} 
+                alt={selectedImage.title}
+                className="image-modal-img"
+              />
+            </div>
+          </div>
+        )}
       </IonContent>
     </IonPage>
   );

@@ -36,17 +36,7 @@ const MapPicker = ({
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [route, setRoute] = useState(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
-
-  // Centrar mapa cuando se obtiene el origen
-  useEffect(() => {
-    if (origin && mapRef.current) {
-      mapRef.current.flyTo({
-        center: [origin.lng, origin.lat],
-        zoom: 15,
-        duration: 1500,
-      });
-    }
-  }, [origin]);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   // Calcular ruta cuando ambos puntos estén definidos
   useEffect(() => {
@@ -80,40 +70,58 @@ const MapPicker = ({
     }
   }, [route]);
 
-  // Auto-zoom cuando llegan cotizaciones (WaitingQuotes)
+  // ✅ ÚNICO useEffect para manejar zoom/centrado (sin destino/ruta)
   useEffect(() => {
-    // Solo si hay cotizaciones Y hay origen (pero NO hay destino/ruta)
-    if (quotes.length > 0 && origin && !destination && mapRef.current) {
-      console.log('🔍 Auto-zoom para mostrar origen + cotizaciones');
-      
-      // Crear array de coordenadas: origen + todas las cotizaciones
-      const coordinates = [
-        [origin.lng, origin.lat], // Origen
-        ...quotes
-          .filter(q => q.location && q.location.lat && q.location.lng)
-          .map(q => [q.location.lng, q.location.lat]) // Cotizaciones
-      ];
+    // Solo ejecutar si hay origen, NO hay destino, el mapa está listo Y cargado
+    if (!origin || destination || !mapRef.current || !isMapLoaded) return;
 
-      if (coordinates.length > 1) {
-        // Calcular bounds que incluyan todos los puntos
-        const bounds = coordinates.reduce((bounds, coord) => {
-          return bounds.extend(coord);
-        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+    // Pequeño delay para asegurar que el mapa esté completamente renderizado
+    const timer = setTimeout(() => {
+      if (quotes.length > 0) {
+        // ✅ CASO 1: Hay cotizaciones - Mostrar origen + cotizaciones
+        console.log('🔍 Auto-zoom para mostrar origen + cotizaciones');
+        
+        // Crear array de coordenadas: origen + todas las cotizaciones
+        const coordinates = [
+          [origin.lng, origin.lat], // Origen
+          ...quotes
+            .filter(q => q.location && q.location.lat && q.location.lng)
+            .map(q => [q.location.lng, q.location.lat]) // Cotizaciones
+        ];
 
-        // Aplicar bounds con padding
-        mapRef.current.fitBounds(bounds, {
-          padding: {
-            top: 80,
-            bottom: 100,  // Menos padding abajo (no hay tarjeta grande)
-            left: 80,
-            right: 80,
-          },
+        if (coordinates.length > 1) {
+          // Calcular bounds que incluyan todos los puntos
+          const bounds = coordinates.reduce((bounds, coord) => {
+            return bounds.extend(coord);
+          }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+
+          // Aplicar bounds con padding
+          mapRef.current.fitBounds(bounds, {
+            padding: {
+              top: 80,
+              bottom: 100,  // Menos padding abajo (no hay tarjeta grande)
+              left: 80,
+              right: 80,
+            },
+            duration: 1500,
+            maxZoom: 14, // No acercar demasiado
+          });
+        }
+      } else {
+        // ✅ CASO 2: NO hay cotizaciones - Centrar en origen estilo Uber/Didi
+        console.log('📍 Centrando en origen (sin cotizaciones)');
+        mapRef.current.flyTo({
+          center: [origin.lng, origin.lat],
+          zoom: 15, // Zoom 15 como solicitaste
           duration: 1500,
-          maxZoom: 14, // No acercar demasiado
+          offset: [0, -30], // Desplazar 30px hacia arriba para compensar cards flotantes
         });
       }
-    }
-  }, [quotes, origin, destination]);
+    }, 300); // Delay de 300ms para asegurar que el mapa esté listo
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quotes.length, origin, destination, isMapLoaded]); // ✅ Incluir isMapLoaded
 
   const calculateRoute = async () => {
     setIsCalculatingRoute(true);
@@ -157,6 +165,10 @@ const MapPicker = ({
         ref={mapRef}
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
+        onLoad={() => {
+          console.log('🗺️ Mapa cargado completamente');
+          setIsMapLoaded(true);
+        }}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
