@@ -49,7 +49,6 @@
 .brand-searchbar {
   padding: 20px;
   --background: var(--ion-color-light, #fff);
-  border-bottom: 1px dashed #e5e7eb;
 }
 
 .brand-list {

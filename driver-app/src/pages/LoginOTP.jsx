@@ -3,7 +3,6 @@ import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonText } from '@ionic/react';
 import { authAPI } from '../services/api';
 import { PhoneInput } from '../../../shared/components';
-import DesvareLogoWhite from '../../../shared/src/img/Desvare-white.svg';
 import './LoginOTP.css';
 
 const LoginOTP = () => {
@@ -64,14 +63,10 @@ const LoginOTP = () => {
     <IonPage>
       <IonContent className="login-otp-content">
         <div className="login-otp-container">
-          {/* Logo */}
-          <div className="login-otp-logo-container">
-            <img src={DesvareLogoWhite} alt="Desvare" className="login-otp-logo" />
-          </div>
 
           {/* Título */}
-          <h1 className="login-otp-title">Ingresa a tu cuenta,</h1>
-          <h2 className="login-otp-subtitle">nuevamente</h2>
+          <h1 className="login-otp-title">Ingresa a tu cuenta, nuevamente</h1>
+          <p className="login-otp-subtitle">Ingresa tu número de teléfono para recibir un código de verificación.</p>
 
           {/* Formulario */}
           <div className="login-otp-form">
@@ -90,14 +85,14 @@ const LoginOTP = () => {
             )}
 
             {/* Botón Ingresar */}
-            <IonButton
+            <button
               expand="block"
               className="login-otp-button"
               onClick={handleLogin}
               disabled={isLoading || phone.length !== 10}
             >
               {isLoading ? <IonSpinner name="crescent" /> : 'Ingresar'}
-            </IonButton>
+            </button>
 
             {/* Link a Registro */}
             <div className="login-otp-footer">

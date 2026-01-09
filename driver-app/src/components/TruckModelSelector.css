@@ -27,10 +27,12 @@
 }
 
 .model-searchbar {
-  --background: #f3f4f6;
+  --background: white;
   --border-radius: 12px;
   --box-shadow: none;
-  --icon-color: #667eea;
+  --icon-color: var(--desvare-primary);
+  border: 1px solid var(--desvare-medium);
+  border-radius: 12px;
   padding: 0;
 }
 
@@ -66,13 +68,12 @@
 }
 
 .model-item:hover {
-  border-color: #667eea;
+  border-color: var(--desvare-primary);
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
-  transform: translateX(4px);
 }
 
 .model-item.selected {
-  border-color: #667eea;
+  border-color: var(--desvare-primary);
   background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
@@ -83,7 +84,7 @@
 }
 
 .model-item-other:hover {
-  border-color: #667eea;
+  border-color: var(--desvare-primary);
   border-style: solid;
 }
 
@@ -101,7 +102,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #667eea;
+  background: var(--desvare-primary);
   color: white;
   display: flex;
   align-items: center;
@@ -141,7 +142,7 @@
   padding: 16px;
   background: #f9fafb;
   border-radius: 12px;
-  border: 2px dashed #667eea;
+  border: 2px dashed var(--desvare-primary);
   animation: slideDown 0.3s ease;
 }
 
@@ -180,7 +181,7 @@
 /* Responsive */
 @media (max-width: 480px) {
   .truck-model-selector {
-    padding: 16px;
+    padding: 0;
   }
 
   .selector-header h2 {

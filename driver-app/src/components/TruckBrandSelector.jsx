@@ -40,10 +40,9 @@ const TruckBrandSelector = ({
   return (
     <div className="truck-brand-selector">
       <div className="selector-header">
-        <Car size="32" color="#667eea" variant="Bold" />
         <IonText>
-          <h2>Marca del vehículo base</h2>
-          <p>Selecciona la marca del vehículo que modificaste como grúa</p>
+          <h2>Marca de la grúa</h2>
+          <p>Selecciona la marca de la grúa que usarás para recoger los vehículos de los clientes</p>
         </IonText>
       </div>
 

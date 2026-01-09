@@ -1,56 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import { IonPage, IonContent, IonButton, IonSpinner, IonProgressBar, IonText, IonSelect, IonSelectOption, IonItem, IonLabel } from '@ionic/react';
-import { Profile, Location, Building, DocumentText, Camera, Truck } from 'iconsax-react';
-import { authAPI, citiesAPI, vehicleAPI } from '../services/api';
-import { Input } from '../../../shared/components';
-import TruckTypeSelector from '../components/TruckTypeSelector';
-import TruckBrandSelector from '../components/TruckBrandSelector';
-import TruckModelSelector from '../components/TruckModelSelector';
-import TruckPlateInput from '../components/TruckPlateInput';
-import './CompleteRegistration.css';
+import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
+import {
+  IonPage,
+  IonContent,
+  IonButton,
+  IonSpinner,
+  IonProgressBar,
+  IonText,
+  IonSelect,
+  IonSelectOption,
+  IonItem,
+  IonLabel,
+} from "@ionic/react";
+import {
+  Profile,
+  Location,
+  Building,
+  DocumentText,
+  Camera,
+  Truck,
+  Map,
+} from "iconsax-react";
+import { authAPI, citiesAPI, vehicleAPI } from "../services/api";
+import { Input } from "../../../shared/components";
+import TruckTypeSelector from "../components/TruckTypeSelector";
+import TruckBrandSelector from "../components/TruckBrandSelector";
+import TruckModelSelector from "../components/TruckModelSelector";
+import TruckPlateInput from "../components/TruckPlateInput";
+import idCardImage from "../../../shared/src/img/id-card.png";
+import selfieImage from "../../../shared/src/img/selfie.png";
+import licenseImage from "../../../shared/src/img/license.png";
+import soatImage from "../../../shared/src/img/soat.png";
+import propertyImage from "../../../shared/src/img/id.png";
+import securityImage from "../../../shared/src/img/Security.png";
+import truckImage from "../../../shared/src/img/tow.png";
+import "./CompleteRegistration.css";
 
 /**
- * Flujo de Registro Completo para Conductores (10 pasos)
- * 
- * Paso 1: Tipo de entidad (Natural / Jurídica)
- * Paso 2: Datos personales / empresa
- * Paso 3: Ubicación (ciudad, dirección)
- * Paso 4: Documentos del conductor
- * Paso 5: Documentos y fotos de la grúa
- * Paso 6: Tipo de grúa (Liviana / Pesada) 🆕
- * Paso 7: Marca del vehículo base 🆕
- * Paso 8: Modelo del vehículo base 🆕
- * Paso 9: Placa de la grúa 🆕
- * Paso 10: Capacidades del vehículo (qué puede llevar)
+ * Flujo de Registro Completo para Conductores (13 pasos - Separados para mejor UX)
+ *
+ * Paso 1: Ubicación (ciudad, dirección)
+ * Paso 2: Cédula (Frente y Atrás) 🆕 Separado
+ * Paso 3: Selfie 🆕 Separado
+ * Paso 4: Licencia de Tránsito (Frente y Atrás) 🆕 Separado
+ * Paso 5: SOAT 🆕 Separado
+ * Paso 6: Tarjeta de Propiedad (Frente y Atrás) 🆕 Separado
+ * Paso 7: Seguro Todo Riesgo (Opcional) 🆕 Separado
+ * Paso 8: Foto de la Grúa 🆕 Separado
+ * Paso 9: Tipo de grúa (Liviana / Pesada)
+ * Paso 10: Marca del vehículo base
+ * Paso 11: Modelo del vehículo base
+ * Paso 12: Placa de la grúa
+ * Paso 13: Capacidades del vehículo (qué puede llevar)
+ *
+ * Nota: Se eliminó la selección de tipo de entidad (Natural/Jurídica) para simplificar el MVP.
+ * Por defecto todos los conductores se registran como Persona Natural.
  */
 
 const CompleteRegistration = () => {
   const history = useHistory();
-  
+
   // Estados del flujo
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [cities, setCities] = useState([]);
-  
-  // Paso 1: Tipo de entidad
-  const [entityType, setEntityType] = useState(''); // 'natural' | 'juridica'
-  
-  // Paso 2: Datos personales / empresa
-  const [companyName, setCompanyName] = useState('');
-  const [companyNIT, setCompanyNIT] = useState('');
-  const [companyAddress, setCompanyAddress] = useState('');
-  
-  // Paso 3: Ubicación
-  const [city, setCity] = useState('');
-  const [address, setAddress] = useState('');
-  
-  // Paso 4: Documentos del conductor
+
+  // Por defecto siempre Persona Natural (simplificado para MVP)
+  const entityType = "natural";
+
+  // Paso 1: Ubicación
+  const [city, setCity] = useState("");
+  const [address, setAddress] = useState("");
+
+  // Paso 2: Documentos del conductor
   const [cedulaFront, setCedulaFront] = useState(null);
   const [cedulaBack, setCedulaBack] = useState(null);
   const [selfie, setSelfie] = useState(null);
-  
-  // Paso 5: Documentos y fotos de la grúa
+
+  // Paso 3: Documentos y fotos de la grúa
   const [licenciaTransitoFront, setLicenciaTransitoFront] = useState(null);
   const [licenciaTransitoBack, setLicenciaTransitoBack] = useState(null);
   const [soat, setSoat] = useState(null);
@@ -58,24 +85,24 @@ const CompleteRegistration = () => {
   const [tarjetaPropiedadBack, setTarjetaPropiedadBack] = useState(null);
   const [seguroTodoRiesgo, setSeguroTodoRiesgo] = useState(null);
   const [towTruckPhoto, setTowTruckPhoto] = useState(null);
-  
-  // 🆕 Paso 6: Tipo de grúa
-  const [truckType, setTruckType] = useState(''); // 'GRUA_LIVIANA' | 'GRUA_PESADA'
-  
-  // 🆕 Paso 7: Marca del vehículo base
+
+  // Paso 4: Tipo de grúa
+  const [truckType, setTruckType] = useState(""); // 'GRUA_LIVIANA' | 'GRUA_PESADA'
+
+  // Paso 5: Marca del vehículo base
   const [truckBrand, setTruckBrand] = useState(null); // { id, name }
-  const [customBrand, setCustomBrand] = useState(''); // Para marca "Otro"
+  const [customBrand, setCustomBrand] = useState(""); // Para marca "Otro"
   const [truckBrands, setTruckBrands] = useState([]);
-  
-  // 🆕 Paso 8: Modelo del vehículo base
+
+  // Paso 6: Modelo del vehículo base
   const [truckModel, setTruckModel] = useState(null); // { id, name }
-  const [customModel, setCustomModel] = useState(''); // Para modelo "Otro"
+  const [customModel, setCustomModel] = useState(""); // Para modelo "Otro"
   const [truckModels, setTruckModels] = useState([]);
-  
-  // 🆕 Paso 9: Placa de la grúa
-  const [truckPlate, setTruckPlate] = useState('');
-  
-  // Paso 10: Capacidades del vehículo
+
+  // Paso 7: Placa de la grúa
+  const [truckPlate, setTruckPlate] = useState("");
+
+  // Paso 8: Capacidades del vehículo
   const [vehicleCapabilities, setVehicleCapabilities] = useState({
     MOTOS: false,
     AUTOS: false,
@@ -83,7 +110,7 @@ const CompleteRegistration = () => {
     CAMIONES: false,
     BUSES: false,
   });
-  
+
   // Estados de error
   const [errors, setErrors] = useState({});
 
@@ -91,16 +118,16 @@ const CompleteRegistration = () => {
   const setFallbackCities = () => {
     // Fallback: ciudades por defecto si falla la API
     const fallbackCities = [
-      { name: 'Bogotá', region: 'Andina' },
-      { name: 'Medellín', region: 'Andina' },
-      { name: 'Cali', region: 'Pacífica' },
-      { name: 'Barranquilla', region: 'Caribe' },
-      { name: 'Cartagena', region: 'Caribe' },
-      { name: 'Bucaramanga', region: 'Andina' },
-      { name: 'Pereira', region: 'Andina' },
-      { name: 'Santa Marta', region: 'Caribe' }
+      { name: "Bogotá" },
+      { name: "Medellín" },
+      { name: "Cali" },
+      { name: "Barranquilla" },
+      { name: "Cartagena" },
+      { name: "Bucaramanga" },
+      { name: "Pereira" },
+      { name: "Santa Marta" },
     ];
-    console.log('✅ Usando ciudades fallback:', fallbackCities.length);
+    console.log("✅ Usando ciudades fallback:", fallbackCities.length);
     setCities(fallbackCities);
   };
 
@@ -108,15 +135,15 @@ const CompleteRegistration = () => {
   const loadTruckBrands = async (type) => {
     try {
       setIsLoading(true);
-      console.log('🔄 Cargando marcas para:', type);
+      console.log("🔄 Cargando marcas para:", type);
       const response = await vehicleAPI.getBrands(type);
       const brandsData = response.data?.data || [];
       setTruckBrands(brandsData);
       console.log(`✅ ${brandsData.length} marcas cargadas para ${type}`);
     } catch (error) {
-      console.error('❌ Error cargando marcas de grúas:', error);
+      console.error("❌ Error cargando marcas de grúas:", error);
       setTruckBrands([]);
-      alert('Error al cargar marcas. Intenta de nuevo.');
+      alert("Error al cargar marcas. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -126,15 +153,15 @@ const CompleteRegistration = () => {
   const loadTruckModels = async (brandId, type) => {
     try {
       setIsLoading(true);
-      console.log('🔄 Cargando modelos para marca:', brandId);
+      console.log("🔄 Cargando modelos para marca:", brandId);
       const response = await vehicleAPI.getModels(brandId, type);
       const modelsData = response.data?.data || [];
       setTruckModels(modelsData);
       console.log(`✅ ${modelsData.length} modelos cargados`);
     } catch (error) {
-      console.error('❌ Error cargando modelos de grúas:', error);
+      console.error("❌ Error cargando modelos de grúas:", error);
       setTruckModels([]);
-      alert('Error al cargar modelos. Intenta de nuevo.');
+      alert("Error al cargar modelos. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -144,20 +171,24 @@ const CompleteRegistration = () => {
   useEffect(() => {
     const loadCities = async () => {
       try {
-        console.log('🔄 Cargando ciudades...');
+        console.log("🔄 Cargando ciudades...");
         const response = await citiesAPI.getAll();
-        console.log('✅ Respuesta ciudades:', response);
-        
+        console.log("✅ Respuesta ciudades:", response);
+
         // Verificar que response.data sea un array
         if (response && response.data && Array.isArray(response.data)) {
-          console.log('✅ Ciudades cargadas:', response.data.length, 'ciudades');
+          console.log(
+            "✅ Ciudades cargadas:",
+            response.data.length,
+            "ciudades"
+          );
           setCities(response.data);
         } else {
-          console.warn('⚠️ Respuesta no es un array, usando fallback');
+          console.warn("⚠️ Respuesta no es un array, usando fallback");
           setFallbackCities();
         }
       } catch (error) {
-        console.error('❌ Error cargando ciudades:', error);
+        console.error("❌ Error cargando ciudades:", error);
         setFallbackCities();
       }
     };
@@ -168,120 +199,142 @@ const CompleteRegistration = () => {
   // 🆕 Cargar marcas cuando se seleccione el tipo de grúa
   useEffect(() => {
     if (truckType) {
-      console.log('🚚 Tipo de grúa seleccionado:', truckType);
+      console.log("🚚 Tipo de grúa seleccionado:", truckType);
       loadTruckBrands(truckType);
       // Reset marca y modelo al cambiar tipo
       setTruckBrand(null);
       setTruckModel(null);
-      setCustomBrand('');
-      setCustomModel('');
+      setCustomBrand("");
+      setCustomModel("");
     }
   }, [truckType]);
 
   // 🆕 Cargar modelos cuando se seleccione la marca
   useEffect(() => {
-    if (truckBrand && truckBrand.id !== 'OTHER' && truckType) {
-      console.log('🚚 Marca seleccionada:', truckBrand.name);
+    if (truckBrand && truckBrand.id !== "OTHER" && truckType) {
+      console.log("🚚 Marca seleccionada:", truckBrand.name);
       loadTruckModels(truckBrand.id, truckType);
       // Reset modelo al cambiar marca
       setTruckModel(null);
-      setCustomModel('');
+      setCustomModel("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [truckBrand]);
 
-  const totalSteps = 10; // 🆕 Actualizado de 6 a 10 pasos
+  const totalSteps = 13; // 🆕 Aumentado de 8 a 13 pasos para mejor UX (documentos separados)
   const progress = currentStep / totalSteps;
 
   const validateStep = () => {
     const newErrors = {};
-    
+
     switch (currentStep) {
+      // Paso 1: Ciudad y dirección
       case 1:
-        if (!entityType) {
-          newErrors.entityType = 'Selecciona un tipo de entidad';
-        }
+        if (!city) newErrors.city = "Selecciona tu ciudad";
+        if (!address) newErrors.address = "Ingresa tu dirección";
         break;
-      
+
+      // Paso 2: Cédula (Frente y Atrás)
       case 2:
-        if (entityType === 'juridica') {
-          if (!companyName) newErrors.companyName = 'Ingresa el nombre de la empresa';
-          if (!companyNIT) newErrors.companyNIT = 'Ingresa el NIT';
-          if (!companyAddress) newErrors.companyAddress = 'Ingresa la dirección de la empresa';
-        }
+        if (!cedulaFront)
+          newErrors.cedulaFront = "Sube la foto frontal de tu cédula";
+        if (!cedulaBack)
+          newErrors.cedulaBack = "Sube la foto trasera de tu cédula";
         break;
-      
+
+      // Paso 3: Selfie
       case 3:
-        if (!city) newErrors.city = 'Selecciona tu ciudad';
-        if (!address) newErrors.address = 'Ingresa tu dirección';
+        if (!selfie) newErrors.selfie = "Sube una selfie tuya";
         break;
-      
+
+      // Paso 4: Licencia de Tránsito (Frente y Atrás)
       case 4:
-        if (!cedulaFront) newErrors.cedulaFront = 'Sube la foto frontal de tu cédula';
-        if (!cedulaBack) newErrors.cedulaBack = 'Sube la foto trasera de tu cédula';
-        if (!selfie) newErrors.selfie = 'Sube una selfie tuya';
+        if (!licenciaTransitoFront)
+          newErrors.licenciaTransitoFront =
+            "Sube la licencia de tránsito (frente)";
+        if (!licenciaTransitoBack)
+          newErrors.licenciaTransitoBack =
+            "Sube la licencia de tránsito (atrás)";
         break;
-      
+
+      // Paso 5: SOAT
       case 5:
-        if (!licenciaTransitoFront) newErrors.licenciaTransitoFront = 'Sube la licencia de tránsito (frente)';
-        if (!licenciaTransitoBack) newErrors.licenciaTransitoBack = 'Sube la licencia de tránsito (atrás)';
-        if (!soat) newErrors.soat = 'Sube el SOAT';
-        if (!tarjetaPropiedadFront) newErrors.tarjetaPropiedadFront = 'Sube la tarjeta de propiedad (frente)';
-        if (!tarjetaPropiedadBack) newErrors.tarjetaPropiedadBack = 'Sube la tarjeta de propiedad (atrás)';
-        if (!towTruckPhoto) newErrors.towTruckPhoto = 'Sube una foto de tu grúa';
+        if (!soat) newErrors.soat = "Sube el SOAT";
         break;
-      
-      // 🆕 Paso 6: Tipo de grúa
+
+      // Paso 6: Tarjeta de Propiedad (Frente y Atrás)
       case 6:
-        if (!truckType) {
-          newErrors.truckType = 'Selecciona el tipo de grúa';
-        }
+        if (!tarjetaPropiedadFront)
+          newErrors.tarjetaPropiedadFront =
+            "Sube la tarjeta de propiedad (frente)";
+        if (!tarjetaPropiedadBack)
+          newErrors.tarjetaPropiedadBack =
+            "Sube la tarjeta de propiedad (atrás)";
         break;
-      
-      // 🆕 Paso 7: Marca del vehículo
+
+      // Paso 7: Seguro Todo Riesgo (Opcional)
       case 7:
-        if (!truckBrand) {
-          newErrors.truckBrand = 'Selecciona la marca del vehículo';
-        } else if (truckBrand.id === 'OTHER' && !customBrand.trim()) {
-          newErrors.customBrand = 'Escribe la marca de tu vehículo';
-        }
+        // Opcional, no hay validación requerida
         break;
-      
-      // 🆕 Paso 8: Modelo del vehículo
+
+      // Paso 8: Foto de la Grúa
       case 8:
-        if (!truckModel) {
-          newErrors.truckModel = 'Selecciona el modelo del vehículo';
-        } else if (truckModel.id === 'OTHER' && !customModel.trim()) {
-          newErrors.customModel = 'Escribe el modelo de tu vehículo';
+        if (!towTruckPhoto)
+          newErrors.towTruckPhoto = "Sube una foto de tu grúa";
+        break;
+
+      // Paso 9: Tipo de grúa
+      case 9:
+        if (!truckType) {
+          newErrors.truckType = "Selecciona el tipo de grúa";
         }
         break;
-      
-      // 🆕 Paso 9: Placa de la grúa
-      case 9: {
+
+      // Paso 10: Marca del vehículo
+      case 10:
+        if (!truckBrand) {
+          newErrors.truckBrand = "Selecciona la marca del vehículo";
+        } else if (truckBrand.id === "OTHER" && !customBrand.trim()) {
+          newErrors.customBrand = "Escribe la marca de tu vehículo";
+        }
+        break;
+
+      // Paso 11: Modelo del vehículo
+      case 11:
+        if (!truckModel) {
+          newErrors.truckModel = "Selecciona el modelo del vehículo";
+        } else if (truckModel.id === "OTHER" && !customModel.trim()) {
+          newErrors.customModel = "Escribe el modelo de tu vehículo";
+        }
+        break;
+
+      // Paso 12: Placa de la grúa
+      case 12: {
         if (!truckPlate || truckPlate.length < 6) {
-          newErrors.truckPlate = 'Ingresa una placa válida (6 caracteres)';
+          newErrors.truckPlate = "Ingresa una placa válida (6 caracteres)";
         }
         // Validar formato colombiano básico: 3 letras + 3 números/letras
         const plateRegex = /^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$/;
         if (truckPlate && !plateRegex.test(truckPlate)) {
-          newErrors.truckPlate = 'Formato inválido. Usa ABC123 o ABC12D';
+          newErrors.truckPlate = "Formato inválido. Usa ABC123 o ABC12D";
         }
         break;
       }
-      
-      // Paso 10: Capacidades (antes era paso 6)
-      case 10: {
-        const hasCapability = Object.values(vehicleCapabilities).some(v => v);
+
+      // Paso 13: Capacidades
+      case 13: {
+        const hasCapability = Object.values(vehicleCapabilities).some((v) => v);
         if (!hasCapability) {
-          newErrors.capabilities = 'Selecciona al menos un tipo de vehículo que puedas llevar';
+          newErrors.capabilities =
+            "Selecciona al menos un tipo de vehículo que puedas llevar";
         }
         break;
       }
-      
+
       default:
         break;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -290,7 +343,7 @@ const CompleteRegistration = () => {
     if (!validateStep()) {
       return;
     }
-    
+
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
       setErrors({});
@@ -309,22 +362,24 @@ const CompleteRegistration = () => {
   };
 
   const handleSubmit = async () => {
-    console.log('📝 Enviando registro completo...');
+    console.log("📝 Enviando registro completo...");
     setIsLoading(true);
 
     try {
       // Obtener userId del usuario guardado
-      const userStr = localStorage.getItem('user');
+      const userStr = localStorage.getItem("user");
       if (!userStr) {
-        alert('Error: No se encontró la sesión. Por favor inicia sesión de nuevo.');
-        history.replace('/login');
+        alert(
+          "Error: No se encontró la sesión. Por favor inicia sesión de nuevo."
+        );
+        history.replace("/login");
         return;
       }
-      
+
       const user = JSON.parse(userStr);
       const userId = user._id; // ✅ Cambiado de user.id a user._id para consistencia con backend
 
-      console.log('👤 Usuario ID:', userId);
+      console.log("👤 Usuario ID:", userId);
 
       // Paso A: Enviar datos básicos + datos de grúa
       const towTruckData = {
@@ -333,86 +388,79 @@ const CompleteRegistration = () => {
       };
 
       // Si seleccionó marca/modelo del catálogo
-      if (truckBrand && truckBrand.id !== 'OTHER') {
+      if (truckBrand && truckBrand.id !== "OTHER") {
         towTruckData.baseBrandId = truckBrand.id;
         towTruckData.baseBrand = truckBrand.name;
       }
-      if (truckModel && truckModel.id !== 'OTHER') {
+      if (truckModel && truckModel.id !== "OTHER") {
         towTruckData.baseModelId = truckModel.id;
         towTruckData.baseModel = truckModel.name;
       }
 
       // Si seleccionó "Otro" en marca/modelo
-      if (truckBrand?.id === 'OTHER' && customBrand) {
+      if (truckBrand?.id === "OTHER" && customBrand) {
         towTruckData.customBrand = customBrand;
       }
-      if (truckModel?.id === 'OTHER' && customModel) {
+      if (truckModel?.id === "OTHER" && customModel) {
         towTruckData.customModel = customModel;
       }
 
-      console.log('🚚 Datos de grúa a enviar:', towTruckData);
+      console.log("🚚 Datos de grúa a enviar:", towTruckData);
 
       await authAPI.registerDriverComplete({
         userId,
         entityType,
         city,
         address,
-        ...(entityType === 'juridica' && {
-          companyInfo: {
-            companyName: companyName,
-            nit: companyNIT,
-            legalRepresentative: companyName, // Por ahora usamos el mismo nombre, después se puede pedir por separado
-          },
-        }),
         towTruck: towTruckData, // 🆕 Incluir datos de la grúa
       });
 
-      console.log('✅ Datos básicos guardados');
+      console.log("✅ Datos básicos guardados");
 
       // Paso B: Subir documentos (convertir a base64)
-      console.log('📤 Enviando documentos...');
-      
+      console.log("📤 Enviando documentos...");
+
       const documents = [];
-      
+
       if (cedulaFront) {
         const base64 = await fileToBase64(cedulaFront);
-        documents.push({ file: base64, documentType: 'cedula-front' });
+        documents.push({ file: base64, documentType: "cedula-front" });
       }
       if (cedulaBack) {
         const base64 = await fileToBase64(cedulaBack);
-        documents.push({ file: base64, documentType: 'cedula-back' });
+        documents.push({ file: base64, documentType: "cedula-back" });
       }
       if (selfie) {
         const base64 = await fileToBase64(selfie);
-        documents.push({ file: base64, documentType: 'selfie' });
+        documents.push({ file: base64, documentType: "selfie" });
       }
       if (licenciaTransitoFront) {
         const base64 = await fileToBase64(licenciaTransitoFront);
-        documents.push({ file: base64, documentType: 'licencia-front' });
+        documents.push({ file: base64, documentType: "licencia-front" });
       }
       if (licenciaTransitoBack) {
         const base64 = await fileToBase64(licenciaTransitoBack);
-        documents.push({ file: base64, documentType: 'licencia-back' });
+        documents.push({ file: base64, documentType: "licencia-back" });
       }
       if (soat) {
         const base64 = await fileToBase64(soat);
-        documents.push({ file: base64, documentType: 'soat' });
+        documents.push({ file: base64, documentType: "soat" });
       }
       if (tarjetaPropiedadFront) {
         const base64 = await fileToBase64(tarjetaPropiedadFront);
-        documents.push({ file: base64, documentType: 'tarjeta-front' });
+        documents.push({ file: base64, documentType: "tarjeta-front" });
       }
       if (tarjetaPropiedadBack) {
         const base64 = await fileToBase64(tarjetaPropiedadBack);
-        documents.push({ file: base64, documentType: 'tarjeta-back' });
+        documents.push({ file: base64, documentType: "tarjeta-back" });
       }
       if (seguroTodoRiesgo) {
         const base64 = await fileToBase64(seguroTodoRiesgo);
-        documents.push({ file: base64, documentType: 'seguro' });
+        documents.push({ file: base64, documentType: "seguro" });
       }
       if (towTruckPhoto) {
         const base64 = await fileToBase64(towTruckPhoto);
-        documents.push({ file: base64, documentType: 'grua-photo' });
+        documents.push({ file: base64, documentType: "grua-photo" });
       }
 
       console.log(`📎 Subiendo ${documents.length} documentos...`);
@@ -422,7 +470,7 @@ const CompleteRegistration = () => {
         documents,
       });
 
-      console.log('✅ Documentos subidos');
+      console.log("✅ Documentos subidos");
 
       // Paso C: Enviar capacidades
       const selectedCapabilities = Object.keys(vehicleCapabilities).filter(
@@ -434,13 +482,13 @@ const CompleteRegistration = () => {
         vehicleCapabilities: selectedCapabilities,
       });
 
-      console.log('✅ Capacidades guardadas');
+      console.log("✅ Capacidades guardadas");
 
       // Navegar a vista "En Revisión"
-      history.replace('/under-review');
+      history.replace("/under-review");
     } catch (error) {
-      console.error('❌ Error en registro completo:', error);
-      alert('Error al enviar el registro. Intenta de nuevo.');
+      console.error("❌ Error en registro completo:", error);
+      alert("Error al enviar el registro. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -465,126 +513,31 @@ const CompleteRegistration = () => {
 
   const renderStepContent = () => {
     switch (currentStep) {
+      // Paso 1: Ciudad y dirección (antes era paso 3)
       case 1:
-        return (
-          <div className="step-content">
-            <div className="step-icon">
-              <Profile size="48" color="#0055FF" variant="Bulk" />
-            </div>
-            <h2 className="step-title">Tipo de entidad</h2>
-            <p className="step-description">
-              ¿Eres persona natural o trabajas con una empresa?
-            </p>
-
-            <div className="entity-options">
-              <button
-                className={`entity-option ${entityType === 'natural' ? 'selected' : ''}`}
-                onClick={() => setEntityType('natural')}
-              >
-                <div className="entity-option-icon">
-                  <Profile size="32" color={entityType === 'natural' ? '#0055FF' : '#6B7280'} />
-                </div>
-                <div className="entity-option-text">
-                  <h3>Persona Natural</h3>
-                  <p>Trabajo por cuenta propia</p>
-                </div>
-              </button>
-
-              <button
-                className={`entity-option ${entityType === 'juridica' ? 'selected' : ''}`}
-                onClick={() => setEntityType('juridica')}
-              >
-                <div className="entity-option-icon">
-                  <Building size="32" color={entityType === 'juridica' ? '#0055FF' : '#6B7280'} />
-                </div>
-                <div className="entity-option-text">
-                  <h3>Persona Jurídica</h3>
-                  <p>Tengo una empresa</p>
-                </div>
-              </button>
-            </div>
-
-            {errors.entityType && (
-              <IonText color="danger" className="step-error">
-                <small>{errors.entityType}</small>
-              </IonText>
-            )}
-          </div>
-        );
-
-      case 2:
-        if (entityType === 'natural') {
-          return (
-            <div className="step-content">
-              <div className="step-icon">
-                <Profile size="48" color="#0055FF" variant="Bulk" />
-              </div>
-              <h2 className="step-title">Datos personales</h2>
-              <p className="step-description">
-                Como persona natural, solo necesitamos confirmar tus datos básicos.
-              </p>
-              <IonText color="success">
-                <p>✅ Continúa al siguiente paso</p>
-              </IonText>
-            </div>
-          );
-        } else {
-          return (
-            <div className="step-content">
-              <div className="step-icon">
-                <Building size="48" color="#0055FF" variant="Bulk" />
-              </div>
-              <h2 className="step-title">Datos de la empresa</h2>
-              <p className="step-description">
-                Ingresa la información legal de tu empresa.
-              </p>
-
-              <Input
-                type="text"
-                placeholder="Nombre de la empresa"
-                value={companyName}
-                onChange={setCompanyName}
-                error={errors.companyName}
-                icon={<Building size="24" color={errors.companyName ? '#EF4444' : '#9CA3AF'} />}
-              />
-
-              <Input
-                type="text"
-                placeholder="NIT (sin dígito de verificación)"
-                value={companyNIT}
-                onChange={setCompanyNIT}
-                error={errors.companyNIT}
-                icon={<DocumentText size="24" color={errors.companyNIT ? '#EF4444' : '#9CA3AF'} />}
-              />
-
-              <Input
-                type="text"
-                placeholder="Dirección de la empresa"
-                value={companyAddress}
-                onChange={setCompanyAddress}
-                error={errors.companyAddress}
-                icon={<Location size="24" color={errors.companyAddress ? '#EF4444' : '#9CA3AF'} />}
-              />
-            </div>
-          );
-        }
-
-      case 3:
         return (
           <div className="step-content">
             <div className="step-icon">
               <Location size="48" color="#0055FF" variant="Bulk" />
             </div>
-            <h2 className="step-title">Ubicación</h2>
-            <p className="step-description">
-              ¿Desde dónde operas tu grúa?
-            </p>
+
+            <div className="step-title-container">
+              <h2 className="step-title">Ubicación</h2>
+              <p className="step-description">¿Desde dónde operas tu grúa?</p>
+            </div>
 
             {/* IonSelect con estilo moderno */}
             <div className="modern-input-wrapper">
-              <div className={`modern-input-group ${errors.city ? 'has-error' : ''}`}>
+              <div
+                className={`modern-input-group ${
+                  errors.city ? "has-error" : ""
+                }`}
+              >
                 <div className="modern-input-icon">
-                  <Location size="24" color={errors.city ? '#EF4444' : '#9CA3AF'} />
+                  <Location
+                    size="24"
+                    color={errors.city ? "#EF4444" : "#9CA3AF"}
+                  />
                 </div>
                 <IonSelect
                   value={city}
@@ -595,12 +548,18 @@ const CompleteRegistration = () => {
                 >
                   {Array.isArray(cities) && cities.length > 0 ? (
                     cities.map((c, index) => (
-                      <IonSelectOption key={`${c.name}-${index}`} value={c.name}>
-                        {c.name} - {c.region}
+                      <IonSelectOption
+                        mode="ios"
+                        key={`${c.name}-${index}`}
+                        value={c.name}
+                      >
+                        {c.name}
                       </IonSelectOption>
                     ))
                   ) : (
-                    <IonSelectOption value="" disabled>Cargando ciudades...</IonSelectOption>
+                    <IonSelectOption value="" disabled>
+                      Cargando ciudades...
+                    </IonSelectOption>
                   )}
                 </IonSelect>
               </div>
@@ -615,20 +574,21 @@ const CompleteRegistration = () => {
               value={address}
               onChange={setAddress}
               error={errors.address}
-              icon={<Location size="24" color={errors.address ? '#EF4444' : '#9CA3AF'} />}
+              icon={
+                <Map size="24" color={errors.address ? "#EF4444" : "#9CA3AF"} />
+              }
             />
           </div>
         );
 
-      case 4:
+      // Paso 2: Cédula (Frente y Atrás)
+      case 2:
         return (
           <div className="step-content">
-            <div className="step-icon">
-              <Camera size="48" color="#0055FF" variant="Bulk" />
-            </div>
-            <h2 className="step-title">Tus documentos</h2>
+            <img src={idCardImage} alt="Cédula" className="step-image" />
+            <h2 className="step-title">Fotos de tu cedula</h2>
             <p className="step-description">
-              Sube fotos claras de tu cédula y una selfie.
+              Necesitamos que le tomes foto a tu cedula por delante y por detras
             </p>
 
             <FileUpload
@@ -644,6 +604,18 @@ const CompleteRegistration = () => {
               onChange={handleFileChange(setCedulaBack)}
               error={errors.cedulaBack}
             />
+          </div>
+        );
+
+      // Paso 3: Selfie
+      case 3:
+        return (
+          <div className="step-content">
+            <img src={selfieImage} alt="Selfie" className="step-image" />
+            <h2 className="step-title">Una selfie 😉</h2>
+            <p className="step-description">
+              Tomate una buena foto que veran tus clientes
+            </p>
 
             <FileUpload
               label="Selfie tuya"
@@ -654,15 +626,15 @@ const CompleteRegistration = () => {
           </div>
         );
 
-      case 5:
+      // Paso 4: Licencia de Tránsito (Frente y Atrás)
+      case 4:
         return (
           <div className="step-content">
-            <div className="step-icon">
-              <Truck size="48" color="#0055FF" variant="Bulk" />
-            </div>
-            <h2 className="step-title">Documentos de tu grúa</h2>
+            <img src={licenseImage} alt="Selfie" className="step-image" />
+            <h2 className="step-title">Licencia de transito</h2>
             <p className="step-description">
-              Sube los documentos legales y una foto de tu grúa.
+              Necesitamos que le tomes foto a tu licencia de tránsito por
+              delante y por detras
             </p>
 
             <FileUpload
@@ -678,6 +650,18 @@ const CompleteRegistration = () => {
               onChange={handleFileChange(setLicenciaTransitoBack)}
               error={errors.licenciaTransitoBack}
             />
+          </div>
+        );
+
+      // Paso 5: SOAT
+      case 5:
+        return (
+          <div className="step-content">
+            <img src={soatImage} alt="SOAT" className="step-image" />
+            <h2 className="step-title">Seguro SOAT</h2>
+            <p className="step-description">
+            Por nuestra seguridad y la del cliente, necesitamos saber si estas al día con el soat.
+            </p>
 
             <FileUpload
               label="SOAT"
@@ -685,6 +669,18 @@ const CompleteRegistration = () => {
               onChange={handleFileChange(setSoat)}
               error={errors.soat}
             />
+          </div>
+        );
+
+      // Paso 6: Tarjeta de Propiedad (Frente y Atrás)
+      case 6:
+        return (
+          <div className="step-content">
+            <img src={propertyImage} alt="Property" className="step-image" />
+            <h2 className="step-title">Tarjeta de propiedad de la grua que usarás</h2>
+            <p className="step-description">
+            Necesitamos saber de quien es el grúa que recogera el vehiculo del cliente
+            </p>
 
             <FileUpload
               label="Tarjeta de Propiedad (Frente)"
@@ -699,6 +695,18 @@ const CompleteRegistration = () => {
               onChange={handleFileChange(setTarjetaPropiedadBack)}
               error={errors.tarjetaPropiedadBack}
             />
+          </div>
+        );
+
+      // Paso 7: Seguro Todo Riesgo (Opcional)
+      case 7:
+        return (
+          <div className="step-content">
+            <img src={securityImage} alt="Security" className="step-image" />
+            <h2 className="step-title">Seguro todo riesgo</h2>
+            <p className="step-description">
+              <strong>Opcional.</strong> Esto nos ayudara con los clientes con sus vehiculos en los patios de movilidad
+            </p>
 
             <FileUpload
               label="Seguro Todo Riesgo (Opcional)"
@@ -706,6 +714,18 @@ const CompleteRegistration = () => {
               onChange={handleFileChange(setSeguroTodoRiesgo)}
               error={errors.seguroTodoRiesgo}
             />
+          </div>
+        );
+
+      // Paso 8: Foto de la Grúa
+      case 8:
+        return (
+          <div className="step-content">
+            <img src={truckImage} alt="Truck" className="step-image" />
+            <h2 className="step-title">Foto de tu Grúa</h2>
+            <p className="step-description">
+              Sube una foto clara de tu grúa completa.
+            </p>
 
             <FileUpload
               label="Foto de tu grúa"
@@ -716,8 +736,8 @@ const CompleteRegistration = () => {
           </div>
         );
 
-      // 🆕 Paso 6: Tipo de grúa
-      case 6:
+      // Paso 9: Tipo de grúa
+      case 9:
         return (
           <TruckTypeSelector
             selectedType={truckType}
@@ -726,8 +746,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // 🆕 Paso 7: Marca del vehículo base
-      case 7:
+      // 🆕 Paso 10: Marca del vehículo base
+      case 10:
         return (
           <TruckBrandSelector
             brands={truckBrands}
@@ -740,14 +760,16 @@ const CompleteRegistration = () => {
           />
         );
 
-      // 🆕 Paso 8: Modelo del vehículo base
-      case 8:
+      // 🆕 Paso 11: Modelo del vehículo base
+      case 11:
         return (
           <TruckModelSelector
             models={truckModels}
             selectedModel={truckModel}
             customModel={customModel}
-            brandName={truckBrand?.id === 'OTHER' ? customBrand : truckBrand?.name}
+            brandName={
+              truckBrand?.id === "OTHER" ? customBrand : truckBrand?.name
+            }
             onSelect={setTruckModel}
             onCustomModelChange={setCustomModel}
             isLoading={isLoading}
@@ -755,8 +777,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // 🆕 Paso 9: Placa de la grúa
-      case 9:
+      // 🆕 Paso 12: Placa de la grúa
+      case 12:
         return (
           <TruckPlateInput
             plate={truckPlate}
@@ -765,8 +787,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 10: Capacidades (antes era paso 6)
-      case 10: {
+      // Paso 13: Capacidades
+      case 13: {
         return (
           <div className="step-content">
             <div className="step-icon">
@@ -781,7 +803,9 @@ const CompleteRegistration = () => {
               {Object.keys(vehicleCapabilities).map((key) => (
                 <button
                   key={key}
-                  className={`capability-option ${vehicleCapabilities[key] ? 'selected' : ''}`}
+                  className={`capability-option ${
+                    vehicleCapabilities[key] ? "selected" : ""
+                  }`}
                   onClick={() =>
                     setVehicleCapabilities({
                       ...vehicleCapabilities,
@@ -790,7 +814,7 @@ const CompleteRegistration = () => {
                   }
                 >
                   <div className="capability-checkbox">
-                    {vehicleCapabilities[key] && '✓'}
+                    {vehicleCapabilities[key] && "✓"}
                   </div>
                   <span className="capability-label">{key}</span>
                 </button>
@@ -820,7 +844,9 @@ const CompleteRegistration = () => {
         <div className="complete-registration-container">
           {/* Step Indicator */}
           <div className="step-indicator">
-            <span>Paso {currentStep} de {totalSteps}</span>
+            <span>
+              Paso {currentStep} de {totalSteps}
+            </span>
           </div>
 
           {/* Step Content */}
@@ -834,7 +860,7 @@ const CompleteRegistration = () => {
               onClick={handleBack}
               disabled={isLoading}
             >
-              {currentStep === 1 ? 'Cancelar' : 'Atrás'}
+              {currentStep === 1 ? "Cancelar" : "Atrás"}
             </IonButton>
 
             <IonButton
@@ -845,9 +871,9 @@ const CompleteRegistration = () => {
               {isLoading ? (
                 <IonSpinner name="crescent" />
               ) : currentStep === totalSteps ? (
-                'Finalizar'
+                "Finalizar"
               ) : (
-                'Siguiente'
+                "Siguiente"
               )}
             </IonButton>
           </div>
@@ -862,7 +888,11 @@ const FileUpload = ({ label, file, onChange, error }) => {
   return (
     <div className="file-upload-wrapper">
       <label className="file-upload-label">{label}</label>
-      <div className={`file-upload-box ${error ? 'error' : ''} ${file ? 'uploaded' : ''}`}>
+      <div
+        className={`file-upload-box ${error ? "error" : ""} ${
+          file ? "uploaded" : ""
+        }`}
+      >
         <input
           type="file"
           accept="image/*"
@@ -870,9 +900,9 @@ const FileUpload = ({ label, file, onChange, error }) => {
           className="file-upload-input"
         />
         <div className="file-upload-content">
-          <Camera size="32" color={file ? '#10B981' : '#9CA3AF'} />
+          <Camera size="32" color={file ? "#10B981" : "#9CA3AF"} />
           <span className="file-upload-text">
-            {file ? `✓ ${file.name}` : 'Toca para subir foto'}
+            {file ? `✓ ${file.name}` : "Toca para subir foto"}
           </span>
         </div>
       </div>
@@ -882,4 +912,3 @@ const FileUpload = ({ label, file, onChange, error }) => {
 };
 
 export default CompleteRegistration;
-

@@ -45,13 +45,13 @@
 }
 
 .truck-type-card:hover {
-  border-color: #667eea;
+  border-color: var(--desvare-primary);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   transform: translateY(-2px);
 }
 
 .truck-type-card.selected {
-  border-color: #667eea;
+  border-color: var(--desvare-primary);
   background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
 }
@@ -92,7 +92,7 @@
 
 .truck-type-capacity {
   font-size: 13px;
-  color: #667eea;
+  color: var(--desvare-primary);
   font-weight: 600;
   margin: 4px 0 0 0;
 }

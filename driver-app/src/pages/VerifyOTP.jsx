@@ -197,14 +197,14 @@ const VerifyOTP = () => {
           )}
 
           {/* Botón Validar */}
-          <IonButton
+          <button
             expand="block"
             className="verify-otp-button"
             onClick={handleVerifyOTP}
             disabled={isLoading || otp.length !== 4}
           >
             {isLoading ? <IonSpinner name="crescent" /> : 'Validar código'}
-          </IonButton>
+          </button>
         </div>
       </IonContent>
     </IonPage>

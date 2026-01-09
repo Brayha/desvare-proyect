@@ -41,7 +41,6 @@ const TruckModelSelector = ({
   return (
     <div className="truck-model-selector">
       <div className="selector-header">
-        <Setting3 size="32" color="#667eea" variant="Bold" />
         <IonText>
           <h2>Modelo del vehículo</h2>
           <p>Selecciona el modelo de {brandName || 'tu vehículo'}</p>

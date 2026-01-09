@@ -4,7 +4,6 @@ import { IonPage, IonContent, IonButton, IonSpinner, IonText } from '@ionic/reac
 import { Profile, Call, Sms } from 'iconsax-react';
 import { authAPI } from '../services/api';
 import { Input, PhoneInput } from '../../../shared/components';
-import DesvareLogoWhite from '../../../shared/src/img/Desvare-white.svg';
 import './Register.css';
 
 const Register = () => {
@@ -93,14 +92,10 @@ const Register = () => {
     <IonPage>
       <IonContent className="register-content">
         <div className="register-container">
-          {/* Logo */}
-          <div className="register-logo-container">
-            <img src={DesvareLogoWhite} alt="Desvare" className="register-logo" />
-          </div>
 
           {/* Título */}
-          <h1 className="register-title">Crea tu cuenta</h1>
-          <h2 className="register-subtitle">y comencemos a hacer plata</h2>
+          <h1 className="register-title">Crea tu cuenta y comenzemos a hacer plata</h1>
+          <h2 className="register-subtitle">Completa la siguiente información para continuar.</h2>
 
           {/* Formulario */}
           <div className="register-form">
@@ -139,14 +134,14 @@ const Register = () => {
             )}
 
             {/* Botón Crear cuenta */}
-            <IonButton
+            <button
               expand="block"
               className="register-button"
               onClick={handleRegister}
               disabled={isLoading || !name || phone.length !== 10}
             >
               {isLoading ? <IonSpinner name="crescent" /> : 'Crear cuenta'}
-            </IonButton>
+            </button>
 
             {/* Link a Login */}
             <div className="register-footer">

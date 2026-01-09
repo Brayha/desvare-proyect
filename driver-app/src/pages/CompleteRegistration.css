@@ -3,19 +3,19 @@
    ====================================== */
 
 .complete-registration-content {
-  --background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+  --background: #F7F7F7;
 }
 
 .registration-progress {
   --progress-background: #0055FF;
-  --background: #E5E7EB;
+  --background: #F7F7F7;
   height: 4px;
 }
 
 .complete-registration-container {
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 16px;
   min-height: 100%;
 }
 
@@ -37,7 +37,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   margin-bottom: 24px;
 }
 
@@ -45,6 +45,15 @@
   display: flex;
   justify-content: center;
   margin-bottom: 16px;
+}
+
+.step-title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  gap: 8px;
 }
 
 .step-title {
@@ -59,7 +68,7 @@
   font-size: 16px;
   color: #6B7280;
   text-align: center;
-  margin: 0 0 24px 0;
+  margin: 0;
   line-height: 1.5;
 }
 
@@ -139,6 +148,15 @@
   margin: 0;
 }
 
+.step-image {
+  width: 70%;
+  height: auto;
+  margin: 20px auto;
+  display: block;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+}
+
 /* ======================================
    MODERN SELECT (IonSelect con estilo de Input)
    ====================================== */
@@ -154,6 +172,10 @@
   color: #1F2937;
   --placeholder-color: #9CA3AF;
   --placeholder-opacity: 1;
+  min-height: 26px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modern-select-field::part(placeholder) {
@@ -345,6 +367,72 @@
 
 .next-button:active::part(native) {
   transform: translateY(0);
+}
+
+/* ======================================
+   ION-SELECT CUSTOM STYLES
+   ====================================== */
+
+/* Quitar el borde inferior que aparece al hacer click */
+ion-select {
+  --highlight-color-focused: transparent !important;
+  --highlight-color-valid: transparent !important;
+  --highlight-color-invalid: transparent !important;
+  --border-color: transparent !important;
+  --border-width: 0 !important;
+  --border-style: none !important;
+}
+
+/* Quitar el borde del contenedor nativo */
+ion-select::part(container) {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Quitar el borde del ion-item si lo estás usando */
+ion-item {
+  --border-color: transparent !important;
+  --border-width: 0 !important;
+  --highlight-background: transparent !important;
+  --highlight-color-focused: transparent !important;
+}
+
+/* Estilos adicionales para el select personalizado */
+.modern-input-wrapper ion-select {
+  width: 100%;
+  --padding-start: 0;
+  --padding-end: 0;
+  --placeholder-opacity: 0.6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Separar el texto del ícono de la flecha */
+ion-select::part(text) {
+  flex: 1;
+  text-align: left;
+}
+
+/* Posicionar el ícono de la flecha en el extremo derecho */
+ion-select::part(icon) {
+  display: none !important; /* Ocultar completamente el ícono */
+  margin-left: auto;
+  padding-left: 12px;
+  opacity: 0.6;
+}
+
+/* Alternativa: usar variables CSS de Ionic */
+ion-select {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+ion-select::part(container) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 /* ======================================

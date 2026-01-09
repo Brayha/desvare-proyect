@@ -21,10 +21,9 @@ const TruckPlateInput = ({
   return (
     <div className="truck-plate-input">
       <div className="selector-header">
-        <DocumentText size="32" color="#667eea" variant="Bold" />
         <IonText>
           <h2>Placa de tu grúa</h2>
-          <p>Ingresa la placa de identificación de tu vehículo</p>
+          <p>Ingresa la placa con la cual el cliente identificará a tu grúa</p>
         </IonText>
       </div>
 

@@ -115,7 +115,7 @@
 /* Responsive */
 @media (max-width: 480px) {
   .truck-plate-input {
-    padding: 16px;
+    padding: 0;
   }
 
   .selector-header h2 {
