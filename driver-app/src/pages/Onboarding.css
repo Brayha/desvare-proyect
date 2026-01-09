@@ -27,7 +27,7 @@
 
 .skip-button:active {
   transform: scale(0.95);
-  color: #0066FF;
+  color: #0066ff;
 }
 
 /* Swiper Container */
@@ -36,15 +36,16 @@
   padding: 60px 0 0 0;
 }
 
-/* Pagination personalizada */
+/* Pagination personalizada - Posicionada arriba */
 .onboarding-swiper .swiper-pagination {
-  bottom: 140px !important;
+  top: 30px !important;
+  bottom: auto !important;
 }
 
 .onboarding-swiper .swiper-pagination-bullet {
   width: 8px;
   height: 8px;
-  background: #D1D5DB;
+  background: #d1d5db;
   opacity: 1;
   margin: 0 6px;
   transition: all 0.3s ease;
@@ -53,7 +54,7 @@
 .onboarding-swiper .swiper-pagination-bullet-active {
   width: 24px;
   border-radius: 4px;
-  background: #0066FF;
+  background: #0066ff;
 }
 
 /* ============================================
@@ -72,17 +73,19 @@
 
 /* Image */
 .slide-image {
-  width: 200px;
-  height: 200px;
-  border-radius: 30px;
+  width: 80%;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   animation: fadeInScale 0.6s ease-out;
+  padding: 20px;
 }
 
-.slide-emoji {
-  font-size: 100px;
+.slide-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   animation: bounce 2s ease-in-out infinite;
 }
 
@@ -96,15 +99,15 @@
 .slide-title {
   font-size: 28px;
   font-weight: 700;
-  color: #1F2937;
+  color: #1f2937;
   margin: 0 0 16px 0;
   line-height: 1.2;
 }
 
 .slide-subtitle {
   font-size: 16px;
-  font-weight: 400;
-  color: #6B7280;
+  font-weight: 500;
+  color: var(--desvare-secondary);
   margin: 0;
   line-height: 1.6;
 }
@@ -124,17 +127,21 @@
 }
 
 .onboarding-button {
-  --background: #0066FF;
-  --background-activated: #004FC6;
-  --border-radius: 12px;
-  --padding-top: 16px;
-  --padding-bottom: 16px;
-  font-size: 17px;
-  font-weight: 600;
+  border-radius: 15px;
+  border: 1px solid rgba(34, 61, 98, 0.2);
+  background: var(--desvare-primary);
+  display: flex;
+  padding: 15px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
   text-transform: none;
   letter-spacing: 0;
-  height: 56px;
-  margin: 0;
+  width: 100%;
 }
 
 /* ============================================
@@ -164,7 +171,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -182,8 +190,9 @@
     height: 160px;
   }
 
-  .slide-emoji {
-    font-size: 80px;
+  .slide-svg {
+    width: 100%;
+    height: 100%;
   }
 
   .slide-title {
@@ -210,8 +219,8 @@
     height: 160px;
   }
 
-  .slide-emoji {
-    font-size: 80px;
+  .slide-svg {
+    width: 100%;
+    height: 100%;
   }
 }
-

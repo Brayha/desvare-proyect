@@ -1,38 +1,63 @@
-import { 
-  IonCard, 
-  IonCardContent, 
-  IonIcon, 
-  IonText, 
-  IonButton, 
-  IonBadge 
-} from '@ionic/react';
-import { locateOutline, locationOutline } from 'ionicons/icons';
-import './RequestCard.css';
+import {
+  IonCard,
+  IonCardContent,
+  IonIcon,
+  IonText,
+  IonButton,
+  IonBadge,
+} from "@ionic/react";
+import { Location } from "iconsax-react";
+import "./RequestCard.css";
+
+// Importar iconos SVG de vehículos
+import carIcon from "../../../shared/src/img/vehicles/car.svg";
+import motoIcon from "../../../shared/src/img/vehicles/moto.svg";
+import camionetaIcon from "../../../shared/src/img/vehicles/camioneta.svg";
+import camionIcon from "../../../shared/src/img/vehicles/camion.svg";
+import busIcon from "../../../shared/src/img/vehicles/bus.svg";
 
 const RequestCard = ({ request, onQuote }) => {
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('es-CO', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true
-    }).toUpperCase();
+    return date
+      .toLocaleTimeString("es-CO", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .toUpperCase();
+  };
+
+  // Función para obtener el icono SVG según el emoji
+  const getVehicleIcon = (iconEmoji) => {
+    const iconMap = {
+      "🏍️": motoIcon,
+      "🚗": carIcon,
+      "🚙": camionetaIcon,
+      "🚚": camionIcon,
+      "🚌": busIcon,
+    };
+    return iconMap[iconEmoji] || carIcon; // Por defecto usa el icono de carro
   };
 
   // Estado de la card (Nuevo, Cotizada, Aprobada)
   const getStatusBadge = () => {
-    if (request.status === 'accepted') {
-      return <IonBadge color="success">Aprobada</IonBadge>;
+    if (request.status === "accepted") {
+      return <IonBadge mode="ios" color="success">Aprobada</IonBadge>;
     }
     if (request.quotesCount > 0) {
-      return <IonBadge color="warning">Cotizada</IonBadge>;
+      return <IonBadge mode="ios" color="warning">Cotizada</IonBadge>;
     }
-    return <IonBadge color="primary">Nuevo</IonBadge>;
+    return <IonBadge mode="ios" color="primary">Nuevo</IonBadge>;
   };
 
   return (
-    <IonCard className="request-card">
-      <IonCardContent>
+    <div 
+      className={`request-card ${request.status}`}
+      onClick={() => onQuote(request)}
+      style={{ cursor: 'pointer' }}
+    >
+      <div className="request-card-content">
         {/* Header: Hora y Estado */}
         <div className="card-header">
           <IonText color="medium" className="time">
@@ -42,41 +67,47 @@ const RequestCard = ({ request, onQuote }) => {
         </div>
 
         {/* Vehículo */}
-        <div className="vehicle-info">
-          <div className="vehicle-icon">
-            <span className="vehicle-emoji">{request.vehicle?.icon || '🚗'}</span>
+        <div className="vehicle-section">
+          <div className="vehicle-info">
+            <div className="vehicle-icon">
+              <img
+                src={getVehicleIcon(request.vehicle?.icon)}
+                alt={request.vehicle?.category || "Vehículo"}
+                className="vehicle-svg-icon"
+              />
+            </div>
+            <div className="vehicle-details">
+              <h2 className="vehicle-brand">
+                {request.vehicle?.brand || "N/A"}
+              </h2>
+              <h3 className="vehicle-model" color="medium">
+                {request.vehicle?.model || "N/A"}
+              </h3>
+            </div>
+            <div className="distance-info">
+              <IonText className="distance">
+                <strong>{request.durationMin || "N/A"} Min</strong>
+              </IonText>
+              <IonText className="distance-km" color="medium">
+                {request.distanceKm || "N/A"} km
+              </IonText>
+            </div>
           </div>
-          <div className="vehicle-details">
-            <IonText className="vehicle-model">
-              <strong>{request.vehicle?.brand || 'N/A'} {request.vehicle?.model || 'N/A'}</strong>
-            </IonText>
-            <IonText className="vehicle-plate" color="medium">
-              {request.vehicle?.licensePlate || 'N/A'}
-            </IonText>
-          </div>
-          <div className="distance-info">
-            <IonText className="distance">
-              <strong>{request.durationMin || 'N/A'} MIN</strong>
-            </IonText>
-            <IonText className="distance-km" color="medium">
-              {request.distanceKm || 'N/A'} km
-            </IonText>
-          </div>
-        </div>
 
-        {/* Problema */}
-        <div className="problem-section">
-          <IonText color="medium" className="section-label">
-            Problema
-          </IonText>
-          <IonText className="problem-text">
-            {request.problem || 'Sin descripción'}
-          </IonText>
+          {/* Problema */}
+          <div className="problem-section">
+            <IonText color="medium" className="section-label">
+              Problema
+            </IonText>
+            <IonText className="problem-text">
+              {request.problem || "Sin descripción"}
+            </IonText>
+          </div>
         </div>
 
         {/* Origen */}
         <div className="location-section">
-          <IonIcon icon={locateOutline} color="primary" />
+          <Location size="24" variant="Bold" color="#0055FF" />
           <div className="location-text">
             <IonText color="medium" className="location-label">
               Origen aproximado
@@ -89,7 +120,7 @@ const RequestCard = ({ request, onQuote }) => {
 
         {/* Destino */}
         <div className="location-section">
-          <IonIcon icon={locationOutline} color="danger" />
+          <Location size="24" variant="Bold" color="#FF5500" />
           <div className="location-text">
             <IonText color="medium" className="location-label">
               Destino
@@ -99,42 +130,9 @@ const RequestCard = ({ request, onQuote }) => {
             </IonText>
           </div>
         </div>
-
-        {/* Botón Cotizar */}
-        {request.status === 'pending' && (
-          <IonButton 
-            expand="block" 
-            onClick={() => onQuote(request)}
-            className="quote-button"
-            color="primary"
-          >
-            Cotizar
-          </IonButton>
-        )}
-
-        {request.status === 'quoted' && request.quotesCount > 0 && (
-          <IonButton 
-            expand="block" 
-            color="medium"
-            disabled
-          >
-            Cotizada ({request.quotesCount} cotizaciones)
-          </IonButton>
-        )}
-
-        {request.status === 'accepted' && (
-          <IonButton 
-            expand="block" 
-            color="success"
-            onClick={() => onQuote(request)}
-          >
-            Aprobada - Ver Detalle
-          </IonButton>
-        )}
-      </IonCardContent>
-    </IonCard>
+      </div>
+    </div>
   );
 };
 
 export default RequestCard;
-

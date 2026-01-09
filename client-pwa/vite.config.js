@@ -14,11 +14,16 @@ export default defineConfig({
       '@services': path.resolve(__dirname, '../shared/services'),
       '@utils': path.resolve(__dirname, '../shared/utils'),
       '@styles': path.resolve(__dirname, '../shared/styles'),
+      '/shared': path.resolve(__dirname, '../shared'), // Para servir archivos estáticos como fuentes
     },
     dedupe: ['react', 'react-dom', '@ionic/react'],
   },
   server: {
     host: '0.0.0.0', // Permite acceso desde red local
     port: 5173,
+    fs: {
+      allow: ['..'], // Permitir acceso a carpeta shared
+    },
   },
+  assetsInclude: ['**/*.woff', '**/*.woff2'], // Asegurar que Vite procese fuentes
 })

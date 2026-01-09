@@ -151,6 +151,7 @@
   overflow: hidden;
   color: var(--ion-color-dark);
   text-overflow: ellipsis;
+  font-family: var(--font-family);
   font-size: 16px;
   font-style: normal;
   font-weight: 700;

@@ -3,11 +3,17 @@
  * Se aplica tanto a client-pwa como driver-app
  */
 
+/* Importar fuentes Gilroy */
+@import './fonts.css';
+
 /* Importar variables compartidas */
 @import './variables.css';
 
 /* ===== COLORES DE IONIC ===== */
 :root {
+  /* Variables de tipografía de Ionic - Forzar Gilroy */
+  --ion-font-family: var(--font-family);
+  
   --ion-color-primary: var(--desvare-primary);
   --ion-color-primary-rgb: var(--desvare-primary-rgb);
   --ion-color-primary-contrast: var(--desvare-primary-contrast);

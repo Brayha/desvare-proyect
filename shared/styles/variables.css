@@ -42,19 +42,15 @@
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
   
-    /* ===== TIPOGRAFÍA ===== */
-    --font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  
-    /* Font weights de Raleway */
-    --font-weight-thin: 100;
-    --font-weight-extralight: 200;
-    --font-weight-light: 300;
-    --font-weight-regular: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
-    --font-weight-extrabold: 800;
-    --font-weight-black: 900;
+  /* ===== TIPOGRAFÍA ===== */
+  --font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+
+  /* Font weights de Gilroy (disponibles: 300, 400, 500, 700, 900) */
+  --font-weight-light: 300;      /* Gilroy Light */
+  --font-weight-regular: 400;    /* Gilroy Regular */
+  --font-weight-medium: 500;     /* Gilroy Medium */
+  --font-weight-bold: 700;       /* Gilroy Bold */
+  --font-weight-heavy: 900;      /* Gilroy Heavy */
     
     /* Font sizes */
     --font-size-xs: 12px;

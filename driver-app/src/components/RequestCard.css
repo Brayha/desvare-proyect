@@ -1,14 +1,56 @@
 .request-card {
   margin-bottom: 16px;
-  border-radius: 12px;
+  border-radius: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 0;
+  margin-right: 0;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+/* Efecto hover para desktop */
+.request-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Efecto activo (click/tap) */
+.request-card:active {
+  transform: translateY(0px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos específicos según el estado */
+.request-card.pending {
+  border: 2px solid transparent;
+}
+
+.request-card.pending:hover {
+  border: 2px solid rgba(0, 85, 255, 0.3);
+}
+
+.request-card.quoted {
+  border: 2px solid transparent;
+}
+
+.request-card.quoted:hover {
+  border: 2px solid rgba(255, 196, 9, 0.3);
+}
+
+.request-card.accepted {
+  border: 2px solid transparent;
+}
+
+.request-card.accepted:hover {
+  border: 2px solid rgba(45, 211, 111, 0.3);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 }
 
 .time {
@@ -16,34 +58,70 @@
   font-weight: 600;
 }
 
+.vehicle-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 15px;
+  padding: 4px;
+  background: #f5f5f5;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  background: #f7f7f7;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
 .vehicle-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #f5f5f5;
-  border-radius: 8px;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
 .vehicle-icon {
-  font-size: 40px;
+  width: 50px;
+  height: 50px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.vehicle-emoji {
-  display: block;
+.vehicle-svg-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .vehicle-details {
-  flex: 1;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.vehicle-brand {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  margin: 0;
+  text-align: left;
 }
 
 .vehicle-model {
   display: block;
-  font-size: 16px;
-  margin-bottom: 2px;
+  font-size: 14px;
+  margin: 0;
+  color: #666;
+  margin: 0;
+  text-align: left;
 }
 
 .vehicle-plate {
@@ -54,6 +132,8 @@
 .distance-info {
   text-align: right;
   flex-shrink: 0;
+  border-left: 1px solid #e5e7eb;
+  padding-left: 10px;
 }
 
 .distance {
@@ -68,15 +148,16 @@
 }
 
 .problem-section {
-  margin-bottom: 12px;
+  padding: 5px;
+  gap: 5px;
 }
 
 .section-label {
   display: block;
   font-size: 12px;
   margin-bottom: 4px;
-  text-transform: uppercase;
   font-weight: 600;
+  margin: 0;
 }
 
 .problem-text {
@@ -90,14 +171,13 @@
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  margin-bottom: 12px;
-  padding: 8px 0;
+  margin-bottom:0px;
+  padding: 10px;
 }
 
-.location-section ion-icon {
-  font-size: 20px;
-  margin-top: 2px;
+.location-section svg {
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .location-text {
@@ -118,9 +198,3 @@
   line-height: 1.3;
   color: #333;
 }
-
-.quote-button {
-  margin-top: 16px;
-  font-weight: 600;
-}
-

@@ -5,6 +5,12 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination } from 'swiper/modules';
 import { ArrowRight2 } from 'iconsax-react';
 
+// Importar imágenes SVG del onboarding
+import onboarding1 from '../../../shared/src/img/onboarding-1.svg';
+import onboarding2 from '../../../shared/src/img/onboarding-2.svg';
+import onboarding3 from '../../../shared/src/img/onboarding-3.svg';
+import onboarding4 from '../../../shared/src/img/onboarding-4.svg';
+
 // Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -18,30 +24,30 @@ const Onboarding = () => {
   const slides = [
     {
       id: 1,
-      title: 'Bienvenido a Desvare',
-      subtitle: 'La plataforma que conecta conductores de grúa con clientes',
-      image: '🚛',
+      title: 'Recibe servicios de grúa en tu zona',
+      subtitle: 'Recibe solicitudes en tiempo real y decide a cuáles quieres cotizar.',
+      image: onboarding1,
       color: '#0066FF'
     },
     {
       id: 2,
-      title: 'Recibe Solicitudes',
-      subtitle: 'Obtén notificaciones en tiempo real de clientes cercanos que necesitan tus servicios',
-      image: '📱',
+      title: 'Tú pones el precio',
+      subtitle: 'Revisa los detalles del servicio y envía tu cotización del rescate.',
+      image: onboarding2,
       color: '#00C853'
     },
     {
       id: 3,
-      title: 'Cotiza y Gana',
-      subtitle: 'Envía tu cotización y comienza a generar ingresos de forma inmediata',
-      image: '💰',
+      title: 'Servicio confirmado, cliente asignado',
+      subtitle: 'Cuando el cliente acepta tu cotización, te mostramos la ubicación exacta y los datos de contacto.',
+      image: onboarding3,
       color: '#FF6B00'
     },
     {
       id: 4,
-      title: 'Trabaja con Seguridad',
-      subtitle: 'Todos los servicios están asegurados y verificados para tu tranquilidad',
-      image: '🛡️',
+      title: 'Construye tu reputación',
+      subtitle: 'Al finalizar el servicio, el cliente te califica, un buen puntaje te da más visibilidad y más solicitudes.',
+      image: onboarding4,
       color: '#9C27B0'
     }
   ];
@@ -91,12 +97,11 @@ const Onboarding = () => {
           {slides.map((slide) => (
             <SwiperSlide key={slide.id}>
               <div className="slide-content">
-                {/* Emoji como imagen */}
+                {/* Imagen SVG */}
                 <div
                   className="slide-image"
-                  style={{ background: `${slide.color}15` }}
                 >
-                  <span className="slide-emoji">{slide.image}</span>
+                  <img src={slide.image} alt={slide.title} className="slide-svg" />
                 </div>
 
                 {/* Texto */}
@@ -111,14 +116,13 @@ const Onboarding = () => {
 
         {/* Botón de acción */}
         <div className="onboarding-footer">
-          <IonButton
+          <button
             expand="block"
             className="onboarding-button"
             onClick={handleNext}
           >
             {isLastSlide ? 'Comenzar' : 'Siguiente'}
-            <ArrowRight2 size="20" style={{ marginLeft: '8px' }} />
-          </IonButton>
+          </button>
         </div>
       </IonContent>
     </IonPage>

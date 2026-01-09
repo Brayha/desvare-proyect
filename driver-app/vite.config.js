@@ -14,6 +14,7 @@ export default defineConfig({
       '@services': path.resolve(__dirname, '../shared/services'),
       '@utils': path.resolve(__dirname, '../shared/utils'),
       '@styles': path.resolve(__dirname, '../shared/styles'),
+      '/shared': path.resolve(__dirname, '../shared'), // Para servir archivos estáticos como fuentes
     },
     dedupe: ['react', 'react-dom', '@ionic/react'],
   },
