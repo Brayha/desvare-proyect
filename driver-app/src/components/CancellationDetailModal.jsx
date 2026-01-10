@@ -14,16 +14,17 @@ import { closeCircleOutline, carOutline, personOutline, timeOutline } from 'ioni
 import './CancellationDetailModal.css';
 
 const CancellationDetailModal = ({ isOpen, onDismiss, cancellationData }) => {
-  console.log('🎨 CancellationDetailModal - Render');
-  console.log('  isOpen:', isOpen);
-  console.log('  cancellationData:', cancellationData);
+  // Solo mostrar logs cuando el modal está abierto
+  if (isOpen && cancellationData) {
+    console.log('📋 CancellationDetailModal abierto:', {
+      reason: cancellationData.reason,
+      clientName: cancellationData.clientName
+    });
+  }
   
   if (!cancellationData) {
-    console.log('⚠️ CancellationDetailModal: No hay cancellationData');
     return null;
   }
-
-  console.log('📋 CancellationDetailModal renderizando modal completo');
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);

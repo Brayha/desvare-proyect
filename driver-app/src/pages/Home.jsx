@@ -359,9 +359,11 @@ const Home = () => {
 
   // Abrir modal de cotización
   const handleQuote = (request) => {
-    setSelectedRequest(request);
-    setQuoteAmount('');
-    setShowQuoteModal(true);
+    // Navegar a la página de detalle con los datos de la solicitud y ubicación del conductor
+    history.push('/request-detail', {
+      request: request,
+      driverLocation: driverLocation
+    });
   };
 
   // Enviar cotización

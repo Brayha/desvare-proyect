@@ -119,7 +119,7 @@ router.post('/new', async (req, res) => {
 router.post('/:id/quote', async (req, res) => {
   try {
     const { id } = req.params;
-    const { driverId, driverName, amount } = req.body;
+    const { driverId, driverName, amount, location } = req.body;
 
     // Validar campos requeridos
     if (!driverId || !driverName || !amount) {
@@ -154,11 +154,12 @@ router.post('/:id/quote', async (req, res) => {
       });
     }
 
-    // Agregar cotización
+    // Agregar cotización con ubicación del conductor
     request.quotes.push({
       driverId,
       driverName,
       amount: parseFloat(amount),
+      location: location || null, // Ubicación del conductor
       timestamp: new Date()
     });
 
@@ -170,6 +171,31 @@ router.post('/:id/quote', async (req, res) => {
     await request.save();
 
     console.log(`💰 Cotización agregada a solicitud ${id} por ${driverName}`);
+
+    // ✅ Emitir evento de Socket.IO al cliente en tiempo real
+    const io = global.io;
+    const connectedClients = global.connectedClients;
+
+    if (io && connectedClients) {
+      const clientSocketId = connectedClients.get(request.clientId.toString());
+      if (clientSocketId) {
+        const quoteData = {
+          requestId: request._id.toString(),
+          driverId: driverId,
+          driverName: driverName,
+          amount: parseFloat(amount),
+          location: location || null, // Incluir ubicación del conductor
+          timestamp: new Date()
+        };
+        
+        console.log('📤 Enviando cotización al cliente vía Socket.IO:', quoteData);
+        io.to(clientSocketId).emit('quote:received', quoteData);
+      } else {
+        console.log('⚠️ Cliente no conectado vía Socket.IO (ID:', request.clientId.toString(), ')');
+      }
+    } else {
+      console.log('⚠️ Socket.IO no disponible');
+    }
 
     res.json({
       message: 'Cotización agregada exitosamente',

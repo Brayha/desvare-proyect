@@ -1,0 +1,211 @@
+.quote-amount-page {
+  --background: #f7f7f7;
+}
+
+.quote-content {
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Texto descriptivo */
+.description-text {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.description-text ion-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Monto grande - Display */
+.amount-display {
+  text-align: center;
+  padding: 30px 20px;
+  background: transparent;
+  margin-bottom: 10px;
+}
+
+.amount-text {
+  font-size: 56px;
+  font-weight: 700;
+  color: #1e293b;
+  display: block;
+  line-height: 1;
+}
+
+/* Card de Input */
+.amount-input-card {
+  background: white;
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  display: block;
+}
+
+.input-subtitle {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #64748b;
+  display: block;
+}
+
+/* Input wrapper con símbolo de peso */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 16px;
+  transition: all 0.2s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--ion-color-primary);
+  background: white;
+}
+
+.currency-symbol {
+  font-size: 24px;
+  font-weight: 600;
+  color: #64748b;
+  margin-right: 8px;
+}
+
+.amount-input {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+  flex: 1;
+}
+
+.amount-input input {
+  text-align: left !important;
+}
+
+.amount-input input::placeholder {
+  color: #cbd5e1;
+}
+
+/* Botón de enviar */
+.send-button {
+  --background: #0055FF;
+  --background-activated: #0044CC;
+  --border-radius: 14px;
+  font-size: 17px;
+  font-weight: 700;
+  height: 56px;
+  margin-top: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.send-button[disabled] {
+  --background: #cbd5e1;
+  opacity: 0.6;
+}
+
+/* Spinner en el botón */
+.send-button ion-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsive - Pantallas pequeñas */
+@media (max-width: 375px) {
+  .quote-content {
+    padding: 20px 16px;
+    gap: 16px;
+  }
+
+  .amount-text {
+    font-size: 48px;
+  }
+
+  .amount-input-card {
+    padding: 20px;
+  }
+
+  .input-title {
+    font-size: 16px;
+  }
+
+  .input-subtitle {
+    font-size: 13px;
+  }
+
+  .amount-input {
+    font-size: 20px;
+  }
+
+  .currency-symbol {
+    font-size: 20px;
+  }
+
+  .send-button {
+    height: 52px;
+    font-size: 16px;
+  }
+}
+
+/* Responsive - Pantallas grandes */
+@media (min-width: 768px) {
+  .quote-content {
+    padding: 40px 30px;
+    gap: 30px;
+  }
+
+  .amount-display {
+    padding: 40px 20px;
+  }
+
+  .amount-text {
+    font-size: 64px;
+  }
+
+  .amount-input-card {
+    padding: 30px;
+  }
+}
+
+/* Animación suave al cambiar el monto */
+.amount-text {
+  transition: all 0.2s ease;
+}
+
+/* Ocultar flechas del input number en Chrome, Safari, Edge */
+.amount-input input::-webkit-outer-spin-button,
+.amount-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Ocultar flechas del input number en Firefox */
+.amount-input input[type=number] {
+  -moz-appearance: textfield;
+}
