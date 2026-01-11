@@ -27,11 +27,33 @@ const RequestDetail = () => {
   const history = useHistory();
   const location = useLocation();
   const [loading, setLoading] = useState(true);
+  const [driverPhoto, setDriverPhoto] = useState('https://ionicframework.com/docs/img/demos/avatar.svg');
 
   const request = location.state?.request;
   const driverLocation = location.state?.driverLocation;
 
   useEffect(() => {
+    // Cargar foto del conductor desde el API
+    const loadDriverPhoto = async () => {
+      try {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          const response = await fetch(`http://localhost:5001/api/drivers/profile/${parsedUser._id}`);
+          const data = await response.json();
+          
+          if (response.ok && data.driver?.documents?.selfie) {
+            setDriverPhoto(data.driver.documents.selfie);
+            console.log('✅ Foto del conductor cargada');
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error al cargar foto del conductor:', error);
+      }
+    };
+
+    loadDriverPhoto();
+
     if (!request || !driverLocation) {
       console.warn('⚠️ No hay datos de la solicitud. Redirigiendo a inicio...');
       setTimeout(() => {
@@ -102,14 +124,14 @@ const RequestDetail = () => {
 
         {/* Contenido de detalles */}
         <div className="detail-content">
-          {/* Información de ubicación del usuario */}
+          {/* Información de ubicación del conductor */}
           <div className="user-location-card">
             <div className="user-avatar">
               <img 
-                src={request.clientPhoto || '/default-avatar.png'} 
-                alt="Cliente" 
+                src={driverPhoto} 
+                alt="Conductor" 
                 onError={(e) => {
-                  e.target.src = '/default-avatar.png';
+                  e.target.src = 'https://ionicframework.com/docs/img/demos/avatar.svg';
                 }}
               />
             </div>
