@@ -81,10 +81,13 @@
   transition: all 0.2s ease;
 }
 
+/* Estado focus mejorado */
 .input-wrapper:focus-within {
-  border-color: var(--ion-color-primary);
-  background: white;
+  border-color: #0055FF;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
 }
+
 
 .currency-symbol {
   font-size: 24px;
@@ -98,14 +101,35 @@
   --padding-end: 0;
   --padding-top: 16px;
   --padding-bottom: 16px;
+  --border-width: 0 !important;
+  --border-style: none !important;
+  --border-color: transparent !important;
+  --background: transparent;
+  --box-shadow: none;
+  --highlight-height: 0;
   font-size: 24px;
   font-weight: 600;
   color: #1e293b;
   flex: 1;
 }
 
-.amount-input input {
+/* Remover TODOS los posibles bordes del IonInput */
+.amount-input::part(native) {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Asegurar que el input interno tampoco tenga bordes */
+.amount-input .native-input,
+.amount-input input,
+.amount-input .sc-ion-input-ios,
+.amount-input .sc-ion-input-md {
   text-align: left !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 .amount-input input::placeholder {
@@ -202,10 +226,32 @@
 .amount-input input::-webkit-outer-spin-button,
 .amount-input input::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 
 /* Ocultar flechas del input number en Firefox */
 .amount-input input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Forzar eliminación de TODOS los bordes internos de Ionic */
+.input-wrapper ion-input,
+.input-wrapper .native-wrapper,
+.input-wrapper .input-wrapper {
+  border: none !important;
+  box-shadow: none !important;
+  --border-width: 0 !important;
+  --border-style: none !important;
+}
+
+/* Eliminar línea de fondo de Ionic */
+.input-wrapper ion-input::part(container) {
+  border: none !important;
+}
+
+.input-wrapper ion-input::part(native) {
+  border: none !important;
+  box-shadow: none !important;
 }

@@ -7,9 +7,20 @@ import './RequestDetailMap.css';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
-// Estilo de la línea de ruta
-const routeLayerStyle = {
-  id: 'route-layer',
+// Estilo para la ruta del conductor al origen (azul oscuro)
+const driverToOriginLayerStyle = {
+  id: 'driver-to-origin-layer',
+  type: 'line',
+  paint: {
+    'line-color': '#223D62',
+    'line-width': 4,
+    'line-opacity': 0.8,
+  },
+};
+
+// Estilo para la ruta del origen al destino (azul brillante)
+const originToDestinationLayerStyle = {
+  id: 'origin-to-destination-layer',
   type: 'line',
   paint: {
     'line-color': '#0055FF',
@@ -46,10 +57,18 @@ const calculateBounds = (coordinates) => {
   ];
 };
 
-const RequestDetailMap = ({ request, driverLocation }) => {
+const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
   const mapRef = useRef(null);
-  const [route, setRoute] = useState(null);
+  const [driverToOriginRoute, setDriverToOriginRoute] = useState(null);
+  const [originToDestinationRoute, setOriginToDestinationRoute] = useState(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
+  
+  // Estados para controlar la animación secuencial
+  const [showDriver, setShowDriver] = useState(false);
+  const [showOrigin, setShowOrigin] = useState(false);
+  const [showDriverRoute, setShowDriverRoute] = useState(false);
+  const [showDestination, setShowDestination] = useState(false);
+  const [showDestinationRoute, setShowDestinationRoute] = useState(false);
   
   // Validar y obtener coordenadas de forma segura
   const getCoordinates = () => {
@@ -81,10 +100,17 @@ const RequestDetailMap = ({ request, driverLocation }) => {
     zoom: 12,
   });
 
-  // Calcular ruta cuando cambian los datos
+  // Calcular rutas cuando cambian los datos
   useEffect(() => {
-    const calculateRoute = async () => {
+    const calculateRoutes = async () => {
     setIsCalculatingRoute(true);
+    
+    // Reiniciar estados de animación
+    setShowDriver(false);
+    setShowOrigin(false);
+    setShowDriverRoute(false);
+    setShowDestination(false);
+    setShowDestinationRoute(false);
     
     try {
       // Obtener coordenadas de forma segura
@@ -105,54 +131,111 @@ const RequestDetailMap = ({ request, driverLocation }) => {
       const originCoords = getOriginCoords();
       const destCoords = getDestCoords();
       
-      console.log('📍 Coordenadas para ruta:', {
+      console.log('📍 Coordenadas para rutas:', {
         driver: { lng: driverLocation.lng, lat: driverLocation.lat },
         origin: originCoords,
         destination: destCoords
       });
       
-      // Waypoints: conductor → origen → destino
-      const waypoints = [
+      // Calcular ruta 1: Conductor → Origen (color #223D62)
+      const route1Waypoints = [
         `${driverLocation.lng},${driverLocation.lat}`,
+        `${originCoords.lng},${originCoords.lat}`
+      ].join(';');
+
+      const url1 = `https://api.mapbox.com/directions/v5/mapbox/driving/${route1Waypoints}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+      
+      // Calcular ruta 2: Origen → Destino (color #0055FF)
+      const route2Waypoints = [
         `${originCoords.lng},${originCoords.lat}`,
         `${destCoords.lng},${destCoords.lat}`
       ].join(';');
 
-      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+      const url2 = `https://api.mapbox.com/directions/v5/mapbox/driving/${route2Waypoints}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
       
-      console.log('🗺️ Calculando ruta con 3 waypoints...');
+      console.log('🗺️ Calculando dos rutas separadas...');
       
-      const response = await fetch(url);
-      const data = await response.json();
+      // Hacer ambas peticiones en paralelo
+      const [response1, response2] = await Promise.all([
+        fetch(url1),
+        fetch(url2)
+      ]);
       
-      if (data.routes && data.routes[0]) {
-        const routeGeometry = data.routes[0].geometry;
-        setRoute(routeGeometry);
-        
-        console.log('✅ Ruta calculada exitosamente');
-        
-        // Ajustar zoom para mostrar toda la ruta
-        setTimeout(() => {
-          if (mapRef.current && routeGeometry.coordinates) {
-            const bounds = calculateBounds(routeGeometry.coordinates);
-            if (bounds) {
-              mapRef.current.fitBounds(bounds, {
-                padding: { top: 60, bottom: 60, left: 40, right: 40 },
-                duration: 1000,
-              });
-            }
-          }
-        }, 500);
+      const [data1, data2] = await Promise.all([
+        response1.json(),
+        response2.json()
+      ]);
+      
+      if (data1.routes && data1.routes[0]) {
+        setDriverToOriginRoute(data1.routes[0].geometry);
+        console.log('✅ Ruta Conductor → Origen calculada');
       }
+      
+      if (data2.routes && data2.routes[0]) {
+        setOriginToDestinationRoute(data2.routes[0].geometry);
+        console.log('✅ Ruta Origen → Destino calculada');
+      }
+      
+      // Ajustar zoom para mostrar todas las coordenadas
+      setTimeout(() => {
+        if (mapRef.current) {
+          // Combinar todas las coordenadas para calcular bounds
+          const allCoordinates = [
+            [driverLocation.lng, driverLocation.lat],
+            [originCoords.lng, originCoords.lat],
+            [destCoords.lng, destCoords.lat]
+          ];
+          
+          const bounds = calculateBounds(allCoordinates);
+          if (bounds) {
+            mapRef.current.fitBounds(bounds, {
+              padding: { top: 60, bottom: 60, left: 40, right: 40 },
+              duration: 1000,
+            });
+          }
+        }
+      }, 500);
+      
+      // 🎬 ANIMACIÓN SECUENCIAL
+      // Paso 1: Mostrar conductor (inmediato después de cargar)
+      setTimeout(() => {
+        setShowDriver(true);
+        console.log('🎬 Paso 1: Conductor visible');
+      }, 600);
+      
+      // Paso 2: Mostrar origen
+      setTimeout(() => {
+        setShowOrigin(true);
+        console.log('🎬 Paso 2: Origen visible');
+      }, 1200);
+      
+      // Paso 3: Trazar ruta conductor → origen
+      setTimeout(() => {
+        setShowDriverRoute(true);
+        console.log('🎬 Paso 3: Ruta Conductor → Origen trazada');
+      }, 1800);
+      
+      // Paso 4: Mostrar destino
+      setTimeout(() => {
+        setShowDestination(true);
+        console.log('🎬 Paso 4: Destino visible');
+      }, 2400);
+      
+      // Paso 5: Trazar ruta origen → destino
+      setTimeout(() => {
+        setShowDestinationRoute(true);
+        console.log('🎬 Paso 5: Ruta Origen → Destino trazada');
+      }, 3000);
+      
     } catch (error) {
-      console.error('❌ Error calculando ruta:', error);
+      console.error('❌ Error calculando rutas:', error);
     } finally {
       setIsCalculatingRoute(false);
     }
     };
 
     if (request && driverLocation && MAPBOX_TOKEN) {
-      calculateRoute();
+      calculateRoutes();
     }
   }, [request, driverLocation]);
 
@@ -187,37 +270,62 @@ const RequestDetailMap = ({ request, driverLocation }) => {
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
       >
-        {/* Marcador del Conductor */}
-        <Marker 
-          longitude={driverLocation.lng} 
-          latitude={driverLocation.lat}
-          anchor="bottom"
-        >
-          <div className="driver-marker">🚛</div>
-        </Marker>
+        {/* Marcador del Conductor - Aparece primero */}
+        {showDriver && (
+          <Marker 
+            longitude={driverLocation.lng} 
+            latitude={driverLocation.lat}
+            anchor="bottom"
+          >
+            <div className="driver-marker-avatar animate-fade-in">
+              <img 
+                src={driverPhoto || 'https://ionicframework.com/docs/img/demos/avatar.svg'} 
+                alt="Conductor"
+                onError={(e) => {
+                  e.target.src = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+                }}
+              />
+            </div>
+          </Marker>
+        )}
 
-        {/* Marcador de Origen */}
-        <Marker 
-          longitude={request.origin.coordinates?.[0] || request.origin.lng} 
-          latitude={request.origin.coordinates?.[1] || request.origin.lat}
-          anchor="bottom"
-        >
-          <Location size="40" color="#3880ff" variant="Bold" />
-        </Marker>
+        {/* Marcador de Origen - Aparece segundo */}
+        {showOrigin && (
+          <Marker 
+            longitude={request.origin.coordinates?.[0] || request.origin.lng} 
+            latitude={request.origin.coordinates?.[1] || request.origin.lat}
+            anchor="bottom"
+          >
+            <div className="animate-fade-in">
+              <Location size="40" color="#3880ff" variant="Bold" />
+            </div>
+          </Marker>
+        )}
 
-        {/* Marcador de Destino */}
-        <Marker 
-          longitude={request.destination.coordinates?.[0] || request.destination.lng} 
-          latitude={request.destination.coordinates?.[1] || request.destination.lat}
-          anchor="bottom"
-        >
-          <Location size="40" color="#eb445a" variant="Bold" />
-        </Marker>
+        {/* Marcador de Destino - Aparece cuarto */}
+        {showDestination && (
+          <Marker 
+            longitude={request.destination.coordinates?.[0] || request.destination.lng} 
+            latitude={request.destination.coordinates?.[1] || request.destination.lat}
+            anchor="bottom"
+          >
+            <div className="animate-fade-in">
+              <Location size="40" color="#eb445a" variant="Bold" />
+            </div>
+          </Marker>
+        )}
 
-        {/* Línea de Ruta */}
-        {route && (
-          <Source id="route" type="geojson" data={route}>
-            <Layer {...routeLayerStyle} />
+        {/* Ruta Conductor → Origen - Se traza tercero */}
+        {showDriverRoute && driverToOriginRoute && (
+          <Source id="driver-to-origin-route" type="geojson" data={driverToOriginRoute}>
+            <Layer {...driverToOriginLayerStyle} />
+          </Source>
+        )}
+        
+        {/* Ruta Origen → Destino - Se traza quinto */}
+        {showDestinationRoute && originToDestinationRoute && (
+          <Source id="origin-to-destination-route" type="geojson" data={originToDestinationRoute}>
+            <Layer {...originToDestinationLayerStyle} />
           </Source>
         )}
       </Map>

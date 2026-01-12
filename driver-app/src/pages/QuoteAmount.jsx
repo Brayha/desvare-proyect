@@ -26,13 +26,24 @@ const QuoteAmount = () => {
   const driverLocation = location.state?.driverLocation;
   
   const [amount, setAmount] = useState('');
+  const [displayAmount, setDisplayAmount] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleAmountChange = (e) => {
     const value = e.detail.value;
+    // Remover todos los puntos y espacios para obtener solo números
+    const cleanValue = value.replace(/[.\s]/g, '');
+    
     // Solo permitir números
-    if (value === '' || /^\d+$/.test(value)) {
-      setAmount(value);
+    if (cleanValue === '' || /^\d+$/.test(cleanValue)) {
+      setAmount(cleanValue);
+      // Formatear con separador de miles para mostrar en el input
+      if (cleanValue) {
+        const formatted = parseInt(cleanValue).toLocaleString('es-CO');
+        setDisplayAmount(formatted);
+      } else {
+        setDisplayAmount('');
+      }
     }
   };
 
@@ -161,8 +172,8 @@ const QuoteAmount = () => {
             <div className="input-wrapper">
               <span className="currency-symbol">$</span>
               <IonInput
-                type="number"
-                value={amount}
+                type="text"
+                value={displayAmount}
                 onIonInput={handleAmountChange}
                 placeholder="0"
                 className="amount-input"
