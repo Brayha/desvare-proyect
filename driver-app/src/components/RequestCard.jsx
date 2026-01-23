@@ -16,7 +16,7 @@ import camionetaIcon from "../../../shared/src/img/vehicles/camioneta.svg";
 import camionIcon from "../../../shared/src/img/vehicles/camion.svg";
 import busIcon from "../../../shared/src/img/vehicles/bus.svg";
 
-const RequestCard = ({ request, onQuote }) => {
+const RequestCard = ({ request, onQuote, myQuote }) => {
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     return date
@@ -40,22 +40,48 @@ const RequestCard = ({ request, onQuote }) => {
     return iconMap[iconEmoji] || carIcon; // Por defecto usa el icono de carro
   };
 
-  // Estado de la card (Nuevo, Cotizada, Aprobada)
+  // Estado de la card (Nuevo, Cotizada, Tu Cotización, Aprobada)
   const getStatusBadge = () => {
+    // Si YO coticé, mostrar badge especial con monto
+    if (myQuote) {
+      return (
+        <div className="my-quote-badge-container">
+          <IonBadge mode="ios" color="success" className="my-quote-badge">
+            ✓ Tu Cotización
+          </IonBadge>
+          <IonText className="my-quote-amount">
+            ${myQuote.amount.toLocaleString('es-CO')}
+          </IonText>
+        </div>
+      );
+    }
+    
     if (request.status === "accepted") {
-      return <IonBadge mode="ios" color="success">Aprobada</IonBadge>;
+      return (
+        <IonBadge mode="ios" color="success">
+          Aprobada
+        </IonBadge>
+      );
     }
     if (request.quotesCount > 0) {
-      return <IonBadge mode="ios" color="warning">Cotizada</IonBadge>;
+      return (
+        <IonBadge mode="ios" color="warning">
+          {request.quotesCount} Cotización{request.quotesCount > 1 ? 'es' : ''}
+        </IonBadge>
+      );
     }
-    return <IonBadge mode="ios" color="primary">Nuevo</IonBadge>;
+    return (
+      <IonBadge mode="ios" color="primary">
+        Nuevo
+      </IonBadge>
+    );
   };
 
   return (
-    <div 
+    <div
       className={`request-card ${request.status}`}
       onClick={() => onQuote(request)}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: "pointer" }}
     >
       <div className="request-card-content">
         {/* Header: Hora y Estado */}
@@ -104,30 +130,31 @@ const RequestCard = ({ request, onQuote }) => {
             </IonText>
           </div>
         </div>
-
-        {/* Origen */}
-        <div className="location-section">
-          <Location size="24" variant="Bold" color="#0055FF" />
-          <div className="location-text">
-            <IonText color="medium" className="location-label">
-              Origen aproximado
-            </IonText>
-            <IonText className="location-address">
-              {request.origin.address}
-            </IonText>
+        <div className="location-section-wrapper">
+          {/* Origen */}
+          <div className="location-section">
+            <Location size="24" variant="Bold" color="#0055FF" />
+            <div className="location-text">
+              <IonText color="medium" className="location-label">
+                Origen aproximado
+              </IonText>
+              <IonText className="location-address">
+                {request.origin.address}
+              </IonText>
+            </div>
           </div>
-        </div>
 
-        {/* Destino */}
-        <div className="location-section">
-          <Location size="24" variant="Bold" color="#FF5500" />
-          <div className="location-text">
-            <IonText color="medium" className="location-label">
-              Destino
-            </IonText>
-            <IonText className="location-address">
-              {request.destination.address}
-            </IonText>
+          {/* Destino */}
+          <div className="location-section">
+            <Location size="24" variant="Bold" color="#FF5500" />
+            <div className="location-text">
+              <IonText color="medium" className="location-label">
+                Destino
+              </IonText>
+              <IonText className="location-address">
+                {request.destination.address}
+              </IonText>
+            </div>
           </div>
         </div>
       </div>

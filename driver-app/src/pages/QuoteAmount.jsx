@@ -93,6 +93,19 @@ const QuoteAmount = () => {
 
       await requestAPI.addQuote(request.requestId, quoteData);
 
+      // ✅ Guardar en localStorage que cotizaste esta solicitud
+      const quotedRequests = JSON.parse(localStorage.getItem('quotedRequests') || '[]');
+      quotedRequests.push({
+        requestId: request.requestId,
+        amount: parseInt(amount),
+        timestamp: new Date().toISOString(),
+        clientName: request.clientName || 'Cliente',
+        origin: request.origin?.address || 'N/A',
+        destination: request.destination?.address || 'N/A'
+      });
+      localStorage.setItem('quotedRequests', JSON.stringify(quotedRequests));
+      console.log('💾 Cotización guardada en localStorage:', quotedRequests[quotedRequests.length - 1]);
+
       present({
         message: '✅ Cotización enviada exitosamente',
         duration: 2000,

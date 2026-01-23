@@ -596,7 +596,7 @@ const RequestService = () => {
                   >
                     {isSendingRequest
                       ? "Enviando solicitud..."
-                      : "🚀 Buscar Cotizaciones"}
+                      : "Buscar Cotizaciones"}
                   </Button>
                 )}
               </div>

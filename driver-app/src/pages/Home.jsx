@@ -36,6 +36,7 @@ const Home = () => {
   
   const [user, setUser] = useState(null);
   const [requests, setRequests] = useState([]);
+  const [quotedRequests, setQuotedRequests] = useState([]);
   const [isOnline, setIsOnline] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -107,6 +108,11 @@ const Home = () => {
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
     setIsOnline(parsedUser.driverProfile?.isOnline || false);
+
+    // ✅ Cargar cotizaciones guardadas en localStorage
+    const savedQuotes = JSON.parse(localStorage.getItem('quotedRequests') || '[]');
+    setQuotedRequests(savedQuotes);
+    console.log(`💾 ${savedQuotes.length} cotizaciones cargadas del localStorage`);
 
     // Conectar Socket.IO
     socketService.connect();
@@ -289,6 +295,18 @@ const Home = () => {
       setShowLocationModal(true);
     }
   }, [locationError]);
+
+  // ✅ Recargar cotizaciones cuando el componente se vuelve a mostrar
+  useEffect(() => {
+    const handleFocus = () => {
+      const savedQuotes = JSON.parse(localStorage.getItem('quotedRequests') || '[]');
+      setQuotedRequests(savedQuotes);
+      console.log('🔄 Cotizaciones recargadas:', savedQuotes.length);
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   // Función para cargar solicitudes
   const loadRequests = async (driverId) => {
@@ -522,13 +540,19 @@ const Home = () => {
             </IonText>
           </div>
         ) : (
-          requests.map((request) => (
-            <RequestCard 
-              key={request.requestId} 
-              request={request} 
-              onQuote={handleQuote}
-            />
-          ))
+          requests.map((request) => {
+            // Buscar si este conductor ya cotizó esta solicitud
+            const myQuote = quotedRequests.find(q => q.requestId === request.requestId);
+            
+            return (
+              <RequestCard 
+                key={request.requestId} 
+                request={request} 
+                onQuote={handleQuote}
+                myQuote={myQuote}
+              />
+            );
+          })
         )}
 
         {/* Modal de cotización */}
