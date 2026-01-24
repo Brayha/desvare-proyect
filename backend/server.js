@@ -124,8 +124,9 @@ mongoose.connect(process.env.MONGODB_URI, {
 const connectedDrivers = new Map(); // Almacena { driverId: { socketId, isOnline } }
 const connectedClients = new Map(); // Almacena socket.id de clientes conectados
 
-// 🆕 EXPORTAR connectedClients para usarlo en las rutas
+// 🆕 EXPORTAR para usarlo en las rutas
 global.connectedClients = connectedClients;
+global.connectedDrivers = connectedDrivers;
 
 io.on('connection', (socket) => {
   console.log('🔌 Nuevo cliente conectado:', socket.id);

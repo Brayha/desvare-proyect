@@ -33,6 +33,18 @@ const Home = () => {
   const [quotes, setQuotes] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Función helper para obtener texto de razón de cancelación
+  const getReasonText = (reason) => {
+    const reasons = {
+      'no_puedo_atender': 'No puede atender',
+      'error_monto': 'Error en el monto',
+      'muy_lejos': 'Muy lejos',
+      'cliente_sospechoso': 'Motivos de seguridad',
+      'otro': 'Otro motivo'
+    };
+    return reasons[reason] || 'No especificado';
+  };
+
   useEffect(() => {
     const userData = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -60,9 +72,26 @@ const Home = () => {
         });
       });
 
+      // Escuchar cancelaciones de cotizaciones
+      socketService.onQuoteCancelled((data) => {
+        console.log("🚫 Cotización cancelada:", data);
+        
+        // Remover la cotización de la lista
+        setQuotes((prev) => prev.filter(q => q.driverId !== data.driverId));
+
+        // Mostrar notificación al cliente
+        const reasonText = data.customReason || getReasonText(data.reason);
+        present({
+          message: `${data.driverName} canceló su cotización. Motivo: ${reasonText}`,
+          duration: 5000,
+          color: "warning",
+        });
+      });
+
       return () => {
         // Solo limpiar el listener, no desconectar (manejado por App.jsx)
         socketService.offQuoteReceived();
+        socketService.offQuoteCancelled();
       };
     } else {
       // Usuario NO está logueado

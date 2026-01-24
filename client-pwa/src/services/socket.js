@@ -141,6 +141,23 @@ class SocketService {
       console.log('🔇 Listener de cotizaciones removido');
     }
   }
+
+  onQuoteCancelled(callback) {
+    if (this.socket) {
+      // Remover listener anterior para evitar duplicados
+      this.socket.off('quote:cancelled');
+      // Agregar nuevo listener
+      this.socket.on('quote:cancelled', callback);
+      console.log('👂 Listener de cancelación de cotizaciones registrado');
+    }
+  }
+
+  offQuoteCancelled() {
+    if (this.socket) {
+      this.socket.off('quote:cancelled');
+      console.log('🔇 Listener de cancelación de cotizaciones removido');
+    }
+  }
 }
 
 export default new SocketService();

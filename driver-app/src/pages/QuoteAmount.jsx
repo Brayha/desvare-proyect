@@ -73,12 +73,10 @@ const QuoteAmount = () => {
       return;
     }
 
-    setLoading(true);
-
     try {
       const user = JSON.parse(localStorage.getItem('user'));
+      setLoading(true);
       
-      // ✅ MANTENER LA FUNCIONALIDAD ORIGINAL: Enviar con ubicación exacta
       const quoteData = {
         driverId: user._id,
         driverName: user.name,
@@ -89,38 +87,24 @@ const QuoteAmount = () => {
         },
       };
 
-      console.log('📤 Enviando cotización con ubicación:', quoteData);
+      console.log('📤 Enviando cotización al servidor:', quoteData);
 
       await requestAPI.addQuote(request.requestId, quoteData);
-
-      // ✅ Guardar en localStorage que cotizaste esta solicitud
-      const quotedRequests = JSON.parse(localStorage.getItem('quotedRequests') || '[]');
-      quotedRequests.push({
-        requestId: request.requestId,
-        amount: parseInt(amount),
-        timestamp: new Date().toISOString(),
-        clientName: request.clientName || 'Cliente',
-        origin: request.origin?.address || 'N/A',
-        destination: request.destination?.address || 'N/A'
-      });
-      localStorage.setItem('quotedRequests', JSON.stringify(quotedRequests));
-      console.log('💾 Cotización guardada en localStorage:', quotedRequests[quotedRequests.length - 1]);
-
+      console.log('✅ Cotización enviada correctamente');
+      
       present({
-        message: '✅ Cotización enviada exitosamente',
-        duration: 2000,
+        message: '✅ Cotización enviada',
+        duration: 1500,
         color: 'success',
       });
 
       // Volver al home después de enviar
-      setTimeout(() => {
-        history.replace('/home');
-      }, 500);
+      history.replace('/home');
 
     } catch (error) {
       console.error('❌ Error al enviar cotización:', error);
       present({
-        message: 'Error al enviar cotización. Intenta de nuevo.',
+        message: 'Error al enviar cotización. Por favor intenta de nuevo.',
         duration: 3000,
         color: 'danger',
       });

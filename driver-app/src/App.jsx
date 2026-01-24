@@ -31,6 +31,7 @@ import Profile from './pages/Profile';
 import ActiveService from './pages/ActiveService';
 import CancellationDetail from './pages/CancellationDetail';
 import RequestDetail from './pages/RequestDetail';
+import QuoteDetail from './pages/QuoteDetail';
 import QuoteAmount from './pages/QuoteAmount';
 
 setupIonicReact();
@@ -53,6 +54,7 @@ function App() {
           <Route exact path="/active-service" component={ActiveService} />
           <Route exact path="/cancellation-detail" component={CancellationDetail} />
           <Route exact path="/request-detail" component={RequestDetail} />
+          <Route exact path="/quote-detail/:requestId" component={QuoteDetail} />
           <Route exact path="/quote-amount" component={QuoteAmount} />
           <Route exact path="/">
             <Redirect to="/splash" />

@@ -45,6 +45,9 @@ export const authAPI = {
 // API de solicitudes
 export const requestAPI = {
   addQuote: (requestId, data) => api.post(`/api/requests/${requestId}/quote`, data),
+  getRequest: (requestId) => api.get(`/api/requests/${requestId}`),
+  getNearbyRequests: (driverId) => api.get(`/api/requests/nearby/${driverId}`),
+  cancelQuote: (requestId, driverId, data) => api.delete(`/api/requests/${requestId}/quote/${driverId}`, { data }),
 };
 
 // API de ciudades

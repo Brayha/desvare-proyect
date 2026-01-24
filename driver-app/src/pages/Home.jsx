@@ -15,6 +15,7 @@ import {
   IonButtons,
   useIonToast,
   useIonAlert,
+  useIonViewWillEnter,
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
@@ -36,7 +37,6 @@ const Home = () => {
   
   const [user, setUser] = useState(null);
   const [requests, setRequests] = useState([]);
-  const [quotedRequests, setQuotedRequests] = useState([]);
   const [isOnline, setIsOnline] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -55,6 +55,16 @@ const Home = () => {
     error: locationError, 
     requestLocation 
   } = useDriverLocation(10000);
+
+  // 🔄 Recargar requests cada vez que la vista se activa (volviendo de QuoteAmount, etc.)
+  useIonViewWillEnter(() => {
+    console.log('🔄 Vista Home activada - Recargando requests del backend...');
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      loadRequests(parsedUser._id);
+    }
+  });
 
   // Cargar imagen de perfil solo si no existe (sin romper nada)
   useEffect(() => {
@@ -108,11 +118,6 @@ const Home = () => {
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
     setIsOnline(parsedUser.driverProfile?.isOnline || false);
-
-    // ✅ Cargar cotizaciones guardadas en localStorage
-    const savedQuotes = JSON.parse(localStorage.getItem('quotedRequests') || '[]');
-    setQuotedRequests(savedQuotes);
-    console.log(`💾 ${savedQuotes.length} cotizaciones cargadas del localStorage`);
 
     // Conectar Socket.IO
     socketService.connect();
@@ -278,11 +283,26 @@ const Home = () => {
       });
     });
 
+    // Escuchar cuando una cotización expira
+    socketService.onQuoteExpired((data) => {
+      console.log('⏰ Cotización expirada:', data);
+      
+      // Remover de la lista de requests
+      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      
+      present({
+        message: data.message || 'Una de tus cotizaciones expiró',
+        duration: 3000,
+        color: 'medium',
+      });
+    });
+
     return () => {
       socketService.offRequestReceived();
       socketService.offRequestCancelled();
       socketService.offServiceAccepted();
       socketService.offServiceTaken();
+      socketService.offQuoteExpired();
       socketService.disconnect();
     };
   }, [history, present, presentAlert]);
@@ -297,17 +317,6 @@ const Home = () => {
   }, [locationError]);
 
   // ✅ Recargar cotizaciones cuando el componente se vuelve a mostrar
-  useEffect(() => {
-    const handleFocus = () => {
-      const savedQuotes = JSON.parse(localStorage.getItem('quotedRequests') || '[]');
-      setQuotedRequests(savedQuotes);
-      console.log('🔄 Cotizaciones recargadas:', savedQuotes.length);
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, []);
-
   // Función para cargar solicitudes
   const loadRequests = async (driverId) => {
     try {
@@ -375,13 +384,22 @@ const Home = () => {
     }
   };
 
-  // Abrir modal de cotización
+  // Abrir detalle de solicitud o detalle de cotización
   const handleQuote = (request) => {
-    // Navegar a la página de detalle con los datos de la solicitud y ubicación del conductor
-    history.push('/request-detail', {
-      request: request,
-      driverLocation: driverLocation
-    });
+    // Verificar si ya cotizó esta solicitud (desde el backend)
+    const user = JSON.parse(localStorage.getItem('user'));
+    const myQuote = request.quotes?.find(q => q.driverId === user._id);
+    
+    if (myQuote) {
+      // Ya cotizó, navegar al detalle de la cotización
+      history.push(`/quote-detail/${request.requestId}`);
+    } else {
+      // No ha cotizado, navegar a ver el detalle de la solicitud
+      history.push('/request-detail', {
+        request: request,
+        driverLocation: driverLocation
+      });
+    }
   };
 
   // Enviar cotización
@@ -541,8 +559,9 @@ const Home = () => {
           </div>
         ) : (
           requests.map((request) => {
-            // Buscar si este conductor ya cotizó esta solicitud
-            const myQuote = quotedRequests.find(q => q.requestId === request.requestId);
+            // Buscar si este conductor ya cotizó esta solicitud (desde el backend)
+            const user = JSON.parse(localStorage.getItem('user'));
+            const myQuote = request.quotes?.find(q => q.driverId === user._id);
             
             return (
               <RequestCard 

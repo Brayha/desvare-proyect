@@ -1,0 +1,31 @@
+/* RequestDetail.css */
+
+.request-detail-container {
+  height: 100%;
+}
+
+.mapboxgl-canvas {
+  outline: none;
+}
+
+.alert-button-confirm {
+  color: var(--ion-color-danger) !important;
+  font-weight: 600;
+}
+
+/* Animación para el monto */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.amount-card {
+  animation: pulse 2s ease-in-out infinite;
+}

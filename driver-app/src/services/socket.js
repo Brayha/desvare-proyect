@@ -104,6 +104,20 @@ class SocketService {
       this.socket.off('service:taken');
     }
   }
+
+  onQuoteExpired(callback) {
+    if (this.socket) {
+      console.log('👂 Escuchando expiraciones de cotizaciones');
+      this.socket.on('quote:expired', callback);
+    }
+  }
+
+  offQuoteExpired() {
+    if (this.socket) {
+      console.log('🔇 Dejando de escuchar expiraciones');
+      this.socket.off('quote:expired');
+    }
+  }
 }
 
 export default new SocketService();

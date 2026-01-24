@@ -160,7 +160,31 @@ const requestSchema = new mongoose.Schema({
     driverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     driverName: String,
     amount: Number,
-    timestamp: { type: Date, default: Date.now }
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: [Number] // [lng, lat]
+    },
+    timestamp: { type: Date, default: Date.now },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'cancelled', 'expired'],
+      default: 'pending'
+    },
+    cancelledAt: { type: Date, default: null },
+    cancellationReason: {
+      type: String,
+      enum: ['no_puedo_atender', 'error_monto', 'muy_lejos', 'cliente_sospechoso', 'otro', null],
+      default: null
+    },
+    cancellationCustomReason: {
+      type: String,
+      maxlength: 200,
+      default: null
+    }
   }],
   
   // Conductor asignado (cuando se acepta una cotización)
