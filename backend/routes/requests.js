@@ -594,57 +594,74 @@ router.get('/nearby/:driverId', async (req, res) => {
     };
 
     // Formatear para el frontend
-    const formattedRequests = requests.map(req => ({
-      id: req._id,
-      requestId: req._id,
-      timestamp: req.createdAt,
-      
-      // Cliente
-      clientId: req.clientId,
-      clientName: req.clientName,
-      clientPhone: req.clientPhone,
-      
-      // Vehículo
-      vehicle: req.vehicleSnapshot ? {
-        category: req.vehicleSnapshot.category?.name || 'N/A',
-        brand: req.vehicleSnapshot.brand?.name || 'N/A',
-        model: req.vehicleSnapshot.model?.name || 'N/A',
-        licensePlate: req.vehicleSnapshot.licensePlate || 'N/A',
-        icon: getCategoryIcon(req.vehicleSnapshot.category?.id)
-      } : null,
-      
-      // Ubicación
-      origin: {
-        address: req.origin.address,
-        coordinates: req.origin.coordinates
-      },
-      destination: {
-        address: req.destination.address,
-        coordinates: req.destination.coordinates
-      },
-      
-      // Distancia y tiempo
-      distance: req.distance, // metros
-      duration: req.duration, // segundos
-      distanceKm: (req.distance / 1000).toFixed(1),
-      durationMin: Math.round(req.duration / 60),
-      
-      // Problema
-      problem: req.serviceDetails?.problem || 'Sin descripción',
-      
-      // Estado
-      status: req.status,
-      quotesCount: req.quotes.length,
-      
-      // ✅ IMPORTANTE: Incluir quotes para que el frontend sepa si ya cotizó
-      quotes: req.quotes.map(q => ({
-        driverId: q.driverId,
-        driverName: q.driverName,
-        amount: q.amount,
-        timestamp: q.timestamp,
-        status: q.status
+    const formattedRequests = requests
+      .map(req => ({
+        id: req._id,
+        requestId: req._id,
+        timestamp: req.createdAt,
+        
+        // Cliente
+        clientId: req.clientId,
+        clientName: req.clientName,
+        clientPhone: req.clientPhone,
+        
+        // Vehículo
+        vehicle: req.vehicleSnapshot ? {
+          category: req.vehicleSnapshot.category?.name || 'N/A',
+          brand: req.vehicleSnapshot.brand?.name || 'N/A',
+          model: req.vehicleSnapshot.model?.name || 'N/A',
+          licensePlate: req.vehicleSnapshot.licensePlate || 'N/A',
+          icon: getCategoryIcon(req.vehicleSnapshot.category?.id)
+        } : null,
+        
+        // Ubicación
+        origin: {
+          address: req.origin.address,
+          coordinates: req.origin.coordinates
+        },
+        destination: {
+          address: req.destination.address,
+          coordinates: req.destination.coordinates
+        },
+        
+        // Distancia y tiempo
+        distance: req.distance, // metros
+        duration: req.duration, // segundos
+        distanceKm: (req.distance / 1000).toFixed(1),
+        durationMin: Math.round(req.duration / 60),
+        
+        // Problema
+        problem: req.serviceDetails?.problem || 'Sin descripción',
+        
+        // Estado
+        status: req.status,
+        quotesCount: req.quotes.length,
+        
+        // ✅ IMPORTANTE: Incluir quotes para que el frontend sepa si ya cotizó
+        quotes: req.quotes.map(q => ({
+          driverId: q.driverId,
+          driverName: q.driverName,
+          amount: q.amount,
+          timestamp: q.timestamp,
+          status: q.status
+        }))
       }))
-    }));
+      // ✅ FILTRAR: No mostrar si mi cotización está cancelled o accepted
+      .filter(req => {
+        const myQuote = req.quotes.find(q => q.driverId.toString() === driverId);
+        
+        // Si no he cotizado, mostrar
+        if (!myQuote) return true;
+        
+        // Si mi cotización está cancelled o accepted, NO mostrar
+        if (myQuote.status === 'cancelled' || myQuote.status === 'accepted') {
+          console.log(`🚫 Filtrando request ${req.requestId} - Quote status: ${myQuote.status}`);
+          return false;
+        }
+        
+        // Si está pending, mostrar
+        return true;
+      });
 
     console.log(`✅ ${formattedRequests.length} solicitudes cercanas para conductor ${driver.name}`);
 

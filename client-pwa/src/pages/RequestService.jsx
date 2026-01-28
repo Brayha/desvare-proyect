@@ -106,6 +106,65 @@ const RequestService = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geoError]);
 
+  // ✅ Cargar datos previos del localStorage (cuando cliente cancela búsqueda)
+  useEffect(() => {
+    const savedRequestData = localStorage.getItem('requestData');
+    
+    if (savedRequestData) {
+      try {
+        const parsed = JSON.parse(savedRequestData);
+        console.log('🔄 Cargando datos previos desde localStorage:', parsed);
+        
+        // Cargar origen previo
+        if (parsed.origin && !origin) {
+          setOrigin({
+            lat: parsed.origin.lat,
+            lng: parsed.origin.lng,
+            address: parsed.origin.address
+          });
+          console.log('✅ Origen cargado:', parsed.origin.address);
+        }
+        
+        // Cargar destino previo
+        if (parsed.destination && !destination) {
+          setDestination({
+            lat: parsed.destination.lat,
+            lng: parsed.destination.lng,
+            address: parsed.destination.address
+          });
+          console.log('✅ Destino cargado:', parsed.destination.address);
+        }
+        
+        // Cargar información de ruta previa
+        if (parsed.routeInfo && !routeInfo) {
+          setRouteInfo(parsed.routeInfo);
+          console.log('✅ Ruta cargada:', parsed.routeInfo);
+        }
+        
+        // Cargar vehículo previo (estructura completa)
+        if (parsed.vehicleSnapshot && parsed.serviceDetails && !vehicleData) {
+          setVehicleData({
+            vehicleId: parsed.vehicleId, // Puede ser undefined si no existe
+            vehicleSnapshot: parsed.vehicleSnapshot,
+            serviceDetails: parsed.serviceDetails
+          });
+          console.log('✅ Vehículo cargado:', {
+            vehicleId: parsed.vehicleId,
+            marca: parsed.vehicleSnapshot.brand.name,
+            modelo: parsed.vehicleSnapshot.model.name,
+            placa: parsed.vehicleSnapshot.licensePlate,
+            problema: parsed.serviceDetails.problem
+          });
+        }
+        
+        showSuccess('📋 Datos previos cargados. Puedes editarlos y buscar nuevamente.');
+      } catch (error) {
+        console.error('❌ Error al cargar datos previos:', error);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar al montar
+
   // Buscar direcciones mientras el usuario escribe
   useEffect(() => {
     // Si no hay query suficiente, limpiar resultados
@@ -299,6 +358,7 @@ const RequestService = () => {
           origin,
           destination,
           routeInfo,
+          vehicleId: vehicleData.vehicleId,
           vehicleSnapshot: vehicleData.vehicleSnapshot,
           serviceDetails: vehicleData.serviceDetails,
         })
@@ -380,10 +440,13 @@ const RequestService = () => {
         origin,
         destination,
         routeInfo,
+        vehicleId: vehicleData.vehicleId,
+        vehicleSnapshot: vehicleData.vehicleSnapshot,
+        serviceDetails: vehicleData.serviceDetails,
       })
     );
 
-    // Guardar vehicleData por separado (para que RequestAuth pueda leerlo)
+    // Guardar vehicleData por separado (para que RequestAuth pueda leerlo - compatibilidad)
     localStorage.setItem("vehicleData", JSON.stringify(vehicleData));
     console.log("💾 vehicleData guardado en localStorage");
 

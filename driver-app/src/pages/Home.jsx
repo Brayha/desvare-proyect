@@ -196,7 +196,7 @@ const Home = () => {
         setSelectedRequest(null);
       }
       
-      // ✅ NUEVO: Verificar si es el servicio activo
+      // ✅ VERIFICAR si es el servicio ACTIVO (aceptado)
       const activeServiceData = localStorage.getItem('activeService');
       if (activeServiceData) {
         try {
@@ -219,27 +219,26 @@ const Home = () => {
               history.push('/home');
             }
             
-            // ✅ NUEVO: Guardar datos y redirigir a vista dedicada
+            // Guardar datos y redirigir a vista dedicada
             console.log('💾 Guardando datos de cancelación en localStorage');
             localStorage.setItem('lastCancellation', JSON.stringify(data));
             
             setTimeout(() => {
               console.log('🎯 Redirigiendo a /cancellation-detail');
               history.push('/cancellation-detail');
-            }, 500); // Pequeño delay para asegurar que se complete la navegación previa
+            }, 500);
             
-            return; // ← IMPORTANTE: Salir aquí para evitar doble ejecución
+            return; // ← IMPORTANTE: Salir aquí
           }
         } catch (error) {
           console.error('❌ Error al verificar servicio activo:', error);
         }
       }
       
-      // ✅ Si NO es servicio activo, guardar y redirigir inmediatamente
-      console.log('💾 Guardando datos de cancelación (solicitud en bandeja)');
-      localStorage.setItem('lastCancellation', JSON.stringify(data));
-      console.log('🎯 Redirigiendo a /cancellation-detail');
-      history.push('/cancellation-detail');
+      // ✅ Si NO es servicio activo (solo cotización en bandeja), remover silenciosamente
+      console.log('ℹ️ Cancelación de solicitud en bandeja (no activa) - Removiendo silenciosamente');
+      
+      // NO mostrar toast, NO redirigir, quedarse en Home esperando nuevas solicitudes
     });
 
     // Escuchar cuando tu cotización es aceptada

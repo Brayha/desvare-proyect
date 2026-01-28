@@ -217,6 +217,40 @@ const WaitingQuotes = () => {
         //   duration: 5000,
         // });
       });
+
+      // ✅ Escuchar cancelaciones de cotizaciones
+      socketService.onQuoteCancelled((data) => {
+        console.log("🚫 Cotización cancelada en WaitingQuotes:", data);
+
+        // Remover la cotización cancelada de la lista
+        if (isMounted) {
+          setQuotesReceived((prev) => {
+            const filtered = prev.filter(q => q.driverId !== data.driverId);
+            console.log(`📊 Cotizaciones después de cancelación: ${filtered.length}`);
+            
+            // ✅ Si filtered.length === 0, el componente automáticamente
+            //    mostrará el loader "Buscando cotizaciones..." (líneas 669-692)
+            //    y seguirá escuchando nuevas cotizaciones por Socket.IO
+            // ✅ NO redirigir, mantener al cliente en la búsqueda activa
+            
+            return filtered;
+          });
+
+          // ✅ Cerrar modal si la cotización cancelada es la que está abierta
+          setSelectedQuote((currentQuote) => {
+            if (currentQuote && currentQuote.driverId === data.driverId) {
+              console.log('⚠️ La cotización en el modal fue cancelada - Cerrando modal');
+              setSheetOpen(false); // Cerrar el modal
+              
+              // Mostrar notificación al cliente
+              showError(`${data.driverName} canceló su cotización`);
+              
+              return null; // Limpiar la cotización seleccionada
+            }
+            return currentQuote; // Mantener si es otra cotización
+          });
+        }
+      });
     }
 
     // Cleanup function
@@ -224,7 +258,8 @@ const WaitingQuotes = () => {
       console.log("🧹 WaitingQuotes - Desmontando componente");
       isMounted = false;
       socketService.offQuoteReceived();
-      console.log("🔇 Listener de cotizaciones removido");
+      socketService.offQuoteCancelled();
+      console.log("🔇 Listeners de cotizaciones removidos");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar al montar el componente
@@ -355,11 +390,11 @@ const WaitingQuotes = () => {
       );
     }
 
-    // ✅ Limpiar TODO completamente (incluye quotesReceived)
-    localStorage.removeItem("requestData");
+    // ✅ Limpiar solo la solicitud actual, MANTENER requestData para edición
+    // localStorage.removeItem("requestData"); ← NO eliminar, mantener origen/destino/vehículo
     localStorage.removeItem("currentRequestId");
     localStorage.removeItem("activeService");
-    localStorage.removeItem("quotesReceived"); // ← NUEVO: Limpiar cotizaciones en localStorage
+    localStorage.removeItem("quotesReceived");
 
     // ✅ Limpiar estado de cotizaciones en memoria
     setQuotesReceived([]);
@@ -368,8 +403,8 @@ const WaitingQuotes = () => {
 
     showSuccess("Solicitud cancelada");
 
-    // ✅ Volver al Home REPLACE para forzar reinicio completo (no permite volver atrás)
-    history.replace("/home");
+    // ✅ Volver a /tabs/desvare para que pueda EDITAR y volver a buscar
+    history.replace("/tabs/desvare");
   };
 
   // Pull to Refresh - Recargar cotizaciones desde el backend
