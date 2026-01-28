@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import {
   IonPage,
   IonHeader,
@@ -8,21 +8,24 @@ import {
   IonContent,
   IonButtons,
   IonBackButton,
-  IonCard,
-  IonCardContent,
   IonButton,
   IonSpinner,
   IonText,
-  IonIcon,
   IonBadge,
   useIonAlert,
   useIonToast,
-} from '@ionic/react';
-import { locationOutline, timeOutline, cashOutline, carOutline, alertCircleOutline } from 'ionicons/icons';
-import { requestAPI } from '../services/api';
-import Map, { Marker, Source, Layer } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import './QuoteDetail.css';
+} from "@ionic/react";
+import { Location } from "iconsax-react";
+import { requestAPI } from "../services/api";
+import RequestDetailMap from "../components/RequestDetailMap";
+import "./RequestDetail.css"; // ✅ Reutilizar el mismo CSS
+
+// Importar iconos SVG de vehículos
+import carIcon from "../../../shared/src/img/vehicles/car.svg";
+import motoIcon from "../../../shared/src/img/vehicles/moto.svg";
+import camionetaIcon from "../../../shared/src/img/vehicles/camioneta.svg";
+import camionIcon from "../../../shared/src/img/vehicles/camion.svg";
+import busIcon from "../../../shared/src/img/vehicles/bus.svg";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -31,16 +34,32 @@ const QuoteDetail = () => {
   const history = useHistory();
   const [presentAlert] = useIonAlert();
   const [present] = useIonToast();
-  
+
   const [request, setRequest] = useState(null);
   const [myQuote, setMyQuote] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [timeElapsed, setTimeElapsed] = useState('');
+  const [timeElapsed, setTimeElapsed] = useState("");
   const [cancelling, setCancelling] = useState(false);
-  const [routeGeoJSON, setRouteGeoJSON] = useState(null);
+
+  // ✅ NUEVO: Estados para compatibilidad con RequestDetailMap
+  const [driverPhoto, setDriverPhoto] = useState(
+    "https://ionicframework.com/docs/img/demos/avatar.svg",
+  );
+  const [driverAddress, setDriverAddress] = useState("Obteniendo ubicación...");
+  // ⚡ Ubicación por defecto (Bogotá) mientras se obtiene la real
+  const [driverLocation, setDriverLocation] = useState({
+    lat: 4.6097,
+    lng: -74.0817,
+  });
 
   useEffect(() => {
+    // ⚡ Cargar datos críticos primero (bloquea UI)
     loadRequestDetail();
+
+    // ⚡ Cargar datos secundarios en paralelo (no bloquea UI)
+    loadDriverPhoto();
+    loadDriverAddress();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
 
   // Actualizar tiempo transcurrido cada segundo
@@ -57,34 +76,102 @@ const QuoteDetail = () => {
     return () => clearInterval(interval);
   }, [myQuote]);
 
-  // Cargar ruta entre origen y destino
-  useEffect(() => {
-    if (request && request.origin && request.destination) {
-      loadRoute();
+  const loadDriverPhoto = async () => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        const response = await fetch(
+          `http://localhost:5001/api/drivers/profile/${parsedUser._id}`,
+        );
+        const data = await response.json();
+
+        if (response.ok && data.driver?.documents?.selfie) {
+          setDriverPhoto(data.driver.documents.selfie);
+          console.log("✅ Foto del conductor cargada");
+        }
+      }
+    } catch (error) {
+      console.error("❌ Error al cargar foto del conductor:", error);
     }
-  }, [request]);
+  };
+
+  const loadDriverAddress = async () => {
+    try {
+      // Obtener ubicación actual del conductor
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            setDriverLocation({ lat, lng });
+            console.log("✅ Ubicación GPS obtenida:", { lat, lng });
+
+            if (!MAPBOX_TOKEN) {
+              setDriverAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+              return;
+            }
+
+            // Obtener dirección legible (no bloquea renderizado)
+            try {
+              const response = await fetch(
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=es`,
+              );
+              const data = await response.json();
+
+              if (data.features && data.features.length > 0) {
+                const address = data.features[0].place_name;
+                setDriverAddress(address);
+                console.log("📍 Dirección del conductor:", address);
+              } else {
+                setDriverAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+              }
+            } catch (geoError) {
+              console.error("⚠️ Error obteniendo dirección:", geoError);
+              setDriverAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+            }
+          },
+          (error) => {
+            console.error("❌ Error obteniendo ubicación GPS:", error);
+            setDriverAddress("Bogotá, Colombia");
+            // Mantener ubicación por defecto
+          },
+          {
+            // ⚡ Opciones para GPS más rápido
+            enableHighAccuracy: false, // Más rápido, menos preciso (suficiente para mapa)
+            timeout: 5000, // Timeout de 5 segundos
+            maximumAge: 300000, // Aceptar ubicación cacheada de hasta 5 minutos
+          },
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error en loadDriverAddress:", error);
+      setDriverAddress("Bogotá, Colombia");
+    }
+  };
 
   const loadRequestDetail = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      
+      const user = JSON.parse(localStorage.getItem("user"));
+
       // Cargar del backend
       const response = await requestAPI.getRequest(requestId);
       const requestData = response.data.request;
-      
-      console.log('✅ Request cargado del backend:', requestData);
-      
+
+      console.log("✅ Request cargado del backend:", requestData);
+
       // Buscar MI cotización
       const quote = requestData.quotes?.find(
-        q => q.driverId.toString() === user._id.toString()
+        (q) => q.driverId.toString() === user._id.toString(),
       );
-      
+
       if (!quote) {
-        console.log('⚠️ No tienes una cotización para esta solicitud');
+        console.log("⚠️ No tienes una cotización para esta solicitud");
         present({
-          message: 'No tienes una cotización para esta solicitud',
+          message: "No tienes una cotización para esta solicitud",
           duration: 2000,
-          color: 'warning'
+          color: "warning",
         });
         history.goBack();
         return;
@@ -92,14 +179,13 @@ const QuoteDetail = () => {
 
       setMyQuote(quote);
       setRequest(requestData);
-      console.log('✅ Cotización encontrada:', quote);
-      
+      console.log("✅ Cotización encontrada:", quote);
     } catch (error) {
-      console.error('❌ Error al cargar detalle:', error);
+      console.error("❌ Error al cargar detalle:", error);
       present({
-        message: 'Error al cargar detalle de la cotización',
+        message: "Error al cargar detalle de la cotización",
         duration: 2000,
-        color: 'danger'
+        color: "danger",
       });
       history.goBack();
     } finally {
@@ -107,161 +193,143 @@ const QuoteDetail = () => {
     }
   };
 
-  const loadRoute = async () => {
-    try {
-      // Validar que existan coordenadas válidas
-      if (!request.origin?.coordinates || !request.destination?.coordinates) {
-        console.log('⚠️ No hay coordenadas disponibles para cargar ruta');
-        return;
-      }
-
-      const origin = request.origin.coordinates;
-      const destination = request.destination.coordinates;
-
-      // Validar que no sean coordenadas [0, 0] (placeholder)
-      if ((origin[0] === 0 && origin[1] === 0) || (destination[0] === 0 && destination[1] === 0)) {
-        console.log('⚠️ Coordenadas no válidas, esperando datos del backend...');
-        return;
-      }
-      
-      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origin[0]},${origin[1]};${destination[0]},${destination[1]}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (data.routes && data.routes.length > 0) {
-        setRouteGeoJSON({
-          type: 'Feature',
-          geometry: data.routes[0].geometry
-        });
-      }
-    } catch (error) {
-      console.error('Error al cargar ruta:', error);
-    }
+  const getVehicleIcon = (iconEmoji) => {
+    const iconMap = {
+      "🏍️": motoIcon,
+      "🚗": carIcon,
+      "🚙": camionetaIcon,
+      "🚚": camionIcon,
+      "🚌": busIcon,
+    };
+    return iconMap[iconEmoji] || carIcon;
   };
 
   const handleCancelQuote = () => {
     presentAlert({
-      header: '¿Cancelar Cotización?',
-      message: 'Selecciona el motivo de la cancelación:',
+      header: "¿Cancelar Cotización?",
+      message: "Selecciona el motivo de la cancelación:",
       inputs: [
         {
-          type: 'radio',
-          label: 'No puedo atender',
-          value: 'no_puedo_atender',
-          checked: true
+          type: "radio",
+          label: "No puedo atender",
+          value: "no_puedo_atender",
+          checked: true,
         },
         {
-          type: 'radio',
-          label: 'Error en el monto',
-          value: 'error_monto'
+          type: "radio",
+          label: "Error en el monto",
+          value: "error_monto",
         },
         {
-          type: 'radio',
-          label: 'Muy lejos',
-          value: 'muy_lejos'
+          type: "radio",
+          label: "Muy lejos",
+          value: "muy_lejos",
         },
         {
-          type: 'radio',
-          label: 'Cliente sospechoso',
-          value: 'cliente_sospechoso'
+          type: "radio",
+          label: "Cliente sospechoso",
+          value: "cliente_sospechoso",
         },
         {
-          type: 'radio',
-          label: 'Otro motivo',
-          value: 'otro'
-        }
+          type: "radio",
+          label: "Otro motivo",
+          value: "otro",
+        },
       ],
       buttons: [
         {
-          text: 'Volver',
-          role: 'cancel'
+          text: "Volver",
+          role: "cancel",
         },
         {
-          text: 'Confirmar Cancelación',
-          cssClass: 'alert-button-confirm',
+          text: "Confirmar Cancelación",
+          cssClass: "alert-button-confirm",
           handler: async (reason) => {
             if (!reason) {
               present({
-                message: 'Selecciona un motivo',
+                message: "Selecciona un motivo",
                 duration: 2000,
-                color: 'warning'
+                color: "warning",
               });
               return false;
             }
-            
-            if (reason === 'otro') {
+
+            if (reason === "otro") {
               // Mostrar segundo alert para ingresar motivo personalizado
               presentAlert({
-                header: 'Otro Motivo',
-                message: 'Describe el motivo de la cancelación:',
+                header: "Otro Motivo",
+                message: "Describe el motivo de la cancelación:",
                 inputs: [
                   {
-                    name: 'customReason',
-                    type: 'textarea',
-                    placeholder: 'Escribe aquí...'
-                  }
+                    name: "customReason",
+                    type: "textarea",
+                    placeholder: "Escribe aquí...",
+                  },
                 ],
                 buttons: [
                   {
-                    text: 'Cancelar',
-                    role: 'cancel'
+                    text: "Cancelar",
+                    role: "cancel",
                   },
                   {
-                    text: 'Confirmar',
+                    text: "Confirmar",
                     handler: (data) => {
-                      if (!data.customReason || data.customReason.trim() === '') {
+                      if (
+                        !data.customReason ||
+                        data.customReason.trim() === ""
+                      ) {
                         present({
-                          message: 'Debes escribir un motivo',
+                          message: "Debes escribir un motivo",
                           duration: 2000,
-                          color: 'warning'
+                          color: "warning",
                         });
                         return false;
                       }
                       cancelQuote(reason, data.customReason);
-                    }
-                  }
-                ]
+                    },
+                  },
+                ],
               });
             } else {
               await cancelQuote(reason);
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
   };
 
   const cancelQuote = async (reason, customReason = null) => {
     setCancelling(true);
-    
+
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      
+      const user = JSON.parse(localStorage.getItem("user"));
+
       await requestAPI.cancelQuote(requestId, user._id, {
         reason,
-        customReason
+        customReason,
       });
 
       present({
-        message: 'Cotización cancelada exitosamente',
+        message: "Cotización cancelada exitosamente",
         duration: 2000,
-        color: 'success'
+        color: "success",
       });
 
       // Remover de localStorage si existe
-      const quotedRequests = JSON.parse(localStorage.getItem('quotedRequests') || '[]');
-      const updated = quotedRequests.filter(r => r.requestId !== requestId);
-      localStorage.setItem('quotedRequests', JSON.stringify(updated));
+      const quotedRequests = JSON.parse(
+        localStorage.getItem("quotedRequests") || "[]",
+      );
+      const updated = quotedRequests.filter((r) => r.requestId !== requestId);
+      localStorage.setItem("quotedRequests", JSON.stringify(updated));
 
-      history.replace('/home');
-      
+      history.replace("/home");
     } catch (error) {
-      console.error('Error al cancelar:', error);
+      console.error("Error al cancelar:", error);
       present({
-        message: error.response?.data?.error || 'Error al cancelar cotización',
+        message: error.response?.data?.error || "Error al cancelar cotización",
         duration: 3000,
-        color: 'danger'
+        color: "danger",
       });
     } finally {
       setCancelling(false);
@@ -272,59 +340,80 @@ const QuoteDetail = () => {
     if (!myQuote) return null;
 
     const statusConfig = {
-      pending: { color: 'warning', text: 'Pendiente' },
-      accepted: { color: 'success', text: 'Aceptada' },
-      cancelled: { color: 'danger', text: 'Cancelada' },
-      expired: { color: 'medium', text: 'Expirada' }
+      pending: { color: "warning", text: "Pendiente" },
+      accepted: { color: "success", text: "Aceptada" },
+      cancelled: { color: "danger", text: "Cancelada" },
+      expired: { color: "medium", text: "Expirada" },
     };
 
     const config = statusConfig[myQuote.status] || statusConfig.pending;
 
     return (
-      <IonBadge color={config.color} style={{ fontSize: '14px', padding: '8px 12px' }}>
+      <IonBadge
+        color={config.color}
+        style={{ fontSize: "14px", padding: "8px 12px" }}
+      >
         {config.text}
       </IonBadge>
     );
   };
 
-  if (loading) {
+  // ⚡ Solo mostrar loading si NO tenemos los datos críticos del request
+  if (loading || !request || !myQuote) {
     return (
       <IonPage>
         <IonHeader>
           <IonToolbar>
             <IonButtons slot="start">
-              <IonBackButton defaultHref="/home" />
+              <IonBackButton defaultHref="/home" text="Atrás" />
             </IonButtons>
             <IonTitle>Detalle de Cotización</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <IonContent className="ion-padding ion-text-center">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              gap: "15px",
+            }}
+          >
             <IonSpinner name="crescent" />
+            <IonText color="medium">
+              <p>Cargando detalles...</p>
+            </IonText>
           </div>
         </IonContent>
       </IonPage>
     );
   }
 
-  if (!request || !myQuote) {
-    return null;
-  }
-
-  // Validar que existan las coordenadas antes de calcular el centro
+  // Validar coordenadas (error crítico)
   if (!request.origin?.coordinates || !request.destination?.coordinates) {
     return (
       <IonPage>
         <IonHeader>
           <IonToolbar>
             <IonButtons slot="start">
-              <IonBackButton defaultHref="/home" />
+              <IonBackButton defaultHref="/home" text="Atrás" />
             </IonButtons>
             <IonTitle>Detalle de Cotización</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', gap: '10px' }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              flexDirection: "column",
+              gap: "10px",
+            }}
+          >
             <IonSpinner name="crescent" />
             <IonText color="medium">Cargando coordenadas...</IonText>
           </div>
@@ -333,307 +422,243 @@ const QuoteDetail = () => {
     );
   }
 
-  // Calcular centro del mapa
-  const centerLng = (request.origin.coordinates[0] + request.destination.coordinates[0]) / 2;
-  const centerLat = (request.origin.coordinates[1] + request.destination.coordinates[1]) / 2;
-
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonBackButton defaultHref="/home" />
+            <IonBackButton defaultHref="/home" text="Atrás" />
           </IonButtons>
           <IonTitle>Detalle de Cotización</IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent>
+      <div className="request-detail-page">
         {/* Mapa */}
-        <div style={{ height: '300px', position: 'relative' }}>
-          <Map
-            mapboxAccessToken={MAPBOX_TOKEN}
-            initialViewState={{
-              longitude: centerLng,
-              latitude: centerLat,
-              zoom: 11
-            }}
-            style={{ width: '100%', height: '100%' }}
-            mapStyle="mapbox://styles/mapbox/streets-v11"
-          >
-            {/* Marcador de Origen */}
-            <Marker
-              longitude={request.origin.coordinates[0]}
-              latitude={request.origin.coordinates[1]}
-              anchor="bottom"
-            >
-              <div style={{ 
-                backgroundColor: '#3880ff', 
-                width: '30px', 
-                height: '30px', 
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
-                border: '3px solid white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-              }}>
-                A
-              </div>
-            </Marker>
-
-            {/* Marcador de Destino */}
-            <Marker
-              longitude={request.destination.coordinates[0]}
-              latitude={request.destination.coordinates[1]}
-              anchor="bottom"
-            >
-              <div style={{ 
-                backgroundColor: '#10dc60', 
-                width: '30px', 
-                height: '30px', 
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
-                border: '3px solid white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-              }}>
-                B
-              </div>
-            </Marker>
-
-            {/* Ruta */}
-            {routeGeoJSON && (
-              <Source id="route" type="geojson" data={routeGeoJSON}>
-                <Layer
-                  id="route-layer"
-                  type="line"
-                  paint={{
-                    'line-color': '#3880ff',
-                    'line-width': 4,
-                    'line-opacity': 0.8
-                  }}
-                />
-              </Source>
-            )}
-          </Map>
+        <div className="map-section">
+          <RequestDetailMap
+            request={request}
+            driverLocation={driverLocation}
+            driverPhoto={driverPhoto}
+          />
         </div>
 
-        <div className="ion-padding">
-          {/* Estado de la Cotización */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <IonText>
-              <h2 style={{ margin: 0 }}>Tu Cotización</h2>
-            </IonText>
-            {getStatusBadge()}
-          </div>
+        {/* Contenido de detalles */}
+        <div className="detail-content">
+          <div className="request-detail-content">
+            {/* Badge de Estado y Tiempo */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: "100%",
+                marginBottom: "5px",
+              }}
+            >
+              {getStatusBadge()}
+              <IonText color="medium" style={{ fontSize: "13px" }}>
+                Enviada hace {timeElapsed}
+              </IonText>
+            </div>
 
-          {/* Card del Monto Cotizado */}
-          <IonCard color="primary" style={{ marginBottom: '16px' }}>
-            <IonCardContent style={{ textAlign: 'center', padding: '24px' }}>
-              <IonIcon icon={cashOutline} style={{ fontSize: '48px', marginBottom: '8px' }} />
-              <h1 style={{ fontSize: '48px', margin: '8px 0', fontWeight: 'bold' }}>
+            {/* Monto Cotizado Destacado */}
+            <div
+              style={{
+                width: "100%",
+                background: "linear-gradient(135deg, #3880ff 0%, #5260ff 100%)",
+                padding: "20px",
+                borderRadius: "15px",
+                textAlign: "center",
+                marginBottom: "10px",
+                boxShadow: "0 4px 10px rgba(56, 128, 255, 0.3)",
+              }}
+            >
+              <IonText
+                style={{
+                  color: "white",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  display: "block",
+                  marginBottom: "5px",
+                }}
+              >
+                💰 Tu Cotización
+              </IonText>
+              <IonText
+                style={{
+                  color: "white",
+                  fontSize: "36px",
+                  fontWeight: "bold",
+                  display: "block",
+                }}
+              >
                 ${myQuote.amount.toLocaleString()}
-              </h1>
-              <IonText color="light">
-                <p style={{ margin: '4px 0', fontSize: '14px' }}>
-                  <IonIcon icon={timeOutline} /> Enviada hace {timeElapsed}
-                </p>
               </IonText>
-            </IonCardContent>
-          </IonCard>
-
-          {/* Información del Cliente */}
-          <IonCard>
-            <IonCardContent>
-              <IonText color="primary">
-                <h3 style={{ marginTop: 0 }}>Información del Cliente</h3>
-              </IonText>
-              
-              <div style={{ marginBottom: '12px' }}>
-                <IonText color="medium">
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>Cliente</p>
+            </div>
+            {/* Información del conductor (Tu ubicación) */}
+            <div className="user-location-card">
+              <div className="user-avatar">
+                <img
+                  src={driverPhoto}
+                  alt="Conductor"
+                  onError={(e) => {
+                    e.target.src =
+                      "https://ionicframework.com/docs/img/demos/avatar.svg";
+                  }}
+                />
+              </div>
+              <div className="user-info">
+                <IonText className="user-name">
+                  <h3>Tu</h3>
                 </IonText>
-                <IonText>
-                  <p style={{ margin: '0', fontSize: '16px', fontWeight: '500' }}>
-                    {request.clientName}
-                  </p>
+                <IonText color="medium" className="user-address">
+                  <p>{driverAddress}</p>
                 </IonText>
               </div>
+            </div>
 
-              {request.clientPhone && request.clientPhone !== 'N/A' && (
-                <div style={{ marginBottom: '12px' }}>
-                  <IonText color="medium">
-                    <p style={{ margin: '4px 0', fontSize: '12px' }}>Teléfono</p>
-                  </IonText>
-                  <IonText>
-                    <p style={{ margin: '0', fontSize: '16px' }}>
-                      {request.clientPhone}
-                    </p>
-                  </IonText>
-                </div>
-              )}
-            </IonCardContent>
-          </IonCard>
-
-          {/* Información del Vehículo */}
-          {request.vehicleSnapshot && (
-            <IonCard>
-              <IonCardContent>
-                <IonText color="primary">
-                  <h3 style={{ marginTop: 0 }}>
-                    <IonIcon icon={carOutline} /> Vehículo
-                  </h3>
+            {/* Origen aproximado */}
+            <div className="location-section">
+              <div className="location-icon">
+                <Location size="24" variant="Bold" color="#3880ff" />
+              </div>
+              <div className="location-text">
+                <IonText color="medium" className="location-label">
+                  Origen aproximado
                 </IonText>
-                
-                <div style={{ marginBottom: '8px' }}>
-                  <IonText>
-                    <p style={{ margin: '4px 0', fontSize: '16px', fontWeight: '500' }}>
-                      {request.vehicleSnapshot.vehicle?.icon || '🚗'} {request.vehicleSnapshot.brand?.name} {request.vehicleSnapshot.model?.name}
-                    </p>
-                  </IonText>
-                </div>
+                <IonText className="location-address">
+                  {request.origin.address}
+                </IonText>
+              </div>
+            </div>
 
-                {request.vehicleSnapshot.licensePlate && (
-                  <div style={{ marginBottom: '8px' }}>
-                    <IonText color="medium">
-                      <p style={{ margin: '0', fontSize: '14px' }}>
-                        Placa: {request.vehicleSnapshot.licensePlate}
-                      </p>
+            {/* Destino */}
+            <div className="location-section">
+              <div className="location-icon-destination">
+                <Location size="24" variant="Bold" color="#eb445a" />
+              </div>
+              <div className="location-text">
+                <IonText color="medium" className="location-label">
+                  Destino
+                </IonText>
+                <IonText className="location-address">
+                  {request.destination.address}
+                </IonText>
+              </div>
+            </div>
+
+            {/* Vehículo y Problema */}
+            {request.vehicleSnapshot && (
+              <div className="vehicle-problem-card">
+                <div className="vehicle-info">
+                  <div className="vehicle-icon">
+                    <img
+                      src={getVehicleIcon(
+                        request.vehicleSnapshot.vehicle?.icon,
+                      )}
+                      alt={request.vehicleSnapshot.category?.name || "Vehículo"}
+                      className="vehicle-svg-icon"
+                    />
+                  </div>
+                  <div className="vehicle-details">
+                    <IonText className="vehicle-brand">
+                      <h3>{request.vehicleSnapshot.brand?.name || "N/A"}</h3>
+                    </IonText>
+                    <IonText color="medium" className="vehicle-model">
+                      <p>{request.vehicleSnapshot.model?.name || "N/A"}</p>
                     </IonText>
                   </div>
-                )}
+                  <div className="distance-time-info">
+                    <IonText className="distance">
+                      <strong>
+                        {request.durationMin ||
+                          Math.round(request.duration / 60)}{" "}
+                        Min
+                      </strong>
+                    </IonText>
+                    <IonText color="medium" className="distance-km">
+                      {request.distanceKm ||
+                        (request.distance / 1000).toFixed(1)}{" "}
+                      km
+                    </IonText>
+                  </div>
+                </div>
 
                 {request.serviceDetails?.problem && (
-                  <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#f4f5f8', borderRadius: '8px' }}>
-                    <IonText color="medium">
-                      <p style={{ margin: '0 0 4px 0', fontSize: '12px' }}>
-                        <IonIcon icon={alertCircleOutline} /> Problema reportado:
-                      </p>
+                  <div className="problem-section">
+                    <IonText color="medium" className="section-label">
+                      Problema reportado
                     </IonText>
-                    <IonText>
-                      <p style={{ margin: '0', fontSize: '14px' }}>
-                        {request.serviceDetails.problem}
-                      </p>
+                    <IonText className="problem-text">
+                      {request.serviceDetails.problem}
                     </IonText>
                   </div>
                 )}
-              </IonCardContent>
-            </IonCard>
-          )}
+              </div>
+            )}
 
-          {/* Información de la Ruta */}
-          <IonCard>
-            <IonCardContent>
-              <IonText color="primary">
-                <h3 style={{ marginTop: 0 }}>
-                  <IonIcon icon={locationOutline} /> Ruta
-                </h3>
-              </IonText>
-              
-              <div style={{ marginBottom: '12px' }}>
+            {/* Botón Cancelar Cotización (solo si está pendiente) */}
+            {myQuote.status === "pending" && (
+              <button
+                expand="block"
+                onClick={handleCancelQuote}
+                disabled={cancelling}
+                className="send-quote-button"
+                style={{ background: "#eb445a" }}
+              >
+                {cancelling ? "Cancelando..." : "Cancelar Cotización"}
+              </button>
+            )}
+
+            {/* Mensaje si ya fue cancelada o expirada */}
+            {(myQuote.status === "cancelled" ||
+              myQuote.status === "expired") && (
+              <div
+                style={{
+                  padding: "15px",
+                  background: "#f4f4f4",
+                  borderRadius: "10px",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
                 <IonText color="medium">
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>📍 Origen</p>
-                </IonText>
-                <IonText>
-                  <p style={{ margin: '0', fontSize: '14px' }}>
-                    {request.origin.address}
+                  <p style={{ margin: "0" }}>
+                    {myQuote.status === "cancelled"
+                      ? "❌ Esta cotización fue cancelada"
+                      : "⏰ Esta cotización expiró"}
                   </p>
                 </IonText>
               </div>
+            )}
 
-              <div style={{ marginBottom: '12px' }}>
-                <IonText color="medium">
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>📍 Destino</p>
-                </IonText>
-                <IonText>
-                  <p style={{ margin: '0', fontSize: '14px' }}>
-                    {request.destination.address}
-                  </p>
-                </IonText>
-              </div>
-
-              <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
-                <div style={{ flex: 1 }}>
-                  <IonText color="medium">
-                    <p style={{ margin: '0', fontSize: '12px' }}>Distancia</p>
-                  </IonText>
-                  <IonText>
-                    <p style={{ margin: '4px 0', fontSize: '16px', fontWeight: '500' }}>
-                      {request.distanceKm || (request.distance / 1000).toFixed(1)} km
-                    </p>
-                  </IonText>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <IonText color="medium">
-                    <p style={{ margin: '0', fontSize: '12px' }}>Tiempo estimado</p>
-                  </IonText>
-                  <IonText>
-                    <p style={{ margin: '4px 0', fontSize: '16px', fontWeight: '500' }}>
-                      {request.durationMin || Math.round(request.duration / 60)} min
-                    </p>
-                  </IonText>
-                </div>
-              </div>
-            </IonCardContent>
-          </IonCard>
-
-          {/* Botón Cancelar Cotización (solo si está pendiente) */}
-          {myQuote.status === 'pending' && (
-            <IonButton 
-              expand="block" 
-              color="danger"
-              onClick={handleCancelQuote}
-              disabled={cancelling}
-              style={{ marginTop: '16px', marginBottom: '32px' }}
-            >
-              {cancelling ? (
-                <>
-                  <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
-                  Cancelando...
-                </>
-              ) : (
-                'Cancelar Cotización'
-              )}
-            </IonButton>
-          )}
-
-          {/* Mensaje si ya fue cancelada o expirada */}
-          {(myQuote.status === 'cancelled' || myQuote.status === 'expired') && (
-            <IonCard color="light">
-              <IonCardContent style={{ textAlign: 'center' }}>
-                <IonText color="medium">
-                  <p style={{ margin: '0' }}>
-                    {myQuote.status === 'cancelled' 
-                      ? '❌ Esta cotización fue cancelada'
-                      : '⏰ Esta cotización expiró'
-                    }
-                  </p>
-                </IonText>
-              </IonCardContent>
-            </IonCard>
-          )}
-
-          {/* Mensaje si fue aceptada */}
-          {myQuote.status === 'accepted' && (
-            <IonCard color="success">
-              <IonCardContent style={{ textAlign: 'center' }}>
-                <IonText color="light">
-                  <h3 style={{ margin: '8px 0' }}>🎉 ¡Cotización Aceptada!</h3>
-                  <p style={{ margin: '8px 0' }}>
+            {/* Mensaje si fue aceptada */}
+            {myQuote.status === "accepted" && (
+              <div
+                style={{
+                  padding: "20px",
+                  background:
+                    "linear-gradient(135deg, #10dc60 0%, #24d6a3 100%)",
+                  borderRadius: "15px",
+                  textAlign: "center",
+                  width: "100%",
+                  boxShadow: "0 4px 10px rgba(16, 220, 96, 0.3)",
+                }}
+              >
+                <IonText style={{ color: "white" }}>
+                  <h3 style={{ margin: "0 0 8px 0" }}>
+                    🎉 ¡Cotización Aceptada!
+                  </h3>
+                  <p style={{ margin: "0", fontSize: "14px" }}>
                     El cliente aceptó tu cotización. Prepárate para el servicio.
                   </p>
                 </IonText>
-              </IonCardContent>
-            </IonCard>
-          )}
+              </div>
+            )}
+          </div>
         </div>
-      </IonContent>
+      </div>
     </IonPage>
   );
 };

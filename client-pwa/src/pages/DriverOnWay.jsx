@@ -2,26 +2,15 @@ import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonButton,
   IonIcon,
-  IonText,
   IonCard,
   IonCardContent,
   IonSpinner,
-  IonModal,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonRadioGroup,
-  IonRadio,
-  IonTextarea,
-  IonButtons,
+  useIonAlert,
 } from "@ionic/react";
-import { call, star, closeOutline, alertCircleOutline } from "ionicons/icons";
+import { call, star } from "ionicons/icons";
 import { Moneys, Refresh2 } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
@@ -33,27 +22,12 @@ import logo from "@shared/src/img/Desvare.svg";
 const DriverOnWay = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
+  const [presentAlert] = useIonAlert();
 
   const [serviceData, setServiceData] = useState(null);
   // const [driverLocation, setDriverLocation] = useState(null); // ← No usado aún
   const [isLoading, setIsLoading] = useState(true);
   // const [estimatedTime, setEstimatedTime] = useState("Calculando..."); // ← No usado aún
-
-  // Estados del modal de cancelación
-  const [showCancellationModal, setShowCancellationModal] = useState(false);
-  const [selectedReason, setSelectedReason] = useState("");
-  const [customReason, setCustomReason] = useState("");
-
-  // Razones de cancelación
-  const cancellationReasons = [
-    { value: "resuelto", label: "✅ Ya me desvaré / El carro prendió" },
-    { value: "conductor_no_viene", label: "⏰ El conductor no viene" },
-    { value: "conductor_no_responde", label: "📵 El conductor no responde" },
-    { value: "otra_grua", label: "🚛 Otra grúa me recogió" },
-    { value: "muy_caro", label: "💰 Muy caro" },
-    { value: "muy_lejos", label: "📍 El conductor está muy lejos" },
-    { value: "otro", label: "📝 Otro motivo" },
-  ];
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -100,33 +74,144 @@ const DriverOnWay = () => {
   // };
 
   const handleCancelService = () => {
-    console.log("🚨 handleCancelService llamado - Abriendo modal de razones");
-    setShowCancellationModal(true);
+    console.log("🚨 handleCancelService llamado - Mostrando alert nativo");
+    
+    // Primero, ofrecer llamar al conductor
+    presentAlert({
+      header: '⚠️ Cancelar Servicio',
+      message: serviceData?.driver?.phone 
+        ? `¿Deseas llamar a ${serviceData.driver.name} antes de cancelar?`
+        : '¿Estás seguro que deseas cancelar el servicio?',
+      buttons: [
+        {
+          text: 'Volver',
+          role: 'cancel'
+        },
+        ...(serviceData?.driver?.phone ? [{
+          text: `📞 Llamar a ${serviceData.driver.name}`,
+          handler: () => {
+            window.location.href = `tel:${serviceData.driver.phone}`;
+            return true; // Cerrar el alert después de iniciar la llamada
+          }
+        }] : []),
+        {
+          text: 'Continuar con cancelación',
+          handler: () => {
+            // Usar setTimeout para asegurar que el primer alert se cierre antes
+            setTimeout(() => {
+              showCancellationReasons();
+            }, 250);
+          }
+        }
+      ]
+    });
   };
 
-  const handleCallFromModal = () => {
-    console.log("📞 Llamando al conductor desde modal");
-    if (serviceData?.driver?.phone) {
-      window.location.href = `tel:${serviceData.driver.phone}`;
-      // Cerrar modal después de iniciar la llamada
-      setTimeout(() => {
-        setShowCancellationModal(false);
-        setSelectedReason("");
-        setCustomReason("");
-      }, 500);
-    }
+  const showCancellationReasons = () => {
+    presentAlert({
+      header: 'Cancelar Servicio',
+      message: '¿Por qué deseas cancelar el servicio?',
+      inputs: [
+        {
+          type: 'radio',
+          label: 'Ya me desvaré / El carro prendió',
+          value: 'resuelto',
+          checked: true
+        },
+        {
+          type: 'radio',
+          label: 'El conductor no viene',
+          value: 'conductor_no_viene'
+        },
+        {
+          type: 'radio',
+          label: 'El conductor no responde',
+          value: 'conductor_no_responde'
+        },
+        {
+          type: 'radio',
+          label: 'Otra grúa me recogió',
+          value: 'otra_grua'
+        },
+        {
+          type: 'radio',
+          label: 'Muy caro',
+          value: 'muy_caro'
+        },
+        {
+          type: 'radio',
+          label: 'El conductor está muy lejos',
+          value: 'muy_lejos'
+        },
+        {
+          type: 'radio',
+          label: 'Otro motivo',
+          value: 'otro'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Volver',
+          role: 'cancel'
+        },
+        {
+          text: 'Confirmar Cancelación',
+          cssClass: 'alert-button-confirm',
+          handler: (reason) => {
+            if (!reason) {
+              showError('Selecciona un motivo');
+              return false;
+            }
+            
+            if (reason === 'otro') {
+              // Usar setTimeout para encadenar alerts correctamente
+              setTimeout(() => {
+                presentAlert({
+                  header: 'Otro Motivo',
+                  message: 'Describe el motivo de la cancelación:',
+                  inputs: [
+                    {
+                      name: 'customReason',
+                      type: 'textarea',
+                      placeholder: 'Escribe aquí...',
+                      attributes: {
+                        maxlength: 200
+                      }
+                    }
+                  ],
+                  buttons: [
+                    {
+                      text: 'Volver',
+                      role: 'cancel'
+                    },
+                    {
+                      text: 'Confirmar',
+                      handler: (data) => {
+                        if (!data.customReason || data.customReason.trim() === '') {
+                          showError('Debes escribir un motivo');
+                          return false;
+                        }
+                        confirmCancellation(reason, data.customReason);
+                        return true; // Cerrar el alert después de confirmar
+                      }
+                    }
+                  ]
+                });
+              }, 250);
+              return true; // Cerrar el primer alert
+            }
+            
+            // Cancelar con motivo predefinido
+            confirmCancellation(reason);
+            return true; // Cerrar el alert después de confirmar
+          }
+        }
+      ]
+    });
   };
 
-  const handleConfirmCancellation = () => {
-    console.log("📝 Confirmando cancelación con razón:", selectedReason);
-
-    const cancellationData = {
-      reason: selectedReason,
-      customReason: selectedReason === "otro" ? customReason : null,
-    };
-
-    // Cerrar modal
-    setShowCancellationModal(false);
+  const confirmCancellation = (reason, customReason = null) => {
+    console.log("📝 Confirmando cancelación con razón:", reason, customReason);
 
     // ✅ Limpiar TODO completamente
     localStorage.removeItem("activeService");
@@ -137,8 +222,8 @@ const DriverOnWay = () => {
     // Notificar al backend y al conductor con el método correcto
     socketService.cancelServiceWithDetails({
       requestId: serviceData.requestId,
-      reason: cancellationData.reason,
-      customReason: cancellationData.customReason,
+      reason: reason,
+      customReason: customReason,
       clientName: serviceData.clientName,
       vehicle: serviceData.vehicle,
       origin: serviceData.origin,
@@ -146,23 +231,10 @@ const DriverOnWay = () => {
       problem: serviceData.problem,
     });
 
-    // Reset estados
-    setSelectedReason("");
-    setCustomReason("");
-
     showSuccess("Servicio cancelado");
 
     // ✅ Forzar navegación limpia sin conflictos de estado
-    // Usamos window.location en lugar de history.replace() para evitar
-    // conflictos con componentes montados (WaitingQuotes)
     window.location.href = "/home";
-  };
-
-  const handleCloseModal = () => {
-    console.log("❌ Cerrando modal de cancelación");
-    setShowCancellationModal(false);
-    setSelectedReason("");
-    setCustomReason("");
   };
 
   // const formatAmount = (amount) => {
@@ -173,9 +245,6 @@ const DriverOnWay = () => {
   //     maximumFractionDigits: 0,
   //   }).format(amount);
   // };
-
-  const isConfirmDisabled =
-    !selectedReason || (selectedReason === "otro" && !customReason.trim());
 
   if (isLoading || !serviceData) {
     return (
@@ -301,145 +370,6 @@ const DriverOnWay = () => {
           </div>
         </div>
       </IonContent>
-
-      {/* Modal de Cancelación - INLINE SIMPLE */}
-      <IonModal
-        isOpen={showCancellationModal}
-        onDidDismiss={handleCloseModal}
-        backdropDismiss={false}
-      >
-        <IonHeader>
-          <IonToolbar color="danger">
-            <IonTitle>
-              <IonIcon
-                icon={alertCircleOutline}
-                style={{ marginRight: "8px", verticalAlign: "middle" }}
-              />
-              Cancelar Servicio
-            </IonTitle>
-            <IonButtons slot="end">
-              <IonButton onClick={handleCloseModal}>
-                <IonIcon icon={closeOutline} />
-              </IonButton>
-            </IonButtons>
-          </IonToolbar>
-        </IonHeader>
-
-        <IonContent className="ion-padding">
-          {/* Botón para llamar antes de cancelar */}
-          {serviceData?.driver?.phone && (
-            <IonButton
-              expand="block"
-              fill="outline"
-              color="primary"
-              onClick={handleCallFromModal}
-              style={{ marginBottom: "20px" }}
-            >
-              <IonIcon icon={call} slot="start" />
-              Llamar a {serviceData.driver.name || "conductor"} antes de
-              cancelar
-            </IonButton>
-          )}
-
-          <IonText color="medium">
-            <p style={{ marginBottom: "16px" }}>
-              ¿Por qué deseas cancelar el servicio?
-            </p>
-          </IonText>
-
-          <IonRadioGroup
-            value={selectedReason}
-            onIonChange={(e) => {
-              console.log("📝 Razón seleccionada:", e.detail.value);
-              setSelectedReason(e.detail.value);
-            }}
-          >
-            <IonList>
-              {cancellationReasons.map((reason) => (
-                <IonItem
-                  key={reason.value}
-                  lines="none"
-                  style={{ marginBottom: "8px" }}
-                >
-                  <IonRadio slot="start" value={reason.value} />
-                  <IonLabel>{reason.label}</IonLabel>
-                </IonItem>
-              ))}
-            </IonList>
-          </IonRadioGroup>
-
-          {/* Campo de texto para "Otro motivo" */}
-          {selectedReason === "otro" && (
-            <div
-              style={{
-                marginTop: "16px",
-                padding: "12px",
-                background: "#f8f9fa",
-                borderRadius: "8px",
-              }}
-            >
-              <IonText color="medium">
-                <p style={{ fontSize: "14px", marginBottom: "8px" }}>
-                  Por favor, describe el motivo:
-                </p>
-              </IonText>
-              <IonTextarea
-                value={customReason}
-                onIonInput={(e) => setCustomReason(e.detail.value)}
-                placeholder="Escribe aquí..."
-                rows={4}
-                maxlength={200}
-                style={{
-                  background: "#fff",
-                  borderRadius: "8px",
-                  padding: "8px",
-                  border: "1px solid #ddd",
-                }}
-              />
-              <IonText color="medium">
-                <p
-                  style={{
-                    fontSize: "12px",
-                    textAlign: "right",
-                    marginTop: "4px",
-                  }}
-                >
-                  {customReason.length}/200
-                </p>
-              </IonText>
-            </div>
-          )}
-
-          {/* Botones de acción */}
-          <div
-            style={{
-              marginTop: "24px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-            }}
-          >
-            <IonButton
-              expand="block"
-              color="danger"
-              onClick={handleConfirmCancellation}
-              disabled={isConfirmDisabled}
-              size="large"
-            >
-              Confirmar Cancelación
-            </IonButton>
-
-            <IonButton
-              expand="block"
-              fill="outline"
-              color="medium"
-              onClick={handleCloseModal}
-            >
-              Volver
-            </IonButton>
-          </div>
-        </IonContent>
-      </IonModal>
     </IonPage>
   );
 };
