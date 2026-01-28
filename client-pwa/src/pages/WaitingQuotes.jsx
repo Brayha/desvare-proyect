@@ -547,11 +547,16 @@ const WaitingQuotes = () => {
           requestId: currentRequestId,
           clientId: user.id,
           clientName: user.name,
+          clientPhone: user.phone || data.request.clientPhone,
           acceptedDriverId: quote.driverId,
           amount: quote.amount,
           securityCode: data.request.securityCode,
           origin: routeData.origin,
           destination: routeData.destination,
+          vehicle: data.request.vehicleSnapshot?.vehicle,
+          vehicleSnapshot: data.request.vehicleSnapshot,
+          problem: data.request.serviceDetails?.problem,
+          serviceDetails: data.request.serviceDetails,
           otherDriverIds: data.otherDriverIds || [],
         });
 
@@ -565,6 +570,10 @@ const WaitingQuotes = () => {
             amount: quote.amount,
             origin: routeData.origin,
             destination: routeData.destination,
+            vehicle: data.request.vehicleSnapshot?.vehicle,
+            vehicleSnapshot: data.request.vehicleSnapshot,
+            problem: data.request.serviceDetails?.problem,
+            serviceDetails: data.request.serviceDetails,
           })
         );
 

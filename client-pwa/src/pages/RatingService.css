@@ -1,0 +1,234 @@
+.rating-service-page {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Container Principal */
+.rating-container {
+  padding: 32px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Logo */
+.rating-logo-container {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.rating-logo {
+  height: 60px;
+  filter: brightness(0) invert(1);
+}
+
+/* Header */
+.rating-header {
+  text-align: center;
+  margin-bottom: 24px;
+  color: white;
+}
+
+.rating-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: white;
+}
+
+.rating-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+/* Card Principal */
+.rating-card {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+}
+
+/* Sección de Estrellas */
+.stars-section {
+  text-align: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.stars-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.stars-container {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.star-icon {
+  font-size: 48px;
+  color: #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.star-icon.filled {
+  color: #ffc107;
+  transform: scale(1.1);
+}
+
+.star-icon:hover {
+  transform: scale(1.2);
+}
+
+.rating-text {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 8px;
+  color: #667eea;
+}
+
+/* Sección de Comentario */
+.comment-section {
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.comment-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.comment-textarea {
+  --background: #f5f5f5;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.comment-counter {
+  text-align: right;
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+/* Sección de Propina */
+.tip-section {
+  padding: 20px 0;
+}
+
+.tip-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.tip-sublabel {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 12px;
+}
+
+.tip-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tip-button {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tip-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.tip-button.selected {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
+}
+
+/* Botones de Acción */
+.action-buttons {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.submit-button {
+  --background: linear-gradient(135deg, #10dc60 0%, #0ea54f 100%);
+  --border-radius: 12px;
+  height: 50px;
+  font-weight: 600;
+  font-size: 16px;
+  text-transform: none;
+}
+
+.skip-button {
+  --color: white;
+  font-size: 14px;
+  text-transform: none;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: white;
+}
+
+.loading-container p {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+  .rating-container {
+    padding: 24px 16px;
+  }
+
+  .rating-title {
+    font-size: 24px;
+  }
+
+  .star-icon {
+    font-size: 40px;
+  }
+
+  .tip-buttons {
+    grid-template-columns: 1fr;
+  }
+}

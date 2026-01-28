@@ -29,6 +29,7 @@ import RequestAuth from './pages/RequestAuth';
 import RequestConfirmation from './pages/RequestConfirmation';
 import WaitingQuotes from './pages/WaitingQuotes';
 import DriverOnWay from './pages/DriverOnWay';
+import RatingService from './pages/RatingService';
 import TabLayout from './components/TabLayout/TabLayout';
 
 setupIonicReact();
@@ -71,6 +72,7 @@ function App() {
               return <WaitingQuotes key={requestId} {...props} />;
             }} />
             <Route exact path="/driver-on-way" component={DriverOnWay} />
+            <Route exact path="/rate-service" component={RatingService} />
             
             {/* Tabs (Desvare + Mi cuenta) */}
             <Route path="/tabs" component={TabLayout} />

@@ -55,8 +55,37 @@ const DriverOnWay = () => {
       console.log("✅ Socket.IO ya conectado");
     }
 
+    // ✅ Escuchar cuando el conductor completa el servicio
+    socketService.onServiceCompleted((data) => {
+      console.log('✅ Servicio completado por el conductor:', data);
+      
+      showSuccess('¡Servicio completado! El conductor llegó al destino.');
+      
+      // Guardar datos del servicio completado para la pantalla de calificación
+      const completedServiceData = {
+        requestId: data.requestId || parsedData.requestId,
+        driver: parsedData.driver,
+        amount: parsedData.amount,
+        origin: parsedData.origin,
+        destination: parsedData.destination,
+        completedAt: data.completedAt
+      };
+      
+      localStorage.setItem('completedService', JSON.stringify(completedServiceData));
+      console.log('💾 Datos del servicio completado guardados para calificación');
+      
+      // Limpiar servicio activo
+      localStorage.removeItem('activeService');
+      
+      // Redirigir a la pantalla de calificación después de 1.5 segundos
+      setTimeout(() => {
+        history.replace('/rate-service');
+      }, 1500);
+    });
+
     return () => {
       console.log("🧹 DriverOnWay - Cleanup");
+      socketService.offServiceCompleted();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

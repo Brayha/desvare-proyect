@@ -118,6 +118,19 @@ class SocketService {
       this.socket.off('quote:expired');
     }
   }
+
+  // ========================================
+  // COMPLETAR SERVICIO
+  // ========================================
+  
+  completeService(data) {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('service:complete', data);
+      console.log('📡 Notificando completado de servicio:', data);
+    } else {
+      console.warn('⚠️ No se puede completar servicio: Socket no conectado');
+    }
+  }
 }
 
 export default new SocketService();

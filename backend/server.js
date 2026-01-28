@@ -359,10 +359,15 @@ io.on('connection', (socket) => {
       io.to(driverData.socketId).emit('service:accepted', {
         requestId: data.requestId,
         clientName: data.clientName,
+        clientPhone: data.clientPhone,
         securityCode: data.securityCode,
         amount: data.amount,
         origin: data.origin,
         destination: data.destination,
+        vehicle: data.vehicle,
+        vehicleSnapshot: data.vehicleSnapshot,
+        problem: data.problem,
+        serviceDetails: data.serviceDetails,
         timestamp: new Date()
       });
       
@@ -395,6 +400,44 @@ io.on('connection', (socket) => {
       });
       
       console.log(`📢 ${data.otherDriverIds.length} conductores notificados que el servicio fue tomado`);
+    }
+  });
+
+  // ========================================
+  // Completar Servicio
+  // ========================================
+  socket.on('service:complete', (data) => {
+    console.log('✅ Servicio completado:', data);
+    console.log(`🚗 Conductor: ${data.driverName}`);
+    console.log(`📦 Request ID: ${data.requestId}`);
+    
+    // Notificar al cliente que el servicio fue completado
+    const clientSocketId = connectedClients.get(data.clientId);
+    if (clientSocketId) {
+      io.to(clientSocketId).emit('service:completed', {
+        requestId: data.requestId,
+        driverName: data.driverName,
+        completedAt: data.completedAt,
+        message: '¡Servicio completado! ¿Cómo fue tu experiencia?'
+      });
+      console.log(`✅ Cliente ${data.clientId} notificado de servicio completado`);
+    } else {
+      console.log(`⚠️ Cliente ${data.clientId} no está conectado`);
+    }
+    
+    // Actualizar estado del conductor a disponible
+    const driverData = connectedDrivers.get(data.driverId);
+    if (driverData) {
+      driverData.isOnline = true;
+      connectedDrivers.set(data.driverId, driverData);
+      
+      const driverSocket = io.sockets.sockets.get(driverData.socketId);
+      if (driverSocket) {
+        driverSocket.join('active-drivers');
+        console.log(`🟢 Conductor ${data.driverId} de vuelta en active-drivers (DISPONIBLE)`);
+      }
+    } else {
+      console.log(`⚠️ Conductor ${data.driverId} no está conectado`);
     }
   });
 

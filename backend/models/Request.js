@@ -224,6 +224,76 @@ const requestSchema = new mongoose.Schema({
     default: null
   },
   
+  // ========================================
+  // INFORMACIÓN DE FINALIZACIÓN DEL SERVICIO
+  // ========================================
+  
+  // Finalización del servicio
+  completedAt: { 
+    type: Date,
+    default: null
+  },
+  completedBy: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User',
+    default: null
+  },
+  
+  // ========================================
+  // CALIFICACIÓN DEL CLIENTE
+  // ========================================
+  
+  rating: {
+    stars: { 
+      type: Number, 
+      min: 1, 
+      max: 5,
+      default: null
+    },
+    comment: { 
+      type: String, 
+      maxlength: 500,
+      default: null
+    },
+    tip: { 
+      type: Number, 
+      default: 0,
+      min: 0
+    },
+    ratedAt: { 
+      type: Date,
+      default: null
+    }
+  },
+  
+  // ========================================
+  // TIMESTAMPS DEL FLUJO DEL SERVICIO
+  // ========================================
+  
+  // Cuando el cliente aceptó una cotización
+  acceptedAt: { 
+    type: Date, 
+    default: null 
+  },
+  
+  // Cuando el conductor inició el servicio (llegó al origen)
+  startedAt: { 
+    type: Date, 
+    default: null 
+  },
+  
+  // Cuando el conductor llegó al origen (validó código)
+  arrivedAtOriginAt: { 
+    type: Date, 
+    default: null 
+  },
+  
+  // Cuando el conductor llegó al destino
+  arrivedAtDestinationAt: { 
+    type: Date, 
+    default: null 
+  },
+  
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

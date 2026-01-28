@@ -680,5 +680,177 @@ router.get('/nearby/:driverId', async (req, res) => {
   }
 });
 
+// ========================================
+// POST /api/requests/:id/complete - Completar servicio
+// ========================================
+router.post('/:id/complete', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { driverId, completedAt } = req.body;
+    
+    console.log(`✅ Completando servicio ${id} por conductor ${driverId}`);
+    
+    const request = await Request.findById(id);
+    
+    if (!request) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+    
+    // Verificar que el conductor que completa es el asignado
+    if (request.assignedDriverId?.toString() !== driverId?.toString()) {
+      return res.status(403).json({ 
+        error: 'No autorizado. Solo el conductor asignado puede completar el servicio.' 
+      });
+    }
+    
+    // Actualizar estado a completado
+    request.status = 'completed';
+    request.completedAt = completedAt || new Date();
+    request.completedBy = driverId;
+    request.updatedAt = new Date();
+    
+    await request.save();
+    
+    console.log(`✅ Servicio ${id} marcado como completado`);
+    
+    res.json({
+      message: 'Servicio completado exitosamente',
+      request: {
+        id: request._id,
+        status: request.status,
+        completedAt: request.completedAt,
+        clientId: request.clientId
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Error al completar servicio:', error);
+    res.status(500).json({ 
+      error: 'Error al completar servicio',
+      details: error.message 
+    });
+  }
+});
+
+// ========================================
+// POST /api/requests/:id/rate - Calificar servicio
+// ========================================
+router.post('/:id/rate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { stars, comment, tip } = req.body;
+    
+    console.log(`⭐ Calificando servicio ${id}:`, { stars, comment, tip });
+    
+    // Validar calificación
+    if (!stars || stars < 1 || stars > 5) {
+      return res.status(400).json({ 
+        error: 'La calificación debe estar entre 1 y 5 estrellas' 
+      });
+    }
+    
+    const request = await Request.findById(id);
+    
+    if (!request) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+    
+    // Verificar que el servicio esté completado
+    if (request.status !== 'completed') {
+      return res.status(400).json({ 
+        error: 'Solo se pueden calificar servicios completados' 
+      });
+    }
+    
+    // Verificar que no haya sido calificado previamente
+    if (request.rating && request.rating.ratedAt) {
+      return res.status(400).json({ 
+        error: 'Este servicio ya fue calificado' 
+      });
+    }
+    
+    // Actualizar calificación
+    request.rating = {
+      stars: stars,
+      comment: comment || null,
+      tip: tip || 0,
+      ratedAt: new Date()
+    };
+    request.updatedAt = new Date();
+    
+    await request.save();
+    
+    console.log(`✅ Servicio ${id} calificado con ${stars} estrellas`);
+    
+    // ========================================
+    // ACTUALIZAR PERFIL DEL CONDUCTOR
+    // ========================================
+    
+    // Buscar al conductor asignado
+    const driverId = request.assignedDriverId || request.completedBy;
+    
+    if (driverId) {
+      try {
+        const driver = await User.findById(driverId);
+        
+        if (driver && driver.driverProfile) {
+          console.log(`📊 Actualizando perfil del conductor ${driver.name}...`);
+          
+          // 1. Calcular nuevo promedio de rating
+          const allRatings = await Request.find({
+            $or: [
+              { assignedDriverId: driverId },
+              { completedBy: driverId }
+            ],
+            'rating.stars': { $exists: true, $ne: null }
+          }).select('rating.stars');
+          
+          const totalRatings = allRatings.length;
+          const sumRatings = allRatings.reduce((sum, r) => sum + r.rating.stars, 0);
+          const newAverage = totalRatings > 0 ? (sumRatings / totalRatings) : 5;
+          
+          // 2. Actualizar rating promedio
+          driver.driverProfile.rating = Math.round(newAverage * 10) / 10; // Redondear a 1 decimal
+          
+          // 3. Incrementar totalServices (solo si es la primera calificación de este servicio)
+          if (!request.rating || !request.rating.ratedAt) {
+            driver.driverProfile.totalServices = (driver.driverProfile.totalServices || 0) + 1;
+          }
+          
+          // 4. Actualizar totalEarnings
+          const amount = request.quotes?.find(q => q.driverId?.toString() === driverId.toString())?.amount || 0;
+          driver.driverProfile.totalEarnings = (driver.driverProfile.totalEarnings || 0) + amount;
+          
+          await driver.save();
+          
+          console.log(`✅ Perfil del conductor actualizado:`);
+          console.log(`   - Rating: ${driver.driverProfile.rating} ⭐ (${totalRatings} servicios)`);
+          console.log(`   - Total Servicios: ${driver.driverProfile.totalServices}`);
+          console.log(`   - Total Ganancias: $${driver.driverProfile.totalEarnings.toLocaleString()}`);
+        } else {
+          console.log(`⚠️ Conductor ${driverId} no encontrado o sin perfil`);
+        }
+      } catch (driverError) {
+        // No fallar el request si hay error al actualizar el conductor
+        console.error('❌ Error al actualizar perfil del conductor:', driverError);
+      }
+    } else {
+      console.log('⚠️ No se encontró conductor asignado para actualizar perfil');
+    }
+    
+    res.json({
+      message: 'Calificación registrada exitosamente',
+      rating: request.rating
+    });
+    
+  } catch (error) {
+    console.error('❌ Error al calificar servicio:', error);
+    res.status(500).json({ 
+      error: 'Error al registrar calificación',
+      details: error.message 
+    });
+  }
+});
+
 module.exports = router;
 

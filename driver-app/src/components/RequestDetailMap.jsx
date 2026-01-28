@@ -57,7 +57,7 @@ const calculateBounds = (coordinates) => {
   ];
 };
 
-const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
+const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestination = true }) => {
   const mapRef = useRef(null);
   const [driverToOriginRoute, setDriverToOriginRoute] = useState(null);
   const [originToDestinationRoute, setOriginToDestinationRoute] = useState(null);
@@ -67,7 +67,7 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
   const [showDriver, setShowDriver] = useState(false);
   const [showOrigin, setShowOrigin] = useState(false);
   const [showDriverRoute, setShowDriverRoute] = useState(false);
-  const [showDestination, setShowDestination] = useState(false);
+  const [showDestinationMarker, setShowDestinationMarker] = useState(false);
   const [showDestinationRoute, setShowDestinationRoute] = useState(false);
   
   // Validar y obtener coordenadas de forma segura
@@ -109,7 +109,7 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
     setShowDriver(false);
     setShowOrigin(false);
     setShowDriverRoute(false);
-    setShowDestination(false);
+    setShowDestinationMarker(false);
     setShowDestinationRoute(false);
     
     try {
@@ -121,20 +121,28 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
         return { lng: request.origin.lng, lat: request.origin.lat };
       };
       
-      const getDestCoords = () => {
-        if (request.destination.coordinates && Array.isArray(request.destination.coordinates)) {
-          return { lng: request.destination.coordinates[0], lat: request.destination.coordinates[1] };
-        }
-        return { lng: request.destination.lng, lat: request.destination.lat };
-      };
-      
       const originCoords = getOriginCoords();
-      const destCoords = getDestCoords();
+      
+      // ✅ Validar si hay destino (puede ser null en FASE 1 de ActiveService)
+      const hasDestination = request.destination && 
+        (request.destination.coordinates || (request.destination.lng && request.destination.lat));
+      
+      let destCoords = null;
+      if (hasDestination) {
+        const getDestCoords = () => {
+          if (request.destination.coordinates && Array.isArray(request.destination.coordinates)) {
+            return { lng: request.destination.coordinates[0], lat: request.destination.coordinates[1] };
+          }
+          return { lng: request.destination.lng, lat: request.destination.lat };
+        };
+        destCoords = getDestCoords();
+      }
       
       console.log('📍 Coordenadas para rutas:', {
         driver: { lng: driverLocation.lng, lat: driverLocation.lat },
         origin: originCoords,
-        destination: destCoords
+        destination: destCoords || 'Sin destino (FASE 1)',
+        showDestination
       });
       
       // Calcular ruta 1: Conductor → Origen (color #223D62)
@@ -145,46 +153,54 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
 
       const url1 = `https://api.mapbox.com/directions/v5/mapbox/driving/${route1Waypoints}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
       
-      // Calcular ruta 2: Origen → Destino (color #0055FF)
-      const route2Waypoints = [
-        `${originCoords.lng},${originCoords.lat}`,
-        `${destCoords.lng},${destCoords.lat}`
-      ].join(';');
-
-      const url2 = `https://api.mapbox.com/directions/v5/mapbox/driving/${route2Waypoints}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+      console.log('🗺️ Calculando ruta Conductor → Origen...');
       
-      console.log('🗺️ Calculando dos rutas separadas...');
-      
-      // Hacer ambas peticiones en paralelo
-      const [response1, response2] = await Promise.all([
-        fetch(url1),
-        fetch(url2)
-      ]);
-      
-      const [data1, data2] = await Promise.all([
-        response1.json(),
-        response2.json()
-      ]);
+      // Calcular solo ruta 1 (siempre)
+      const response1 = await fetch(url1);
+      const data1 = await response1.json();
       
       if (data1.routes && data1.routes[0]) {
         setDriverToOriginRoute(data1.routes[0].geometry);
         console.log('✅ Ruta Conductor → Origen calculada');
       }
       
-      if (data2.routes && data2.routes[0]) {
-        setOriginToDestinationRoute(data2.routes[0].geometry);
-        console.log('✅ Ruta Origen → Destino calculada');
+      // ✅ Solo calcular ruta 2 si hay destino Y showDestination es true
+      if (hasDestination && showDestination && destCoords) {
+        const route2Waypoints = [
+          `${originCoords.lng},${originCoords.lat}`,
+          `${destCoords.lng},${destCoords.lat}`
+        ].join(';');
+
+        const url2 = `https://api.mapbox.com/directions/v5/mapbox/driving/${route2Waypoints}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+        
+        console.log('🗺️ Calculando ruta Origen → Destino...');
+        
+        const response2 = await fetch(url2);
+        const data2 = await response2.json();
+        
+        if (data2.routes && data2.routes[0]) {
+          setOriginToDestinationRoute(data2.routes[0].geometry);
+          console.log('✅ Ruta Origen → Destino calculada');
+        }
+      } else {
+        // Limpiar ruta de destino si no debe mostrarse
+        setOriginToDestinationRoute(null);
+        console.log('⏭️ Saltando ruta Origen → Destino (no disponible)');
       }
       
-      // Ajustar zoom para mostrar todas las coordenadas
+      // Ajustar zoom para mostrar todas las coordenadas relevantes
       setTimeout(() => {
         if (mapRef.current) {
-          // Combinar todas las coordenadas para calcular bounds
+          // Incluir solo coordenadas relevantes según el estado
           const allCoordinates = [
             [driverLocation.lng, driverLocation.lat],
-            [originCoords.lng, originCoords.lat],
-            [destCoords.lng, destCoords.lat]
+            [originCoords.lng, originCoords.lat]
           ];
+          
+          // Solo agregar destino si debe mostrarse
+          if (hasDestination && showDestination && destCoords) {
+            allCoordinates.push([destCoords.lng, destCoords.lat]);
+          }
           
           const bounds = calculateBounds(allCoordinates);
           if (bounds) {
@@ -215,17 +231,22 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
         console.log('🎬 Paso 3: Ruta Conductor → Origen trazada');
       }, 1800);
       
-      // Paso 4: Mostrar destino
-      setTimeout(() => {
-        setShowDestination(true);
-        console.log('🎬 Paso 4: Destino visible');
-      }, 2400);
-      
-      // Paso 5: Trazar ruta origen → destino
-      setTimeout(() => {
-        setShowDestinationRoute(true);
-        console.log('🎬 Paso 5: Ruta Origen → Destino trazada');
-      }, 3000);
+      // ✅ Solo mostrar destino si existe Y showDestination prop es true
+      if (hasDestination && showDestination) {
+        // Paso 4: Mostrar marcador de destino
+        setTimeout(() => {
+          setShowDestinationMarker(true);
+          console.log('🎬 Paso 4: Destino visible');
+        }, 2400);
+        
+        // Paso 5: Trazar ruta origen → destino
+        setTimeout(() => {
+          setShowDestinationRoute(true);
+          console.log('🎬 Paso 5: Ruta Origen → Destino trazada');
+        }, 3000);
+      } else {
+        console.log('⏭️ Saltando pasos 4 y 5 (sin destino)');
+      }
       
     } catch (error) {
       console.error('❌ Error calculando rutas:', error);
@@ -237,7 +258,7 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
     if (request && driverLocation && MAPBOX_TOKEN) {
       calculateRoutes();
     }
-  }, [request, driverLocation]);
+  }, [request, driverLocation, showDestination]);
 
   if (!MAPBOX_TOKEN) {
     return (
@@ -302,8 +323,8 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto }) => {
           </Marker>
         )}
 
-        {/* Marcador de Destino - Aparece cuarto */}
-        {showDestination && (
+        {/* Marcador de Destino - Aparece cuarto (solo si existe destino) */}
+        {showDestinationMarker && request.destination && (
           <Marker 
             longitude={request.destination.coordinates?.[0] || request.destination.lng} 
             latitude={request.destination.coordinates?.[1] || request.destination.lat}

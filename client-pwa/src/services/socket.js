@@ -158,6 +158,27 @@ class SocketService {
       console.log('🔇 Listener de cancelación de cotizaciones removido');
     }
   }
+
+  // ========================================
+  // COMPLETAR SERVICIO
+  // ========================================
+  
+  onServiceCompleted(callback) {
+    if (this.socket) {
+      // Remover listener anterior para evitar duplicados
+      this.socket.off('service:completed');
+      // Agregar nuevo listener
+      this.socket.on('service:completed', callback);
+      console.log('👂 Listener de servicio completado registrado');
+    }
+  }
+
+  offServiceCompleted() {
+    if (this.socket) {
+      this.socket.off('service:completed');
+      console.log('🔇 Listener de servicio completado removido');
+    }
+  }
 }
 
 export default new SocketService();
