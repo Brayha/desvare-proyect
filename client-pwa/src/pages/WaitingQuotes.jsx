@@ -392,7 +392,7 @@ const WaitingQuotes = () => {
 
     // ✅ Limpiar solo la solicitud actual, MANTENER requestData para edición
     // localStorage.removeItem("requestData"); ← NO eliminar, mantener origen/destino/vehículo
-    localStorage.removeItem("currentRequestId");
+    // localStorage.removeItem("currentRequestId"); ← NO eliminar AQUÍ, RequestService lo limpiará
     localStorage.removeItem("activeService");
     localStorage.removeItem("quotesReceived");
 
@@ -404,6 +404,7 @@ const WaitingQuotes = () => {
     showSuccess("Solicitud cancelada");
 
     // ✅ Volver a /tabs/desvare para que pueda EDITAR y volver a buscar
+    // IMPORTANTE: Redirigir SIN eliminar currentRequestId para evitar race condition
     history.replace("/tabs/desvare");
   };
 

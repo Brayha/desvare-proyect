@@ -109,6 +109,7 @@ const RequestService = () => {
   // ✅ Cargar datos previos del localStorage (cuando cliente cancela búsqueda)
   useEffect(() => {
     const savedRequestData = localStorage.getItem('requestData');
+    const currentRequestId = localStorage.getItem('currentRequestId');
     
     if (savedRequestData) {
       try {
@@ -155,6 +156,12 @@ const RequestService = () => {
             placa: parsed.vehicleSnapshot.licensePlate,
             problema: parsed.serviceDetails.problem
           });
+        }
+        
+        // ✅ Limpiar currentRequestId antiguo para evitar conflictos
+        if (currentRequestId) {
+          localStorage.removeItem('currentRequestId');
+          console.log('🗑️ RequestId antiguo eliminado (usuario canceló búsqueda)');
         }
         
         showSuccess('📋 Datos previos cargados. Puedes editarlos y buscar nuevamente.');
