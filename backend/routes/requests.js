@@ -605,7 +605,7 @@ router.get('/nearby/:driverId', async (req, res) => {
         clientName: req.clientName,
         clientPhone: req.clientPhone,
         
-        // Vehículo
+        // Vehículo (datos básicos para compatibilidad)
         vehicle: req.vehicleSnapshot ? {
           category: req.vehicleSnapshot.category?.name || 'N/A',
           brand: req.vehicleSnapshot.brand?.name || 'N/A',
@@ -613,6 +613,9 @@ router.get('/nearby/:driverId', async (req, res) => {
           licensePlate: req.vehicleSnapshot.licensePlate || 'N/A',
           icon: getCategoryIcon(req.vehicleSnapshot.category?.id)
         } : null,
+        
+        // Vehículo snapshot completo (con datos adicionales de camiones/buses)
+        vehicleSnapshot: req.vehicleSnapshot,
         
         // Ubicación
         origin: {

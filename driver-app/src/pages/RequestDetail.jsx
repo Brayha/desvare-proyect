@@ -28,7 +28,7 @@ const RequestDetail = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [driverPhoto, setDriverPhoto] = useState(
-    "https://ionicframework.com/docs/img/demos/avatar.svg"
+    "https://ionicframework.com/docs/img/demos/avatar.svg",
   );
   const [driverAddress, setDriverAddress] = useState("Cargando ubicación...");
 
@@ -43,7 +43,7 @@ const RequestDetail = () => {
         if (userData) {
           const parsedUser = JSON.parse(userData);
           const response = await fetch(
-            `http://localhost:5001/api/drivers/profile/${parsedUser._id}`
+            `http://localhost:5001/api/drivers/profile/${parsedUser._id}`,
           );
           const data = await response.json();
 
@@ -65,13 +65,15 @@ const RequestDetail = () => {
         const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
         if (!MAPBOX_TOKEN) {
           setDriverAddress(
-            `${driverLocation.lat.toFixed(4)}, ${driverLocation.lng.toFixed(4)}`
+            `${driverLocation.lat.toFixed(4)}, ${driverLocation.lng.toFixed(
+              4,
+            )}`,
           );
           return;
         }
 
         const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${driverLocation.lng},${driverLocation.lat}.json?access_token=${MAPBOX_TOKEN}&language=es`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${driverLocation.lng},${driverLocation.lat}.json?access_token=${MAPBOX_TOKEN}&language=es`,
         );
         const data = await response.json();
 
@@ -82,13 +84,15 @@ const RequestDetail = () => {
           console.log("📍 Dirección del conductor:", address);
         } else {
           setDriverAddress(
-            `${driverLocation.lat.toFixed(4)}, ${driverLocation.lng.toFixed(4)}`
+            `${driverLocation.lat.toFixed(4)}, ${driverLocation.lng.toFixed(
+              4,
+            )}`,
           );
         }
       } catch (error) {
         console.error("❌ Error obteniendo dirección:", error);
         setDriverAddress(
-          `${driverLocation.lat.toFixed(4)}, ${driverLocation.lng.toFixed(4)}`
+          `${driverLocation.lat.toFixed(4)}, ${driverLocation.lng.toFixed(4)}`,
         );
       }
     };
@@ -107,6 +111,7 @@ const RequestDetail = () => {
   }, [request, driverLocation, history]);
 
   const getVehicleIcon = (iconEmoji) => {
+    // Mapeo de emojis
     const iconMap = {
       "🏍️": motoIcon,
       "🚗": carIcon,
@@ -114,7 +119,18 @@ const RequestDetail = () => {
       "🚚": camionIcon,
       "🚌": busIcon,
     };
-    return iconMap[iconEmoji] || carIcon;
+
+    // Mapeo de IDs de categoría
+    const categoryMap = {
+      MOTOS: motoIcon,
+      AUTOS: carIcon,
+      CAMIONETAS: camionetaIcon,
+      CAMIONES: camionIcon,
+      BUSES: busIcon,
+    };
+
+    // Intentar primero por emoji, luego por ID de categoría
+    return iconMap[iconEmoji] || categoryMap[iconEmoji] || carIcon;
   };
 
   const handleSendQuote = () => {
@@ -175,106 +191,229 @@ const RequestDetail = () => {
         </div>
 
         {/* Contenido de detalles */}
-        <div className="detail-content">
-          <div className="request-detail-content">
+        <div className="detail-content-request-detail">
+          <div className="request-detail-content-request-detail">
+            <h3 className="type-title">Nueva solicitud</h3>
             {/* Información de ubicación del conductor */}
-            <div className="user-location-card">
-              <div className="user-avatar">
-                <img
-                  src={driverPhoto}
-                  alt="Conductor"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://ionicframework.com/docs/img/demos/avatar.svg";
-                  }}
-                />
-              </div>
-              <div className="user-info">
-                <IonText className="user-name">
-                  <h3>Tu</h3>
-                </IonText>
-                <IonText color="medium" className="user-address">
-                  <p>{driverAddress}</p>
-                </IonText>
-              </div>
-            </div>
-
-            {/* Origen aproximado */}
-            <div className="location-section">
-              <div className="location-icon">
-                <Location size="24" variant="Bold" color="#3880ff" />
-              </div>
-              <div className="location-text">
-                <IonText color="medium" className="location-label">
-                  Origen aproximado
-                </IonText>
-                <IonText className="location-address">
-                  {request.origin.address}
-                </IonText>
-              </div>
-            </div>
-
-            {/* Destino */}
-            <div className="location-section">
-              <div className="location-icon-destination">
-                <Location size="24" variant="Bold" color="#eb445a" />
-              </div>
-              <div className="location-text">
-                <IonText color="medium" className="location-label">
-                  Destino
-                </IonText>
-                <IonText className="location-address">
-                  {request.destination.address}
-                </IonText>
-              </div>
-            </div>
-
-            {/* Vehículo y Problema */}
-            <div className="vehicle-problem-card">
-              <div className="vehicle-info">
-                <div className="vehicle-icon">
+            <div className="card-request-detail">
+              <h2 className="quote-title">Detalle del servicio</h2>
+              <div className="user-location-card">
+                <div className="user-avatar">
                   <img
-                    src={getVehicleIcon(request.vehicle?.icon)}
-                    alt={request.vehicle?.category || "Vehículo"}
-                    className="vehicle-svg-icon"
+                    src={driverPhoto}
+                    alt="Conductor"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://ionicframework.com/docs/img/demos/avatar.svg";
+                    }}
                   />
                 </div>
-                <div className="vehicle-details">
-                  <IonText className="vehicle-brand">
-                    <h3>{request.vehicle?.brand || "N/A"}</h3>
+                <div className="user-info">
+                  <IonText className="user-name">
+                    <h3>Tu</h3>
                   </IonText>
-                  <IonText color="medium" className="vehicle-model">
-                    <p>{request.vehicle?.model || "N/A"}</p>
-                  </IonText>
-                </div>
-                <div className="distance-time-info">
-                  <IonText className="distance">
-                    <strong>{request.durationMin || "N/A"} Min</strong>
-                  </IonText>
-                  <IonText color="medium" className="distance-km">
-                    {request.distanceKm || "N/A"} km
+                  <IonText color="medium" className="user-address">
+                    <p>{driverAddress}</p>
                   </IonText>
                 </div>
               </div>
 
-              <div className="problem-section">
-                <IonText color="medium" className="section-label">
-                  Problema
-                </IonText>
-                <IonText className="problem-text">
-                  {request.problem || "Sin descripción"}
-                </IonText>
+              {/* Origen aproximado */}
+              <div className="location-section">
+                <div className="location-icon">
+                  <Location size="24" variant="Bold" color="#3880ff" />
+                </div>
+                <div className="location-text">
+                  <IonText color="medium" className="location-label">
+                    Origen aproximado
+                  </IonText>
+                  <IonText className="location-address">
+                    {request.origin.address}
+                  </IonText>
+                </div>
               </div>
+
+              {/* Destino */}
+              <div className="location-section">
+                <div className="location-icon-destination">
+                  <Location size="24" variant="Bold" color="#eb445a" />
+                </div>
+                <div className="location-text">
+                  <IonText color="medium" className="location-label">
+                    Destino
+                  </IonText>
+                  <IonText className="location-address">
+                    {request.destination.address}
+                  </IonText>
+                </div>
+              </div>
+
+              {/* Vehículo y Problema */}
+              <div className="vehicle-problem-card">
+                <div className="vehicle-info-request-detail">
+                  <div className="vehicle-icon-request-detail">
+                    <img
+                      src={getVehicleIcon(
+                        request.vehicle?.icon ||
+                          request.vehicleSnapshot?.category?.id ||
+                          "🚗",
+                      )}
+                      alt={
+                        typeof request.vehicle?.category === "object"
+                          ? request.vehicle?.category?.name
+                          : request.vehicle?.category ||
+                            request.vehicleSnapshot?.category?.name ||
+                            "Vehículo"
+                      }
+                      className="vehicle-svg-icon"
+                    />
+                  </div>
+                  <div className="vehicle-details-request-detail">
+                    <h3 className="vehicle-brand-request-detail">
+                      {typeof request.vehicle?.brand === "object"
+                        ? request.vehicle?.brand?.name
+                        : request.vehicle?.brand ||
+                          request.vehicleSnapshot?.brand?.name ||
+                          "N/A"}
+                    </h3>
+                    <p className="vehicle-model-request-detail">
+                      {typeof request.vehicle?.model === "object"
+                        ? request.vehicle?.model?.id
+                        : request.vehicle?.model ||
+                          request.vehicleSnapshot?.model?.id ||
+                          "N/A"}
+                    </p>
+                  </div>
+                  <div className="distance-time-info">
+                      <p className="vehicle-brand-request-detail">{request.durationMin || "N/A"} Min</p>
+                      <p className="vehicle-model-request-detail">{request.distanceKm || "N/A"} km</p>
+                  </div>
+                </div>
+
+                <div className="problem-section">
+                  <IonText color="medium" className="section-label">
+                    Problema
+                  </IonText>
+                  <IonText className="problem-text">
+                    {request.problem || "Sin descripción"}
+                  </IonText>
+                </div>
+
+                {/* Datos adicionales del vehículo */}
+                {(request.vehicleSnapshot?.isArmored ||
+                  request.serviceDetails?.basement?.isInBasement ||
+                  request.vehicleSnapshot?.truckData ||
+                  request.vehicleSnapshot?.busData) && (
+                  <div className="vehicle-additional-badge-request-detail">
+                    {/* Blindado (Autos y Camionetas) */}
+                    {request.vehicleSnapshot?.isArmored && (
+                      <div className="detail-badge">🛡️ Blindado</div>
+                    )}
+
+                    {/* Sótano (del serviceDetails actual) */}
+                    {request.serviceDetails?.basement?.isInBasement && (
+                      <div className="detail-badge">
+                        🏢 Sótano nivel {request.serviceDetails.basement.level}
+                      </div>
+                    )}
+
+                    {/* Datos específicos de CAMIONES */}
+                    {request.vehicleSnapshot?.truckData && (
+                      <>
+                        {request.vehicleSnapshot.truckData.trailerType && (
+                          <div className="detail-badge">
+                            🚛{" "}
+                            {request.vehicleSnapshot.truckData.trailerType
+                              .replace("_", " ")
+                              .replace(/\b\w/g, (l) => l.toUpperCase())}
+                          </div>
+                        )}
+                        {request.vehicleSnapshot.truckData.axleType && (
+                          <div className="detail-badge">
+                            🛞{" "}
+                            {request.vehicleSnapshot.truckData.axleType ===
+                            "sencilla"
+                              ? "Llanta Sencilla"
+                              : "Llanta Doble"}
+                          </div>
+                        )}
+                        {request.vehicleSnapshot.truckData.length && (
+                          <div className="detail-badge">
+                            📏 Largo: {request.vehicleSnapshot.truckData.length}{" "}
+                            m
+                          </div>
+                        )}
+                        {request.vehicleSnapshot.truckData.height && (
+                          <div className="detail-badge">
+                            📐 Alto: {request.vehicleSnapshot.truckData.height}{" "}
+                            m
+                          </div>
+                        )}
+                        {request.vehicleSnapshot.truckData.tonnage && (
+                          <div className="detail-badge">
+                            ⚖️ {request.vehicleSnapshot.truckData.tonnage} ton
+                          </div>
+                        )}
+                        {request.serviceDetails?.truckCurrentState
+                          ?.isLoaded && (
+                          <div className="detail-badge">
+                            📦 Cargado:{" "}
+                            {
+                              request.serviceDetails.truckCurrentState
+                                .currentWeight
+                            }{" "}
+                            ton
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Datos específicos de BUSES */}
+                    {request.vehicleSnapshot?.busData && (
+                      <>
+                        {request.vehicleSnapshot.busData.passengerCapacity && (
+                          <div className="detail-badge">
+                            👥{" "}
+                            {request.vehicleSnapshot.busData.passengerCapacity}{" "}
+                            pasajeros
+                          </div>
+                        )}
+                        {request.vehicleSnapshot.busData.axleType && (
+                          <div className="detail-badge">
+                            🛞{" "}
+                            {request.vehicleSnapshot.busData.axleType ===
+                            "sencilla"
+                              ? "Llanta Sencilla"
+                              : "Llanta Doble"}
+                          </div>
+                        )}
+                        {request.vehicleSnapshot.busData.length && (
+                          <div className="detail-badge">
+                            📏 Largo: {request.vehicleSnapshot.busData.length} m
+                          </div>
+                        )}
+                        {request.vehicleSnapshot.busData.height && (
+                          <div className="detail-badge">
+                            📐 Alto: {request.vehicleSnapshot.busData.height} m
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                
+              </div>
+
+              {/* Botón de enviar cotización */}
+              <button
+                expand="block"
+                onClick={handleSendQuote}
+                className="send-quote-button"
+              >
+                Enviar cotización
+              </button>
             </div>
-
-            {/* Botón de enviar cotización */}
-            <button
-              expand="block"
-              onClick={handleSendQuote}
-              className="send-quote-button"
-            >
-              Enviar cotización
-            </button>
           </div>
         </div>
       </div>

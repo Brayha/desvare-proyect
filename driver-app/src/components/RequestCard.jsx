@@ -46,12 +46,9 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
     if (myQuote) {
       return (
         <div className="my-quote-badge-container">
-          <IonBadge mode="ios" color="success" className="my-quote-badge">
-            ✓ Tu Cotización
+          <IonBadge mode="ios" color="secondary" className="my-quote-badge">
+          ${myQuote.amount.toLocaleString('es-CO')}
           </IonBadge>
-          <IonText className="my-quote-amount">
-            ${myQuote.amount.toLocaleString('es-CO')}
-          </IonText>
         </div>
       );
     }
@@ -65,7 +62,7 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
     }
     if (request.quotesCount > 0) {
       return (
-        <IonBadge mode="ios" color="warning">
+        <IonBadge mode="ios" color="secondary">
           {request.quotesCount} Cotización{request.quotesCount > 1 ? 'es' : ''}
         </IonBadge>
       );
@@ -92,8 +89,37 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
           {getStatusBadge()}
         </div>
 
-        {/* Vehículo */}
-        <div className="vehicle-section">
+       
+        <div className="location-section-wrapper">
+          {/* Origen */}
+          <div className="location-section">
+            <Location size="24" variant="Bold" color="#0055FF" />
+            <div className="location-text">
+              <IonText color="medium" className="location-label">
+                Origen aproximado
+              </IonText>
+              <IonText className="location-address">
+                {request.origin.address}
+              </IonText>
+            </div>
+          </div>
+
+          {/* Destino */}
+          <div className="location-section">
+            <Location size="24" variant="Bold" color="#FF5500" />
+            <div className="location-text">
+              <IonText color="medium" className="location-label">
+                Destino
+              </IonText>
+              <IonText className="location-address">
+                {request.destination.address}
+              </IonText>
+            </div>
+          </div>
+        </div>
+
+         {/* Vehículo */}
+         <div className="vehicle-section">
           <div className="vehicle-info">
             <div className="vehicle-icon">
               <img
@@ -128,33 +154,6 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
             <IonText className="problem-text">
               {request.problem || "Sin descripción"}
             </IonText>
-          </div>
-        </div>
-        <div className="location-section-wrapper">
-          {/* Origen */}
-          <div className="location-section">
-            <Location size="24" variant="Bold" color="#0055FF" />
-            <div className="location-text">
-              <IonText color="medium" className="location-label">
-                Origen aproximado
-              </IonText>
-              <IonText className="location-address">
-                {request.origin.address}
-              </IonText>
-            </div>
-          </div>
-
-          {/* Destino */}
-          <div className="location-section">
-            <Location size="24" variant="Bold" color="#FF5500" />
-            <div className="location-text">
-              <IonText color="medium" className="location-label">
-                Destino
-              </IonText>
-              <IonText className="location-address">
-                {request.destination.address}
-              </IonText>
-            </div>
           </div>
         </div>
       </div>

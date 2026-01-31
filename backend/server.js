@@ -218,7 +218,7 @@ io.on('connection', (socket) => {
       destination: data.destination,
       distance: data.distance,
       duration: data.duration,
-      // ✅ AGREGADO: Datos del vehículo
+      // ✅ Datos básicos del vehículo (para compatibilidad)
       vehicle: data.vehicleSnapshot ? {
         category: data.vehicleSnapshot.category?.name || 'N/A',
         brand: data.vehicleSnapshot.brand?.name || 'N/A',
@@ -226,7 +226,11 @@ io.on('connection', (socket) => {
         licensePlate: data.vehicleSnapshot.licensePlate || 'N/A',
         icon: getCategoryIcon(data.vehicleSnapshot.category?.id)
       } : null,
-      // ✅ AGREGADO: Datos del servicio (problema)
+      // ✅ NUEVO: Snapshot completo del vehículo (con truckData y busData)
+      vehicleSnapshot: data.vehicleSnapshot,
+      // ✅ NUEVO: Detalles completos del servicio (problema, sótano, carga actual)
+      serviceDetails: data.serviceDetails,
+      // ✅ Problema (para compatibilidad)
       problem: data.serviceDetails?.problem || 'Sin descripción',
       // Distancia y tiempo formateados
       distanceKm: (data.distance / 1000).toFixed(1),

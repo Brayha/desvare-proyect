@@ -8,11 +8,6 @@
 }
 
 /* Sections */
-.cancellation-reason-section,
-.vehicle-section,
-.client-section {
-  margin-bottom: 20px;
-}
 
 .section-title {
   font-size: 20px;

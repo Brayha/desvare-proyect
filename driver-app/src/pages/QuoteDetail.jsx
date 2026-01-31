@@ -18,7 +18,7 @@ import {
 import { Location } from "iconsax-react";
 import { requestAPI } from "../services/api";
 import RequestDetailMap from "../components/RequestDetailMap";
-import "./RequestDetail.css"; // ✅ Reutilizar el mismo CSS
+import "./QuoteDetail.css"; // ✅ Reutilizar el mismo CSS
 
 // Importar iconos SVG de vehículos
 import carIcon from "../../../shared/src/img/vehicles/car.svg";
@@ -194,6 +194,7 @@ const QuoteDetail = () => {
   };
 
   const getVehicleIcon = (iconEmoji) => {
+    // Mapeo de emojis
     const iconMap = {
       "🏍️": motoIcon,
       "🚗": carIcon,
@@ -201,7 +202,18 @@ const QuoteDetail = () => {
       "🚚": camionIcon,
       "🚌": busIcon,
     };
-    return iconMap[iconEmoji] || carIcon;
+    
+    // Mapeo de IDs de categoría
+    const categoryMap = {
+      "MOTOS": motoIcon,
+      "AUTOS": carIcon,
+      "CAMIONETAS": camionetaIcon,
+      "CAMIONES": camionIcon,
+      "BUSES": busIcon,
+    };
+    
+    // Intentar primero por emoji, luego por ID de categoría
+    return iconMap[iconEmoji] || categoryMap[iconEmoji] || carIcon;
   };
 
   const handleCancelQuote = () => {
@@ -444,218 +456,288 @@ const QuoteDetail = () => {
         </div>
 
         {/* Contenido de detalles */}
-        <div className="detail-content">
-          <div className="request-detail-content">
-            {/* Badge de Estado y Tiempo */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-                marginBottom: "5px",
-              }}
-            >
-              {getStatusBadge()}
-              <IonText color="medium" style={{ fontSize: "13px" }}>
-                Enviada hace {timeElapsed}
-              </IonText>
-            </div>
-
-            {/* Monto Cotizado Destacado */}
-            <div
-              style={{
-                width: "100%",
-                background: "linear-gradient(135deg, #3880ff 0%, #5260ff 100%)",
-                padding: "20px",
-                borderRadius: "15px",
-                textAlign: "center",
-                marginBottom: "10px",
-                boxShadow: "0 4px 10px rgba(56, 128, 255, 0.3)",
-              }}
-            >
-              <IonText
+        <div className="detail-content-quote-detail">
+          <div className="request-detail-content-quote-detail">
+            <h2 className="type-title">Pendiente de aceptación</h2>
+            <div className="pending-quote-container">
+              {/* Monto Cotizado Destacado */}
+              <div
                 style={{
-                  color: "white",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  display: "block",
-                  marginBottom: "5px",
+                  width: "100%",
+                  background: "#fff",
+                  padding: "10px",
+                  borderRadius: "15px",
+                  textAlign: "center",
+                  marginBottom: "10px",
+                  border: "1px solid #E5E7EB",
                 }}
               >
-                💰 Tu Cotización
-              </IonText>
-              <IonText
-                style={{
-                  color: "white",
-                  fontSize: "36px",
-                  fontWeight: "bold",
-                  display: "block",
-                }}
-              >
-                ${myQuote.amount.toLocaleString()}
-              </IonText>
-            </div>
-            {/* Información del conductor (Tu ubicación) */}
-            <div className="user-location-card">
-              <div className="user-avatar">
-                <img
-                  src={driverPhoto}
-                  alt="Conductor"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://ionicframework.com/docs/img/demos/avatar.svg";
+                <IonText
+                  style={{
+                    color: "#4B5563",
+                    fontSize: "36px",
+                    fontWeight: "bold",
+                    display: "block",
                   }}
-                />
-              </div>
-              <div className="user-info">
-                <IonText className="user-name">
-                  <h3>Tu</h3>
+                >
+                  ${myQuote.amount.toLocaleString()}
                 </IonText>
-                <IonText color="medium" className="user-address">
-                  <p>{driverAddress}</p>
-                </IonText>
+                <h4 className="pending-quote-time">
+                  {" "}
+                  Enviada hace {timeElapsed}
+                </h4>
               </div>
-            </div>
+              {/* Información del conductor (Tu ubicación) */}
+              <div className="user-location-card">
+                <div className="user-avatar">
+                  <img
+                    src={driverPhoto}
+                    alt="Conductor"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://ionicframework.com/docs/img/demos/avatar.svg";
+                    }}
+                  />
+                </div>
+                <div className="user-info">
+                  <IonText className="user-name">
+                    <h3>Tu</h3>
+                  </IonText>
+                  <IonText color="medium" className="user-address">
+                    <p>{driverAddress}</p>
+                  </IonText>
+                </div>
+              </div>
 
-            {/* Origen aproximado */}
-            <div className="location-section">
-              <div className="location-icon">
-                <Location size="24" variant="Bold" color="#3880ff" />
+              {/* Origen aproximado */}
+              <div className="location-section">
+                <div className="location-icon">
+                  <Location size="24" variant="Bold" color="#3880ff" />
+                </div>
+                <div className="location-text">
+                  <IonText color="medium" className="location-label">
+                    Origen aproximado
+                  </IonText>
+                  <IonText className="location-address">
+                    {request.origin.address}
+                  </IonText>
+                </div>
               </div>
-              <div className="location-text">
-                <IonText color="medium" className="location-label">
-                  Origen aproximado
-                </IonText>
-                <IonText className="location-address">
-                  {request.origin.address}
-                </IonText>
-              </div>
-            </div>
 
-            {/* Destino */}
-            <div className="location-section">
-              <div className="location-icon-destination">
-                <Location size="24" variant="Bold" color="#eb445a" />
+              {/* Destino */}
+              <div className="location-section">
+                <div className="location-icon-destination">
+                  <Location size="24" variant="Bold" color="#eb445a" />
+                </div>
+                <div className="location-text">
+                  <IonText color="medium" className="location-label">
+                    Destino
+                  </IonText>
+                  <IonText className="location-address">
+                    {request.destination.address}
+                  </IonText>
+                </div>
               </div>
-              <div className="location-text">
-                <IonText color="medium" className="location-label">
-                  Destino
-                </IonText>
-                <IonText className="location-address">
-                  {request.destination.address}
-                </IonText>
-              </div>
-            </div>
 
-            {/* Vehículo y Problema */}
-            {request.vehicleSnapshot && (
-              <div className="vehicle-problem-card">
-                <div className="vehicle-info">
-                  <div className="vehicle-icon">
-                    <img
-                      src={getVehicleIcon(
-                        request.vehicleSnapshot.vehicle?.icon,
-                      )}
-                      alt={request.vehicleSnapshot.category?.name || "Vehículo"}
-                      className="vehicle-svg-icon"
-                    />
-                  </div>
-                  <div className="vehicle-details">
-                    <IonText className="vehicle-brand">
-                      <h3>{request.vehicleSnapshot.brand?.name || "N/A"}</h3>
-                    </IonText>
-                    <IonText color="medium" className="vehicle-model">
-                      <p>{request.vehicleSnapshot.model?.name || "N/A"}</p>
-                    </IonText>
-                  </div>
-                  <div className="distance-time-info">
-                    <IonText className="distance">
-                      <strong>
+              {/* Vehículo y Problema */}
+              {request.vehicleSnapshot && (
+                <div className="vehicle-problem-card-quote-detail">
+                  <div className="vehicle-info-quote-detail">
+                    <div className="vehicle-icon-quote-detail">
+                      <img
+                        src={getVehicleIcon(
+                          request.vehicleSnapshot.category?.id || "🚗"
+                        )}
+                        alt={
+                          request.vehicleSnapshot.category?.name || "Vehículo"
+                        }
+                        className="vehicle-svg-icon"
+                      />
+                    </div>
+                    <div className="vehicle-details-quote-detail">
+                      <h3 className="vehicle-brand-quote-detail">
+                        {request.vehicleSnapshot.brand?.name || "N/A"}
+                      </h3>
+
+                      <p className="vehicle-model-quote-detail">
+                        {request.vehicleSnapshot.model?.name || "N/A"}
+                      </p>
+                    </div>
+                    <div className="distance-time-info">
+                      <p className="distance-quote-detail">
                         {request.durationMin ||
                           Math.round(request.duration / 60)}{" "}
                         Min
-                      </strong>
-                    </IonText>
-                    <IonText color="medium" className="distance-km">
-                      {request.distanceKm ||
-                        (request.distance / 1000).toFixed(1)}{" "}
-                      km
-                    </IonText>
+                      </p>
+                      <p className="distance-km-quote-detail">
+                        {request.distanceKm ||
+                          (request.distance / 1000).toFixed(1)}{" "}
+                        km
+                      </p>
+                    </div>
                   </div>
+
+                  {request.serviceDetails?.problem && (
+                    <div className="problem-section">
+                      <IonText color="medium" className="section-label">
+                        Problema reportado
+                      </IonText>
+                      <IonText className="problem-text">
+                        {request.serviceDetails.problem}
+                      </IonText>
+                    </div>
+                  )}
+
+                  {/* Datos adicionales del vehículo */}
+                  {(request.vehicleSnapshot?.isArmored ||
+                    request.serviceDetails?.basement?.isInBasement ||
+                    request.vehicleSnapshot?.truckData ||
+                    request.vehicleSnapshot?.busData) && (
+                    <div className="vehicle-additional-badge-quote-detail">
+                      {/* Blindado (Autos y Camionetas) */}
+                      {request.vehicleSnapshot?.isArmored && (
+                        <div className="detail-badge">🛡️ Blindado</div>
+                      )}
+                      
+                      {/* Sótano (del serviceDetails actual) */}
+                      {request.serviceDetails?.basement?.isInBasement && (
+                        <div className="detail-badge">
+                          🏢 Sótano nivel {request.serviceDetails.basement.level}
+                        </div>
+                      )}
+                      
+                      {/* Datos específicos de CAMIONES */}
+                      {request.vehicleSnapshot?.truckData && (
+                        <>
+                          {request.vehicleSnapshot.truckData.trailerType && (
+                            <div className="detail-badge">
+                              🚛 {request.vehicleSnapshot.truckData.trailerType
+                                .replace('_', ' ')
+                                .replace(/\b\w/g, l => l.toUpperCase())}
+                            </div>
+                          )}
+                          {request.vehicleSnapshot.truckData.axleType && (
+                            <div className="detail-badge">
+                              🛞 {request.vehicleSnapshot.truckData.axleType === 'sencilla' 
+                                ? 'Llanta Sencilla' 
+                                : 'Llanta Doble'}
+                            </div>
+                          )}
+                          {request.vehicleSnapshot.truckData.length && (
+                            <div className="detail-badge">
+                              📏 Largo: {request.vehicleSnapshot.truckData.length} m
+                            </div>
+                          )}
+                          {request.vehicleSnapshot.truckData.height && (
+                            <div className="detail-badge">
+                              📐 Alto: {request.vehicleSnapshot.truckData.height} m
+                            </div>
+                          )}
+                          {request.vehicleSnapshot.truckData.tonnage && (
+                            <div className="detail-badge">
+                              ⚖️ {request.vehicleSnapshot.truckData.tonnage} ton
+                            </div>
+                          )}
+                          {request.serviceDetails?.truckCurrentState?.isLoaded && (
+                            <div className="detail-badge">
+                              📦 Cargado: {request.serviceDetails.truckCurrentState.currentWeight} ton
+                            </div>
+                          )}
+                        </>
+                      )}
+                      
+                      {/* Datos específicos de BUSES */}
+                      {request.vehicleSnapshot?.busData && (
+                        <>
+                          {request.vehicleSnapshot.busData.passengerCapacity && (
+                            <div className="detail-badge">
+                              👥 {request.vehicleSnapshot.busData.passengerCapacity} pasajeros
+                            </div>
+                          )}
+                          {request.vehicleSnapshot.busData.axleType && (
+                            <div className="detail-badge">
+                              🛞 {request.vehicleSnapshot.busData.axleType === 'sencilla' 
+                                ? 'Llanta Sencilla' 
+                                : 'Llanta Doble'}
+                            </div>
+                          )}
+                          {request.vehicleSnapshot.busData.length && (
+                            <div className="detail-badge">
+                              📏 Largo: {request.vehicleSnapshot.busData.length} m
+                            </div>
+                          )}
+                          {request.vehicleSnapshot.busData.height && (
+                            <div className="detail-badge">
+                              📐 Alto: {request.vehicleSnapshot.busData.height} m
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
+              )}
 
-                {request.serviceDetails?.problem && (
-                  <div className="problem-section">
-                    <IonText color="medium" className="section-label">
-                      Problema reportado
-                    </IonText>
-                    <IonText className="problem-text">
-                      {request.serviceDetails.problem}
-                    </IonText>
-                  </div>
-                )}
-              </div>
-            )}
+              {/* Botón Cancelar Cotización (solo si está pendiente) */}
+              {myQuote.status === "pending" && (
+                <button
+                  expand="block"
+                  onClick={handleCancelQuote}
+                  disabled={cancelling}
+                  className="send-quote-button"
+                  style={{ background: "#eb445a" }}
+                >
+                  {cancelling ? "Cancelando..." : "Cancelar Cotización"}
+                </button>
+              )}
 
-            {/* Botón Cancelar Cotización (solo si está pendiente) */}
-            {myQuote.status === "pending" && (
-              <button
-                expand="block"
-                onClick={handleCancelQuote}
-                disabled={cancelling}
-                className="send-quote-button"
-                style={{ background: "#eb445a" }}
-              >
-                {cancelling ? "Cancelando..." : "Cancelar Cotización"}
-              </button>
-            )}
+              {/* Mensaje si ya fue cancelada o expirada */}
+              {(myQuote.status === "cancelled" ||
+                myQuote.status === "expired") && (
+                <div
+                  style={{
+                    padding: "15px",
+                    background: "#f4f4f4",
+                    borderRadius: "10px",
+                    textAlign: "center",
+                    width: "100%",
+                  }}
+                >
+                  <IonText color="medium">
+                    <p style={{ margin: "0" }}>
+                      {myQuote.status === "cancelled"
+                        ? "❌ Esta cotización fue cancelada"
+                        : "⏰ Esta cotización expiró"}
+                    </p>
+                  </IonText>
+                </div>
+              )}
 
-            {/* Mensaje si ya fue cancelada o expirada */}
-            {(myQuote.status === "cancelled" ||
-              myQuote.status === "expired") && (
-              <div
-                style={{
-                  padding: "15px",
-                  background: "#f4f4f4",
-                  borderRadius: "10px",
-                  textAlign: "center",
-                  width: "100%",
-                }}
-              >
-                <IonText color="medium">
-                  <p style={{ margin: "0" }}>
-                    {myQuote.status === "cancelled"
-                      ? "❌ Esta cotización fue cancelada"
-                      : "⏰ Esta cotización expiró"}
-                  </p>
-                </IonText>
-              </div>
-            )}
-
-            {/* Mensaje si fue aceptada */}
-            {myQuote.status === "accepted" && (
-              <div
-                style={{
-                  padding: "20px",
-                  background:
-                    "linear-gradient(135deg, #10dc60 0%, #24d6a3 100%)",
-                  borderRadius: "15px",
-                  textAlign: "center",
-                  width: "100%",
-                  boxShadow: "0 4px 10px rgba(16, 220, 96, 0.3)",
-                }}
-              >
-                <IonText style={{ color: "white" }}>
-                  <h3 style={{ margin: "0 0 8px 0" }}>
-                    🎉 ¡Cotización Aceptada!
-                  </h3>
-                  <p style={{ margin: "0", fontSize: "14px" }}>
-                    El cliente aceptó tu cotización. Prepárate para el servicio.
-                  </p>
-                </IonText>
-              </div>
-            )}
+              {/* Mensaje si fue aceptada */}
+              {myQuote.status === "accepted" && (
+                <div
+                  style={{
+                    padding: "20px",
+                    background:
+                      "linear-gradient(135deg, #10dc60 0%, #24d6a3 100%)",
+                    borderRadius: "15px",
+                    textAlign: "center",
+                    width: "100%",
+                    boxShadow: "0 4px 10px rgba(16, 220, 96, 0.3)",
+                  }}
+                >
+                  <IonText style={{ color: "white" }}>
+                    <h3 style={{ margin: "0 0 8px 0" }}>
+                      🎉 ¡Cotización Aceptada!
+                    </h3>
+                    <p style={{ margin: "0", fontSize: "14px" }}>
+                      El cliente aceptó tu cotización. Prepárate para el
+                      servicio.
+                    </p>
+                  </IonText>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

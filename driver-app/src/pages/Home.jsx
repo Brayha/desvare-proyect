@@ -144,6 +144,10 @@ const Home = () => {
           model: 'N/A',
           licensePlate: 'N/A'
         },
+        // ✅ NUEVO: Preservar vehicleSnapshot completo (con truckData y busData)
+        vehicleSnapshot: request.vehicleSnapshot,
+        // ✅ NUEVO: Preservar serviceDetails completo (problema, sótano, carga)
+        serviceDetails: request.serviceDetails,
         // ✅ Asegurar que problem existe
         problem: request.problem || 'Sin descripción',
         // ✅ Asegurar que distanceKm y durationMin existen
@@ -152,6 +156,8 @@ const Home = () => {
       };
       
       console.log('✅ Solicitud normalizada:', normalizedRequest);
+      console.log('🚗 VehicleSnapshot:', normalizedRequest.vehicleSnapshot);
+      console.log('📝 ServiceDetails:', normalizedRequest.serviceDetails);
       setRequests((prev) => [normalizedRequest, ...prev]);
       
       // Toast con botón "Ver" interactivo
