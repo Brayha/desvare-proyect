@@ -123,10 +123,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Socket.IO - Manejo de conexiones en tiempo real
 const connectedDrivers = new Map(); // Almacena { driverId: { socketId, isOnline } }
 const connectedClients = new Map(); // Almacena socket.id de clientes conectados
+const activeServices = new Map(); // Almacena { requestId: { clientId, driverId, clientSocketId, driverSocketId } }
 
 // 🆕 EXPORTAR para usarlo en las rutas
 global.connectedClients = connectedClients;
 global.connectedDrivers = connectedDrivers;
+global.activeServices = activeServices;
 
 io.on('connection', (socket) => {
   console.log('🔌 Nuevo cliente conectado:', socket.id);
@@ -410,8 +412,21 @@ io.on('connection', (socket) => {
     console.log(`🚗 Conductor aceptado: ${data.acceptedDriverId}`);
     console.log(`❌ Otros conductores: ${data.otherDriverIds?.length || 0}`);
     
-    // Notificar al conductor aceptado
+    // 🆕 Guardar servicio activo para tracking
+    const clientSocketId = connectedClients.get(data.clientId);
     const driverData = connectedDrivers.get(data.acceptedDriverId);
+    
+    if (clientSocketId && driverData) {
+      activeServices.set(data.requestId, {
+        clientId: data.clientId,
+        driverId: data.acceptedDriverId,
+        clientSocketId: clientSocketId,
+        driverSocketId: driverData.socketId
+      });
+      console.log(`📍 Servicio ${data.requestId} registrado para tracking en tiempo real`);
+    }
+    
+    // Notificar al conductor aceptado
     if (driverData) {
       io.to(driverData.socketId).emit('service:accepted', {
         requestId: data.requestId,
@@ -468,6 +483,12 @@ io.on('connection', (socket) => {
     console.log(`🚗 Conductor: ${data.driverName}`);
     console.log(`📦 Request ID: ${data.requestId}`);
     
+    // 🆕 Eliminar servicio activo del tracking
+    if (data.requestId) {
+      activeServices.delete(data.requestId);
+      console.log(`📍 Servicio ${data.requestId} removido del tracking`);
+    }
+    
     // Notificar al cliente que el servicio fue completado
     const clientSocketId = connectedClients.get(data.clientId);
     if (clientSocketId) {
@@ -495,6 +516,46 @@ io.on('connection', (socket) => {
       }
     } else {
       console.log(`⚠️ Conductor ${data.driverId} no está conectado`);
+    }
+  });
+
+  // ========================================
+  // 🆕 TRACKING EN TIEMPO REAL - Ubicación del Conductor
+  // ========================================
+  socket.on('driver:location-update', (data) => {
+    const { requestId, driverId, location, heading, speed, accuracy } = data;
+    
+    // Buscar el servicio activo
+    const service = activeServices.get(requestId);
+    
+    if (service && service.clientSocketId) {
+      // Enviar ubicación al cliente
+      io.to(service.clientSocketId).emit('driver:location-update', {
+        requestId,
+        driverId,
+        location: {
+          lat: location.lat,
+          lng: location.lng
+        },
+        heading: heading || 0,
+        speed: speed || 0,
+        accuracy: accuracy || 0,
+        timestamp: new Date()
+      });
+      
+      // Log cada 10 actualizaciones para no saturar consola
+      if (!socket.locationUpdateCount) socket.locationUpdateCount = 0;
+      socket.locationUpdateCount++;
+      
+      if (socket.locationUpdateCount % 10 === 0) {
+        console.log(`📍 Ubicación actualizada - Conductor: ${driverId} → Cliente: ${service.clientId}`);
+      }
+    } else {
+      // Solo log la primera vez que no encuentra el servicio
+      if (!socket.serviceNotFoundLogged) {
+        console.log(`⚠️ Servicio ${requestId} no encontrado en activeServices`);
+        socket.serviceNotFoundLogged = true;
+      }
     }
   });
 

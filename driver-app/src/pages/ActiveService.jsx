@@ -156,6 +156,140 @@ const ActiveService = () => {
     }
   }, [history, present]);
 
+  // 🆕 TRACKING EN TIEMPO REAL - Enviar ubicación GPS al cliente
+  useEffect(() => {
+    let watchId = null;
+    let lastSentLocation = null;
+    const MIN_DISTANCE_METERS = 10; // Solo enviar si se movió más de 10 metros
+    
+    // Función para calcular distancia entre dos puntos (Haversine)
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+      const R = 6371e3; // Radio de la Tierra en metros
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+      const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+      return R * c; // Distancia en metros
+    };
+    
+    const startLocationTracking = () => {
+      if (!serviceData || !serviceData.requestId) {
+        console.log('⚠️ No hay servicio activo para tracking');
+        return;
+      }
+      
+      console.log('📍 Iniciando tracking GPS en tiempo real...');
+      
+      // 🆕 ESTRATEGIA HÍBRIDA: Primero ubicación rápida, luego GPS preciso
+      
+      // PASO 1: Obtener ubicación inicial rápida (WiFi/Cell - 2-3 segundos)
+      console.log('⚡ Obteniendo ubicación inicial rápida...');
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          
+          const heading = position.coords.heading || 0;
+          const speed = position.coords.speed || 0;
+          const accuracy = position.coords.accuracy || 0;
+          
+          // Enviar ubicación inicial inmediatamente
+          socketService.sendLocationUpdate({
+            requestId: serviceData.requestId,
+            driverId: serviceData.driverId,
+            location,
+            heading,
+            speed,
+            accuracy
+          });
+          
+          lastSentLocation = location;
+          console.log('⚡ Ubicación inicial enviada (rápida):', location, `Precisión: ±${accuracy}m`);
+        },
+        (error) => {
+          console.warn('⚠️ No se pudo obtener ubicación rápida:', error.message);
+          // No es crítico, el watchPosition tomará el control
+        },
+        {
+          enableHighAccuracy: false,  // Ubicación rápida (WiFi/Cell)
+          timeout: 5000,              // Solo 5 segundos
+          maximumAge: 30000           // Acepta ubicaciones de hasta 30s
+        }
+      );
+      
+      // PASO 2: Iniciar tracking continuo de alta precisión (GPS)
+      console.log('🎯 Iniciando tracking GPS de alta precisión...');
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          
+          const heading = position.coords.heading || 0;
+          const speed = position.coords.speed || 0;
+          const accuracy = position.coords.accuracy || 0;
+          
+          // Solo enviar si se movió más de 10 metros
+          let shouldSend = true;
+          if (lastSentLocation) {
+            const distance = calculateDistance(
+              lastSentLocation.lat,
+              lastSentLocation.lng,
+              location.lat,
+              location.lng
+            );
+            shouldSend = distance >= MIN_DISTANCE_METERS;
+          }
+          
+          if (shouldSend) {
+            // Enviar ubicación vía Socket.IO
+            socketService.sendLocationUpdate({
+              requestId: serviceData.requestId,
+              driverId: serviceData.driverId,
+              location,
+              heading,
+              speed,
+              accuracy
+            });
+            
+            lastSentLocation = location;
+            console.log('📍 Ubicación GPS enviada:', location, `Precisión: ±${accuracy}m`);
+          }
+        },
+        (error) => {
+          console.error('❌ Error obteniendo GPS:', error);
+        },
+        {
+          enableHighAccuracy: true,  // GPS de alta precisión
+          timeout: 20000,            // 20 segundos (más tiempo para GPS)
+          maximumAge: 5000           // Usar ubicación cacheada si tiene menos de 5s
+        }
+      );
+    };
+    
+    // Iniciar tracking solo si hay servicio activo
+    if (serviceData && serviceData.requestId) {
+      startLocationTracking();
+    }
+    
+    // Cleanup: detener tracking al desmontar
+    return () => {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        console.log('🛑 Tracking GPS detenido');
+      }
+    };
+  }, [serviceData]);
+
   const loadDriverPhoto = async () => {
     try {
       const userData = localStorage.getItem("user");

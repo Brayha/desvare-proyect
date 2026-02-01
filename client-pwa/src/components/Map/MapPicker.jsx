@@ -24,6 +24,10 @@ const INITIAL_VIEW_STATE = {
  * @param {Function} onRouteCalculated - Callback cuando se calcula una ruta
  * @param {Array} quotes - Cotizaciones con ubicación de conductores
  * @param {Function} onQuoteClick - Callback cuando se hace click en un price marker
+ * @param {Object} driverLocation - Ubicación en tiempo real del conductor { lat, lng }
+ * @param {Number} driverHeading - Dirección del vehículo (0-360°)
+ * @param {String} driverPhoto - URL de la foto del conductor
+ * @param {String} driverName - Nombre del conductor
  */
 const MapPicker = ({
   origin,
@@ -31,6 +35,10 @@ const MapPicker = ({
   onRouteCalculated,
   quotes = [],
   onQuoteClick = null,
+  driverLocation = null,
+  driverHeading = 0,
+  driverPhoto = null,
+  driverName = 'Conductor',
 }) => {
   const mapRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -122,6 +130,35 @@ const MapPicker = ({
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quotes.length, origin, destination, isMapLoaded]); // ✅ Incluir isMapLoaded
+
+  // 🆕 Ajustar viewport cuando aparece la ubicación del conductor (tracking en tiempo real)
+  useEffect(() => {
+    if (!origin || !driverLocation || !mapRef.current || !isMapLoaded) return;
+
+    console.log('🚗 Ajustando mapa para mostrar conductor + origen');
+
+    // Crear bounds que incluyan origen y conductor
+    const coordinates = [
+      [origin.lng, origin.lat],
+      [driverLocation.lng, driverLocation.lat]
+    ];
+
+    const bounds = coordinates.reduce((bounds, coord) => {
+      return bounds.extend(coord);
+    }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+
+    // Aplicar bounds con padding generoso
+    mapRef.current.fitBounds(bounds, {
+      padding: {
+        top: 100,
+        bottom: 250,  // Espacio para la tarjeta del conductor
+        left: 80,
+        right: 80,
+      },
+      duration: 1500,
+      maxZoom: 15, // No acercar demasiado
+    });
+  }, [driverLocation, origin, isMapLoaded]);
 
   const calculateRoute = async () => {
     setIsCalculatingRoute(true);
@@ -228,6 +265,55 @@ const MapPicker = ({
             </Marker>
           );
         })}
+
+        {/* 🆕 Marcador del Conductor en Tiempo Real (con foto circular) */}
+        {driverLocation && (
+          <Marker
+            longitude={driverLocation.lng}
+            latitude={driverLocation.lat}
+            anchor="center"
+          >
+            <div className="driver-marker-container">
+              {/* Pulso animado de fondo */}
+              <div className="driver-marker-pulse"></div>
+              
+              {/* Foto circular del conductor */}
+              <div 
+                className="driver-marker-photo"
+                style={{
+                  transform: `rotate(${driverHeading}deg)`
+                }}
+              >
+                {driverPhoto ? (
+                  <img 
+                    src={driverPhoto} 
+                    alt={driverName}
+                    onError={(e) => {
+                      // Fallback si la imagen no carga
+                      e.target.style.display = 'none';
+                      e.target.parentElement.classList.add('driver-marker-fallback');
+                      e.target.parentElement.textContent = driverName?.charAt(0) || 'C';
+                    }}
+                  />
+                ) : (
+                  <div className="driver-marker-fallback">
+                    {driverName?.charAt(0) || 'C'}
+                  </div>
+                )}
+              </div>
+              
+              {/* Indicador de dirección (flecha) */}
+              <div 
+                className="driver-marker-arrow"
+                style={{
+                  transform: `rotate(${driverHeading}deg)`
+                }}
+              >
+                ▲
+              </div>
+            </div>
+          </Marker>
+        )}
 
         {/* Línea de Ruta */}
         {route && route.geometry && (

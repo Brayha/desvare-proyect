@@ -131,6 +131,28 @@ class SocketService {
       console.warn('⚠️ No se puede completar servicio: Socket no conectado');
     }
   }
+
+  // ========================================
+  // 🆕 TRACKING EN TIEMPO REAL
+  // ========================================
+  
+  sendLocationUpdate(data) {
+    if (this.socket) {
+      this.socket.emit('driver:location-update', data);
+    }
+  }
+
+  onLocationUpdate(callback) {
+    if (this.socket) {
+      this.socket.on('driver:location-update', callback);
+    }
+  }
+
+  offLocationUpdate() {
+    if (this.socket) {
+      this.socket.off('driver:location-update');
+    }
+  }
 }
 
 export default new SocketService();

@@ -25,9 +25,9 @@ const DriverOnWay = () => {
   const [presentAlert] = useIonAlert();
 
   const [serviceData, setServiceData] = useState(null);
-  // const [driverLocation, setDriverLocation] = useState(null); // ← No usado aún
+  const [driverLocation, setDriverLocation] = useState(null); // 🆕 Ubicación en tiempo real del conductor
+  const [driverHeading, setDriverHeading] = useState(0); // 🆕 Dirección del vehículo
   const [isLoading, setIsLoading] = useState(true);
-  // const [estimatedTime, setEstimatedTime] = useState("Calculando..."); // ← No usado aún
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -83,9 +83,22 @@ const DriverOnWay = () => {
       }, 1500);
     });
 
+    // 🆕 Escuchar actualizaciones de ubicación del conductor en tiempo real
+    socketService.onLocationUpdate((data) => {
+      console.log('📍 Ubicación del conductor actualizada:', data);
+      
+      setDriverLocation({
+        lat: data.location.lat,
+        lng: data.location.lng
+      });
+      
+      setDriverHeading(data.heading || 0);
+    });
+
     return () => {
       console.log("🧹 DriverOnWay - Cleanup");
       socketService.offServiceCompleted();
+      socketService.offLocationUpdate(); // 🆕 Limpiar listener de ubicación
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -337,8 +350,12 @@ const DriverOnWay = () => {
             origin={serviceData.origin}
             destination={null}
             onRouteCalculated={() => {}}
-            quotes={[]} // ← Sin ubicación del conductor por ahora
+            quotes={[]}
             onQuoteClick={null}
+            driverLocation={driverLocation} // 🆕 Ubicación en tiempo real
+            driverHeading={driverHeading}   // 🆕 Dirección del vehículo
+            driverPhoto={serviceData.driver?.photo} // 🆕 Foto del conductor
+            driverName={serviceData.driver?.name}   // 🆕 Nombre del conductor
           />
 
           {/* Información del servicio */}
