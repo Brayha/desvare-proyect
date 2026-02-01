@@ -242,26 +242,79 @@ io.on('connection', (socket) => {
   });
 
   // Conductor envía respuesta
-  socket.on('quote:send', (data) => {
+  socket.on('quote:send', async (data) => {
     console.log('💰 Cotización recibida del conductor:', data);
     console.log('📍 Ubicación del conductor:', data.location);
     
-    // Enviar al cliente específico con TODA la información
-    const clientSocketId = connectedClients.get(data.clientId);
-    if (clientSocketId) {
-      const quoteData = {
-        requestId: data.requestId,
-        driverId: data.driverId,
-        driverName: data.driverName,
-        amount: data.amount,
-        location: data.location, // 🆕 INCLUIR UBICACIÓN DEL CONDUCTOR
-        timestamp: new Date()
-      };
+    try {
+      // Buscar información completa del conductor
+      const User = require('./models/User');
+      const driver = await User.findById(data.driverId);
       
-      console.log('📤 Enviando cotización al cliente con ubicación:', quoteData);
-      io.to(clientSocketId).emit('quote:received', quoteData);
-    } else {
-      console.log('⚠️ Cliente no encontrado con ID:', data.clientId);
+      if (!driver) {
+        console.error('❌ Conductor no encontrado:', data.driverId);
+        return;
+      }
+      
+      // 🔍 DEBUG: Ver estructura completa del conductor
+      console.log('🔍 DEBUG - Conductor encontrado:', {
+        id: driver._id,
+        name: driver.name,
+        userType: driver.userType,
+        tieneDriverProfile: !!driver.driverProfile
+      });
+      
+      if (driver.driverProfile) {
+        console.log('🔍 DEBUG - driverProfile:', {
+          status: driver.driverProfile.status,
+          tieneDocuments: !!driver.driverProfile.documents,
+          rating: driver.driverProfile.rating,
+          totalServices: driver.driverProfile.totalServices
+        });
+        
+        if (driver.driverProfile.documents) {
+          console.log('🔍 DEBUG - documents:', {
+            tieneSelfie: !!driver.driverProfile.documents.selfie,
+            selfie: driver.driverProfile.documents.selfie
+          });
+        } else {
+          console.log('❌ DEBUG - NO tiene documents');
+        }
+      } else {
+        console.log('❌ DEBUG - NO tiene driverProfile');
+      }
+      
+      // Enviar al cliente específico con TODA la información
+      const clientSocketId = connectedClients.get(data.clientId);
+      if (clientSocketId) {
+        const quoteData = {
+          requestId: data.requestId,
+          driverId: data.driverId,
+          driverName: data.driverName,
+          amount: data.amount,
+          location: data.location,
+          // ✅ NUEVOS CAMPOS: Información del conductor
+          driverPhoto: driver.driverProfile?.documents?.selfie || null,
+          driverRating: driver.driverProfile?.rating || 5,
+          driverServiceCount: driver.driverProfile?.totalServices || 0,
+          timestamp: new Date()
+        };
+        
+        console.log('📤 Enviando cotización al cliente:', {
+          requestId: quoteData.requestId,
+          driverId: quoteData.driverId,
+          driverName: quoteData.driverName,
+          amount: quoteData.amount,
+          driverPhoto: quoteData.driverPhoto ? `✅ ${quoteData.driverPhoto.substring(0, 50)}...` : '❌ Sin foto',
+          driverRating: quoteData.driverRating,
+          driverServiceCount: quoteData.driverServiceCount
+        });
+        io.to(clientSocketId).emit('quote:received', quoteData);
+      } else {
+        console.log('⚠️ Cliente no encontrado con ID:', data.clientId);
+      }
+    } catch (error) {
+      console.error('❌ Error al procesar cotización:', error);
     }
   });
 

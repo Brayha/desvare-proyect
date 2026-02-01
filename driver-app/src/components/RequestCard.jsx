@@ -46,46 +46,46 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
     if (myQuote) {
       return (
         <div className="my-quote-badge-container">
-          <IonBadge mode="ios" color="secondary" className="my-quote-badge">
+          <div className="card-service-status-badge my-quote-badge">
           ${myQuote.amount.toLocaleString('es-CO')}
-          </IonBadge>
+          </div>
         </div>
       );
     }
     
     if (request.status === "accepted") {
       return (
-        <IonBadge mode="ios" color="success">
+        <div className="card-service-status-badge card-service-approved-badge">
           Aprobada
-        </IonBadge>
+        </div>
       );
     }
     if (request.quotesCount > 0) {
       return (
-        <IonBadge mode="ios" color="secondary">
+        <div className="card-service-status-badge card-service-send">
           {request.quotesCount} Cotización{request.quotesCount > 1 ? 'es' : ''}
-        </IonBadge>
+        </div>
       );
     }
     return (
-      <IonBadge mode="ios" color="primary">
+      <div className="card-service-status-badge card-service-new-badge">
         Nuevo
-      </IonBadge>
+      </div>
     );
   };
 
   return (
     <div
-      className={`request-card ${request.status}`}
+      className={`card-service ${request.status}`}
       onClick={() => onQuote(request)}
       style={{ cursor: "pointer" }}
     >
-      <div className="request-card-content">
+      <div className="card-service-content">
         {/* Header: Hora y Estado */}
-        <div className="card-header">
-          <IonText color="medium" className="time">
+        <div className="card-service-header">
+          <p color="medium" className="time">
             {formatTime(request.timestamp)}
-          </IonText>
+          </p>
           {getStatusBadge()}
         </div>
 
@@ -93,7 +93,7 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
         <div className="location-section-wrapper">
           {/* Origen */}
           <div className="location-section">
-            <Location size="24" variant="Bold" color="#0055FF" />
+            <Location size="24" variant="Bulk" color="#0055FF" />
             <div className="location-text">
               <IonText color="medium" className="location-label">
                 Origen aproximado
@@ -106,7 +106,7 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
 
           {/* Destino */}
           <div className="location-section">
-            <Location size="24" variant="Bold" color="#FF5500" />
+            <Location size="24" variant="Bulk" color="#FF5500" />
             <div className="location-text">
               <IonText color="medium" className="location-label">
                 Destino
@@ -120,7 +120,7 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
 
          {/* Vehículo */}
          <div className="vehicle-section">
-          <div className="vehicle-info">
+          <div className="vehicle-info-service-card">
             <div className="vehicle-icon">
               <img
                 src={getVehicleIcon(request.vehicle?.icon)}
@@ -128,7 +128,7 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
                 className="vehicle-svg-icon"
               />
             </div>
-            <div className="vehicle-details">
+            <div className="vehicle-details-service-card"> 
               <h2 className="vehicle-brand">
                 {request.vehicle?.brand || "N/A"}
               </h2>
@@ -136,13 +136,13 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
                 {request.vehicle?.model || "N/A"}
               </h3>
             </div>
-            <div className="distance-info">
-              <IonText className="distance">
-                <strong>{request.durationMin || "N/A"} Min</strong>
-              </IonText>
-              <IonText className="distance-km" color="medium">
+            <div className="distance-info-service-card">
+              <p className="distance-service-card">
+               {request.durationMin || "N/A"} Min
+              </p>
+              <p className="distance-km-service-card">
                 {request.distanceKm || "N/A"} km
-              </IonText>
+              </p>
             </div>
           </div>
 

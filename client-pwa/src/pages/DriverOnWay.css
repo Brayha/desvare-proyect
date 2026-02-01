@@ -46,6 +46,13 @@
   font-weight: 600;
   color: white;
   flex-shrink: 0;
+  overflow: hidden; /* ✅ Para que la imagen se recorte en círculo */
+}
+
+.driver-avatar-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ✅ Recorta la imagen manteniendo proporciones */
 }
 
 .driver-details h3 {
@@ -153,12 +160,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  align-self: stretch;
+  flex-wrap: nowrap; /* ✅ Evita que los elementos se envuelvan a otra línea */
 }
 
 .confirm-driver-info-details {
   display: flex;
   flex-direction: column;
   gap: 0px;
+  flex: 1; /* ✅ Permite que tome el espacio disponible sin forzar wrap */
+  min-width: 0; /* ✅ Permite que el contenido se ajuste correctamente */
+  justify-content: space-between;
 }
 
 .confirm-driver-info-details h3 {
@@ -173,6 +185,35 @@
   font-size: 14px;
   font-weight: 400;
   color: #666;
+}
+
+.confirm-driver-info-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vehicle-plate-confirmed-driver-on-way {
+  display: inline-flex; /* ✅ Cambiado de flex a inline-flex */
+  padding: 5px 10px; /* ✅ Más padding horizontal */
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: #f6c343;
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap; /* ✅ Evita que el texto se parta en líneas */
+  flex-shrink: 0; /* ✅ No se encoge */
+  margin: 0; /* ✅ Elimina márgenes que puedan causar wrap */
+}
+
+.stars-rating {
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 1px;
 }
 
 .code-box {

@@ -1,4 +1,4 @@
-.request-card {
+.card-service {
   margin-bottom: 16px;
   border-radius: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -10,55 +10,53 @@
   user-select: none;
 }
 
-/* Efecto hover para desktop */
-.request-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-
-/* Efecto activo (click/tap) */
-.request-card:active {
-  transform: translateY(0px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilos específicos según el estado */
-.request-card.pending {
-  border: 2px solid transparent;
-}
-
-.request-card.pending:hover {
-  border: 2px solid rgba(0, 85, 255, 0.3);
-}
-
-.request-card.quoted {
-  border: 2px solid transparent;
-}
-
-.request-card.quoted:hover {
-  border: 2px solid rgba(255, 196, 9, 0.3);
-}
-
-.request-card.accepted {
-  border: 2px solid transparent;
-}
-
-.request-card.accepted:hover {
-  border: 2px solid rgba(45, 211, 111, 0.3);
+.card-service-content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .location-section-wrapper {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px;
 }
 
-.card-header {
+.card-service-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 0px 0 10px;
+}
+
+.card-service-status-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Badge "Nuevo" - Azul */
+.card-service-new-badge {
+  background: #0055ff;
+  color: #fff;
+}
+
+/* Badge "Aprobada" - Verde */
+.card-service-approved-badge {
+  background: #10b981;
+  color: #fff;
+}
+
+/* Badge "X Cotizaciones" - Amarillo */
+.card-service-send {
+  background: #f6c343;
+  color: #000;
 }
 
 /* Contenedor para el badge de "Tu Cotización" con monto */
@@ -67,17 +65,18 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
-  padding: 5px;
 }
 
+/* Badge "Tu Cotización" - Verde */
 .my-quote-badge {
+  background: #F6C343;
+  color: #000;
   font-size: 12px;
-  font-weight: 700;
-  padding: 10px;
-  border-radius: 24px;
-  background: #10b981 !important;
+  padding: 4px 10px;
+  margin: 0;
 }
 
+/* Monto de tu cotización */
 .my-quote-amount {
   font-size: 16px;
   font-weight: 700;
@@ -89,6 +88,7 @@
 .time {
   font-size: 14px;
   font-weight: 600;
+  margin: 0;
 }
 
 .vehicle-section {
@@ -100,61 +100,55 @@
   border-radius: 16px;
   border: 1px solid #e5e7eb;
   background: #f7f7f7;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
 }
 
-.vehicle-info {
+.vehicle-info-service-card {
   display: flex;
+  padding: 0 10px;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 14px;
+  gap: 15px;
+  align-self: stretch;
+  border-radius: 15px;
   border: 1px solid #e5e7eb;
   background: #fff;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
 .vehicle-icon {
-  width: 50px;
-  height: 50px;
-  flex-shrink: 0;
   display: flex;
-  align-items: center;
+  width: 60px;
+  height: 60px;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  gap: 8.571px;
 }
 
-.vehicle-svg-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.vehicle-details {
+.vehicle-details-service-card {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: flex-start;
-  gap: 5px;
+  flex: 1 0 0;
+  border-right: 1px solid #e5e7eb;
 }
 
 .vehicle-brand {
-  display: block;
+  overflow: hidden;
+  color: #4b5563;
   font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 2px;
+  font-weight: bold;
   margin: 0;
-  text-align: left;
 }
 
 .vehicle-model {
-  display: block;
-  font-size: 14px;
+  overflow: hidden;
+  color: #9ca3af;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
   margin: 0;
-  color: #666;
-  margin: 0;
-  text-align: left;
 }
 
 .vehicle-plate {
@@ -162,22 +156,27 @@
   font-size: 14px;
 }
 
-.distance-info {
+.distance-info-service-card {
   text-align: right;
   flex-shrink: 0;
-  border-left: 1px solid #e5e7eb;
-  padding-left: 10px;
 }
 
-.distance {
-  display: block;
+.distance-service-card {
+  overflow: hidden;
+  color: #4b5563;
   font-size: 16px;
-  margin-bottom: 2px;
+  font-weight: bold;
+  margin: 0;
 }
 
-.distance-km {
-  display: block;
+.distance-km-service-card {
+  overflow: hidden;
+  color: #9ca3af;
   font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0;
 }
 
 .problem-section {
@@ -204,7 +203,7 @@
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  margin-bottom:0px;
+  margin-bottom: 0px;
   padding: 10px;
 }
 

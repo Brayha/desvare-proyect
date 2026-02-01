@@ -195,6 +195,9 @@ const WaitingQuotes = () => {
         console.log("💰 Cotización recibida en WaitingQuotes:", quote);
         console.log("📍 Ubicación del conductor:", quote.location);
         console.log("💵 Monto:", quote.amount);
+        console.log("📸 Foto del conductor:", quote.driverPhoto || "❌ Sin foto");
+        console.log("⭐ Rating del conductor:", quote.driverRating || "❌ Sin rating");
+        console.log("🚗 Servicios completados:", quote.driverServiceCount || "❌ Sin servicios");
 
         // ✅ VALIDACIÓN CRÍTICA: Verificar que la cotización sea del request actual
         if (quote.requestId !== currentRequestId) {
@@ -432,6 +435,10 @@ const WaitingQuotes = () => {
             amount: q.amount,
             location: q.location || null,
             timestamp: q.timestamp,
+            // ✅ NUEVOS CAMPOS: Foto, rating y servicios del conductor
+            driverPhoto: q.driverPhoto || null,
+            driverRating: q.driverRating || 5,
+            driverServiceCount: q.driverServiceCount || 0
           }));
 
           setQuotesReceived(formattedQuotes);

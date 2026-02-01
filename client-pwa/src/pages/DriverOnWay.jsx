@@ -10,7 +10,7 @@ import {
   IonSpinner,
   useIonAlert,
 } from "@ionic/react";
-import { call, star } from "ionicons/icons";
+import { call } from "ionicons/icons";
 import { Moneys, Refresh2 } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
@@ -96,6 +96,46 @@ const DriverOnWay = () => {
     } else {
       showError("No se pudo obtener el teléfono del conductor");
     }
+  };
+
+  // Generar estrellas dinámicamente basadas en el rating
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return (
+      <>
+        {"⭐".repeat(fullStars)}
+        {hasHalfStar && "⭐"}
+        {"☆".repeat(emptyStars)}
+      </>
+    );
+  };
+
+  // Formatear el monto como moneda colombiana
+  const formatAmount = (amount) => {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Formatear placa con guión después de 3 caracteres (ABC-123)
+  const formatLicensePlate = (plate) => {
+    if (!plate) return "Sin placa";
+    
+    // Limpiar la placa (eliminar espacios y guiones existentes)
+    const cleanPlate = plate.replace(/[\s-]/g, '').toUpperCase();
+    
+    // Si tiene más de 3 caracteres, agregar el guión
+    if (cleanPlate.length > 3) {
+      return `${cleanPlate.slice(0, 3)}-${cleanPlate.slice(3)}`;
+    }
+    
+    return cleanPlate;
   };
 
   // const handleChat = () => {
@@ -266,15 +306,6 @@ const DriverOnWay = () => {
     window.location.href = "/home";
   };
 
-  // const formatAmount = (amount) => {
-  //   return new Intl.NumberFormat("es-CO", {
-  //     style: "currency",
-  //     currency: "COP",
-  //     minimumFractionDigits: 0,
-  //     maximumFractionDigits: 0,
-  //   }).format(amount);
-  // };
-
   if (isLoading || !serviceData) {
     return (
       <IonPage>
@@ -317,19 +348,30 @@ const DriverOnWay = () => {
               <div className="confirm-driver-info-header">
                 <div className="confirm-driver-info-header-compact">
                   <div className="driver-avatar-small">
-                    {serviceData.driver?.name?.charAt(0) || "C"}
+                    {serviceData.driver?.photo ? (
+                      <img 
+                        src={serviceData.driver.photo} 
+                        alt={serviceData.driver?.name} 
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.parentElement.textContent = serviceData.driver?.name?.charAt(0) || "C";
+                        }}
+                      />
+                    ) : (
+                      serviceData.driver?.name?.charAt(0) || "C"
+                    )}
                   </div>
                   <div className="confirm-driver-info-details">
                     <h3>{serviceData.driver?.name}</h3>
                     <div className="confirm-driver-info-meta">
-                      <IonIcon icon={star} className="star-icon" />
-                      <span>{serviceData.driver?.rating || "4.8"}</span>
-                      <span className="separator">•</span>
-                      <span>
-                        {serviceData.driver?.totalServices || "0"} servicios
+                      <span className="stars-rating">
+                        {renderStars(serviceData.driver?.rating || 5)}
                       </span>
                     </div>
                   </div>
+                  <p className="vehicle-plate-confirmed-driver-on-way">
+                    {formatLicensePlate(serviceData.driver?.towTruck?.licensePlate)}
+                  </p>
                 </div>
               </div>
 
@@ -356,16 +398,17 @@ const DriverOnWay = () => {
                   <div className="info-items">
                     <div className="info-item">
                       <p>Valor</p>
-                      <h4>$90.000</h4>
+                      <h4>{formatAmount(serviceData.amount || 0)}</h4>
                     </div>
                   </div>
                   <div className="info-items">
                     <div className="info-item">
                       <p>Método de pago</p>
-                      <h4>Efectivo</h4>
+                      <h4>{serviceData.paymentMethod || "Efectivo"}</h4>
                     </div>
                   </div>
                 </div>
+                
                 <div className="code-box">
                   <div className="box-info">
                     <h4>🔒 Código de Seguridad</h4>

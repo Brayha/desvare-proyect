@@ -7,7 +7,7 @@ import {
   IonText,
   IonSpinner,
 } from "@ionic/react";
-import { close, star } from "ionicons/icons";
+import { close } from "ionicons/icons";
 import { Moneys, Refresh2 } from "iconsax-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
@@ -41,6 +41,21 @@ const QuoteDetailSheet = ({
     }).format(amount);
   };
 
+  // Generar estrellas dinámicamente basadas en el rating
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return (
+      <>
+        {"⭐".repeat(fullStars)}
+        {hasHalfStar && "⭐"}
+        {"☆".repeat(emptyStars)}
+      </>
+    );
+  };
+
   const formatDistance = (distanceKm) => {
     // ✅ Validar que distanceKm existe y es un número
     if (!distanceKm || typeof distanceKm !== "number") {
@@ -71,7 +86,12 @@ const QuoteDetailSheet = ({
   const estimatedDistance = quote.location ? "8.5 km" : "Calculando...";
   const estimatedTime = quote.location ? "15 min" : "Calculando...";
 
-  // ✅ Array de reseñas (en el futuro vendrá del backend: quote.reviews)
+  // ✅ Usar datos reales del conductor
+  const driverPhoto = quote.driverPhoto || "https://ionicframework.com/docs/img/demos/avatar.svg";
+  const driverRating = quote.driverRating || 5;
+  const driverServiceCount = quote.driverServiceCount || 0;
+
+  // ✅ Array de reseñas (TODO: en el futuro vendrá del backend: quote.driverReviews)
   const reviews = [
     {
       id: 1,
@@ -121,9 +141,9 @@ const QuoteDetailSheet = ({
     <IonModal
       isOpen={isOpen}
       onDidDismiss={onDismiss}
-      breakpoints={[0, 0.3, 0.6, 1]}
-      initialBreakpoint={0.3}
-      backdropBreakpoint={0.6}
+      breakpoints={[0, 0.4, 1]}
+      initialBreakpoint={0.4}
+      backdropBreakpoint={1}
       handle={true}
       handleBehavior="cycle"
       className="quote-detail-sheet"
@@ -134,14 +154,25 @@ const QuoteDetailSheet = ({
           <div className="quote-summary-header">
             <div className="driver-header">
               <div className="driver-avatar">
-                {quote.driverName?.charAt(0) || "C"}
+                {quote.driverPhoto ? (
+                  <img 
+                    src={driverPhoto} 
+                    alt={quote.driverName}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.textContent = quote.driverName?.charAt(0) || "C";
+                    }}
+                  />
+                ) : (
+                  quote.driverName?.charAt(0) || "C"
+                )}
               </div>
               <div className="driver-info-compact">
                 <h3>{quote.driverName}</h3>
                 <div className="rating-compact">
-                  <IonIcon icon={star} className="star-icon" />
-                  <span>4.8</span>
-                  <span className="service-count">(127 servicios)</span>
+                  <span className="stars-rating">
+                    {renderStars(driverRating)}
+                  </span>
                 </div>
               </div>
             </div>

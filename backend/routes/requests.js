@@ -179,16 +179,60 @@ router.post('/:id/quote', async (req, res) => {
     if (io && connectedClients) {
       const clientSocketId = connectedClients.get(request.clientId.toString());
       if (clientSocketId) {
+        // 🔍 Buscar información completa del conductor
+        const User = require('../models/User');
+        const driver = await User.findById(driverId);
+        
+        // 🔍 DEBUG: Ver estructura completa del conductor
+        console.log('🔍 DEBUG - Conductor encontrado:', {
+          id: driver?._id,
+          name: driver?.name,
+          userType: driver?.userType,
+          tieneDriverProfile: !!driver?.driverProfile
+        });
+        
+        if (driver?.driverProfile) {
+          console.log('🔍 DEBUG - driverProfile:', {
+            status: driver.driverProfile.status,
+            tieneDocuments: !!driver.driverProfile.documents,
+            rating: driver.driverProfile.rating,
+            totalServices: driver.driverProfile.totalServices
+          });
+          
+          if (driver.driverProfile.documents) {
+            console.log('🔍 DEBUG - documents:', {
+              tieneSelfie: !!driver.driverProfile.documents.selfie,
+              selfie: driver.driverProfile.documents.selfie
+            });
+          } else {
+            console.log('❌ DEBUG - NO tiene documents');
+          }
+        } else {
+          console.log('❌ DEBUG - NO tiene driverProfile');
+        }
+        
         const quoteData = {
           requestId: request._id.toString(),
           driverId: driverId,
           driverName: driverName,
           amount: parseFloat(amount),
-          location: location || null, // Incluir ubicación del conductor
+          location: location || null,
+          // ✅ NUEVOS CAMPOS: Información del conductor
+          driverPhoto: driver?.driverProfile?.documents?.selfie || null,
+          driverRating: driver?.driverProfile?.rating || 5,
+          driverServiceCount: driver?.driverProfile?.totalServices || 0,
           timestamp: new Date()
         };
         
-        console.log('📤 Enviando cotización al cliente vía Socket.IO:', quoteData);
+        console.log('📤 Enviando cotización al cliente vía Socket.IO:', {
+          requestId: quoteData.requestId,
+          driverId: quoteData.driverId,
+          driverName: quoteData.driverName,
+          amount: quoteData.amount,
+          driverPhoto: quoteData.driverPhoto ? `✅ ${quoteData.driverPhoto.substring(0, 50)}...` : '❌ Sin foto',
+          driverRating: quoteData.driverRating,
+          driverServiceCount: quoteData.driverServiceCount
+        });
         io.to(clientSocketId).emit('quote:received', quoteData);
       } else {
         console.log('⚠️ Cliente no conectado vía Socket.IO (ID:', request.clientId.toString(), ')');
@@ -302,11 +346,21 @@ router.post('/:id/accept', async (req, res) => {
       id: driver._id,
       name: driver.name,
       phone: driver.phone,
+      photo: driver.driverProfile?.documents?.selfie || null, // ✅ Foto del conductor
       rating: driver.driverProfile.rating,
       totalServices: driver.driverProfile.totalServices,
       towTruck: driver.driverProfile.towTruck,
       vehicleCapabilities: driver.driverProfile.vehicleCapabilities
     };
+    
+    // 🔍 DEBUG: Ver información del conductor que se enviará
+    console.log('🔍 DEBUG - driverInfo preparado:', {
+      id: driverInfo.id,
+      name: driverInfo.name,
+      tieneFoto: !!driverInfo.photo,
+      photo: driverInfo.photo ? `${driverInfo.photo.substring(0, 50)}...` : '❌ Sin foto',
+      rating: driverInfo.rating
+    });
 
     // Preparar lista de otros conductores que cotizaron
     const otherDriverIds = request.quotes
@@ -491,6 +545,26 @@ router.get('/:id', async (req, res) => {
       });
     }
 
+    // ✅ Enriquecer las cotizaciones con datos del conductor
+    const enrichedQuotes = await Promise.all(
+      request.quotes.map(async (quote) => {
+        try {
+          const driver = await User.findById(quote.driverId);
+          return {
+            ...quote.toObject(),
+            // Agregar información del conductor
+            driverPhoto: driver?.driverProfile?.documents?.selfie || null,
+            driverRating: driver?.driverProfile?.rating || 5,
+            driverServiceCount: driver?.driverProfile?.totalServices || 0
+          };
+        } catch (error) {
+          console.error('Error al obtener datos del conductor:', quote.driverId, error);
+          // Si falla, devolver la cotización sin los datos extras
+          return quote.toObject();
+        }
+      })
+    );
+
     res.json({
       message: 'Solicitud obtenida exitosamente',
       request: {
@@ -523,9 +597,9 @@ router.get('/:id', async (req, res) => {
         // Detalles del servicio
         serviceDetails: request.serviceDetails,
         
-        // Cotizaciones
-        quotes: request.quotes,
-        quotesCount: request.quotes.length,
+        // Cotizaciones enriquecidas
+        quotes: enrichedQuotes,
+        quotesCount: enrichedQuotes.length,
         
         // Timestamps
         createdAt: request.createdAt,

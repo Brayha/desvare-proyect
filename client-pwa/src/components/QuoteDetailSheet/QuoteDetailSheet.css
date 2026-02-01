@@ -65,6 +65,13 @@
   font-weight: 600;
   color: white;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.driver-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .driver-info-compact h3 {
@@ -77,18 +84,19 @@
 .rating-compact {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-size: 14px;
 }
 
-.star-icon {
-  color: #ffd700;
-  font-size: 16px;
+.stars-rating {
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 1px;
 }
 
 .service-count {
   color: #666;
-  margin-left: 4px;
+  font-size: 13px;
 }
 
 .price-highlight {
