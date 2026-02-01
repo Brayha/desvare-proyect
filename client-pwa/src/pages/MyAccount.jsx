@@ -3,6 +3,9 @@ import { useHistory } from "react-router-dom";
 import {
   IonPage,
   IonContent,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
   IonIcon,
   IonText,
   IonAvatar,
