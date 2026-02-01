@@ -5,8 +5,9 @@ import { useState, useEffect, useCallback } from 'react';
  * - Solicita permisos de ubicación
  * - Actualiza la ubicación cada X segundos
  * - Proporciona la ubicación actual
+ * - 🆕 Se pausa automáticamente cuando el conductor está OCUPADO (ahorro de batería)
  */
-export const useDriverLocation = (updateInterval = 10000) => {
+export const useDriverLocation = (isOnline = true, updateInterval = 10000) => {
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,6 +51,15 @@ export const useDriverLocation = (updateInterval = 10000) => {
 
   // Iniciar seguimiento continuo de ubicación
   useEffect(() => {
+    // 🆕 Solo activar GPS si el conductor está DISPONIBLE (isOnline === true)
+    if (!isOnline) {
+      console.log('🔴 GPS pausado - Conductor OCUPADO (ahorro de batería)');
+      setLoading(false);
+      // Limpiar ubicación anterior si existe
+      setLocation(null);
+      return;
+    }
+
     if (!navigator.geolocation) {
       setError('Tu navegador no soporta geolocalización');
       setLoading(false);
@@ -92,7 +102,7 @@ export const useDriverLocation = (updateInterval = 10000) => {
         console.log('🛑 Seguimiento de ubicación detenido');
       }
     };
-  }, [updateInterval]);
+  }, [isOnline, updateInterval]);
 
   return {
     location,

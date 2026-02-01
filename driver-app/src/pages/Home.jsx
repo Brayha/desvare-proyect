@@ -54,7 +54,7 @@ const Home = () => {
     loading: locationLoading, 
     error: locationError, 
     requestLocation 
-  } = useDriverLocation(10000);
+  } = useDriverLocation(isOnline, 10000); // 🆕 Pasar isOnline para pausar GPS cuando está OCUPADO
 
   // 🔄 Recargar requests cada vez que la vista se activa (volviendo de QuoteAmount, etc.)
   useIonViewWillEnter(() => {
