@@ -1,8 +1,9 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { vehicleAPI } from '../services/vehicleAPI';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -17,13 +18,9 @@ export const AuthProvider = ({ children }) => {
   const [vehicles, setVehicles] = useState([]);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(false);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
 
-  // Validar sesión y cargar vehículos al iniciar la app
-  useEffect(() => {
-    initializeAuth();
-  }, []);
-
-  const initializeAuth = async () => {
+  const initializeAuth = useCallback(async () => {
     console.log('🔐 Inicializando autenticación...');
     setIsLoadingAuth(true);
     
@@ -50,7 +47,12 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setIsLoadingAuth(false);
     }
-  };
+  }, []);
+
+  // Validar sesión y cargar vehículos al iniciar la app
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   const loadVehicles = async (userId) => {
     console.log('🚗 Cargando vehículos del usuario:', userId);
@@ -79,6 +81,15 @@ export const AuthProvider = ({ children }) => {
     
     // Cargar vehículos
     await loadVehicles(userData.id);
+
+    // Solicitar permisos de notificaciones después del login (si aplica)
+    const promptDismissed = localStorage.getItem('notificationPromptDismissed') === 'true';
+    const shouldPrompt =
+      typeof window !== 'undefined' &&
+      'Notification' in window &&
+      Notification.permission === 'default' &&
+      !promptDismissed;
+    setShowNotificationPrompt(shouldPrompt);
   };
 
   const logout = () => {
@@ -95,6 +106,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsLoggedIn(false);
     setVehicles([]);
+    setShowNotificationPrompt(false);
+  };
+
+  const dismissNotificationPrompt = () => {
+    localStorage.setItem('notificationPromptDismissed', 'true');
+    setShowNotificationPrompt(false);
   };
 
   const refreshVehicles = async () => {
@@ -112,6 +129,9 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     refreshVehicles,
+    showNotificationPrompt,
+    setShowNotificationPrompt,
+    dismissNotificationPrompt,
   };
 
   return (

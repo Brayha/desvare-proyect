@@ -40,7 +40,7 @@ import logo from "@shared/src/img/Desvare.svg";
 const RequestService = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
-  const { user: currentUser, isLoggedIn } = useAuth();
+  const { user: currentUser, isLoggedIn, setShowNotificationPrompt } = useAuth();
 
   // Geolocalización
   const {
@@ -408,6 +408,18 @@ const RequestService = () => {
       // Redirigir a waiting quotes usando replace para evitar loops
       console.log("🔄 Redirigiendo a /waiting-quotes...");
       history.replace("/waiting-quotes");
+
+      // Mostrar prompt de notificaciones DESPUÉS de iniciar la búsqueda
+      const promptDismissed =
+        localStorage.getItem("notificationPromptDismissed") === "true";
+      const shouldPrompt =
+        typeof window !== "undefined" &&
+        "Notification" in window &&
+        Notification.permission === "default" &&
+        !promptDismissed;
+      if (shouldPrompt) {
+        setShowNotificationPrompt(true);
+      }
     } catch (error) {
       console.error("❌ Error al enviar solicitud:", error);
       showError(error.response?.data?.error || "Error al enviar solicitud");

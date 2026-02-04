@@ -313,5 +313,99 @@ router.post('/verify-otp', async (req, res) => {
   }
 });
 
+// POST /api/auth/fcm-token - Guardar/actualizar token FCM para notificaciones push
+router.post('/fcm-token', async (req, res) => {
+  try {
+    const { userId, fcmToken, platform } = req.body;
+
+    // Validar campos requeridos
+    if (!userId || !fcmToken) {
+      return res.status(400).json({ 
+        error: 'userId y fcmToken son requeridos' 
+      });
+    }
+
+    console.log(`📱 Guardando FCM token para usuario ${userId} (${platform || 'unknown'})`);
+
+    // Buscar usuario
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'Usuario no encontrado' 
+      });
+    }
+
+    // Guardar/actualizar token FCM
+    if (user.userType === 'driver') {
+      // Para conductores, guardar en driverProfile
+      user.driverProfile.fcmToken = fcmToken;
+    } else {
+      // Para clientes, guardar directamente en user
+      user.fcmToken = fcmToken;
+    }
+
+    await user.save();
+
+    console.log(`✅ Token FCM guardado exitosamente para ${user.name} (${user.userType})`);
+
+    res.json({ 
+      success: true,
+      message: 'Token FCM registrado correctamente' 
+    });
+
+  } catch (error) {
+    console.error('❌ Error guardando FCM token:', error);
+    res.status(500).json({ 
+      error: 'Error al guardar token FCM',
+      details: error.message 
+    });
+  }
+});
+
+// DELETE /api/auth/fcm-token - Eliminar token FCM (logout)
+router.delete('/fcm-token', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ 
+        error: 'userId es requerido' 
+      });
+    }
+
+    console.log(`🗑️ Eliminando FCM token para usuario ${userId}`);
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'Usuario no encontrado' 
+      });
+    }
+
+    // Eliminar token FCM
+    if (user.userType === 'driver') {
+      user.driverProfile.fcmToken = null;
+    } else {
+      user.fcmToken = null;
+    }
+
+    await user.save();
+
+    console.log(`✅ Token FCM eliminado para ${user.name}`);
+
+    res.json({ 
+      success: true,
+      message: 'Token FCM eliminado correctamente' 
+    });
+
+  } catch (error) {
+    console.error('❌ Error eliminando FCM token:', error);
+    res.status(500).json({ 
+      error: 'Error al eliminar token FCM',
+      details: error.message 
+    });
+  }
+});
+
 module.exports = router;
 

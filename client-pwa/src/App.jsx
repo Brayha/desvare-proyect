@@ -1,9 +1,11 @@
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import socketService from './services/socket';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import NotificationPermissionPrompt from './components/NotificationPermissionPrompt/NotificationPermissionPrompt';
+import { requestNotificationPermission } from './services/fcmService';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -40,6 +42,35 @@ const InitialRedirect = () => {
   return <Redirect to="/home" />;
 };
 
+const NotificationPromptGate = () => {
+  const {
+    user,
+    showNotificationPrompt,
+    setShowNotificationPrompt,
+    dismissNotificationPrompt,
+  } = useAuth();
+
+  const handleRequestPermission = useCallback(async () => {
+    if (!user?.id) return;
+    const token = await requestNotificationPermission(user.id);
+    if (token) {
+      localStorage.setItem('notificationPromptDismissed', 'true');
+    }
+    setShowNotificationPrompt(false);
+  }, [user, setShowNotificationPrompt]);
+
+  if (!showNotificationPrompt || !user?.id) {
+    return null;
+  }
+
+  return (
+    <NotificationPermissionPrompt
+      onRequestPermission={handleRequestPermission}
+      onDismiss={dismissNotificationPrompt}
+    />
+  );
+};
+
 function App() {
   // Conectar Socket.IO una sola vez al iniciar la app
   useEffect(() => {
@@ -57,6 +88,7 @@ function App() {
   return (
     <AuthProvider>
       <IonApp>
+        <NotificationPromptGate />
         <IonReactRouter>
           <IonRouterOutlet>
             {/* Páginas sin tabs */}

@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   
+  // ========================================
+  // NOTIFICACIONES PUSH (CLIENTES)
+  // ========================================
+  fcmToken: String, // Firebase Cloud Messaging token para clientes
+  
   // Estado general del usuario (para suspensiones)
   isActive: {
     type: Boolean,

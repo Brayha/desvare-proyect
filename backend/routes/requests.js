@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Request = require('../models/Request');
 const User = require('../models/User');
+const { sendPushNotification } = require('../services/notifications');
 
 // POST /api/requests/new - Crear nueva solicitud de cotización
 router.post('/new', async (req, res) => {
@@ -234,8 +235,59 @@ router.post('/:id/quote', async (req, res) => {
           driverServiceCount: quoteData.driverServiceCount
         });
         io.to(clientSocketId).emit('quote:received', quoteData);
+        
+        // 🆕 Enviar push notification al cliente (si tiene token FCM)
+        try {
+          const client = await User.findById(request.clientId);
+          if (client?.fcmToken) {
+            console.log('📱 Enviando push notification al cliente...');
+            await sendPushNotification(
+              client.fcmToken,
+              '💰 Nueva Cotización Recibida',
+              `${driverName} te cotizó $${amount.toLocaleString()}`,
+              {
+                type: 'QUOTE_RECEIVED',
+                requestId: request._id.toString(),
+                quoteId: request.quotes[request.quotes.length - 1]._id.toString(),
+                driverId: driverId,
+                amount: amount.toString(),
+                url: '/tabs/desvare' // URL para abrir al hacer click
+              }
+            );
+            console.log('✅ Push notification enviada al cliente');
+          } else {
+            console.log('ℹ️ Cliente no tiene token FCM registrado (no recibirá push)');
+          }
+        } catch (pushError) {
+          console.error('⚠️ Error enviando push notification (no crítico):', pushError.message);
+          // No fallar la request si el push falla
+        }
       } else {
         console.log('⚠️ Cliente no conectado vía Socket.IO (ID:', request.clientId.toString(), ')');
+        
+        // 🆕 Si no está conectado vía Socket.IO, intentar push notification
+        try {
+          const client = await User.findById(request.clientId);
+          if (client?.fcmToken) {
+            console.log('📱 Cliente offline - Enviando solo push notification...');
+            await sendPushNotification(
+              client.fcmToken,
+              '💰 Nueva Cotización Recibida',
+              `${driverName} te cotizó $${amount.toLocaleString()}`,
+              {
+                type: 'QUOTE_RECEIVED',
+                requestId: request._id.toString(),
+                quoteId: request.quotes[request.quotes.length - 1]._id.toString(),
+                driverId: driverId,
+                amount: amount.toString(),
+                url: '/tabs/desvare'
+              }
+            );
+            console.log('✅ Push notification enviada (cliente offline)');
+          }
+        } catch (pushError) {
+          console.error('⚠️ Error enviando push notification:', pushError.message);
+        }
       }
     } else {
       console.log('⚠️ Socket.IO no disponible');
