@@ -1,9 +1,4 @@
 {
-  "version": 2,
-  "buildCommand": "cd client-pwa && npm install && npm run build",
-  "outputDirectory": "client-pwa/dist",
-  "installCommand": "npm install --prefix client-pwa",
-  "framework": null,
   "rewrites": [
     {
       "source": "/(.*)",
