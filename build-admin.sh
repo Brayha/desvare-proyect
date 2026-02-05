@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
+echo "📦 Installing dependencies in shared..."
+cd shared
+npm install
+
 echo "📦 Installing dependencies in admin-dashboard..."
-cd admin-dashboard
+cd ../admin-dashboard
 npm install
 
 echo "🔨 Building admin-dashboard..."
