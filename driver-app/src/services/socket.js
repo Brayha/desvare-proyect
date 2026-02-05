@@ -38,6 +38,13 @@ class SocketService {
     }
   }
 
+  notifyAvailabilityChange(driverId, isOnline) {
+    if (this.socket) {
+      this.socket.emit('driver:availability-changed', { driverId, isOnline });
+      console.log(`📡 Notificado cambio de disponibilidad: ${isOnline ? 'ACTIVO' : 'OCUPADO'}`);
+    }
+  }
+
   sendQuote(data) {
     if (this.socket) {
       this.socket.emit('quote:send', data);
@@ -67,6 +74,83 @@ class SocketService {
     if (this.socket) {
       console.log('🔇 Dejando de escuchar cancelaciones');
       this.socket.off('request:cancelled');
+    }
+  }
+
+  onServiceAccepted(callback) {
+    if (this.socket) {
+      console.log('👂 Escuchando aceptaciones de servicio');
+      this.socket.on('service:accepted', callback);
+    }
+  }
+
+  offServiceAccepted() {
+    if (this.socket) {
+      console.log('🔇 Dejando de escuchar aceptaciones');
+      this.socket.off('service:accepted');
+    }
+  }
+
+  onServiceTaken(callback) {
+    if (this.socket) {
+      console.log('👂 Escuchando servicios tomados por otros');
+      this.socket.on('service:taken', callback);
+    }
+  }
+
+  offServiceTaken() {
+    if (this.socket) {
+      console.log('🔇 Dejando de escuchar servicios tomados');
+      this.socket.off('service:taken');
+    }
+  }
+
+  onQuoteExpired(callback) {
+    if (this.socket) {
+      console.log('👂 Escuchando expiraciones de cotizaciones');
+      this.socket.on('quote:expired', callback);
+    }
+  }
+
+  offQuoteExpired() {
+    if (this.socket) {
+      console.log('🔇 Dejando de escuchar expiraciones');
+      this.socket.off('quote:expired');
+    }
+  }
+
+  // ========================================
+  // COMPLETAR SERVICIO
+  // ========================================
+  
+  completeService(data) {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('service:complete', data);
+      console.log('📡 Notificando completado de servicio:', data);
+    } else {
+      console.warn('⚠️ No se puede completar servicio: Socket no conectado');
+    }
+  }
+
+  // ========================================
+  // 🆕 TRACKING EN TIEMPO REAL
+  // ========================================
+  
+  sendLocationUpdate(data) {
+    if (this.socket) {
+      this.socket.emit('driver:location-update', data);
+    }
+  }
+
+  onLocationUpdate(callback) {
+    if (this.socket) {
+      this.socket.on('driver:location-update', callback);
+    }
+  }
+
+  offLocationUpdate() {
+    if (this.socket) {
+      this.socket.off('driver:location-update');
     }
   }
 }

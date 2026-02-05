@@ -6,7 +6,7 @@ import './Button.css';
  * 
  * @param {Object} props
  * @param {string} props.children - Texto o contenido del botón
- * @param {string} props.variant - Tipo de botón: 'primary', 'secondary', 'success', 'danger', 'warning'
+ * @param {string} props.variant - Tipo de botón: 'primary', 'secondary', 'success', 'danger', 'warning', 'outline'
  * @param {string} props.size - Tamaño: 'small', 'default', 'large'
  * @param {boolean} props.expand - Si el botón debe ocupar todo el ancho: 'block', 'full'
  * @param {boolean} props.disabled - Si el botón está deshabilitado
@@ -39,6 +39,7 @@ const Button = ({
     warning: 'warning',
     light: 'light',
     dark: 'dark',
+    outline: 'light', // Usamos light como base para outline
   };
 
   // Mapear tamaños
@@ -56,7 +57,7 @@ const Button = ({
       disabled={disabled || loading}
       onClick={onClick}
       type={type}
-      className={`shared-button ${className}`}
+      className={`shared-button ${variant === 'outline' ? 'button-outline' : ''} ${className}`}
       {...props}
     >
       {icon && iconPosition === 'start' && (

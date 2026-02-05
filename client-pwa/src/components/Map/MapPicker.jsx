@@ -24,6 +24,10 @@ const INITIAL_VIEW_STATE = {
  * @param {Function} onRouteCalculated - Callback cuando se calcula una ruta
  * @param {Array} quotes - Cotizaciones con ubicación de conductores
  * @param {Function} onQuoteClick - Callback cuando se hace click en un price marker
+ * @param {Object} driverLocation - Ubicación en tiempo real del conductor { lat, lng }
+ * @param {Number} driverHeading - Dirección del vehículo (0-360°)
+ * @param {String} driverPhoto - URL de la foto del conductor
+ * @param {String} driverName - Nombre del conductor
  */
 const MapPicker = ({
   origin,
@@ -31,22 +35,16 @@ const MapPicker = ({
   onRouteCalculated,
   quotes = [],
   onQuoteClick = null,
+  driverLocation = null,
+  driverHeading = 0,
+  driverPhoto = null,
+  driverName = 'Conductor',
 }) => {
   const mapRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [route, setRoute] = useState(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
-
-  // Centrar mapa cuando se obtiene el origen
-  useEffect(() => {
-    if (origin && mapRef.current) {
-      mapRef.current.flyTo({
-        center: [origin.lng, origin.lat],
-        zoom: 15,
-        duration: 1500,
-      });
-    }
-  }, [origin]);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   // Calcular ruta cuando ambos puntos estén definidos
   useEffect(() => {
@@ -80,40 +78,87 @@ const MapPicker = ({
     }
   }, [route]);
 
-  // Auto-zoom cuando llegan cotizaciones (WaitingQuotes)
+  // ✅ ÚNICO useEffect para manejar zoom/centrado (sin destino/ruta)
   useEffect(() => {
-    // Solo si hay cotizaciones Y hay origen (pero NO hay destino/ruta)
-    if (quotes.length > 0 && origin && !destination && mapRef.current) {
-      console.log('🔍 Auto-zoom para mostrar origen + cotizaciones');
-      
-      // Crear array de coordenadas: origen + todas las cotizaciones
-      const coordinates = [
-        [origin.lng, origin.lat], // Origen
-        ...quotes
-          .filter(q => q.location && q.location.lat && q.location.lng)
-          .map(q => [q.location.lng, q.location.lat]) // Cotizaciones
-      ];
+    // Solo ejecutar si hay origen, NO hay destino, el mapa está listo Y cargado
+    if (!origin || destination || !mapRef.current || !isMapLoaded) return;
 
-      if (coordinates.length > 1) {
-        // Calcular bounds que incluyan todos los puntos
-        const bounds = coordinates.reduce((bounds, coord) => {
-          return bounds.extend(coord);
-        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+    // Pequeño delay para asegurar que el mapa esté completamente renderizado
+    const timer = setTimeout(() => {
+      if (quotes.length > 0) {
+        // ✅ CASO 1: Hay cotizaciones - Mostrar origen + cotizaciones
+        console.log('🔍 Auto-zoom para mostrar origen + cotizaciones');
+        
+        // Crear array de coordenadas: origen + todas las cotizaciones
+        const coordinates = [
+          [origin.lng, origin.lat], // Origen
+          ...quotes
+            .filter(q => q.location && q.location.lat && q.location.lng)
+            .map(q => [q.location.lng, q.location.lat]) // Cotizaciones
+        ];
 
-        // Aplicar bounds con padding
-        mapRef.current.fitBounds(bounds, {
-          padding: {
-            top: 80,
-            bottom: 100,  // Menos padding abajo (no hay tarjeta grande)
-            left: 80,
-            right: 80,
-          },
+        if (coordinates.length > 1) {
+          // Calcular bounds que incluyan todos los puntos
+          const bounds = coordinates.reduce((bounds, coord) => {
+            return bounds.extend(coord);
+          }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+
+          // Aplicar bounds con padding
+          mapRef.current.fitBounds(bounds, {
+            padding: {
+              top: 80,
+              bottom: 100,  // Menos padding abajo (no hay tarjeta grande)
+              left: 80,
+              right: 80,
+            },
+            duration: 1500,
+            maxZoom: 14, // No acercar demasiado
+          });
+        }
+      } else {
+        // ✅ CASO 2: NO hay cotizaciones - Centrar en origen estilo Uber/Didi
+        console.log('📍 Centrando en origen (sin cotizaciones)');
+        mapRef.current.flyTo({
+          center: [origin.lng, origin.lat],
+          zoom: 15, // Zoom 15 como solicitaste
           duration: 1500,
-          maxZoom: 14, // No acercar demasiado
+          offset: [0, -30], // Desplazar 30px hacia arriba para compensar cards flotantes
         });
       }
-    }
-  }, [quotes, origin, destination]);
+    }, 300); // Delay de 300ms para asegurar que el mapa esté listo
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quotes.length, origin, destination, isMapLoaded]); // ✅ Incluir isMapLoaded
+
+  // 🆕 Ajustar viewport cuando aparece la ubicación del conductor (tracking en tiempo real)
+  useEffect(() => {
+    if (!origin || !driverLocation || !mapRef.current || !isMapLoaded) return;
+
+    console.log('🚗 Ajustando mapa para mostrar conductor + origen');
+
+    // Crear bounds que incluyan origen y conductor
+    const coordinates = [
+      [origin.lng, origin.lat],
+      [driverLocation.lng, driverLocation.lat]
+    ];
+
+    const bounds = coordinates.reduce((bounds, coord) => {
+      return bounds.extend(coord);
+    }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+
+    // Aplicar bounds con padding generoso
+    mapRef.current.fitBounds(bounds, {
+      padding: {
+        top: 100,
+        bottom: 250,  // Espacio para la tarjeta del conductor
+        left: 80,
+        right: 80,
+      },
+      duration: 1500,
+      maxZoom: 15, // No acercar demasiado
+    });
+  }, [driverLocation, origin, isMapLoaded]);
 
   const calculateRoute = async () => {
     setIsCalculatingRoute(true);
@@ -157,6 +202,10 @@ const MapPicker = ({
         ref={mapRef}
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
+        onLoad={() => {
+          console.log('🗺️ Mapa cargado completamente');
+          setIsMapLoaded(true);
+        }}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
@@ -216,6 +265,55 @@ const MapPicker = ({
             </Marker>
           );
         })}
+
+        {/* 🆕 Marcador del Conductor en Tiempo Real (con foto circular) */}
+        {driverLocation && (
+          <Marker
+            longitude={driverLocation.lng}
+            latitude={driverLocation.lat}
+            anchor="center"
+          >
+            <div className="driver-marker-container">
+              {/* Pulso animado de fondo */}
+              <div className="driver-marker-pulse"></div>
+              
+              {/* Foto circular del conductor */}
+              <div 
+                className="driver-marker-photo"
+                style={{
+                  transform: `rotate(${driverHeading}deg)`
+                }}
+              >
+                {driverPhoto ? (
+                  <img 
+                    src={driverPhoto} 
+                    alt={driverName}
+                    onError={(e) => {
+                      // Fallback si la imagen no carga
+                      e.target.style.display = 'none';
+                      e.target.parentElement.classList.add('driver-marker-fallback');
+                      e.target.parentElement.textContent = driverName?.charAt(0) || 'C';
+                    }}
+                  />
+                ) : (
+                  <div className="driver-marker-fallback">
+                    {driverName?.charAt(0) || 'C'}
+                  </div>
+                )}
+              </div>
+              
+              {/* Indicador de dirección (flecha) */}
+              <div 
+                className="driver-marker-arrow"
+                style={{
+                  transform: `rotate(${driverHeading}deg)`
+                }}
+              >
+                ▲
+              </div>
+            </div>
+          </Marker>
+        )}
 
         {/* Línea de Ruta */}
         {route && route.geometry && (

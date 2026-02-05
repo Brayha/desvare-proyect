@@ -2,6 +2,7 @@
  * Estilos globales compartidos entre client-pwa y driver-app
  */
 
+@import './fonts/raleway.css';
 @import './variables.css';
 @import './theme.css';
 
@@ -42,15 +43,26 @@ body {
 .text-left { text-align: left; }
 .text-right { text-align: right; }
 
-.text-bold { font-weight: 700; }
-.text-semibold { font-weight: 600; }
-.text-normal { font-weight: 400; }
+/* Utilidades de peso de fuente (font-weight) */
+.text-thin { font-weight: var(--font-weight-thin); }
+.text-extralight { font-weight: var(--font-weight-extralight); }
+.text-light { font-weight: var(--font-weight-light); }
+.text-normal { font-weight: var(--font-weight-regular); }
+.text-medium { font-weight: var(--font-weight-medium); }
+.text-semibold { font-weight: var(--font-weight-semibold); }
+.text-bold { font-weight: var(--font-weight-bold); }
+.text-extrabold { font-weight: var(--font-weight-extrabold); }
+.text-black { font-weight: var(--font-weight-black); }
 
+/* Utilidades de tamaño de fuente */
 .text-xs { font-size: var(--font-size-xs); }
 .text-sm { font-size: var(--font-size-sm); }
 .text-md { font-size: var(--font-size-md); }
 .text-lg { font-size: var(--font-size-lg); }
 .text-xl { font-size: var(--font-size-xl); }
+
+/* Utilidad para cursiva */
+.text-italic { font-style: italic; }
 
 /* ===== UTILIDADES DE DISPLAY ===== */
 .flex { display: flex; }

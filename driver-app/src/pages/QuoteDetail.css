@@ -1,0 +1,223 @@
+.request-detail-container {
+  height: 100%;
+}
+
+.mapboxgl-canvas {
+  outline: none;
+}
+
+.alert-button-confirm {
+  color: var(--ion-color-danger) !important;
+  font-weight: 600;
+}
+
+/* Animación para el monto */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.amount-card {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Contenido de detalles */
+.detail-content-quote-detail {
+  padding: 10px;
+  margin-top: -40px; /* Superponer ligeramente sobre el mapa */
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.request-detail-content-quote-detail {
+  background: #f6c343;
+  padding: 2px;
+  overflow: auto;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.type-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  text-align: center;
+  margin: 5px;
+  width: auto;
+}
+
+.card-request-detail {
+  background: white;
+  padding: 10px;
+  overflow: auto;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quote-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ion-color-dark);
+  margin: 0;
+  text-align: left;
+  margin: 10px 0 0 10px;
+  width: auto;
+}
+
+.vehicle-problem-card-quote-detail {
+  display: flex;
+  padding: 5px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  align-self: stretch;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: #f7f7f7;
+}
+
+.vehicle-info-quote-detail {
+  display: flex;
+  padding: 0 10px;
+  align-items: center;
+  gap: 15px;
+  align-self: stretch;
+  border-radius: 15px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}
+
+.vehicle-icon-quote-detail {
+  display: flex;
+  width: 60px;
+  height: 60px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8.571px;
+}
+
+.vehicle-details-quote-detail {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1 0 0;
+  border-right: 1px solid #E5E7EB;
+}
+
+.vehicle-brand-quote-detail {
+  overflow: hidden;
+  color: #4b5563;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.vehicle-model-quote-detail {
+  overflow: hidden;
+  color: #9ca3af;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0;
+}
+
+.distance-time-info {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.distance-quote-detail {
+  overflow: hidden;
+  color: #4b5563;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.distance-km-quote-detail {
+  overflow: hidden;
+  color: #9ca3af;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0;
+}
+
+/* Vehicle Additional Details */
+.vehicle-additional-badge-quote-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 5px;
+  width: 100%;
+}
+
+.detail-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Sección de Problema */
+.problem-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  padding: 5px;
+}
+
+.problem-section .section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ion-color-medium);
+  margin: 0;
+  display: block;
+}
+
+.problem-section .problem-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ion-color-dark);
+  display: block;
+}
+
+/* Responsive - Pantallas pequeñas */
+@media (max-width: 375px) {
+  .detail-badge {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .vehicle-additional-details {
+    gap: 6px;
+    padding: 8px 5px;
+  }
+}

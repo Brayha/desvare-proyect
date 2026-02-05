@@ -54,9 +54,19 @@ class SocketService {
 
   disconnect() {
     if (this.socket) {
-      console.log('🔌 Desconectando Socket.IO...');
+      console.log('🔌 Desconectando Socket.IO (solo llamar al cerrar app)...');
       this.socket.disconnect();
       this.socket = null;
+    }
+  }
+
+  // Método para mantener conexión activa (no desconectar)
+  keepAlive() {
+    if (!this.socket || !this.socket.connected) {
+      console.log('🔄 Socket desconectado, reconectando...');
+      this.connect();
+    } else {
+      console.log('✅ Socket.IO conectado y activo');
     }
   }
 
@@ -95,6 +105,26 @@ class SocketService {
     }
   }
 
+  // Método para cancelar servicio con detalles completos (razón, vehículo, etc.)
+  cancelServiceWithDetails(data) {
+    if (this.socket && this.socket.connected) {
+      console.log('🚫 Cancelando servicio con detalles:', data.requestId);
+      console.log('📝 Razón:', data.reason, data.customReason || '');
+      this.socket.emit('request:cancel', data);
+    } else {
+      console.warn('⚠️ No se puede cancelar servicio: Socket no conectado');
+    }
+  }
+
+  acceptService(data) {
+    if (this.socket && this.socket.connected) {
+      console.log('✅ Aceptando servicio:', data.requestId);
+      this.socket.emit('service:accept', data);
+    } else {
+      console.warn('⚠️ No se puede aceptar servicio: Socket no conectado');
+    }
+  }
+
   onQuoteReceived(callback) {
     if (this.socket) {
       // Remover listener anterior para evitar duplicados
@@ -109,6 +139,66 @@ class SocketService {
     if (this.socket) {
       this.socket.off('quote:received');
       console.log('🔇 Listener de cotizaciones removido');
+    }
+  }
+
+  onQuoteCancelled(callback) {
+    if (this.socket) {
+      // Remover listener anterior para evitar duplicados
+      this.socket.off('quote:cancelled');
+      // Agregar nuevo listener
+      this.socket.on('quote:cancelled', callback);
+      console.log('👂 Listener de cancelación de cotizaciones registrado');
+    }
+  }
+
+  offQuoteCancelled() {
+    if (this.socket) {
+      this.socket.off('quote:cancelled');
+      console.log('🔇 Listener de cancelación de cotizaciones removido');
+    }
+  }
+
+  // ========================================
+  // COMPLETAR SERVICIO
+  // ========================================
+  
+  onServiceCompleted(callback) {
+    if (this.socket) {
+      // Remover listener anterior para evitar duplicados
+      this.socket.off('service:completed');
+      // Agregar nuevo listener
+      this.socket.on('service:completed', callback);
+      console.log('👂 Listener de servicio completado registrado');
+    }
+  }
+
+  offServiceCompleted() {
+    if (this.socket) {
+      this.socket.off('service:completed');
+      console.log('🔇 Listener de servicio completado removido');
+    }
+  }
+
+  // ========================================
+  // 🆕 TRACKING EN TIEMPO REAL
+  // ========================================
+  
+  sendLocationUpdate(data) {
+    if (this.socket) {
+      this.socket.emit('driver:location-update', data);
+    }
+  }
+
+  onLocationUpdate(callback) {
+    if (this.socket) {
+      this.socket.on('driver:location-update', callback);
+    }
+  }
+
+  offLocationUpdate() {
+    if (this.socket) {
+      this.socket.off('driver:location-update');
     }
   }
 }

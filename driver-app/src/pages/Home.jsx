@@ -2,31 +2,33 @@ import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   IonContent,
-  IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonList,
-  IonItem,
-  IonLabel,
   IonText,
-  IonBadge,
   IonButton,
-  IonButtons,
-  IonIcon,
   IonModal,
   IonInput,
+  IonLabel,
+  IonItem,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
   useIonToast,
   useIonAlert,
+  useIonViewWillEnter,
+  IonRefresher,
+  IonRefresherContent,
+  IonSpinner,
 } from '@ionic/react';
-import { logOutOutline, carSportOutline, locationOutline } from 'ionicons/icons';
 import { requestAPI } from '../services/api';
 import socketService from '../services/socket';
 import { useDriverLocation } from '../hooks/useDriverLocation';
+import ServiceHeader from '../components/ServiceHeader';
+import RequestCard from '../components/RequestCard';
+import LocationBanner from '../components/LocationBanner';
+import LocationPermissionModal from '../components/LocationPermissionModal';
+import CancellationDetailModal from '../components/CancellationDetailModal';
+import './Home.css';
 
 const Home = () => {
   const history = useHistory();
@@ -35,13 +37,77 @@ const Home = () => {
   
   const [user, setUser] = useState(null);
   const [requests, setRequests] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [isOnline, setIsOnline] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [quoteAmount, setQuoteAmount] = useState('');
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+  
+  // Estados para modal de cancelación
+  const [showCancellationModal, setShowCancellationModal] = useState(false);
+  const [cancellationData, setCancellationData] = useState(null);
 
   // Hook de geolocalización del conductor
-  const { location: driverLocation, loading: locationLoading, error: locationError } = useDriverLocation(10000);
+  const { 
+    location: driverLocation, 
+    loading: locationLoading, 
+    error: locationError, 
+    requestLocation 
+  } = useDriverLocation(isOnline, 10000); // 🆕 Pasar isOnline para pausar GPS cuando está OCUPADO
 
+  // 🔄 Recargar requests cada vez que la vista se activa (volviendo de QuoteAmount, etc.)
+  useIonViewWillEnter(() => {
+    console.log('🔄 Vista Home activada - Recargando requests del backend...');
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      loadRequests(parsedUser._id);
+    }
+  });
+
+  // Cargar imagen de perfil solo si no existe (sin romper nada)
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const parsedUser = JSON.parse(userData);
+    
+    // Si ya tiene selfie, no hacer nada
+    if (parsedUser.driverProfile?.documents?.selfie) {
+      return;
+    }
+
+    // Solo si NO tiene selfie, cargarlo del backend
+    const loadProfileImage = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/drivers/profile/${parsedUser._id}`);
+        if (response.ok) {
+          const data = await response.json();
+          const selfie = data.driver?.driverProfile?.documents?.selfie;
+          
+          if (selfie) {
+            // Actualizar solo el selfie en localStorage
+            const updatedUser = { ...parsedUser };
+            if (!updatedUser.driverProfile.documents) {
+              updatedUser.driverProfile.documents = {};
+            }
+            updatedUser.driverProfile.documents.selfie = selfie;
+            
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+            console.log('✅ Imagen de perfil cargada');
+          }
+        }
+      } catch (error) {
+        console.log('ℹ️ No se pudo cargar imagen de perfil (no crítico)');
+      }
+    };
+
+    loadProfileImage();
+  }, []); // Solo se ejecuta una vez
+
+  // Cargar usuario y solicitudes al montar
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (!userData) {
@@ -51,90 +117,297 @@ const Home = () => {
 
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
+    setIsOnline(parsedUser.driverProfile?.isOnline || false);
 
     // Conectar Socket.IO
     socketService.connect();
-    socketService.registerDriver(parsedUser.id);
+    socketService.registerDriver(parsedUser._id);
+
+    // Cargar solicitudes iniciales
+    loadRequests(parsedUser._id);
 
     // Escuchar nuevas solicitudes
     socketService.onRequestReceived((request) => {
       console.log('📥 Nueva solicitud recibida:', request);
-      setRequests((prev) => [request, ...prev]);
       
-      // Mostrar alerta de nueva solicitud
-      presentAlert({
-        header: '¡Nueva Solicitud!',
-        message: `${request.clientName} está solicitando una cotización`,
+      // Normalizar la solicitud para asegurar que tenga todos los campos necesarios
+      const normalizedRequest = {
+        ...request,
+        id: request.requestId,
+        requestId: request.requestId,
+        status: request.status || 'pending',
+        quotesCount: request.quotesCount || 0,
+        // ✅ Asegurar que vehicle existe con valores por defecto
+        vehicle: request.vehicle || {
+          icon: '🚗',
+          brand: 'N/A',
+          model: 'N/A',
+          licensePlate: 'N/A'
+        },
+        // ✅ NUEVO: Preservar vehicleSnapshot completo (con truckData y busData)
+        vehicleSnapshot: request.vehicleSnapshot,
+        // ✅ NUEVO: Preservar serviceDetails completo (problema, sótano, carga)
+        serviceDetails: request.serviceDetails,
+        // ✅ Asegurar que problem existe
+        problem: request.problem || 'Sin descripción',
+        // ✅ Asegurar que distanceKm y durationMin existen
+        distanceKm: request.distanceKm || (request.distance ? (request.distance / 1000).toFixed(1) : 'N/A'),
+        durationMin: request.durationMin || (request.duration ? Math.round(request.duration / 60) : 'N/A')
+      };
+      
+      console.log('✅ Solicitud normalizada:', normalizedRequest);
+      console.log('🚗 VehicleSnapshot:', normalizedRequest.vehicleSnapshot);
+      console.log('📝 ServiceDetails:', normalizedRequest.serviceDetails);
+      setRequests((prev) => [normalizedRequest, ...prev]);
+      
+      // Toast con botón "Ver" interactivo
+      present({
+        message: `🚗 Nueva solicitud de ${normalizedRequest.clientName}`,
+        duration: 5000,
+        position: 'bottom',
+        color: 'primary',
         buttons: [
           {
             text: 'Ver',
             handler: () => {
-              handleRespondToRequest(request);
+              handleQuote(normalizedRequest);
             }
-          },
-          'OK'
+          }
         ]
-      });
-
-      present({
-        message: `Nueva solicitud de ${request.clientName}`,
-        duration: 3000,
-        color: 'primary',
       });
     });
 
-    // Escuchar cancelaciones de solicitudes
+    // Escuchar cancelaciones
     socketService.onRequestCancelled((data) => {
-      console.log('🚫 Solicitud cancelada:', data.requestId);
+      console.log('🚫 EVENTO CANCELACIÓN RECIBIDO');
+      console.log('📝 RequestId recibido:', data.requestId);
+      console.log('📝 Razón:', data.reason);
+      console.log('📝 Razón custom:', data.customReason);
+      console.log('📦 Datos completos de cancelación:', data);
+      console.log('📋 Requests actuales:', requests.map(r => r.requestId));
       
-      // Eliminar la solicitud de la lista
-      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      // ✅ Remover de la lista con conversión a String para evitar problemas de comparación
+      setRequests((prev) => {
+        const filtered = prev.filter(req => 
+          req.requestId?.toString() !== data.requestId?.toString()
+        );
+        console.log('📊 Requests después de filtrar:', filtered.map(r => r.requestId));
+        return filtered;
+      });
       
-      // Cerrar modal si estaba abierta para esta solicitud
-      if (selectedRequest && selectedRequest.requestId === data.requestId) {
-        setShowModal(false);
+      // Cerrar modal de cotización si estaba abierto
+      if (selectedRequest && selectedRequest.requestId?.toString() === data.requestId?.toString()) {
+        console.log('🔒 Cerrando modal de cotización');
+        setShowQuoteModal(false);
         setSelectedRequest(null);
       }
       
+      // ✅ VERIFICAR si es el servicio ACTIVO (aceptado)
+      const activeServiceData = localStorage.getItem('activeService');
+      if (activeServiceData) {
+        try {
+          const activeService = JSON.parse(activeServiceData);
+          if (activeService.requestId?.toString() === data.requestId?.toString()) {
+            console.log('🚨 Servicio activo cancelado por el cliente');
+            
+            // Limpiar servicio activo
+            localStorage.removeItem('activeService');
+            
+            // Actualizar estado a ACTIVO
+            setIsOnline(true);
+            const updatedUser = { ...parsedUser };
+            updatedUser.driverProfile.isOnline = true;
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            
+            // Si está en /active-service, redirigir a /home
+            if (window.location.pathname === '/active-service') {
+              console.log('🔄 Redirigiendo desde /active-service a /home');
+              history.push('/home');
+            }
+            
+            // Guardar datos y redirigir a vista dedicada
+            console.log('💾 Guardando datos de cancelación en localStorage');
+            localStorage.setItem('lastCancellation', JSON.stringify(data));
+            
+            setTimeout(() => {
+              console.log('🎯 Redirigiendo a /cancellation-detail');
+              history.push('/cancellation-detail');
+            }, 500);
+            
+            return; // ← IMPORTANTE: Salir aquí
+          }
+        } catch (error) {
+          console.error('❌ Error al verificar servicio activo:', error);
+        }
+      }
+      
+      // ✅ Si NO es servicio activo (solo cotización en bandeja), remover silenciosamente
+      console.log('ℹ️ Cancelación de solicitud en bandeja (no activa) - Removiendo silenciosamente');
+      
+      // NO mostrar toast, NO redirigir, quedarse en Home esperando nuevas solicitudes
+    });
+
+    // Escuchar cuando tu cotización es aceptada
+    socketService.onServiceAccepted((data) => {
+      console.log('🎉 ¡Tu cotización fue aceptada!', data);
+      
+      // ✅ NUEVO: Remover la solicitud de la bandeja
+      setRequests((prev) => prev.filter(req => req.requestId?.toString() !== data.requestId?.toString()));
+      
+      // Guardar datos del servicio activo
+      localStorage.setItem('activeService', JSON.stringify(data));
+
+      // Actualizar estado a OCUPADO
+      setIsOnline(false);
+      const updatedUser = { ...parsedUser };
+      updatedUser.driverProfile.isOnline = false;
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // ✅ NUEVO: Navegar a vista de servicio activo
+      history.push('/active-service');
+      
       // Mostrar notificación
       present({
-        message: data.message || 'Servicio cancelado por el cliente',
-        duration: 4000,
-        color: 'warning',
+        message: `¡Tu cotización fue aceptada! Cliente: ${data.clientName}`,
+        duration: 3000,
+        color: 'success',
+      });
+    });
+
+    // Escuchar cuando otro conductor tomó el servicio
+    socketService.onServiceTaken((data) => {
+      console.log('❌ Servicio tomado por otro conductor:', data.requestId);
+      
+      // Remover de la lista
+      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      
+      present({
+        message: 'Este servicio ya fue tomado por otro conductor',
+        duration: 3000,
+        color: 'medium',
+      });
+    });
+
+    // Escuchar cuando una cotización expira
+    socketService.onQuoteExpired((data) => {
+      console.log('⏰ Cotización expirada:', data);
+      
+      // Remover de la lista de requests
+      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      
+      present({
+        message: data.message || 'Una de tus cotizaciones expiró',
+        duration: 3000,
+        color: 'medium',
       });
     });
 
     return () => {
       socketService.offRequestReceived();
       socketService.offRequestCancelled();
+      socketService.offServiceAccepted();
+      socketService.offServiceTaken();
+      socketService.offQuoteExpired();
       socketService.disconnect();
     };
-  }, [history, present, presentAlert, selectedRequest]);
+  }, [history, present, presentAlert]);
 
-  // Mostrar error de ubicación si existe
+  // Mostrar modal de permisos al detectar error de ubicación
   useEffect(() => {
-    if (locationError) {
-      present({
-        message: `⚠️ Error de ubicación: ${locationError}`,
-        duration: 4000,
-        color: 'warning',
-      });
+    const hasSeenLocationModal = localStorage.getItem('hasSeenLocationModal');
+    
+    if (!hasSeenLocationModal && locationError) {
+      setShowLocationModal(true);
     }
-  }, [locationError, present]);
+  }, [locationError]);
 
-  // Mostrar confirmación cuando se obtiene la ubicación
-  useEffect(() => {
-    if (driverLocation && !locationLoading) {
-      console.log('✅ Ubicación del conductor lista:', driverLocation);
+  // ✅ Recargar cotizaciones cuando el componente se vuelve a mostrar
+  // Función para cargar solicitudes
+  const loadRequests = async (driverId) => {
+    try {
+      setLoadingRequests(true);
+      const response = await fetch(`http://localhost:5001/api/requests/nearby/${driverId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setRequests(data.requests || []);
+        console.log(`✅ ${data.count} solicitudes cargadas`);
+      } else {
+        console.error('Error al cargar solicitudes:', data);
+      }
+    } catch (error) {
+      console.error('❌ Error al cargar solicitudes:', error);
+    } finally {
+      setLoadingRequests(false);
     }
-  }, [driverLocation, locationLoading]);
-
-  const handleRespondToRequest = (request) => {
-    setSelectedRequest(request);
-    setQuoteAmount('');
-    setShowModal(true);
   };
 
+  // Toggle Ocupado/Activo
+  const handleToggleAvailability = async (newStatus) => {
+    try {
+      const response = await fetch('http://localhost:5001/api/drivers/toggle-availability', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          driverId: user._id,
+          isOnline: newStatus
+        })
+      });
+
+      if (response.ok) {
+        setIsOnline(newStatus);
+        
+        // Notificar a Socket.IO sobre el cambio de disponibilidad
+        socketService.notifyAvailabilityChange(user._id, newStatus);
+        
+        present({
+          message: newStatus ? '🟢 Ahora estás ACTIVO' : '🔴 Ahora estás OCUPADO',
+          duration: 2000,
+          color: newStatus ? 'success' : 'warning',
+        });
+
+        // Actualizar localStorage
+        const updatedUser = { ...user };
+        updatedUser.driverProfile.isOnline = newStatus;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Si cambia a OCUPADO, limpiar solicitudes actuales
+        if (!newStatus) {
+          setRequests([]);
+        } else {
+          // Si cambia a ACTIVO, recargar solicitudes
+          loadRequests(user._id);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error al cambiar estado:', error);
+      present({
+        message: 'Error al cambiar estado',
+        duration: 2000,
+        color: 'danger',
+      });
+    }
+  };
+
+  // Abrir detalle de solicitud o detalle de cotización
+  const handleQuote = (request) => {
+    // Verificar si ya cotizó esta solicitud (desde el backend)
+    const user = JSON.parse(localStorage.getItem('user'));
+    const myQuote = request.quotes?.find(q => q.driverId === user._id);
+    
+    if (myQuote) {
+      // Ya cotizó, navegar al detalle de la cotización
+      history.push(`/quote-detail/${request.requestId}`);
+    } else {
+      // No ha cotizado, navegar a ver el detalle de la solicitud
+      history.push('/request-detail', {
+        request: request,
+        driverLocation: driverLocation
+      });
+    }
+  };
+
+  // Enviar cotización
   const handleSendQuote = async () => {
     if (!quoteAmount || isNaN(quoteAmount) || parseFloat(quoteAmount) <= 0) {
       present({
@@ -145,7 +418,6 @@ const Home = () => {
       return;
     }
 
-    // Verificar que tengamos la ubicación del conductor
     if (!driverLocation) {
       present({
         message: '⚠️ Obteniendo tu ubicación... Intenta de nuevo',
@@ -156,11 +428,8 @@ const Home = () => {
     }
 
     try {
-      console.log('📤 Enviando cotización con ubicación:', driverLocation);
-
-      // Preparar datos de la cotización
       const quoteData = {
-        driverId: user.id,
+        driverId: user._id,
         driverName: user.name,
         amount: parseFloat(quoteAmount),
         location: {
@@ -169,23 +438,13 @@ const Home = () => {
         },
       };
 
-      // Guardar en BD
       await requestAPI.addQuote(selectedRequest.requestId, quoteData);
 
-      // Enviar por Socket.IO con ubicación
       socketService.sendQuote({
         requestId: selectedRequest.requestId,
         clientId: selectedRequest.clientId,
-        driverId: user.id,
-        driverName: user.name,
-        amount: parseFloat(quoteAmount),
-        location: {
-          lat: driverLocation.lat,
-          lng: driverLocation.lng,
-        },
+        ...quoteData
       });
-
-      console.log('✅ Cotización enviada con ubicación exitosamente');
 
       present({
         message: '✅ Cotización enviada exitosamente',
@@ -193,14 +452,14 @@ const Home = () => {
         color: 'success',
       });
 
-      setShowModal(false);
+      setShowQuoteModal(false);
       setQuoteAmount('');
 
-      // Marcar como respondida
+      // Actualizar estado de la solicitud
       setRequests(prev => 
         prev.map(req => 
           req.requestId === selectedRequest.requestId 
-            ? { ...req, responded: true } 
+            ? { ...req, quotesCount: req.quotesCount + 1, status: 'quoted' } 
             : req
         )
       );
@@ -214,88 +473,119 @@ const Home = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    socketService.disconnect();
-    history.push('/login');
+  // Refrescar solicitudes
+  const handleRefresh = async (event) => {
+    console.log('🔄 Pull to refresh activado en driver-app');
+    await loadRequests(user._id);
+    
+    present({
+      message: `${requests.length} solicitudes actualizadas`,
+      duration: 2000,
+      color: 'success',
+    });
+    
+    event.detail.complete();
+  };
+
+  // Manejar solicitud de permisos de ubicación
+  const handleRequestLocationPermission = () => {
+    localStorage.setItem('hasSeenLocationModal', 'true');
+    setShowLocationModal(false);
+    
+    if (requestLocation) {
+      requestLocation();
+    }
+    
+    present({
+      message: 'Por favor, permite el acceso a tu ubicación en el navegador',
+      duration: 3000,
+      color: 'primary',
+    });
+  };
+
+  const handleDismissLocationModal = () => {
+    localStorage.setItem('hasSeenLocationModal', 'true');
+    setShowLocationModal(false);
   };
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar color="primary">
-          <IonTitle>Conductor - {user?.name}</IonTitle>
-          <IonButtons slot="end">
-            {/* Indicador de ubicación */}
-            {locationLoading ? (
-              <IonButton disabled>
-                <IonIcon icon={locationOutline} />
-                <IonText style={{ fontSize: '12px', marginLeft: '4px' }}>...</IonText>
-              </IonButton>
-            ) : driverLocation ? (
-              <IonButton disabled color="success">
-                <IonIcon icon={locationOutline} />
-                <IonText style={{ fontSize: '12px', marginLeft: '4px' }}>✓</IonText>
-              </IonButton>
-            ) : (
-              <IonButton disabled color="danger">
-                <IonIcon icon={locationOutline} />
-                <IonText style={{ fontSize: '12px', marginLeft: '4px' }}>✗</IonText>
-              </IonButton>
-            )}
-            
-            <IonButton onClick={handleLogout}>
-              <IonIcon icon={logOutOutline} />
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        <IonCard>
-          <IonCardHeader>
-            <IonCardTitle>
-              <IonIcon icon={carSportOutline} /> Solicitudes de Cotización
-            </IonCardTitle>
-          </IonCardHeader>
-          <IonCardContent>
-            {requests.length === 0 ? (
-              <IonText color="medium">
-                <p>No hay solicitudes pendientes. Esperando nuevas solicitudes...</p>
-              </IonText>
-            ) : (
-              <IonList>
-                {requests.map((request, index) => (
-                  <IonItem key={index}>
-                    <IonLabel>
-                      <h2>{request.clientName}</h2>
-                      <p>{new Date(request.timestamp).toLocaleString()}</p>
-                    </IonLabel>
-                    {request.responded ? (
-                      <IonBadge color="success" slot="end">
-                        Respondida
-                      </IonBadge>
-                    ) : (
-                      <IonButton 
-                        slot="end" 
-                        onClick={() => handleRespondToRequest(request)}
-                      >
-                        Cotizar
-                      </IonButton>
-                    )}
-                  </IonItem>
-                ))}
-              </IonList>
-            )}
-          </IonCardContent>
-        </IonCard>
+      <ServiceHeader 
+        user={user} 
+        isOnline={isOnline} 
+        onToggleAvailability={handleToggleAvailability}
+      />
 
-        <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+      <IonContent className="ion-padding home-content">
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent />
+        </IonRefresher>
+
+        {/* Mostrar banner de ubicación solo si hay error */}
+        {locationError && (
+          <LocationBanner 
+            loading={locationLoading} 
+            error={locationError} 
+            location={driverLocation} 
+          />
+        )}
+
+        {/* Título */}
+        <div className="page-title">
+          <IonText>
+            <h1>Bandeja de cotizaciones</h1>
+            <p>Recibe aquí las solicitudes de los clientes que necesitan una cotización tuya</p>
+          </IonText>
+        </div>
+
+        {/* Aviso si está ocupado */}
+        {!isOnline && (
+          <div className="offline-notice">
+            <IonText color="warning">
+              <p>⚠️ Estás OCUPADO. Activa tu disponibilidad para recibir nuevas solicitudes.</p>
+            </IonText>
+          </div>
+        )}
+
+        {/* Lista de solicitudes */}
+        {loadingRequests ? (
+          <div className="loading-container">
+            <IonSpinner name="crescent" />
+            <IonText color="medium">
+              <p>Cargando solicitudes...</p>
+            </IonText>
+          </div>
+        ) : requests.length === 0 ? (
+          <div className="empty-state">
+            <IonText color="medium">
+              <p>No hay solicitudes pendientes.</p>
+              <p>Esperando nuevas solicitudes...</p>
+            </IonText>
+          </div>
+        ) : (
+          requests.map((request) => {
+            // Buscar si este conductor ya cotizó esta solicitud (desde el backend)
+            const user = JSON.parse(localStorage.getItem('user'));
+            const myQuote = request.quotes?.find(q => q.driverId === user._id);
+            
+            return (
+              <RequestCard 
+                key={request.requestId} 
+                request={request} 
+                onQuote={handleQuote}
+                myQuote={myQuote}
+              />
+            );
+          })
+        )}
+
+        {/* Modal de cotización */}
+        <IonModal isOpen={showQuoteModal} onDidDismiss={() => setShowQuoteModal(false)}>
           <IonHeader>
             <IonToolbar>
               <IonTitle>Enviar Cotización</IonTitle>
               <IonButtons slot="end">
-                <IonButton onClick={() => setShowModal(false)}>Cerrar</IonButton>
+                <IonButton onClick={() => setShowQuoteModal(false)}>Cerrar</IonButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>
@@ -304,7 +594,11 @@ const Home = () => {
               <>
                 <IonText>
                   <h2>Cliente: {selectedRequest.clientName}</h2>
-                  <p>Solicitud recibida: {new Date(selectedRequest.timestamp).toLocaleString()}</p>
+                  <p><strong>Vehículo:</strong> {selectedRequest.vehicle?.brand} {selectedRequest.vehicle?.model}</p>
+                  <p><strong>Placa:</strong> {selectedRequest.vehicle?.licensePlate}</p>
+                  <p><strong>Problema:</strong> {selectedRequest.problem}</p>
+                  <p><strong>Origen:</strong> {selectedRequest.origin.address}</p>
+                  <p><strong>Destino:</strong> {selectedRequest.destination.address}</p>
                 </IonText>
 
                 <IonItem style={{ marginTop: '20px' }}>
@@ -324,15 +618,36 @@ const Home = () => {
                 >
                   Enviar Cotización
                 </IonButton>
+
+                <IonButton 
+                  expand="block" 
+                  fill="outline"
+                  style={{ marginTop: '10px' }}
+                  onClick={() => setShowQuoteModal(false)}
+                >
+                  Cancelar
+                </IonButton>
               </>
             )}
           </IonContent>
         </IonModal>
+
+        {/* Modal de permisos de ubicación */}
+        <LocationPermissionModal
+          isOpen={showLocationModal}
+          onDismiss={handleDismissLocationModal}
+          onRequestPermission={handleRequestLocationPermission}
+        />
+
+        {/* Modal de detalle de cancelación */}
+        <CancellationDetailModal
+          isOpen={showCancellationModal}
+          onDismiss={() => setShowCancellationModal(false)}
+          cancellationData={cancellationData}
+        />
       </IonContent>
     </IonPage>
   );
 };
 
 export default Home;
-
-

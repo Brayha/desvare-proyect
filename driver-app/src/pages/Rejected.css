@@ -1,0 +1,256 @@
+/* ======================================
+   REJECTED PAGE (DRIVER APP)
+   ====================================== */
+
+.rejected-content {
+  --background: linear-gradient(135deg, #7F1D1D 0%, #EF4444 100%);
+}
+
+.rejected-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  min-height: 100%;
+  text-align: center;
+}
+
+/* ======================================
+   LOGO
+   ====================================== */
+.rejected-logo-container {
+  margin-bottom: 40px;
+  margin-top: 20px;
+}
+
+.rejected-logo {
+  width: 140px;
+  height: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* ======================================
+   ÍCONO PRINCIPAL
+   ====================================== */
+.rejected-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  margin-bottom: 32px;
+  backdrop-filter: blur(10px);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+/* ======================================
+   TÍTULOS
+   ====================================== */
+.rejected-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 12px 0;
+}
+
+.rejected-subtitle {
+  font-size: 20px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 32px 0;
+}
+
+/* ======================================
+   CARD
+   ====================================== */
+.rejected-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rejected-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #FCD34D;
+}
+
+.rejected-reason {
+  font-size: 15px;
+  color: white;
+  line-height: 1.6;
+  margin: 0;
+  text-align: left;
+}
+
+/* ======================================
+   INSTRUCCIONES
+   ====================================== */
+.rejected-instructions {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rejected-instructions h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 16px 0;
+  text-align: left;
+}
+
+.rejected-instructions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.rejected-instructions li {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin-bottom: 12px;
+  padding-left: 24px;
+  position: relative;
+}
+
+.rejected-instructions li::before {
+  content: '•';
+  position: absolute;
+  left: 8px;
+  color: #FCD34D;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.rejected-instructions li:last-child {
+  margin-bottom: 0;
+}
+
+/* ======================================
+   BOTONES
+   ====================================== */
+.rejected-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.retry-button {
+  --background: white;
+  --background-hover: #F3F4F6;
+  --background-activated: #E5E7EB;
+  --color: #EF4444;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+  font-size: 16px;
+  height: 56px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.retry-button::part(native) {
+  transition: all 0.2s ease;
+  display: flex;
+  gap: 8px;
+}
+
+.retry-button:hover::part(native) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.retry-button:active::part(native) {
+  transform: translateY(0);
+}
+
+.support-button {
+  --color: white;
+  font-weight: 600;
+  font-size: 14px;
+  height: 48px;
+  text-transform: none;
+  letter-spacing: 0;
+  text-decoration: underline;
+}
+
+.logout-button-rejected {
+  --border-color: rgba(255, 255, 255, 0.3);
+  --color: white;
+  --border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  height: 56px;
+  text-transform: none;
+  letter-spacing: 0;
+  backdrop-filter: blur(10px);
+}
+
+.logout-button-rejected::part(native) {
+  transition: all 0.2s ease;
+}
+
+.logout-button-rejected:hover::part(native) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+/* ======================================
+   RESPONSIVE
+   ====================================== */
+@media (max-width: 375px) {
+  .rejected-container {
+    padding: 24px 16px;
+  }
+
+  .rejected-title {
+    font-size: 28px;
+  }
+
+  .rejected-subtitle {
+    font-size: 18px;
+  }
+
+  .rejected-icon {
+    width: 120px;
+    height: 120px;
+  }
+
+  .rejected-logo {
+    width: 120px;
+  }
+}
+
+@media (min-height: 800px) {
+  .rejected-container {
+    justify-content: center;
+  }
+}
+

@@ -1,161 +1,343 @@
-.request-auth-page {
-  --background: var(--ion-background-color, #f5f5f5);
+/* ======================================
+   SHEET MODAL - RequestAuth
+   ====================================== */
+
+/* Mapa de fondo (desenfocado) */
+.auth-background-map {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  filter: blur(4px) brightness(0.7);
+  background: white;
 }
 
-/* Resumen de ruta */
-.route-summary-card {
-  margin: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.auth-background-map .mapboxgl-canvas-container {
+  filter: blur(2px);
+  background: white;
 }
 
-.route-summary-card ion-card-title {
+/* Sheet Modal */
+.request-auth-sheet-modal {
+  --background: white;
+  --border-radius: 24px 24px 0 0;
+  z-index: 10;
+}
+
+.request-auth-sheet-modal::part(content) {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.request-auth-sheet-modal::part(handle) {
+  background: #E5E7EB;
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  margin: 12px auto;
+}
+
+.auth-sheet-content {
+  --background: white;
+  --padding-top: 0;
+  --padding-bottom: 32px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+}
+
+/* ======================================
+   LOGO
+   ====================================== */
+.auth-logo-container {
+  display: flex;
+  justify-content: center;
+  margin: 48px 0 32px;
+}
+
+.auth-logo {
+  width: 120px;
+  height: auto;
+}
+
+/* ======================================
+   SEGMENT (Registrarme / Ingresar)
+   ====================================== */
+.auth-segment {
+  margin-bottom: 24px;
+  --background: #F3F4F6;
+  border-radius: 15px;
+  padding: 4px;
+}
+
+.auth-segment ion-segment-button {
+  --indicator-color: white;
+  --indicator-height: 100%;
+  --indicator-box-shadow: none;
+  --indicator-border-radius: 15px;
+  --color: #6B7280;
+  --color-checked: #223D62;
+  min-height: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.auth-segment ion-segment-button::part(indicator-background) {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}
+
+.auth-segment ion-segment-button::part(native) {
+  padding: 8px 16px;
+}
+
+.auth-segment ion-segment-button ion-label {
+  margin: 0;
+}
+
+/* ======================================
+   FORMULARIO
+   ====================================== */
+.auth-form-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.auth-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ======================================
+   INPUTS PERSONALIZADOS
+   ====================================== */
+.auth-input-group {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 18px;
+  background: #F9FAFB;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #E5E7EB;
+  transition: all 0.2s ease;
 }
 
-.route-summary-item {
+.auth-input-group:focus-within {
+  border-color: #0055FF;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+}
+
+.auth-input-icon {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.auth-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1F2937;
+  width: 100%;
+}
+
+.auth-input::placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.auth-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   TÉRMINOS Y CONDICIONES
+   ====================================== */
+.auth-terms {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6B7280;
+  text-align: left;
+  margin: 8px 0 16px;
+}
+
+.auth-terms a {
+  color: #0055FF;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+/* ======================================
+   BOTONES
+   ====================================== */
+.auth-submit-button {
+  width: 100%;
+  padding: 16px;
+  background: #0055FF;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-submit-button:hover:not(:disabled) {
+  background: #0044CC;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 85, 255, 0.3);
+}
+
+.auth-submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-secondary-button {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  color: #6B7280;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: all 0.2s ease;
+}
+
+.auth-secondary-button:hover:not(:disabled) {
+  color: #1F2937;
+}
+
+.auth-secondary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   OTP PASO 2
+   ====================================== */
+.otp-icon-container {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+.otp-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1F2937;
+  text-align: center;
+  margin: 0;
+}
+
+.otp-description {
+  font-size: 14px;
+  color: #6B7280;
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.otp-inputs-container {
+  display: flex;
+  justify-content: center;
   gap: 12px;
   margin-bottom: 16px;
 }
 
-.route-summary-item ion-icon {
-  font-size: 24px;
-  margin-top: 4px;
-  flex-shrink: 0;
-}
-
-.route-summary-text {
-  flex: 1;
-}
-
-.route-summary-text small {
-  display: block;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-
-.route-summary-text p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.route-summary-divider {
-  height: 1px;
-  background: var(--ion-color-light);
-  margin: 16px 0;
-}
-
-.route-summary-stats {
-  display: flex;
-  gap: 24px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--ion-color-light);
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stat-item ion-icon {
-  font-size: 20px;
-}
-
-.stat-item small {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-/* Segmento de autenticación */
-.auth-segment-container {
-  padding: 0 16px;
-  margin: 16px 0;
-}
-
-.auth-segment-container ion-segment {
+.otp-input-box {
+  width: 56px;
+  height: 56px;
+  border: 2px solid #E5E7EB;
   border-radius: 12px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Formulario de autenticación */
-.auth-form {
-  padding: 0 16px 16px;
-}
-
-.auth-form ion-card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin: 0;
-}
-
-.auth-form ion-card-title {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.auth-form ion-item {
-  --padding-start: 0;
-  --inner-padding-end: 0;
-  margin-bottom: 16px;
-}
-
-.submit-button {
-  margin-top: 24px;
-  --border-radius: 12px;
-  font-weight: 600;
-  text-transform: none;
-}
-
-/* Texto de privacidad */
-.privacy-text {
-  padding: 24px 32px;
   text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1F2937;
+  background: #F9FAFB;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-.privacy-text p {
+.otp-input-box:focus {
+  border-color: #0055FF;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+}
+
+.otp-input-box:not(:placeholder-shown) {
+  border-color: #0055FF;
+  background: #EFF6FF;
+}
+
+.otp-input-box:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.otp-error {
+  display: block;
+  text-align: center;
+  margin-bottom: 16px;
   font-size: 12px;
-  line-height: 1.5;
-  color: var(--ion-color-medium);
-  margin: 0;
 }
 
-/* Modo oscuro */
-@media (prefers-color-scheme: dark) {
-  .request-auth-page {
-    --background: var(--ion-background-color);
-  }
-
-  .route-summary-card,
-  .auth-form ion-card,
-  .auth-segment-container ion-segment {
-    background: var(--ion-card-background, #1e1e1e);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
-  .route-summary-divider,
-  .route-summary-stats {
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-}
-
-/* Responsive */
+/* ======================================
+   RESPONSIVE
+   ====================================== */
 @media (max-width: 375px) {
-  .route-summary-card,
-  .auth-form {
-    margin: 12px;
-    padding: 12px;
+  .auth-sheet-content {
+    --padding-start: 16px;
+    --padding-end: 16px;
   }
 
-  .route-summary-stats {
-    flex-direction: column;
-    gap: 12px;
+  .auth-logo {
+    width: 100px;
+  }
+
+  .auth-form-title {
+    font-size: 18px;
+  }
+
+  .otp-input-box {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .otp-inputs-container {
+    gap: 8px;
   }
 }
 
+.auth-form-content-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}

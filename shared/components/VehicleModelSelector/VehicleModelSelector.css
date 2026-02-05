@@ -1,0 +1,117 @@
+.vehicle-model-selector {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.vehicle-list-type {
+  padding: 0;
+  border-bottom: 1px solid var(--ion-color-light, #f4f5f8);
+}
+
+.select-vehicle-added-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vehicle-added-card-content-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vehicle-added-card-content-text {
+  flex: 1;
+}
+
+.vehicle-brand-name {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--ion-text-color, #000);
+  margin: 0 0 4px 0;
+}
+
+.vehicle-brand-subtext {
+  font-size: 14px;
+  font-weight: var(--font-weight-normal, 400);
+  color: var(--ion-color-medium, #92949c);
+  margin: 0;
+}
+
+
+.model-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.model-item {
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --min-height: 56px;
+  transition: background 0.2s ease;
+}
+
+.model-item:hover {
+  --background: var(--ion-color-light, #f4f5f8);
+}
+
+.model-item-selected {
+  --background: var(--ion-color-primary-tint, #ede7f6);
+}
+
+.model-name {
+  font-size: 16px;
+  font-weight: var(--font-weight-normal, 400);
+  color: var(--ion-text-color, #000);
+  margin: 0;
+}
+
+.model-item-selected .model-name {
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--desvare-primary, #4F46E5);
+}
+
+.model-check {
+  font-size: 20px;
+  color: var(--desvare-primary, #4F46E5);
+  font-weight: bold;
+}
+
+.vehicle-model-loading,
+.vehicle-model-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  min-height: 200px;
+}
+
+.vehicle-model-loading ion-spinner {
+  margin-bottom: 16px;
+}
+
+.vehicle-model-loading p,
+.vehicle-model-empty p {
+  font-size: 14px;
+  color: var(--ion-color-medium, #92949c);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .model-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 52px;
+  }
+
+  .model-name {
+    font-size: 15px;
+  }
+}
+

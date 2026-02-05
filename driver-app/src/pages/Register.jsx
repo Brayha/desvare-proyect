@@ -1,130 +1,162 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IonText, useIonLoading } from '@ionic/react';
-import { AuthLayout } from '@layouts/AuthLayout';
-import { Button } from '@components';
-import { Input } from '@components';
-import { Card } from '@components';
-import { authAPI } from '@services/api';
-import { useToast } from '@hooks/useToast';
-import storage from '@services/storage';
+import { IonPage, IonContent, IonButton, IonSpinner, IonText } from '@ionic/react';
+import { Profile, Call, Sms } from 'iconsax-react';
+import { authAPI } from '../services/api';
+import { Input, PhoneInput } from '../../../shared/components';
+import './Register.css';
 
 const Register = () => {
   const history = useHistory();
-  const { showSuccess, showWarning, showError } = useToast();
-  const [presentLoading, dismissLoading] = useIonLoading();
   
+  // Estados del formulario
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Estados de error
+  const [nameError, setNameError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [generalError, setGeneralError] = useState('');
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  const validateForm = () => {
+    let isValid = true;
+    
+    // Reset errors
+    setNameError('');
+    setPhoneError('');
+    setEmailError('');
+    setGeneralError('');
 
-    if (!name || !email || !password || !confirmPassword) {
-      showWarning('Por favor completa todos los campos');
+    // Validar nombre
+    if (!name || name.trim().length < 3) {
+      setNameError('Ingresa tu nombre completo');
+      isValid = false;
+    }
+
+    // Validar teléfono
+    if (!phone || phone.length !== 10) {
+      setPhoneError('Ingresa un número válido de 10 dígitos');
+      isValid = false;
+    }
+
+    // Validar email (opcional pero si lo ingresa debe ser válido)
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Ingresa un email válido');
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
+  const handleRegister = async () => {
+    console.log('📝 Iniciando registro driver:', { name, phone, email });
+
+    if (!validateForm()) {
       return;
     }
 
-    if (password !== confirmPassword) {
-      showWarning('Las contraseñas no coinciden');
-      return;
-    }
-
-    if (password.length < 6) {
-      showWarning('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-    await presentLoading('Registrando...');
-
+    setIsLoading(true);
     try {
-      const response = await authAPI.register({
-        name,
-        email,
-        password,
-        userType: 'driver',
+      const response = await authAPI.registerDriverInitial({
+        name: name.trim(),
+        phone,
+        email: email || undefined,
       });
 
-      storage.setSession(response.data.token, response.data.user);
+      console.log('✅ Registro inicial exitoso:', response.data);
 
-      await dismissLoading();
-      showSuccess('¡Registro exitoso!');
-      history.push('/home');
+      // Guardar userId temporalmente y navegar a verificación OTP
+      localStorage.setItem('tempDriverId', response.data.userId);
+      localStorage.setItem('tempDriverPhone', phone);
+      
+      // Navegar a verificación OTP
+      history.push('/verify-otp');
     } catch (error) {
-      await dismissLoading();
-      showError(error.response?.data?.error || 'Error al registrarse');
+      console.error('❌ Error en registro:', error);
+      const errorMsg = error.response?.data?.error || 'Error al registrarte. Intenta de nuevo.';
+      
+      if (errorMsg.includes('ya está registrado')) {
+        setGeneralError('Este número ya está registrado. Ve a "Ingresar" para continuar.');
+      } else {
+        setGeneralError(errorMsg);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <AuthLayout title="Registro - Conductor" toolbarColor="secondary">
-      <Card title="Crear Cuenta de Conductor">
-        <form onSubmit={handleRegister}>
-          <Input
-            label="Nombre Completo"
-            type="text"
-            value={name}
-            onIonInput={(e) => setName(e.detail.value)}
-            placeholder="Juan Pérez"
-            required
-          />
+    <IonPage>
+      <IonContent className="register-content">
+        <div className="register-container">
 
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onIonInput={(e) => setEmail(e.detail.value)}
-            placeholder="tu@email.com"
-            required
-          />
+          {/* Título */}
+          <h1 className="register-title">Crea tu cuenta y comenzemos a hacer plata</h1>
+          <h2 className="register-subtitle">Completa la siguiente información para continuar.</h2>
 
-          <Input
-            label="Contraseña"
-            type="password"
-            value={password}
-            onIonInput={(e) => setPassword(e.detail.value)}
-            placeholder="Mínimo 6 caracteres"
-            helper="Debe tener al menos 6 caracteres"
-            required
-          />
+          {/* Formulario */}
+          <div className="register-form">
+            <Input
+              type="text"
+              placeholder="Nombre completo"
+              value={name}
+              onChange={setName}
+              error={nameError}
+              disabled={isLoading}
+              icon={<Profile size="24" color={nameError ? '#EF4444' : '#9CA3AF'} />}
+            />
 
-          <Input
-            label="Confirmar Contraseña"
-            type="password"
-            value={confirmPassword}
-            onIonInput={(e) => setConfirmPassword(e.detail.value)}
-            placeholder="Repite tu contraseña"
-            error={
-              confirmPassword && password !== confirmPassword
-                ? 'Las contraseñas no coinciden'
-                : ''
-            }
-            required
-          />
+            <Input
+              type="email"
+              placeholder="ejemplo@email.com (opcional)"
+              value={email}
+              onChange={setEmail}
+              error={emailError}
+              disabled={isLoading}
+              icon={<Sms size="24" color={emailError ? '#EF4444' : '#9CA3AF'} />}
+            />
 
-          <Button 
-            expand="block" 
-            type="submit" 
-            size="large"
-            variant="secondary"
-            className="mt-md"
-          >
-            Registrarse
-          </Button>
+            <PhoneInput
+              value={phone}
+              onChange={setPhone}
+              error={phoneError}
+              disabled={isLoading}
+            />
 
-          <div className="text-center mt-md">
-            <IonText>
-              ¿Ya tienes cuenta?{' '}
-              <a onClick={() => history.push('/login')}>
-                Inicia sesión aquí
-              </a>
-            </IonText>
+            {/* Error general */}
+            {generalError && (
+              <IonText color="danger" className="register-error">
+                <small>{generalError}</small>
+              </IonText>
+            )}
+
+            {/* Botón Crear cuenta */}
+            <button
+              expand="block"
+              className="register-button"
+              onClick={handleRegister}
+              disabled={isLoading || !name || phone.length !== 10}
+            >
+              {isLoading ? <IonSpinner name="crescent" /> : 'Crear cuenta'}
+            </button>
+
+            {/* Link a Login */}
+            <div className="register-footer">
+              <button
+                className="register-link"
+                onClick={() => history.push('/login')}
+                disabled={isLoading}
+              >
+                Ya tengo una cuenta
+              </button>
+            </div>
           </div>
-        </form>
-      </Card>
-    </AuthLayout>
+        </div>
+      </IonContent>
+    </IonPage>
   );
 };
 

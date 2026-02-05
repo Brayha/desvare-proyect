@@ -1,5 +1,11 @@
+/* ========================================
+   Importar tema compartido (incluye fuentes Gilroy, variables y animaciones)
+   ======================================== */
+@import '../../shared/styles/theme.css';
+@import '../../shared/styles/animations.css';
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-family);
   line-height: 1.5;
   font-weight: 400;
 
@@ -11,15 +17,44 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Variables de Ionic para forzar Gilroy */
+  --ion-font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* ========================================
+   Forzar Gilroy en TODOS los elementos
+   ======================================== */
+html,
+body,
+* {
+  font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
 }
-a:hover {
-  color: #535bf2;
+
+/* Sobrescribir variables de Ionic para que use Gilroy */
+ion-app,
+ion-content,
+ion-page,
+ion-header,
+ion-toolbar,
+ion-title,
+ion-button,
+ion-text,
+ion-label,
+ion-item,
+ion-list,
+ion-card,
+ion-card-header,
+ion-card-title,
+ion-card-content,
+ion-input,
+ion-textarea,
+ion-select,
+ion-tab-button,
+ion-tab-bar,
+ion-tabs,
+.ion-page {
+  font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
 }
 
 body {
@@ -28,6 +63,9 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--desvare-light) !important;
+  --background: var(--desvare-light) !important;
+  font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
 }
 
 h1 {

@@ -1,8 +1,11 @@
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import socketService from './services/socket';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import NotificationPermissionPrompt from './components/NotificationPermissionPrompt/NotificationPermissionPrompt';
+import { requestNotificationPermission } from './services/fcmService';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -24,10 +27,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import LocationPermission from './pages/LocationPermission';
-import RequestService from './pages/RequestService';
 import RequestAuth from './pages/RequestAuth';
 import RequestConfirmation from './pages/RequestConfirmation';
 import WaitingQuotes from './pages/WaitingQuotes';
+import DriverOnWay from './pages/DriverOnWay';
+import RatingService from './pages/RatingService';
+import TabLayout from './components/TabLayout/TabLayout';
 
 setupIonicReact();
 
@@ -37,35 +42,79 @@ const InitialRedirect = () => {
   return <Redirect to="/home" />;
 };
 
+const NotificationPromptGate = () => {
+  const {
+    user,
+    showNotificationPrompt,
+    setShowNotificationPrompt,
+    dismissNotificationPrompt,
+  } = useAuth();
+
+  const handleRequestPermission = useCallback(async () => {
+    if (!user?.id) return;
+    const token = await requestNotificationPermission(user.id);
+    if (token) {
+      localStorage.setItem('notificationPromptDismissed', 'true');
+    }
+    setShowNotificationPrompt(false);
+  }, [user, setShowNotificationPrompt]);
+
+  if (!showNotificationPrompt || !user?.id) {
+    return null;
+  }
+
+  return (
+    <NotificationPermissionPrompt
+      onRequestPermission={handleRequestPermission}
+      onDismiss={dismissNotificationPrompt}
+    />
+  );
+};
+
 function App() {
   // Conectar Socket.IO una sola vez al iniciar la app
   useEffect(() => {
     console.log('🚀 Inicializando Socket.IO...');
     socketService.connect();
     
-    // Cleanup al desmontar la app
+    // NO desconectar en cleanup - mantener conexión durante toda la sesión
+    // Socket.IO se desconectará solo cuando se cierre el navegador
     return () => {
-      console.log('👋 Cerrando Socket.IO...');
-      socketService.disconnect();
+      console.log('👋 App desmontándose (no cerrar Socket.IO)');
+      // socketService.disconnect(); // ← COMENTADO: NO desconectar
     };
   }, []);
 
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/register" component={Register} />
-          <Route exact path="/home" component={Home} />
-          <Route exact path="/location-permission" component={LocationPermission} />
-          <Route exact path="/request-service" component={RequestService} />
-          <Route exact path="/request-auth" component={RequestAuth} />
-          <Route exact path="/request-confirmation" component={RequestConfirmation} />
-          <Route exact path="/waiting-quotes" component={WaitingQuotes} />
-          <Route exact path="/" component={InitialRedirect} />
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
+    <AuthProvider>
+      <IonApp>
+        <NotificationPromptGate />
+        <IonReactRouter>
+          <IonRouterOutlet>
+            {/* Páginas sin tabs */}
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/register" component={Register} />
+            <Route exact path="/home" component={Home} />
+            <Route exact path="/location-permission" component={LocationPermission} />
+            <Route exact path="/request-auth" component={RequestAuth} />
+            <Route exact path="/request-confirmation" component={RequestConfirmation} />
+            <Route exact path="/waiting-quotes" render={(props) => {
+              // ✅ Usar requestId como key para forzar remount cuando cambie
+              const requestId = localStorage.getItem('currentRequestId') || 'default';
+              return <WaitingQuotes key={requestId} {...props} />;
+            }} />
+            <Route exact path="/driver-on-way" component={DriverOnWay} />
+            <Route exact path="/rate-service" component={RatingService} />
+            
+            {/* Tabs (Desvare + Mi cuenta) */}
+            <Route path="/tabs" component={TabLayout} />
+            
+            {/* Redirección inicial */}
+            <Route exact path="/" component={InitialRedirect} />
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </IonApp>
+    </AuthProvider>
   );
 }
 

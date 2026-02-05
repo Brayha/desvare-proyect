@@ -36,20 +36,36 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+// Aumentar límite para soportar imágenes en base64
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Configuración de Socket.IO
 const io = new Server(server, {
   cors: corsOptions
 });
 
+// 🆕 EXPORTAR io para usarlo en las rutas
+global.io = io;
+
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const requestRoutes = require('./routes/requests');
+const vehicleRoutes = require('./routes/vehicles');
+const driverRoutes = require('./routes/drivers');
+const citiesRoutes = require('./routes/cities');
+const adminRoutes = require('./routes/admin');
+
+// Importar middleware de expiración
+const { startExpirationChecker } = require('./middleware/requestExpiration');
 
 // Usar rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/requests', requestRoutes);
+app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/drivers', driverRoutes);
+app.use('/api/cities', citiesRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Proxy para Google Places API (evitar CORS en frontend)
 app.get('/api/google-places-proxy', async (req, res) => {
@@ -97,21 +113,73 @@ mongoose.connect(process.env.MONGODB_URI, {
   serverSelectionTimeoutMS: 30000, // 30 segundos para seleccionar servidor
   socketTimeoutMS: 45000, // 45 segundos para operaciones de socket
 })
-  .then(() => console.log('✅ Conectado a MongoDB Atlas'))
+  .then(() => {
+    console.log('✅ Conectado a MongoDB Atlas');
+    // Iniciar verificador de expiración cada 30 minutos
+    startExpirationChecker(30);
+  })
   .catch((err) => console.error('❌ Error conectando a MongoDB:', err));
 
 // Socket.IO - Manejo de conexiones en tiempo real
-const connectedDrivers = new Map(); // Almacena socket.id de conductores conectados
+const connectedDrivers = new Map(); // Almacena { driverId: { socketId, isOnline } }
 const connectedClients = new Map(); // Almacena socket.id de clientes conectados
+const activeServices = new Map(); // Almacena { requestId: { clientId, driverId, clientSocketId, driverSocketId } }
+
+// 🆕 EXPORTAR para usarlo en las rutas
+global.connectedClients = connectedClients;
+global.connectedDrivers = connectedDrivers;
+global.activeServices = activeServices;
 
 io.on('connection', (socket) => {
   console.log('🔌 Nuevo cliente conectado:', socket.id);
 
   // Registro de conductor
-  socket.on('driver:register', (driverId) => {
-    connectedDrivers.set(driverId, socket.id);
-    console.log(`🚗 Conductor registrado: ${driverId}`);
-    socket.join('drivers'); // Unirse a la sala de conductores
+  socket.on('driver:register', async (driverId) => {
+    try {
+      // Obtener info del conductor desde BD
+      const User = require('./models/User');
+      const driver = await User.findById(driverId);
+      
+      if (driver && driver.userType === 'driver') {
+        const isOnline = driver.driverProfile?.isOnline || false;
+        
+        connectedDrivers.set(driverId, {
+          socketId: socket.id,
+          isOnline: isOnline
+        });
+        
+        console.log(`🚗 Conductor registrado: ${driverId} - Estado: ${isOnline ? '🟢 ACTIVO' : '🔴 OCUPADO'}`);
+        
+        socket.join('drivers'); // Unirse a la sala general de conductores
+        socket.join(`driver:${driverId}`); // Unirse a sala personal del conductor
+        
+        // Solo unirse a 'active-drivers' si está activo
+        if (isOnline) {
+          socket.join('active-drivers');
+          console.log(`✅ Conductor ${driverId} unido a sala de conductores activos`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error registrando conductor:', error);
+    }
+  });
+  
+  // Actualizar estado de disponibilidad del conductor
+  socket.on('driver:availability-changed', ({ driverId, isOnline }) => {
+    const driverData = connectedDrivers.get(driverId);
+    if (driverData) {
+      driverData.isOnline = isOnline;
+      connectedDrivers.set(driverId, driverData);
+      
+      // Manejar salas de Socket.IO
+      if (isOnline) {
+        socket.join('active-drivers');
+        console.log(`🟢 Conductor ${driverId} ahora ACTIVO - Agregado a sala active-drivers`);
+      } else {
+        socket.leave('active-drivers');
+        console.log(`🔴 Conductor ${driverId} ahora OCUPADO - Removido de sala active-drivers`);
+      }
+    }
   });
 
   // Registro de cliente
@@ -124,10 +192,27 @@ io.on('connection', (socket) => {
   socket.on('request:new', (data) => {
     console.log('📢 Nueva solicitud de cotización recibida');
     console.log('📦 Datos completos:', JSON.stringify(data, null, 2));
-    console.log(`🚗 Conductores conectados en sala "drivers": ${io.sockets.adapter.rooms.get('drivers')?.size || 0}`);
     
-    // Enviar a todos los conductores conectados con TODOS los datos
-    io.to('drivers').emit('request:received', {
+    const activeDriversCount = io.sockets.adapter.rooms.get('active-drivers')?.size || 0;
+    const totalDriversCount = io.sockets.adapter.rooms.get('drivers')?.size || 0;
+    
+    console.log(`🚗 Conductores totales conectados: ${totalDriversCount}`);
+    console.log(`🟢 Conductores ACTIVOS: ${activeDriversCount}`);
+    
+    // Helper para obtener icono según categoría
+    const getCategoryIcon = (categoryId) => {
+      const icons = {
+        'MOTOS': '🏍️',
+        'AUTOS': '🚗',
+        'CAMIONETAS': '🚙',
+        'CAMIONES': '🚚',
+        'BUSES': '🚌'
+      };
+      return icons[categoryId] || '🚗';
+    };
+    
+    // Enviar SOLO a conductores activos (isOnline = true) con datos completos del vehículo
+    io.to('active-drivers').emit('request:received', {
       requestId: data.requestId,
       clientId: data.clientId,
       clientName: data.clientName,
@@ -135,57 +220,351 @@ io.on('connection', (socket) => {
       destination: data.destination,
       distance: data.distance,
       duration: data.duration,
+      // ✅ Datos básicos del vehículo (para compatibilidad)
+      vehicle: data.vehicleSnapshot ? {
+        category: data.vehicleSnapshot.category?.name || 'N/A',
+        brand: data.vehicleSnapshot.brand?.name || 'N/A',
+        model: data.vehicleSnapshot.model?.name || 'N/A',
+        licensePlate: data.vehicleSnapshot.licensePlate || 'N/A',
+        icon: getCategoryIcon(data.vehicleSnapshot.category?.id)
+      } : null,
+      // ✅ NUEVO: Snapshot completo del vehículo (con truckData y busData)
+      vehicleSnapshot: data.vehicleSnapshot,
+      // ✅ NUEVO: Detalles completos del servicio (problema, sótano, carga actual)
+      serviceDetails: data.serviceDetails,
+      // ✅ Problema (para compatibilidad)
+      problem: data.serviceDetails?.problem || 'Sin descripción',
+      // Distancia y tiempo formateados
+      distanceKm: (data.distance / 1000).toFixed(1),
+      durationMin: Math.round(data.duration / 60),
       timestamp: new Date()
     });
     
-    console.log('✅ Solicitud emitida a conductores en sala "drivers"');
+    console.log(`✅ Solicitud emitida a ${activeDriversCount} conductores ACTIVOS`);
   });
 
   // Conductor envía respuesta
-  socket.on('quote:send', (data) => {
+  socket.on('quote:send', async (data) => {
     console.log('💰 Cotización recibida del conductor:', data);
     console.log('📍 Ubicación del conductor:', data.location);
     
-    // Enviar al cliente específico con TODA la información
-    const clientSocketId = connectedClients.get(data.clientId);
-    if (clientSocketId) {
-      const quoteData = {
-        requestId: data.requestId,
-        driverId: data.driverId,
-        driverName: data.driverName,
-        amount: data.amount,
-        location: data.location, // 🆕 INCLUIR UBICACIÓN DEL CONDUCTOR
-        timestamp: new Date()
-      };
+    try {
+      // Buscar información completa del conductor
+      const User = require('./models/User');
+      const driver = await User.findById(data.driverId);
       
-      console.log('📤 Enviando cotización al cliente con ubicación:', quoteData);
-      io.to(clientSocketId).emit('quote:received', quoteData);
-    } else {
-      console.log('⚠️ Cliente no encontrado con ID:', data.clientId);
+      if (!driver) {
+        console.error('❌ Conductor no encontrado:', data.driverId);
+        return;
+      }
+      
+      // 🔍 DEBUG: Ver estructura completa del conductor
+      console.log('🔍 DEBUG - Conductor encontrado:', {
+        id: driver._id,
+        name: driver.name,
+        userType: driver.userType,
+        tieneDriverProfile: !!driver.driverProfile
+      });
+      
+      if (driver.driverProfile) {
+        console.log('🔍 DEBUG - driverProfile:', {
+          status: driver.driverProfile.status,
+          tieneDocuments: !!driver.driverProfile.documents,
+          rating: driver.driverProfile.rating,
+          totalServices: driver.driverProfile.totalServices
+        });
+        
+        if (driver.driverProfile.documents) {
+          console.log('🔍 DEBUG - documents:', {
+            tieneSelfie: !!driver.driverProfile.documents.selfie,
+            selfie: driver.driverProfile.documents.selfie
+          });
+        } else {
+          console.log('❌ DEBUG - NO tiene documents');
+        }
+      } else {
+        console.log('❌ DEBUG - NO tiene driverProfile');
+      }
+      
+      // Enviar al cliente específico con TODA la información
+      const clientSocketId = connectedClients.get(data.clientId);
+      if (clientSocketId) {
+        const quoteData = {
+          requestId: data.requestId,
+          driverId: data.driverId,
+          driverName: data.driverName,
+          amount: data.amount,
+          location: data.location,
+          // ✅ NUEVOS CAMPOS: Información del conductor
+          driverPhoto: driver.driverProfile?.documents?.selfie || null,
+          driverRating: driver.driverProfile?.rating || 5,
+          driverServiceCount: driver.driverProfile?.totalServices || 0,
+          timestamp: new Date()
+        };
+        
+        console.log('📤 Enviando cotización al cliente:', {
+          requestId: quoteData.requestId,
+          driverId: quoteData.driverId,
+          driverName: quoteData.driverName,
+          amount: quoteData.amount,
+          driverPhoto: quoteData.driverPhoto ? `✅ ${quoteData.driverPhoto.substring(0, 50)}...` : '❌ Sin foto',
+          driverRating: quoteData.driverRating,
+          driverServiceCount: quoteData.driverServiceCount
+        });
+        io.to(clientSocketId).emit('quote:received', quoteData);
+      } else {
+        console.log('⚠️ Cliente no encontrado con ID:', data.clientId);
+      }
+    } catch (error) {
+      console.error('❌ Error al procesar cotización:', error);
     }
   });
 
   // Cliente cancela solicitud
-  socket.on('request:cancel', (data) => {
+  socket.on('request:cancel', async (data) => {
     console.log('🚫 Solicitud cancelada por cliente:', data.requestId);
-    console.log('📢 Notificando a todos los conductores...');
+    console.log('📝 Razón:', data.reason, data.customReason || '');
     
-    // Notificar a TODOS los conductores que el servicio fue cancelado
-    io.to('drivers').emit('request:cancelled', {
-      requestId: data.requestId,
-      message: 'Servicio cancelado por el cliente',
-      timestamp: new Date()
-    });
+    try {
+      const Request = require('./models/Request');
+      const User = require('./models/User');
+      
+      // ✅ Actualizar estado de la solicitud en la base de datos
+      const request = await Request.findByIdAndUpdate(
+        data.requestId,
+        {
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          cancellationReason: data.reason,
+          cancellationCustomReason: data.customReason || null,
+          updatedAt: new Date()
+        },
+        { new: true }
+      );
+      
+      if (!request) {
+        console.error('❌ Solicitud no encontrada para cancelar:', data.requestId);
+        return;
+      }
+      
+      console.log('✅ Solicitud actualizada a estado "cancelled" en DB');
+      
+      // ✅ Si había conductor asignado, liberarlo y ponerlo en ACTIVO
+      if (request.assignedDriverId) {
+        await User.findByIdAndUpdate(
+          request.assignedDriverId,
+          {
+            'driverProfile.isOnline': true,
+            'driverProfile.currentServiceId': null,
+            'driverProfile.lastOnlineAt': new Date()
+          }
+        );
+        
+        console.log(`🟢 Conductor ${request.assignedDriverId} liberado y puesto en ACTIVO`);
+        
+        // Actualizar estado en memoria
+        const driverData = connectedDrivers.get(request.assignedDriverId.toString());
+        if (driverData) {
+          driverData.isOnline = true;
+          connectedDrivers.set(request.assignedDriverId.toString(), driverData);
+          
+          // Unir a sala de conductores activos
+          const driverSocket = io.sockets.sockets.get(driverData.socketId);
+          if (driverSocket) {
+            driverSocket.join('active-drivers');
+            console.log(`✅ Conductor ${request.assignedDriverId} agregado a sala active-drivers`);
+          }
+        }
+      }
+      
+      // ✅ Convertir requestId a String para evitar problemas de comparación
+      const requestIdStr = data.requestId.toString();
+      
+      console.log('📢 Notificando a todos los conductores...');
+      
+      // Notificar a TODOS los conductores con información detallada
+      io.to('drivers').emit('request:cancelled', {
+        requestId: requestIdStr, // ✅ String
+        reason: data.reason,
+        customReason: data.customReason || null,
+        clientName: data.clientName,
+        vehicle: data.vehicle,
+        origin: data.origin,
+        destination: data.destination,
+        problem: data.problem,
+        message: 'Servicio cancelado por el cliente',
+        cancelledAt: new Date(),
+        timestamp: new Date()
+      });
+      
+      console.log('✅ Notificación de cancelación enviada a conductores');
+      
+    } catch (error) {
+      console.error('❌ Error al procesar cancelación:', error);
+      console.error('Stack:', error.stack);
+    }
+  });
+
+  // Cliente acepta una cotización
+  socket.on('service:accept', (data) => {
+    console.log('✅ Cliente aceptó cotización:', data);
+    console.log(`👤 Cliente: ${data.clientId}`);
+    console.log(`🚗 Conductor aceptado: ${data.acceptedDriverId}`);
+    console.log(`❌ Otros conductores: ${data.otherDriverIds?.length || 0}`);
     
-    console.log('✅ Notificación de cancelación enviada a conductores');
+    // 🆕 Guardar servicio activo para tracking
+    const clientSocketId = connectedClients.get(data.clientId);
+    const driverData = connectedDrivers.get(data.acceptedDriverId);
+    
+    if (clientSocketId && driverData) {
+      activeServices.set(data.requestId, {
+        clientId: data.clientId,
+        driverId: data.acceptedDriverId,
+        clientSocketId: clientSocketId,
+        driverSocketId: driverData.socketId
+      });
+      console.log(`📍 Servicio ${data.requestId} registrado para tracking en tiempo real`);
+    }
+    
+    // Notificar al conductor aceptado
+    if (driverData) {
+      io.to(driverData.socketId).emit('service:accepted', {
+        requestId: data.requestId,
+        clientName: data.clientName,
+        clientPhone: data.clientPhone,
+        securityCode: data.securityCode,
+        amount: data.amount,
+        origin: data.origin,
+        destination: data.destination,
+        vehicle: data.vehicle,
+        vehicleSnapshot: data.vehicleSnapshot,
+        problem: data.problem,
+        serviceDetails: data.serviceDetails,
+        timestamp: new Date()
+      });
+      
+      console.log(`✅ Conductor ${data.acceptedDriverId} notificado de aceptación`);
+      
+      // Actualizar estado en memoria y remover de sala active-drivers
+      driverData.isOnline = false;
+      connectedDrivers.set(data.acceptedDriverId, driverData);
+      
+      const driverSocket = io.sockets.sockets.get(driverData.socketId);
+      if (driverSocket) {
+        driverSocket.leave('active-drivers');
+        console.log(`🔴 Conductor ${data.acceptedDriverId} removido de active-drivers (ahora OCUPADO)`);
+      }
+    } else {
+      console.log(`⚠️ Conductor ${data.acceptedDriverId} no está conectado`);
+    }
+    
+    // Notificar a otros conductores que el servicio ya fue tomado
+    if (data.otherDriverIds && data.otherDriverIds.length > 0) {
+      data.otherDriverIds.forEach(driverId => {
+        const otherDriverData = connectedDrivers.get(driverId);
+        if (otherDriverData) {
+          io.to(otherDriverData.socketId).emit('service:taken', {
+            requestId: data.requestId,
+            message: 'Este servicio ya fue tomado por otro conductor',
+            timestamp: new Date()
+          });
+        }
+      });
+      
+      console.log(`📢 ${data.otherDriverIds.length} conductores notificados que el servicio fue tomado`);
+    }
+  });
+
+  // ========================================
+  // Completar Servicio
+  // ========================================
+  socket.on('service:complete', (data) => {
+    console.log('✅ Servicio completado:', data);
+    console.log(`🚗 Conductor: ${data.driverName}`);
+    console.log(`📦 Request ID: ${data.requestId}`);
+    
+    // 🆕 Eliminar servicio activo del tracking
+    if (data.requestId) {
+      activeServices.delete(data.requestId);
+      console.log(`📍 Servicio ${data.requestId} removido del tracking`);
+    }
+    
+    // Notificar al cliente que el servicio fue completado
+    const clientSocketId = connectedClients.get(data.clientId);
+    if (clientSocketId) {
+      io.to(clientSocketId).emit('service:completed', {
+        requestId: data.requestId,
+        driverName: data.driverName,
+        completedAt: data.completedAt,
+        message: '¡Servicio completado! ¿Cómo fue tu experiencia?'
+      });
+      console.log(`✅ Cliente ${data.clientId} notificado de servicio completado`);
+    } else {
+      console.log(`⚠️ Cliente ${data.clientId} no está conectado`);
+    }
+    
+    // Actualizar estado del conductor a disponible
+    const driverData = connectedDrivers.get(data.driverId);
+    if (driverData) {
+      driverData.isOnline = true;
+      connectedDrivers.set(data.driverId, driverData);
+      
+      const driverSocket = io.sockets.sockets.get(driverData.socketId);
+      if (driverSocket) {
+        driverSocket.join('active-drivers');
+        console.log(`🟢 Conductor ${data.driverId} de vuelta en active-drivers (DISPONIBLE)`);
+      }
+    } else {
+      console.log(`⚠️ Conductor ${data.driverId} no está conectado`);
+    }
+  });
+
+  // ========================================
+  // 🆕 TRACKING EN TIEMPO REAL - Ubicación del Conductor
+  // ========================================
+  socket.on('driver:location-update', (data) => {
+    const { requestId, driverId, location, heading, speed, accuracy } = data;
+    
+    // Buscar el servicio activo
+    const service = activeServices.get(requestId);
+    
+    if (service && service.clientSocketId) {
+      // Enviar ubicación al cliente
+      io.to(service.clientSocketId).emit('driver:location-update', {
+        requestId,
+        driverId,
+        location: {
+          lat: location.lat,
+          lng: location.lng
+        },
+        heading: heading || 0,
+        speed: speed || 0,
+        accuracy: accuracy || 0,
+        timestamp: new Date()
+      });
+      
+      // Log cada 10 actualizaciones para no saturar consola
+      if (!socket.locationUpdateCount) socket.locationUpdateCount = 0;
+      socket.locationUpdateCount++;
+      
+      if (socket.locationUpdateCount % 10 === 0) {
+        console.log(`📍 Ubicación actualizada - Conductor: ${driverId} → Cliente: ${service.clientId}`);
+      }
+    } else {
+      // Solo log la primera vez que no encuentra el servicio
+      if (!socket.serviceNotFoundLogged) {
+        console.log(`⚠️ Servicio ${requestId} no encontrado en activeServices`);
+        socket.serviceNotFoundLogged = true;
+      }
+    }
   });
 
   // Desconexión
   socket.on('disconnect', () => {
     console.log('🔌 Cliente desconectado:', socket.id);
     // Limpiar mapas
-    for (let [driverId, socketId] of connectedDrivers.entries()) {
-      if (socketId === socket.id) {
+    for (let [driverId, driverData] of connectedDrivers.entries()) {
+      if (driverData.socketId === socket.id) {
         connectedDrivers.delete(driverId);
         console.log(`🚗 Conductor desconectado: ${driverId}`);
       }

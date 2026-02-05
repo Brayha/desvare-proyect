@@ -11,7 +11,11 @@ import {
 import { locationOutline, checkmarkCircleOutline } from "ionicons/icons";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useToast } from "@hooks/useToast";
+import logo from "@shared/src/img/Desvare.svg";
+import geolocationIcon from "@shared/src/img/area-map.gif";
 import "./LocationPermission.css";
+import { Routing2, LocationTick } from 'iconsax-react';
+import { Button } from "@shared/components/Button/Button";
 
 const LocationPermission = () => {
   const history = useHistory();
@@ -23,109 +27,115 @@ const LocationPermission = () => {
     try {
       await requestLocation();
       setPermissionGranted(true);
-      
+
       // Esperar 1 segundo para mostrar el éxito y luego navegar
       setTimeout(() => {
-        history.push("/request-service");
+        history.push("/tabs/desvare");
       }, 1000);
     } catch (error) {
-      showError("No pudimos obtener tu ubicación. Por favor, activa los permisos en tu navegador.");
+      showError(
+        "No pudimos obtener tu ubicación. Por favor, activa los permisos en tu navegador."
+      );
     }
   };
 
-  return (
+  const handleDenyPermission = () => {
+    history.push("/home");
+  };
+
+    return (
     <IonPage>
-      <IonContent className="location-permission-page">
-        <div className="permission-container">
-          {!permissionGranted ? (
-            <>
-              {/* Icono principal */}
-              <div className="icon-container">
-                <IonIcon icon={locationOutline} className="location-icon" />
+      <IonContent>
+        <div className="location-permission-page">
+          {/* TODO: LOGO */}
+          <div className="permission-content-header">
+            <img src={logo} alt="logo" />
+          </div>
+          <div className="permission-container">
+            {!permissionGranted ? (
+              <>
+              <div className="permission-icon">
+                <img src={geolocationIcon} alt="geolocation" />
               </div>
-
-              {/* Título */}
-              <IonText>
-                <h1 className="permission-title">
-                  Necesitamos tu ubicación
-                </h1>
-              </IonText>
-
-              {/* Descripción */}
-              <IonText color="medium">
-                <p className="permission-description">
-                  Para brindarte el mejor servicio, necesitamos conocer tu ubicación
-                  y calcular la ruta hacia tu destino.
-                </p>
-              </IonText>
-
-              {/* Beneficios */}
-              <div className="benefits-list">
-                <div className="benefit-item">
-                  <IonIcon icon={checkmarkCircleOutline} color="success" />
-                  <IonText>
-                    <p>Calcula rutas precisas</p>
-                  </IonText>
-                </div>
-                <div className="benefit-item">
-                  <IonIcon icon={checkmarkCircleOutline} color="success" />
-                  <IonText>
-                    <p>Encuentra conductores cercanos</p>
-                  </IonText>
-                </div>
-                <div className="benefit-item">
-                  <IonIcon icon={checkmarkCircleOutline} color="success" />
-                  <IonText>
-                    <p>Cotizaciones más rápidas</p>
-                  </IonText>
-                </div>
-              </div>
-
-              {/* Botón de acción */}
-              <IonButton
-                expand="block"
-                size="large"
-                onClick={handleRequestPermission}
-                disabled={loading}
-                className="permission-button"
-              >
-                {loading ? (
-                  <>
-                    <IonSpinner name="crescent" />
-                    <span style={{ marginLeft: "10px" }}>Solicitando permiso...</span>
-                  </>
-                ) : (
-                  "Permitir acceso a ubicación"
-                )}
-              </IonButton>
-
-              {/* Nota de privacidad */}
-              <IonText color="medium">
-                <p className="privacy-note">
-                  Tu ubicación solo se usa para calcular rutas y encontrar conductores.
-                  No compartimos tu información con terceros.
-                </p>
-              </IonText>
-            </>
-          ) : (
-            <>
-              {/* Estado de éxito */}
-              <div className="success-container">
-                <IonIcon
-                  icon={checkmarkCircleOutline}
-                  className="success-icon"
-                  color="success"
-                />
+                {/* Título */}
                 <IonText>
-                  <h2 className="success-title">¡Ubicación obtenida!</h2>
+                  <h1 className="permission-title">Necesitamos tu ubicación</h1>
                 </IonText>
+
+                {/* Descripción */}
                 <IonText color="medium">
-                  <p>Redirigiendo...</p>
+                  <p className="permission-description">
+                    Para brindarte el mejor servicio, necesitamos conocer tu
+                    ubicación y calcular la ruta hacia tu destino.
+                  </p>
                 </IonText>
-                <IonSpinner name="crescent" color="primary" />
-              </div>
-            </>
-          )}
+
+                {/* Beneficios */}
+                <div className="benefits-list">
+                  <div className="benefit-item">
+                  <Routing2 size={24} color="#9CA3AF"/>
+                    <IonText>
+                      <p>Calcula rutas precisas</p>
+                    </IonText>
+                  </div>
+                  <div className="benefit-item">
+                  <LocationTick size={24} color="#9CA3AF"/>
+                    <IonText>
+                      <p>Encuentra conductores cercanos</p>
+                    </IonText>
+                  </div>
+                </div>
+
+                {/* Botón de acción */}
+                <Button
+                  variant="primary"
+                  size="large"
+                  expand="block"
+                  onClick={handleRequestPermission}
+                  disabled={loading}
+                >
+                  Permitir acceso a ubicación
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="large"
+                  expand="block"
+                  onClick={handleDenyPermission}
+                  disabled={loading}
+                  color="#9CA3AF"
+                >
+                  Denegar solicitud
+                </Button>
+
+                {/* Nota de privacidad */}
+                <IonText color="medium">
+                  <p className="privacy-note">
+                    Tu ubicación solo se usa para calcular rutas y encontrar
+                    conductores. No compartimos tu información con terceros.
+                  </p>
+                </IonText>
+              </>
+            ) : (
+              <>
+                {/* Estado de éxito */}
+                <div className="success-container">
+                  <IonIcon
+                    icon={checkmarkCircleOutline}
+                    className="success-icon"
+                    color="success"
+                  />
+                  <IonText>
+                    <h2 className="success-title">¡Ubicación obtenida!</h2>
+                  </IonText>
+                  <IonText color="medium">
+                    <p>Redirigiendo...</p>
+                  </IonText>
+                  <IonSpinner name="crescent" color="primary" />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </IonContent>
     </IonPage>
@@ -133,4 +143,3 @@ const LocationPermission = () => {
 };
 
 export default LocationPermission;
-
