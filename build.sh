@@ -1,12 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "📦 Installing dependencies in shared..."
-cd shared
-npm install
-
 echo "📦 Installing dependencies in client-pwa..."
-cd ../client-pwa
+cd client-pwa
 npm install
 
 echo "🔨 Building client-pwa..."
