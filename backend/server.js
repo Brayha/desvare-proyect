@@ -27,6 +27,13 @@ const getAllowedOrigins = () => {
     origins.push('http://localhost:8100', 'http://localhost:5174');
   }
   
+  // ADMIN_URL puede tener múltiples URLs separadas por coma
+  if (process.env.ADMIN_URL) {
+    origins.push(...process.env.ADMIN_URL.split(',').map(url => url.trim()));
+  } else {
+    origins.push('http://localhost:5176');
+  }
+  
   return origins;
 };
 
