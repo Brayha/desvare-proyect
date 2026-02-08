@@ -1,4 +1,4 @@
-# 📱 Configuración Completa de PWA + Notificaciones Push
+on # 📱 Configuración Completa de PWA + Notificaciones Push
 
 **Fecha:** 2026-02-06  
 **Objetivo:** Convertir la app en una PWA completa con notificaciones push funcionales
