@@ -1,11 +1,11 @@
-import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
+import { IonApp, IonRouterOutlet, setupIonicReact, useIonToast } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
 import { useEffect, useCallback } from 'react';
 import socketService from './services/socket';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import NotificationPermissionPrompt from './components/NotificationPermissionPrompt/NotificationPermissionPrompt';
-import { requestNotificationPermission } from './services/fcmService';
+import { requestNotificationPermission, onMessageListener } from './services/fcmService';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -71,6 +71,65 @@ const NotificationPromptGate = () => {
   );
 };
 
+// Componente para escuchar notificaciones de Firebase en foreground
+const FirebaseNotificationListener = () => {
+  const { user } = useAuth();
+  const [present] = useIonToast();
+
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    console.log('🔔 Registrando listener de notificaciones Firebase...');
+    
+    const unsubscribe = onMessageListener((payload) => {
+      console.log('📬 Notificación recibida en foreground:', payload);
+      
+      // Mostrar toast con la notificación
+      present({
+        message: `${payload.title}\n${payload.body}`,
+        duration: 5000,
+        position: 'top',
+        color: 'primary',
+        buttons: [
+          {
+            text: 'Ver',
+            handler: () => {
+              // Navegar a la URL especificada en la notificación
+              if (payload.data?.url) {
+                window.location.href = payload.data.url;
+              }
+            }
+          },
+          {
+            text: 'Cerrar',
+            role: 'cancel'
+          }
+        ]
+      });
+      
+      // Reproducir sonido
+      try {
+        const audio = new Audio('/notification-sound.mp3');
+        audio.play().catch(err => console.log('No se pudo reproducir sonido:', err));
+      } catch (err) {
+        console.log('Error al reproducir sonido:', err);
+      }
+      
+      // Vibrar (si el dispositivo lo soporta)
+      if ('vibrate' in navigator) {
+        navigator.vibrate([200, 100, 200]);
+      }
+    });
+    
+    return () => {
+      console.log('🔕 Desregistrando listener de notificaciones');
+      unsubscribe();
+    };
+  }, [user, present]);
+
+  return null; // Este componente no renderiza nada
+};
+
 function App() {
   // Conectar Socket.IO una sola vez al iniciar la app
   useEffect(() => {
@@ -89,6 +148,7 @@ function App() {
     <AuthProvider>
       <IonApp>
         <NotificationPromptGate />
+        <FirebaseNotificationListener />
         <IonReactRouter>
           <IonRouterOutlet>
             {/* Páginas sin tabs */}

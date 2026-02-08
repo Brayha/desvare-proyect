@@ -17,6 +17,11 @@ import "./RatingService.css";
 
 import logo from "@shared/src/img/Desvare.svg";
 
+// ============================================
+// API URL Configuration
+// ============================================
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const RatingService = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
@@ -73,7 +78,7 @@ const RatingService = () => {
       });
 
       const response = await fetch(
-        `http://localhost:5001/api/requests/${serviceData.requestId}/rate`,
+        `${API_URL}/api/requests/${serviceData.requestId}/rate`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -82,14 +82,26 @@ export const AuthProvider = ({ children }) => {
     // Cargar vehículos
     await loadVehicles(userData.id);
 
-    // Solicitar permisos de notificaciones después del login (si aplica)
-    const promptDismissed = localStorage.getItem('notificationPromptDismissed') === 'true';
-    const shouldPrompt =
-      typeof window !== 'undefined' &&
-      'Notification' in window &&
-      Notification.permission === 'default' &&
-      !promptDismissed;
-    setShowNotificationPrompt(shouldPrompt);
+    // Solicitar permisos de notificaciones después del login (con delay de 2 segundos)
+    setTimeout(() => {
+      const promptDismissed = localStorage.getItem('notificationPromptDismissed') === 'true';
+      const shouldPrompt =
+        typeof window !== 'undefined' &&
+        'Notification' in window &&
+        Notification.permission === 'default' &&
+        !promptDismissed;
+      
+      if (shouldPrompt) {
+        console.log('🔔 Mostrando prompt de notificaciones...');
+        setShowNotificationPrompt(true);
+      } else {
+        console.log('ℹ️ Prompt de notificaciones no necesario:', {
+          promptDismissed,
+          notificationAvailable: 'Notification' in window,
+          permission: typeof Notification !== 'undefined' ? Notification.permission : 'N/A'
+        });
+      }
+    }, 2000);
   };
 
   const logout = () => {

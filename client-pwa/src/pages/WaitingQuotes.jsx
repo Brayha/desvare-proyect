@@ -15,14 +15,19 @@ import { chevronDownCircleOutline } from "ionicons/icons";
 import { Notification } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
-// import { useNotification } from "../hooks/useNotification"; // ← Comentado: Ya no se usa
-// import QuoteNotification from "../components/QuoteNotification/QuoteNotification"; // ← Comentado: Ya no se usa
+import { useNotification } from "../hooks/useNotification";
+import QuoteNotification from "../components/QuoteNotification/QuoteNotification";
 import QuoteDetailSheet from "../components/QuoteDetailSheet/QuoteDetailSheet";
 import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
 import "./WaitingQuotes.css";
 
 import logo from "@shared/src/img/Desvare.svg";
+
+// ============================================
+// API URL Configuration
+// ============================================
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 // ============================================
 // 🧪 EXPERIMENT-QUOTES: Flag para activar/desactivar
@@ -75,8 +80,8 @@ const WaitingQuotes = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
   const [presentAlert] = useIonAlert();
-  // const { activeNotifications, showQuoteNotification, closeNotification } =
-  //   useNotification(); // ← Comentado: Ya no se usa
+  const { activeNotifications, showQuoteNotification, closeNotification } =
+    useNotification();
 
   const [user, setUser] = useState(null);
   const [routeData, setRouteData] = useState(null);
@@ -213,12 +218,12 @@ const WaitingQuotes = () => {
         // Agregar cotización a la lista
         setQuotesReceived((prev) => [...prev, quote]);
 
-        // ✅ Notificación eliminada - Las cotizaciones aparecen directamente en el mapa
-        // showQuoteNotification(quote, {
-        //   playSound: true,
-        //   vibrate: true,
-        //   duration: 5000,
-        // });
+        // ✅ Mostrar notificación visual + sonido + vibración
+        showQuoteNotification(quote, {
+          playSound: true,
+          vibrate: true,
+          duration: 5000,
+        });
       });
 
       // ✅ Escuchar cancelaciones de cotizaciones
@@ -421,7 +426,7 @@ const WaitingQuotes = () => {
       if (currentRequestId) {
         // Llamar al backend para obtener cotizaciones actualizadas
         const response = await fetch(
-          `http://localhost:5001/api/requests/${currentRequestId}`
+          `${API_URL}/api/requests/${currentRequestId}`
         );
         const data = await response.json();
 
@@ -533,7 +538,7 @@ const WaitingQuotes = () => {
 
       // Llamar al endpoint de aceptación
       const response = await fetch(
-        `http://localhost:5001/api/requests/${currentRequestId}/accept`,
+        `${API_URL}/api/requests/${currentRequestId}/accept`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -668,15 +673,15 @@ const WaitingQuotes = () => {
           />
         </IonRefresher>
 
-        {/* ✅ Notificaciones eliminadas - Las cotizaciones aparecen directamente en el mapa */}
-        {/* {activeNotifications.map((notification) => (
+        {/* ✅ Notificaciones visuales cuando llega una cotización */}
+        {activeNotifications.map((notification) => (
           <QuoteNotification
             key={notification.id}
             quote={notification.quote}
             duration={notification.duration}
             onClose={() => closeNotification(notification.id)}
           />
-        ))} */}
+        ))}
 
         {/* Mapa fullscreen - Sin header ni footer */}
         <div className="map-container-fullscreen-no-header">

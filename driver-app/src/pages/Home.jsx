@@ -30,6 +30,11 @@ import LocationPermissionModal from '../components/LocationPermissionModal';
 import CancellationDetailModal from '../components/CancellationDetailModal';
 import './Home.css';
 
+// ============================================
+// API URL Configuration
+// ============================================
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const Home = () => {
   const history = useHistory();
   const [present] = useIonToast();
@@ -81,7 +86,7 @@ const Home = () => {
     // Solo si NO tiene selfie, cargarlo del backend
     const loadProfileImage = async () => {
       try {
-        const response = await fetch(`http://localhost:5001/api/drivers/profile/${parsedUser._id}`);
+        const response = await fetch(`${API_URL}/api/drivers/profile/${parsedUser._id}`);
         if (response.ok) {
           const data = await response.json();
           const selfie = data.driver?.driverProfile?.documents?.selfie;
@@ -326,7 +331,7 @@ const Home = () => {
   const loadRequests = async (driverId) => {
     try {
       setLoadingRequests(true);
-      const response = await fetch(`http://localhost:5001/api/requests/nearby/${driverId}`);
+      const response = await fetch(`${API_URL}/api/requests/nearby/${driverId}`);
       const data = await response.json();
       
       if (response.ok) {
@@ -345,7 +350,7 @@ const Home = () => {
   // Toggle Ocupado/Activo
   const handleToggleAvailability = async (newStatus) => {
     try {
-      const response = await fetch('http://localhost:5001/api/drivers/toggle-availability', {
+      const response = await fetch(`${API_URL}/api/drivers/toggle-availability`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -33,6 +33,11 @@ import {
 import socketService from '../services/socket';
 import './Profile.css';
 
+// ============================================
+// API URL Configuration
+// ============================================
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const Profile = () => {
   const history = useHistory();
   const [user, setUser] = useState(null);
@@ -55,7 +60,7 @@ const Profile = () => {
 
   const loadProfile = async (driverId) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/drivers/profile/${driverId}`);
+      const response = await fetch(`${API_URL}/api/drivers/profile/${driverId}`);
       const data = await response.json();
       
       if (response.ok) {

@@ -28,6 +28,11 @@ import busIcon from "../../../shared/src/img/vehicles/bus.svg";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
+// ============================================
+// API URL Configuration
+// ============================================
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const ActiveService = () => {
   const history = useHistory();
   const [present] = useIonToast();
@@ -296,7 +301,7 @@ const ActiveService = () => {
       if (userData) {
         const parsedUser = JSON.parse(userData);
         const response = await fetch(
-          `http://localhost:5001/api/drivers/profile/${parsedUser._id}`,
+          `${API_URL}/api/drivers/profile/${parsedUser._id}`,
         );
         const data = await response.json();
 
@@ -365,7 +370,7 @@ const ActiveService = () => {
     try {
       console.log("🔄 Obteniendo datos completos del request del backend...");
       const response = await fetch(
-        `http://localhost:5001/api/requests/${parsedData.requestId}`,
+        `${API_URL}/api/requests/${parsedData.requestId}`,
       );
       const data = await response.json();
 
@@ -543,7 +548,7 @@ const ActiveService = () => {
 
               // 1. Actualizar en el backend
               const response = await fetch(
-                `http://localhost:5001/api/requests/${serviceData.requestId}/complete`,
+                `${API_URL}/api/requests/${serviceData.requestId}/complete`,
                 {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },

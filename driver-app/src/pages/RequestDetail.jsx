@@ -23,6 +23,11 @@ import camionetaIcon from "../../../shared/src/img/vehicles/camioneta.svg";
 import camionIcon from "../../../shared/src/img/vehicles/camion.svg";
 import busIcon from "../../../shared/src/img/vehicles/bus.svg";
 
+// ============================================
+// API URL Configuration
+// ============================================
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const RequestDetail = () => {
   const history = useHistory();
   const location = useLocation();
@@ -43,7 +48,7 @@ const RequestDetail = () => {
         if (userData) {
           const parsedUser = JSON.parse(userData);
           const response = await fetch(
-            `http://localhost:5001/api/drivers/profile/${parsedUser._id}`,
+            `${API_URL}/api/drivers/profile/${parsedUser._id}`,
           );
           const data = await response.json();
 

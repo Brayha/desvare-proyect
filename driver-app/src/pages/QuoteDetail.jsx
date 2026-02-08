@@ -29,6 +29,11 @@ import busIcon from "../../../shared/src/img/vehicles/bus.svg";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
+// ============================================
+// API URL Configuration
+// ============================================
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const QuoteDetail = () => {
   const { requestId } = useParams();
   const history = useHistory();
@@ -82,7 +87,7 @@ const QuoteDetail = () => {
       if (userData) {
         const parsedUser = JSON.parse(userData);
         const response = await fetch(
-          `http://localhost:5001/api/drivers/profile/${parsedUser._id}`,
+          `${API_URL}/api/drivers/profile/${parsedUser._id}`,
         );
         const data = await response.json();
 
