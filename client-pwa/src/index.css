@@ -92,6 +92,23 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* ========================================
+   Safe Area para iOS (evitar que Safari tape los tabs)
+   ======================================== */
+ion-tab-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0) !important;
+  padding-bottom: constant(safe-area-inset-bottom, 0) !important;
+}
+
+ion-content {
+  --padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Asegurar que el contenido no se tape en iOS */
+body {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
