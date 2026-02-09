@@ -228,11 +228,14 @@ userSchema.pre('save', async function(next) {
 // MÉTODOS PARA OTP (Clients y Drivers)
 // ========================================
 userSchema.methods.generateOTP = function() {
-  // Por ahora OTP fijo para testing, después será aleatorio
+  // Generar código aleatorio de 6 dígitos
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
   this.otp = {
-    code: '0000',
+    code: otpCode,
     expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutos
   };
+  
   return this.otp.code;
 };
 

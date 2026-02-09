@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { sendOTP, verifyOTP } = require('../services/sms');
 
 // POST /api/auth/register - Registrar nuevo usuario
 router.post('/register', async (req, res) => {
@@ -177,12 +178,26 @@ router.post('/register-otp', async (req, res) => {
       phoneVerified: false
     });
     
-    // Generar OTP
-    const otpCode = user.generateOTP();
-    await user.save();
+    // Enviar OTP usando Twilio Verify (Twilio genera el código automáticamente)
+    const smsResult = await sendOTP(cleanPhone);
     
-    // TODO: Enviar OTP por SMS (Twilio)
-    console.log(`✅ Usuario registrado - OTP para ${cleanPhone}: ${otpCode}`);
+    if (smsResult.success) {
+      console.log(`✅ OTP enviado a ${cleanPhone} vía Twilio Verify`);
+      console.log(`   Verification SID: ${smsResult.sid}`);
+    } else if (smsResult.devMode) {
+      // Modo desarrollo: generar OTP local
+      console.warn('⚠️ Modo desarrollo: generando OTP local');
+      const otpCode = user.generateOTP();
+      await user.save();
+      console.log(`📱 OTP de desarrollo para ${cleanPhone}: ${otpCode}`);
+    } else {
+      console.error(`❌ Error enviando OTP: ${smsResult.error}`);
+      return res.status(500).json({ 
+        error: 'No se pudo enviar el código de verificación',
+        details: smsResult.error
+      });
+    }
+    
     console.log('⏰ OTP expira en 10 minutos');
     
     res.json({
@@ -223,12 +238,26 @@ router.post('/login-otp', async (req, res) => {
       });
     }
     
-    // Generar nuevo OTP
-    const otpCode = user.generateOTP();
-    await user.save();
+    // Enviar OTP usando Twilio Verify
+    const smsResult = await sendOTP(cleanPhone);
     
-    // TODO: Enviar OTP por SMS (Twilio)
-    console.log(`✅ OTP generado para ${cleanPhone}: ${otpCode}`);
+    if (smsResult.success) {
+      console.log(`✅ OTP enviado a ${cleanPhone} vía Twilio Verify`);
+      console.log(`   Verification SID: ${smsResult.sid}`);
+    } else if (smsResult.devMode) {
+      // Modo desarrollo: generar OTP local
+      console.warn('⚠️ Modo desarrollo: generando OTP local');
+      const otpCode = user.generateOTP();
+      await user.save();
+      console.log(`📱 OTP de desarrollo para ${cleanPhone}: ${otpCode}`);
+    } else {
+      console.error(`❌ Error enviando OTP: ${smsResult.error}`);
+      return res.status(500).json({ 
+        error: 'No se pudo enviar el código de verificación',
+        details: smsResult.error
+      });
+    }
+    
     console.log('⏰ OTP expira en 10 minutos');
     
     res.json({
@@ -266,12 +295,26 @@ router.post('/verify-otp', async (req, res) => {
       });
     }
     
-    // Verificar OTP
-    if (!user.verifyOTP(otp)) {
-      console.log('❌ OTP inválido o expirado');
-      return res.status(401).json({ 
-        error: 'OTP inválido o expirado' 
-      });
+    // Verificar OTP con Twilio Verify
+    const verifyResult = await verifyOTP(user.phone, otp);
+    
+    if (!verifyResult.success) {
+      // Si Twilio no está configurado, intentar verificación local
+      if (verifyResult.devMode) {
+        console.warn('⚠️ Modo desarrollo: verificando OTP local');
+        if (!user.verifyOTP(otp)) {
+          console.log('❌ OTP local inválido o expirado');
+          return res.status(401).json({ 
+            error: 'OTP inválido o expirado' 
+          });
+        }
+      } else {
+        console.log('❌ Error verificando OTP con Twilio:', verifyResult.error);
+        return res.status(401).json({ 
+          error: 'OTP inválido o expirado',
+          details: verifyResult.error
+        });
+      }
     }
     
     // OTP correcto - limpiar y marcar como verificado
