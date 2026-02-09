@@ -773,5 +773,81 @@ router.get('/profile/:id', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/drivers/fcm-token
+ * Registra o actualiza el FCM token del conductor para notificaciones push
+ */
+router.post('/fcm-token', async (req, res) => {
+  try {
+    const { driverId, fcmToken, platform } = req.body;
+
+    if (!driverId || !fcmToken) {
+      return res.status(400).json({
+        error: 'driverId y fcmToken son requeridos'
+      });
+    }
+
+    const driver = await User.findById(driverId);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    // Actualizar FCM token
+    driver.driverProfile.fcmToken = fcmToken;
+    driver.driverProfile.platform = platform || 'android';
+    await driver.save();
+
+    console.log(`✅ Token FCM registrado para conductor ${driver.name} (${platform || 'android'})`);
+
+    res.json({
+      message: 'Token FCM registrado exitosamente',
+      driverId: driver._id
+    });
+
+  } catch (error) {
+    console.error('❌ Error al registrar FCM token:', error);
+    res.status(500).json({
+      error: 'Error al registrar FCM token',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /api/drivers/fcm-token
+ * Elimina el FCM token del conductor (cuando se desloguea)
+ */
+router.delete('/fcm-token', async (req, res) => {
+  try {
+    const { driverId } = req.body;
+
+    if (!driverId) {
+      return res.status(400).json({ error: 'driverId es requerido' });
+    }
+
+    const driver = await User.findById(driverId);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    // Eliminar FCM token
+    driver.driverProfile.fcmToken = null;
+    await driver.save();
+
+    console.log(`🗑️ Token FCM eliminado para conductor ${driver.name}`);
+
+    res.json({
+      message: 'Token FCM eliminado exitosamente'
+    });
+
+  } catch (error) {
+    console.error('❌ Error al eliminar FCM token:', error);
+    res.status(500).json({
+      error: 'Error al eliminar FCM token',
+      details: error.message
+    });
+  }
+});
+
 module.exports = router;
 

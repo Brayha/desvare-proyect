@@ -23,6 +23,7 @@ import {
 import { requestAPI } from '../services/api';
 import socketService from '../services/socket';
 import { useDriverLocation } from '../hooks/useDriverLocation';
+import { initializePushNotifications } from '../services/pushNotifications';
 import ServiceHeader from '../components/ServiceHeader';
 import RequestCard from '../components/RequestCard';
 import LocationBanner from '../components/LocationBanner';
@@ -127,6 +128,9 @@ const Home = () => {
     // Conectar Socket.IO
     socketService.connect();
     socketService.registerDriver(parsedUser._id);
+
+    // 🔔 Inicializar push notifications
+    initializePushNotifications(parsedUser._id);
 
     // Cargar solicitudes iniciales
     loadRequests(parsedUser._id);
