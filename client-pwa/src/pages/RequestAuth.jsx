@@ -98,7 +98,7 @@ const RequestAuth = () => {
     setOtpError("");
 
     // Auto-focus siguiente input
-    if (value && index < 3) {
+    if (value && index < 5) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -229,8 +229,8 @@ const RequestAuth = () => {
     console.log("🔐 Verificando OTP:", otp);
     console.log("🆔 UserId guardado:", userId);
 
-    if (otp.length !== 4) {
-      setOtpError("Ingresa el código de 4 dígitos");
+    if (otp.length !== 6) {
+      setOtpError("Ingresa el código de 6 dígitos");
       return;
     }
 
@@ -771,9 +771,9 @@ const RequestAuth = () => {
                   )}
                 </p>
               </div>
-              {/* Input OTP personalizado (4 dígitos) */}
+              {/* Input OTP personalizado (6 dígitos) */}
               <div className="otp-inputs-container">
-                {[0, 1, 2, 3].map((index) => (
+                {[0, 1, 2, 3, 4, 5].map((index) => (
                   <input
                     key={index}
                     ref={(el) => (otpRefs.current[index] = el)}
@@ -798,7 +798,7 @@ const RequestAuth = () => {
               <button
                 className="auth-submit-button"
                 onClick={handleVerifyOTP}
-                disabled={isLoading || otp.length !== 4}
+                disabled={isLoading || otp.length !== 6}
               >
                 {isLoading ? <IonSpinner name="crescent" /> : "Validar código"}
               </button>

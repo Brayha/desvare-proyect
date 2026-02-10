@@ -51,7 +51,7 @@ const VerifyOTP = () => {
     setError('');
 
     // Auto focus siguiente input
-    if (value && index < 3) {
+    if (value && index < 5) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -65,8 +65,8 @@ const VerifyOTP = () => {
   const handleVerifyOTP = async () => {
     console.log('🔐 Verificando OTP:', otp);
 
-    if (otp.length !== 4) {
-      setError('Ingresa el código de 4 dígitos');
+    if (otp.length !== 6) {
+      setError('Ingresa el código de 6 dígitos');
       return;
     }
 
@@ -166,13 +166,13 @@ const VerifyOTP = () => {
           {/* Título */}
           <h1 className="verify-otp-title">Verifica tu código</h1>
           <p className="verify-otp-description">
-            Ingresa el código de 4 dígitos enviado a tu número de celular{' '}
+            Ingresa el código de 6 dígitos enviado a tu número de celular{' '}
             <strong>{formatPhone(phone)}</strong>
           </p>
 
           {/* OTP Inputs */}
           <div className="verify-otp-inputs">
-            {[0, 1, 2, 3].map((index) => (
+            {[0, 1, 2, 3, 4, 5].map((index) => (
               <input
                 key={index}
                 ref={(el) => (otpRefs.current[index] = el)}
@@ -201,7 +201,7 @@ const VerifyOTP = () => {
             expand="block"
             className="verify-otp-button"
             onClick={handleVerifyOTP}
-            disabled={isLoading || otp.length !== 4}
+            disabled={isLoading || otp.length !== 6}
           >
             {isLoading ? <IonSpinner name="crescent" /> : 'Validar código'}
           </button>

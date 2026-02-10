@@ -75,7 +75,7 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
     setOtp(newOtp.join(""));
     setOtpError("");
 
-    if (value && index < 3) {
+    if (value && index < 5) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -154,8 +154,8 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
   const handleVerifyOTP = async () => {
     console.log("🔐 Verificando OTP:", otp);
 
-    if (otp.length !== 4) {
-      setOtpError("Ingresa el código de 4 dígitos");
+    if (otp.length !== 6) {
+      setOtpError("Ingresa el código de 6 dígitos");
       return;
     }
 
@@ -400,9 +400,9 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
               </p>
             </div>
 
-            {/* Input OTP personalizado (4 dígitos) */}
+            {/* Input OTP personalizado (6 dígitos) */}
             <div className="otp-inputs-container">
-              {[0, 1, 2, 3].map((index) => (
+              {[0, 1, 2, 3, 4, 5].map((index) => (
                 <input
                   key={index}
                   ref={(el) => (otpRefs.current[index] = el)}
@@ -427,7 +427,7 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
             <button
               className="auth-submit-button"
               onClick={handleVerifyOTP}
-              disabled={isLoading || otp.length !== 4}
+              disabled={isLoading || otp.length !== 6}
             >
               {isLoading ? <IonSpinner name="crescent" /> : "Validar código"}
             </button>
