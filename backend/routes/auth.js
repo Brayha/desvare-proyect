@@ -187,6 +187,9 @@ router.post('/register-otp', async (req, res) => {
     const smsResult = await sendOTP(cleanPhone);
     
     if (smsResult.success) {
+      // ✅ GUARDAR USUARIO EN DB antes de retornar
+      await user.save();
+      console.log(`✅ Usuario guardado en DB: ${user._id}`);
       console.log(`✅ OTP enviado a ${cleanPhone} vía Twilio Verify`);
       console.log(`   Verification SID: ${smsResult.sid}`);
     } else if (smsResult.devMode) {
