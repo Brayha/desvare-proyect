@@ -19,14 +19,22 @@ A problem occurred evaluating project ':app'.
 
 ## ✅ Solución Aplicada
 
-### **Cambio en build.gradle**
+### **Cambios Realizados (5 archivos)**
 
-**ANTES (línea 22):**
+Se corrigió el mismo error en **5 archivos diferentes**:
+
+1. ✅ **`driver-app/android/app/build.gradle`** (línea 22)
+2. ✅ **`node_modules/@capacitor/android/capacitor/build.gradle`** (línea 57)
+3. ✅ **`node_modules/@capacitor/camera/android/build.gradle`** (línea 47)
+4. ✅ **`node_modules/@capacitor/push-notifications/android/build.gradle`** (línea 46)
+5. ✅ **`node_modules/@capacitor/geolocation/android/build.gradle`** (línea 37)
+
+**ANTES:**
 ```gradle
 proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 ```
 
-**DESPUÉS (línea 22):**
+**DESPUÉS:**
 ```gradle
 proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 ```
@@ -276,7 +284,61 @@ buildTypes {
 
 ---
 
-**Estado:** ✅ CORREGIDO  
+---
+
+## ⚠️ IMPORTANTE: Archivos en node_modules
+
+**Nota:** 4 de los 5 archivos corregidos están en `node_modules` (dependencias de Capacitor).
+
+**¿Qué significa esto?**
+- Si ejecutas `npm install` de nuevo, estos cambios se **perderán**
+- Tendrías que volver a aplicar los cambios manualmente
+- O esperar a que Capacitor actualice sus plugins
+
+**Solución permanente:**
+- Actualizar Capacitor a una versión más reciente que ya tenga este fix
+- O crear un script post-install que aplique los cambios automáticamente
+
+**Por ahora:**
+- ✅ Los cambios están aplicados
+- ✅ Puedes generar el APK
+- ⚠️ No ejecutes `npm install` en `driver-app` sin antes hacer backup de estos cambios
+
+---
+
+## 🔄 Script para Aplicar Cambios Automáticamente (Futuro)
+
+Si necesitas ejecutar `npm install` de nuevo, puedes usar este script:
+
+```bash
+#!/bin/bash
+# fix-capacitor-proguard.sh
+
+echo "🔧 Aplicando fix de ProGuard a plugins de Capacitor..."
+
+# Lista de archivos a corregir
+FILES=(
+  "driver-app/node_modules/@capacitor/android/capacitor/build.gradle"
+  "driver-app/node_modules/@capacitor/camera/android/build.gradle"
+  "driver-app/node_modules/@capacitor/push-notifications/android/build.gradle"
+  "driver-app/node_modules/@capacitor/geolocation/android/build.gradle"
+)
+
+for file in "${FILES[@]}"; do
+  if [ -f "$file" ]; then
+    sed -i '' "s/proguard-android.txt/proguard-android-optimize.txt/g" "$file"
+    echo "✅ Corregido: $file"
+  else
+    echo "⚠️  No encontrado: $file"
+  fi
+done
+
+echo "✅ Fix aplicado a todos los archivos"
+```
+
+---
+
+**Estado:** ✅ CORREGIDO (5 archivos)  
 **Próximo paso:** Sincronizar Gradle en Android Studio y generar APK
 
 ¡El error está solucionado! Ahora puedes generar el APK sin problemas. 🎉

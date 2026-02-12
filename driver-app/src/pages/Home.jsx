@@ -354,6 +354,17 @@ const Home = () => {
   // Toggle Ocupado/Activo
   const handleToggleAvailability = async (newStatus) => {
     try {
+      // Validar que user existe y tiene _id
+      if (!user || !user._id) {
+        console.error('❌ Error: user no está definido o no tiene _id');
+        present({
+          message: '⚠️ Error: Usuario no cargado. Intenta de nuevo.',
+          duration: 2000,
+          color: 'danger',
+        });
+        return;
+      }
+
       const response = await fetch(`${API_URL}/api/drivers/toggle-availability`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -402,6 +413,18 @@ const Home = () => {
   const handleQuote = (request) => {
     // Verificar si ya cotizó esta solicitud (desde el backend)
     const user = JSON.parse(localStorage.getItem('user'));
+    
+    // Validar que user existe y tiene _id
+    if (!user || !user._id) {
+      console.error('❌ Error: user no está definido o no tiene _id');
+      present({
+        message: '⚠️ Error: Usuario no cargado. Intenta de nuevo.',
+        duration: 2000,
+        color: 'danger',
+      });
+      return;
+    }
+    
     const myQuote = request.quotes?.find(q => q.driverId === user._id);
     
     if (myQuote) {
@@ -432,6 +455,17 @@ const Home = () => {
         message: '⚠️ Obteniendo tu ubicación... Intenta de nuevo',
         duration: 2000,
         color: 'warning',
+      });
+      return;
+    }
+
+    // Validar que user existe y tiene _id
+    if (!user || !user._id) {
+      console.error('❌ Error: user no está definido o no tiene _id');
+      present({
+        message: '⚠️ Error: Usuario no cargado. Intenta de nuevo.',
+        duration: 2000,
+        color: 'danger',
       });
       return;
     }
