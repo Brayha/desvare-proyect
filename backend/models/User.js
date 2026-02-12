@@ -17,8 +17,8 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    unique: true,
-    sparse: true, // Permite null/undefined sin violar unique
+    // unique: true, // ❌ REMOVIDO: Ahora permitimos mismo teléfono con diferentes userType
+    sparse: true,
     trim: true
   },
   phoneVerified: {
@@ -217,6 +217,15 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// ========================================
+// ÍNDICE COMPUESTO: Permite mismo teléfono con diferentes userType
+// ========================================
+// Esto permite que un conductor también pueda ser cliente (caso de uso: conductor varado)
+// Ejemplo: { phone: "+57 300 123", userType: "client" } ✅
+//          { phone: "+57 300 123", userType: "driver" } ✅
+//          { phone: "+57 300 123", userType: "client" } ❌ (duplicado)
+userSchema.index({ phone: 1, userType: 1 }, { unique: true });
 
 // Actualizar timestamp antes de guardar
 userSchema.pre('save', async function(next) {

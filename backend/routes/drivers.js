@@ -53,11 +53,16 @@ router.post('/register-initial', async (req, res) => {
     // Limpiar número de teléfono
     const cleanPhone = phone.replace(/\s/g, '');
 
-    // Verificar si el teléfono ya existe
-    const existingUser = await User.findOne({ phone: cleanPhone });
-    if (existingUser) {
+    // Verificar si ya existe un conductor con este teléfono
+    // ✅ NUEVO: Ahora solo verificamos si ya es conductor, no si el teléfono existe
+    // Esto permite que un cliente también pueda registrarse como conductor
+    const existingDriver = await User.findOne({ 
+      phone: cleanPhone, 
+      userType: 'driver' 
+    });
+    if (existingDriver) {
       return res.status(400).json({
-        error: 'El teléfono ya está registrado'
+        error: 'Ya tienes una cuenta de conductor con este teléfono'
       });
     }
 

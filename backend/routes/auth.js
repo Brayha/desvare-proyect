@@ -161,11 +161,16 @@ router.post('/register-otp', async (req, res) => {
     // Limpiar número de teléfono (quitar espacios)
     const cleanPhone = phone.replace(/\s/g, '');
     
-    // Verificar si el teléfono ya existe
-    const existingUser = await User.findOne({ phone: cleanPhone });
-    if (existingUser) {
+    // Verificar si ya existe un cliente con este teléfono
+    // ✅ NUEVO: Ahora solo verificamos si ya es cliente, no si el teléfono existe
+    // Esto permite que un conductor también pueda registrarse como cliente
+    const existingClient = await User.findOne({ 
+      phone: cleanPhone, 
+      userType: 'client' 
+    });
+    if (existingClient) {
       return res.status(400).json({ 
-        error: 'El teléfono ya está registrado' 
+        error: 'Ya tienes una cuenta de cliente con este teléfono' 
       });
     }
     
