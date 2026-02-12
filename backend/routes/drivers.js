@@ -179,6 +179,8 @@ router.post('/verify-otp', async (req, res) => {
   try {
     const { userId, otp } = req.body;
 
+    console.log('🔐 Verificando OTP para usuario:', userId);
+
     if (!userId || !otp) {
       return res.status(400).json({ error: 'userId y otp son requeridos' });
     }
@@ -192,10 +194,18 @@ router.post('/verify-otp', async (req, res) => {
       return res.status(400).json({ error: 'Usuario no es conductor' });
     }
 
-    // Verificar OTP
-    if (!driver.verifyOTP(otp)) {
-      return res.status(400).json({ error: 'OTP inválido o expirado' });
+    // Verificar OTP usando Twilio Verify
+    const verificationResult = await verifyOTP(driver.phone, otp);
+    
+    if (!verificationResult.success) {
+      console.error('❌ Error al verificar OTP:', verificationResult.error);
+      return res.status(400).json({ 
+        error: 'OTP inválido o expirado',
+        details: verificationResult.error
+      });
     }
+
+    console.log(`✅ OTP verificado correctamente para ${driver.phone}`);
 
     // Marcar teléfono como verificado
     driver.clearOTP();
