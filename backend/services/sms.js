@@ -40,10 +40,26 @@ initializeTwilio();
 
 /**
  * Envía código OTP usando Twilio Verify API
+ * En modo desarrollo (TWILIO_DEV_MODE=true), usa código fijo sin enviar SMS real
  * @param {string} phoneNumber - Número de teléfono (formato: +573001234567 o 3001234567)
  * @returns {Promise<Object>} Resultado del envío
  */
 const sendOTP = async (phoneNumber) => {
+  // 🔧 MODO DESARROLLO: Usar OTP fijo para evitar restricciones de Twilio Trial
+  const DEV_MODE = process.env.TWILIO_DEV_MODE === 'true';
+  
+  if (DEV_MODE) {
+    console.log('🔧 MODO DESARROLLO ACTIVADO: OTP fijo sin SMS real');
+    console.log(`📱 Número: ${phoneNumber}`);
+    console.log(`🔑 Código OTP de desarrollo: 123456`);
+    console.log('⚠️ Este modo es solo para testing. NO usar en producción.');
+    return { 
+      success: true, 
+      devMode: true,
+      message: 'OTP de desarrollo generado (código: 123456)'
+    };
+  }
+
   const client = twilioClient || initializeTwilio();
   
   if (!client) {
@@ -96,6 +112,17 @@ const sendOTP = async (phoneNumber) => {
       console.error(`   Más info: ${error.moreInfo}`);
     }
 
+    // Si es error de cuenta Trial (21608), sugerir soluciones
+    if (error.code === 21608) {
+      console.error('');
+      console.error('💡 SOLUCIÓN: Tu cuenta de Twilio está en modo Trial.');
+      console.error('   Opciones:');
+      console.error('   1. Verificar números en: https://www.twilio.com/console/phone-numbers/verified');
+      console.error('   2. Actualizar a cuenta paga: https://www.twilio.com/console/billing');
+      console.error('   3. Activar modo desarrollo: TWILIO_DEV_MODE=true en .env');
+      console.error('');
+    }
+
     return { 
       success: false, 
       error: error.message,
@@ -106,11 +133,27 @@ const sendOTP = async (phoneNumber) => {
 
 /**
  * Verifica código OTP usando Twilio Verify API
+ * En modo desarrollo (TWILIO_DEV_MODE=true), acepta código fijo '123456'
  * @param {string} phoneNumber - Número de teléfono
  * @param {string} code - Código OTP ingresado por el usuario
  * @returns {Promise<Object>} Resultado de la verificación
  */
 const verifyOTP = async (phoneNumber, code) => {
+  // 🔧 MODO DESARROLLO: Aceptar OTP fijo
+  const DEV_MODE = process.env.TWILIO_DEV_MODE === 'true';
+  
+  if (DEV_MODE) {
+    const isValid = code === '123456';
+    console.log(`🔧 MODO DESARROLLO: Verificando OTP para ${phoneNumber}`);
+    console.log(`   Código ingresado: ${code}`);
+    console.log(`   Resultado: ${isValid ? '✅ VÁLIDO' : '❌ INVÁLIDO (usa 123456)'}`);
+    return { 
+      success: isValid,
+      devMode: true,
+      message: isValid ? 'OTP correcto' : 'OTP incorrecto (usa 123456 en modo desarrollo)'
+    };
+  }
+
   const client = twilioClient || initializeTwilio();
   
   if (!client) {
