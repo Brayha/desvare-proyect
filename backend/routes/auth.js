@@ -285,23 +285,37 @@ router.post('/verify-otp', async (req, res) => {
     const { userId, otp } = req.body;
     
     console.log('🔐 Verificando OTP para usuario:', userId);
+    console.log('   📝 OTP recibido:', otp);
     
     if (!userId || !otp) {
+      console.log('❌ Faltan datos: userId o otp');
       return res.status(400).json({ 
         error: 'userId y otp son requeridos' 
       });
     }
     
     // Buscar usuario
+    console.log('🔍 Buscando usuario en DB...');
     const user = await User.findById(userId);
     if (!user) {
+      console.log('❌ Usuario no encontrado:', userId);
       return res.status(404).json({ 
         error: 'Usuario no encontrado' 
       });
     }
     
+    console.log('✅ Usuario encontrado:', user.phone);
+    console.log('🔄 Llamando a Twilio Verify...');
+    
     // Verificar OTP con Twilio Verify
     const verifyResult = await verifyOTP(user.phone, otp);
+    
+    console.log('📊 Resultado de Twilio:', {
+      success: verifyResult.success,
+      devMode: verifyResult.devMode,
+      error: verifyResult.error,
+      status: verifyResult.status
+    });
     
     if (!verifyResult.success) {
       // Si Twilio no está configurado, intentar verificación local
@@ -315,6 +329,8 @@ router.post('/verify-otp', async (req, res) => {
         }
       } else {
         console.log('❌ Error verificando OTP con Twilio:', verifyResult.error);
+        console.log('   Code:', verifyResult.code);
+        console.log('   Status:', verifyResult.status);
         return res.status(401).json({ 
           error: 'OTP inválido o expirado',
           details: verifyResult.error
@@ -323,6 +339,7 @@ router.post('/verify-otp', async (req, res) => {
     }
     
     // OTP correcto - limpiar y marcar como verificado
+    console.log('✅ OTP válido, actualizando usuario...');
     user.clearOTP();
     await user.save();
     
@@ -339,6 +356,8 @@ router.post('/verify-otp', async (req, res) => {
       { expiresIn: '7d' }
     );
     
+    console.log('✅ Token JWT generado para usuario:', user._id);
+    
     // Retornar token y datos del usuario
     res.json({
       message: 'Autenticación exitosa',
@@ -354,6 +373,7 @@ router.post('/verify-otp', async (req, res) => {
     
   } catch (error) {
     console.error('❌ Error en verify-otp:', error);
+    console.error('   Stack:', error.stack);
     res.status(500).json({ 
       error: 'Error al verificar OTP',
       details: error.message 
