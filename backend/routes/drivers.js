@@ -12,6 +12,7 @@ const multer = require('multer');
 const User = require('../models/User');
 const { uploadDriverDocument, uploadMultipleDocuments } = require('../services/storage');
 const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
+const { sendOTP, verifyOTP } = require('../services/sms');
 
 // Configurar multer para manejar archivos en memoria
 const upload = multer({
@@ -78,12 +79,28 @@ router.post('/register-initial', async (req, res) => {
       }
     });
 
-    // Generar OTP
-    const otpCode = driver.generateOTP();
+    // Enviar OTP usando Twilio Verify
+    const smsResult = await sendOTP(cleanPhone);
+    
+    if (smsResult.success) {
+      console.log(`✅ OTP enviado a ${cleanPhone} vía Twilio Verify`);
+      console.log(`   Verification SID: ${smsResult.sid}`);
+      console.log(`   Status: ${smsResult.status}`);
+      console.log(`   Channel: ${smsResult.channel}`);
+    } else if (smsResult.devMode) {
+      // Modo desarrollo: generar OTP local
+      console.warn('⚠️ Modo desarrollo: generando OTP local');
+      const otpCode = driver.generateOTP();
+      console.log(`📱 OTP de desarrollo para ${cleanPhone}: ${otpCode}`);
+    } else {
+      console.error(`❌ Error enviando OTP: ${smsResult.error}`);
+      return res.status(500).json({
+        error: 'Error al enviar código de verificación',
+        details: smsResult.error
+      });
+    }
+    
     await driver.save();
-
-    // TODO: Enviar OTP por SMS (Twilio)
-    console.log(`✅ Conductor registrado - OTP para ${cleanPhone}: ${otpCode}`);
     console.log('⏰ OTP expira en 10 minutos');
 
     res.json({
