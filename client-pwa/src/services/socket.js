@@ -1,6 +1,9 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
+// TEMPORAL: Hardcodeado para testing - debe funcionar con variables después
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://api.desvare.app';
+
+console.log('🔧 SOCKET_URL configurada:', SOCKET_URL);
 
 class SocketService {
   constructor() {
