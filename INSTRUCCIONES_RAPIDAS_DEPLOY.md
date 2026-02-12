@@ -97,3 +97,5 @@ Si necesitas más detalles, consulta:
 **Tiempo estimado:** 5 minutos  
 **Riesgo:** Bajo  
 **Cambios:** 3 archivos backend
+
+
