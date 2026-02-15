@@ -145,12 +145,19 @@ router.post('/login-otp', async (req, res) => {
       return res.status(404).json({ error: 'Conductor no encontrado. Por favor regístrate primero.' });
     }
 
-    // Generar nuevo OTP
-    const otpCode = driver.generateOTP();
-    await driver.save();
+    // Enviar OTP con Twilio Verify
+    const smsResult = await sendOTP(cleanPhone);
+    
+    if (!smsResult.success) {
+      console.error('❌ Error enviando OTP:', smsResult.error);
+      return res.status(500).json({ 
+        error: 'Error al enviar código de verificación',
+        details: smsResult.error 
+      });
+    }
 
-    // TODO: Enviar OTP por SMS (Twilio)
-    console.log(`✅ OTP generado para login de conductor ${cleanPhone}: ${otpCode}`);
+    console.log(`✅ OTP enviado a ${cleanPhone} vía Twilio Verify`);
+    console.log(`   Verification SID: ${smsResult.sid}`);
     console.log('⏰ OTP expira en 10 minutos');
 
     res.json({
