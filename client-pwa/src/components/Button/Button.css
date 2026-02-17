@@ -1,0 +1,49 @@
+.shared-button {
+  --border-radius: 15px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: none;
+  letter-spacing: 0.3px;
+}
+
+.shared-button.button-large {
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+.shared-button.button-small {
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+}
+
+/* Estilo outline personalizado */
+.shared-button.button-outline {
+  --border-radius: 15px;
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: #E5E7EB;
+  --background: #FFF;
+  --background-activated: #F9FAFB;
+  --background-focused: #F9FAFB;
+  --background-hover: #F9FAFB;
+  --color: #9CA3AF !important;
+  --color-activated: #6B7280 !important;
+  --color-focused: #6B7280 !important;
+}
+
+/* Forzar el color del texto en el botón outline */
+.shared-button.button-outline .button-native {
+  color: #9CA3AF !important;
+}
+
+.shared-button.button-outline .button-native:hover,
+.shared-button.button-outline .button-native:focus,
+.shared-button.button-outline .button-native:active {
+  color: #6B7280 !important;
+}
+

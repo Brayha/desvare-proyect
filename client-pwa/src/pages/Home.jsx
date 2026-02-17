@@ -18,12 +18,12 @@ import {
   IonButtons,
   useIonToast,
 } from "@ionic/react";
-import { Button } from "@components";
+import { Button } from "../components/Button/Button";
 import { Location } from 'iconsax-react';
-import mapBackground from "@shared/src/img/map-home-responsive.png";
+import mapBackground from "../assets/img/map-home-responsive.png";
 import socketService from "../services/socket";
 import "./Home.css";
-import logo from "@shared/src/img/Desvare.svg";
+import logo from "../assets/img/Desvare.svg";
 
 const Home = () => {
   const history = useHistory();

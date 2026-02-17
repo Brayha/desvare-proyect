@@ -11,11 +11,11 @@ import {
 import { locationOutline, checkmarkCircleOutline } from "ionicons/icons";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useToast } from "@hooks/useToast";
-import logo from "@shared/src/img/Desvare.svg";
-import geolocationIcon from "@shared/src/img/area-map.gif";
+import logo from "../assets/img/Desvare.svg";
+import geolocationIcon from "../assets/img/area-map.gif";
 import "./LocationPermission.css";
 import { Routing2, LocationTick } from 'iconsax-react';
-import { Button } from "@shared/components/Button/Button";
+import { Button } from "../components/Button/Button";
 
 const LocationPermission = () => {
   const history = useHistory();

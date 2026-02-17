@@ -22,18 +22,18 @@ import {
   Map,
 } from "iconsax-react";
 import { authAPI, citiesAPI, vehicleAPI } from "../services/api";
-import { Input } from "../../../shared/components";
+import { Input } from "../components/Input/Input";
 import TruckTypeSelector from "../components/TruckTypeSelector";
 import TruckBrandSelector from "../components/TruckBrandSelector";
 import TruckModelSelector from "../components/TruckModelSelector";
 import TruckPlateInput from "../components/TruckPlateInput";
-import idCardImage from "../../../shared/src/img/id-card.png";
-import selfieImage from "../../../shared/src/img/selfie.png";
-import licenseImage from "../../../shared/src/img/license.png";
-import soatImage from "../../../shared/src/img/soat.png";
-import propertyImage from "../../../shared/src/img/id.png";
-import securityImage from "../../../shared/src/img/Security.png";
-import truckImage from "../../../shared/src/img/tow.png";
+import idCardImage from "../assets/img/id-card.png";
+import selfieImage from "../assets/img/selfie.png";
+import licenseImage from "../assets/img/license.png";
+import soatImage from "../assets/img/soat.png";
+import propertyImage from "../assets/img/id.png";
+import securityImage from "../assets/img/Security.png";
+import truckImage from "../assets/img/tow.png";
 import "./CompleteRegistration.css";
 
 /**

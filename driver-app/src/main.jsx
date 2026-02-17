@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
-// Estilos compartidos (PRIMERO)
-import '@styles/global.css'
+// Estilos globales (PRIMERO)
+import './styles/global.css'
 
 // Estilos locales
 import './index.css'

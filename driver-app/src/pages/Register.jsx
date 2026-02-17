@@ -3,7 +3,8 @@ import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonText } from '@ionic/react';
 import { Profile, Call, Sms } from 'iconsax-react';
 import { authAPI } from '../services/api';
-import { Input, PhoneInput } from '../../../shared/components';
+import { Input } from '../components/Input/Input';
+import { PhoneInput } from '../components/PhoneInput/PhoneInput';
 import './Register.css';
 
 const Register = () => {

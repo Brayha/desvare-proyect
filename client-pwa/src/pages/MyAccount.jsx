@@ -12,7 +12,7 @@ import {
   IonSpinner,
 } from "@ionic/react";
 import { personCircleOutline, logInOutline } from "ionicons/icons";
-import { Button } from "@components";
+import { Button } from "../components/Button/Button";
 import AuthModal from "../components/AuthModal/AuthModal";
 import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
 import socketService from "../services/socket";
@@ -21,7 +21,7 @@ import { useToast } from "@hooks/useToast";
 import { vehicleAPI } from "../services/vehicleAPI";
 import { getVehicleImage } from "../utils/vehicleImages";
 import "./MyAccount.css";
-import logo from "@shared/src/img/Desvare.svg";
+import logo from "../assets/img/Desvare.svg";
 import {
   Setting2,
   Verify,

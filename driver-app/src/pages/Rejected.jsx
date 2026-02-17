@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonText } from '@ionic/react';
 import { CloseCircle, InfoCircle, Refresh } from 'iconsax-react';
-import DesvareLogoWhite from '../../../shared/src/img/Desvare-white.svg';
+import DesvareLogoWhite from '../assets/img/Desvare-white.svg';
 import './Rejected.css';
 
 /**

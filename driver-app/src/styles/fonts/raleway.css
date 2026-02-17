@@ -1,0 +1,23 @@
+/**
+ * Google Fonts - Raleway
+ * Fuente elegante para Desvare
+ * Incluye todos los pesos disponibles: 100-900
+ */
+
+/* Importar Raleway con todos los pesos desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+/*
+  Pesos disponibles de Raleway:
+  - 100: Thin
+  - 200: Extra Light
+  - 300: Light
+  - 400: Regular (normal)
+  - 500: Medium
+  - 600: SemiBold
+  - 700: Bold
+  - 800: ExtraBold
+  - 900: Black
+  
+  También incluye versiones en itálica (cursiva) de todos los pesos
+*/

@@ -3,11 +3,11 @@
  */
 
 // Importar todas las imágenes SVG de vehículos
-import motoSvg from '../../../shared/src/img/vehicles/moto.svg';
-import carSvg from '../../../shared/src/img/vehicles/car.svg';
-import camionetaSvg from '../../../shared/src/img/vehicles/camioneta.svg';
-import camionSvg from '../../../shared/src/img/vehicles/camion.svg';
-import busSvg from '../../../shared/src/img/vehicles/bus.svg';
+import motoSvg from '../assets/img/vehicles/moto.svg';
+import carSvg from '../assets/img/vehicles/car.svg';
+import camionetaSvg from '../assets/img/vehicles/camioneta.svg';
+import camionSvg from '../assets/img/vehicles/camion.svg';
+import busSvg from '../assets/img/vehicles/bus.svg';
 
 /**
  * Mapa de categoryId a imagen SVG

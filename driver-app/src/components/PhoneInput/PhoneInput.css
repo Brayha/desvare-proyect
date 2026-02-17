@@ -1,0 +1,134 @@
+/* ======================================
+   MODERN PHONE INPUT
+   ====================================== */
+
+.modern-phone-input-wrapper {
+  margin-bottom: 16px;
+}
+
+.modern-phone-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #F9FAFB;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #E5E7EB;
+  transition: all 0.2s ease;
+}
+
+.modern-phone-input-group:focus-within {
+  border-color: #0055FF;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+}
+
+.modern-phone-input-group.has-error {
+  border-color: #EF4444;
+  background: #FEF2F2;
+}
+
+.modern-phone-input-group.has-error:focus-within {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.modern-phone-input-group.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #F3F4F6;
+}
+
+.modern-phone-input-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.modern-phone-input-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1F2937;
+  width: 100%;
+}
+
+.modern-phone-input-field::placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.modern-phone-input-field:disabled {
+  cursor: not-allowed;
+}
+
+.modern-phone-input-error {
+  display: block;
+  font-size: 12px;
+  color: #EF4444;
+  margin-top: 6px;
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+/* ======================================
+   MANTENER ESTILOS ANTIGUOS PARA COMPATIBILIDAD
+   ====================================== */
+.phone-input-wrapper {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.phone-input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.phone-input-item {
+  --background: #f5f5f5;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+}
+
+.phone-input-item.ion-invalid {
+  --background: #fee;
+  border: 1px solid #f44;
+}
+
+.phone-prefix {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-right: 8px;
+  white-space: nowrap;
+  padding-right: 8px;
+  border-right: 1px solid #ddd;
+}
+
+.phone-input-field {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  --padding-start: 12px;
+}
+
+.phone-input-error {
+  color: #f44;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 16px;
+  font-weight: 500;
+}
+

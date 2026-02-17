@@ -1,7 +1,7 @@
 import React from 'react';
 import { IonText } from '@ionic/react';
 import { DocumentText } from 'iconsax-react';
-import { Input } from '../../../shared/components';
+import { Input } from './Input/Input';
 import './TruckPlateInput.css';
 
 /**

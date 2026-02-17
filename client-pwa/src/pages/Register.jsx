@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonText, useIonLoading } from '@ionic/react';
-import { AuthLayout } from '@layouts/AuthLayout';
-import { Button } from '@components';
-import { Input } from '@components';
-import { Card } from '@components';
-import { authAPI } from '@services/api';
-import { useToast } from '@hooks/useToast';
+import { AuthLayout } from '../layouts/AuthLayout';
+import { Button } from '../components/Button/Button';
+import { Input } from '../components/Input/Input';
+import { Card } from '../components/Card/Card';
+import { authAPI } from '../services/api';
+import { useToast } from '../hooks/useToast';
 import { Sms, Profile2User, Key } from 'iconsax-react';
-import storage from '@services/storage'; 
+import storage from '../services/storage'; 
 
 
 const Register = () => {

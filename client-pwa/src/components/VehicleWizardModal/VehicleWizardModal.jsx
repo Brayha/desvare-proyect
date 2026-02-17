@@ -12,18 +12,16 @@ import {
   IonProgressBar,
 } from '@ionic/react';
 import { closeOutline, arrowBackOutline, checkmarkOutline } from 'ionicons/icons';
-import {
-  VehicleCategorySelector,
-  VehicleBrandSelector,
-  VehicleModelSelector,
-  VehiclePlateInput,
-  VehicleSpecificsForm,
-  ServiceDetailsForm,
-  VehicleList,
-  Button,
-} from '@components';
+import { VehicleCategorySelector } from '../VehicleCategorySelector/VehicleCategorySelector';
+import { VehicleBrandSelector } from '../VehicleBrandSelector/VehicleBrandSelector';
+import { VehicleModelSelector } from '../VehicleModelSelector/VehicleModelSelector';
+import { VehiclePlateInput } from '../VehiclePlateInput/VehiclePlateInput';
+import { VehicleSpecificsForm } from '../VehicleSpecificsForm/VehicleSpecificsForm';
+import { ServiceDetailsForm } from '../ServiceDetailsForm/ServiceDetailsForm';
+import { VehicleList } from '../VehicleList/VehicleList';
+import { Button } from '../Button/Button';
 import { vehicleAPI } from '../../services/vehicleAPI';
-import { useToast } from '@hooks/useToast';
+import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../AuthModal/AuthModal';
 import './VehicleWizardModal.css';

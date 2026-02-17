@@ -17,7 +17,7 @@ import { useToast } from "@hooks/useToast";
 import socketService from "../services/socket";
 import "./DriverOnWay.css";
 
-import logo from "@shared/src/img/Desvare.svg";
+import logo from "../assets/img/Desvare.svg";
 
 const DriverOnWay = () => {
   const history = useHistory();

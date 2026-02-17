@@ -1,0 +1,43 @@
+.shared-card {
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+.shared-card.card-elevated {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.shared-card.card-clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shared-card.card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.shared-card.card-clickable:active {
+  transform: translateY(0);
+}
+
+.shared-card ion-card-header {
+  padding-bottom: 8px;
+}
+
+.shared-card ion-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ion-color-dark);
+}
+
+.shared-card ion-card-subtitle {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin-top: 4px;
+}
+
+.shared-card ion-card-content {
+  padding-top: 12px;
+}
+

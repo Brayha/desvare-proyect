@@ -15,7 +15,7 @@ import { star as starFilled, starOutline } from "ionicons/icons";
 import { useToast } from "@hooks/useToast";
 import "./RatingService.css";
 
-import logo from "@shared/src/img/Desvare.svg";
+import logo from "../assets/img/Desvare.svg";
 
 // ============================================
 // API URL Configuration

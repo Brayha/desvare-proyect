@@ -33,9 +33,9 @@ import { requestAPI } from "../services/api";
 import socketService from "../services/socket";
 import { useAuth } from "../contexts/AuthContext";
 import { getVehicleImageFromVehicle } from "../utils/vehicleImages";
-import { Button } from "@components";
+import { Button } from "../components/Button/Button";
 import "./RequestService.css";
-import logo from "@shared/src/img/Desvare.svg";
+import logo from "../assets/img/Desvare.svg";
 
 const RequestService = () => {
   const history = useHistory();

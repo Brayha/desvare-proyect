@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonToast } from '@ionic/react';
 import { Clock, SecurityUser, TickCircle } from 'iconsax-react';
 import { io } from 'socket.io-client';
-import DesvareLogoWhite from '../../../shared/src/img/Desvare-white.svg';
+import DesvareLogoWhite from '../assets/img/Desvare-white.svg';
 import './UnderReview.css';
 
 /**

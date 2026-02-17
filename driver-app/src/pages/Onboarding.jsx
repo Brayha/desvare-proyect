@@ -6,10 +6,10 @@ import { Pagination } from 'swiper/modules';
 import { ArrowRight2 } from 'iconsax-react';
 
 // Importar imágenes SVG del onboarding
-import onboarding1 from '../../../shared/src/img/onboarding-1.svg';
-import onboarding2 from '../../../shared/src/img/onboarding-2.svg';
-import onboarding3 from '../../../shared/src/img/onboarding-3.svg';
-import onboarding4 from '../../../shared/src/img/onboarding-4.svg';
+import onboarding1 from '../assets/img/onboarding-1.svg';
+import onboarding2 from '../assets/img/onboarding-2.svg';
+import onboarding3 from '../assets/img/onboarding-3.svg';
+import onboarding4 from '../assets/img/onboarding-4.svg';
 
 // Swiper styles
 import 'swiper/css';

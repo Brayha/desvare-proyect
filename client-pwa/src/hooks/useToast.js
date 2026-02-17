@@ -1,53 +1,48 @@
 import { useIonToast } from '@ionic/react';
-import { useCallback } from 'react';
 
 /**
- * Hook personalizado para mostrar toasts con configuración predeterminada
- * Toasts aparecen desde abajo (bottom)
- * Usa useCallback para evitar re-renders infinitos
+ * Hook personalizado para mostrar toasts de manera más sencilla
+ * 
+ * @returns {Object} { showSuccess, showError, showWarning, showInfo }
  */
-export const useToast = () => {
+const useToast = () => {
   const [present] = useIonToast();
 
-  const showSuccess = useCallback((message) => {
+  const showSuccess = (message, duration = 2000) => {
     present({
       message,
-      duration: 3000,
+      duration,
       color: 'success',
-      position: 'bottom', // 🎯 Aparece desde abajo
-      cssClass: 'toast-bottom',
+      position: 'top',
     });
-  }, [present]);
+  };
 
-  const showError = useCallback((message) => {
+  const showError = (message, duration = 3000) => {
     present({
       message,
-      duration: 4000,
+      duration,
       color: 'danger',
-      position: 'bottom', // 🎯 Aparece desde abajo
-      cssClass: 'toast-bottom',
+      position: 'top',
     });
-  }, [present]);
+  };
 
-  const showWarning = useCallback((message) => {
+  const showWarning = (message, duration = 2500) => {
     present({
       message,
-      duration: 3000,
+      duration,
       color: 'warning',
-      position: 'bottom', // 🎯 Aparece desde abajo
-      cssClass: 'toast-bottom',
+      position: 'top',
     });
-  }, [present]);
+  };
 
-  const showInfo = useCallback((message) => {
+  const showInfo = (message, duration = 2000) => {
     present({
       message,
-      duration: 3000,
+      duration,
       color: 'primary',
-      position: 'bottom', // 🎯 Aparece desde abajo
-      cssClass: 'toast-bottom',
+      position: 'top',
     });
-  }, [present]);
+  };
 
   return {
     showSuccess,
@@ -56,4 +51,7 @@ export const useToast = () => {
     showInfo,
   };
 };
+
+export { useToast };
+export default useToast;
 

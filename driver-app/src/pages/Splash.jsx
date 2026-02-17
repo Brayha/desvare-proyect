@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent } from '@ionic/react';
-import DesvareLogoWhite from '../../../shared/src/img/Desvare-white.svg';
+import DesvareLogoWhite from '../assets/img/Desvare-white.svg';
 import './Splash.css';
 
 const Splash = () => {

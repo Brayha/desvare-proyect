@@ -17,7 +17,7 @@ import socketService from "../services/socket";
 import { useAuth } from "../contexts/AuthContext";
 import { MapPicker } from "../components/Map/MapPicker";
 import "./RequestAuth.css";
-import logo from "@shared/src/img/Desvare.svg";
+import logo from "../assets/img/Desvare.svg";
 
 const RequestAuth = () => {
   const history = useHistory();

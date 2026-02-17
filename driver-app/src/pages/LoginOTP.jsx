@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonText } from '@ionic/react';
 import { authAPI } from '../services/api';
-import { PhoneInput } from '../../../shared/components';
+import { PhoneInput } from '../components/PhoneInput/PhoneInput';
 import './LoginOTP.css';
 
 const LoginOTP = () => {

@@ -20,11 +20,11 @@ import socketService from "../services/socket"; // ✅ Importar socketService
 import "./ActiveService.css"; // ✅ Reutilizar mismo CSS
 
 // Importar iconos SVG de vehículos
-import carIcon from "../../../shared/src/img/vehicles/car.svg";
-import motoIcon from "../../../shared/src/img/vehicles/moto.svg";
-import camionetaIcon from "../../../shared/src/img/vehicles/camioneta.svg";
-import camionIcon from "../../../shared/src/img/vehicles/camion.svg";
-import busIcon from "../../../shared/src/img/vehicles/bus.svg";
+import carIcon from "../assets/img/vehicles/car.svg";
+import motoIcon from "../assets/img/vehicles/moto.svg";
+import camionetaIcon from "../assets/img/vehicles/camioneta.svg";
+import camionIcon from "../assets/img/vehicles/camion.svg";
+import busIcon from "../assets/img/vehicles/bus.svg";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 

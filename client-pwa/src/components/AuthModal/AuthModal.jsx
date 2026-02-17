@@ -13,7 +13,7 @@ import { authAPI } from "../../services/api";
 import { useToast } from "@hooks/useToast";
 import { useAuth } from "../../contexts/AuthContext";
 import "./AuthModal.css";
-import logo from "@shared/src/img/Desvare.svg";
+import logo from "../../assets/img/Desvare.svg";
 
 const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
   const { showSuccess, showError } = useToast();

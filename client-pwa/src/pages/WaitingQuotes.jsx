@@ -22,7 +22,7 @@ import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
 import "./WaitingQuotes.css";
 
-import logo from "@shared/src/img/Desvare.svg";
+import logo from "../assets/img/Desvare.svg";
 
 // ============================================
 // API URL Configuration
