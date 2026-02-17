@@ -1,5 +1,5 @@
 /* Importar tema compartido (incluye fuentes Gilroy y variables) */
-@import '../../shared/styles/theme.css';
+@import './styles/theme.css';
 
 :root {
   --admin-primary: #0055FF;

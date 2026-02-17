@@ -1,0 +1,85 @@
+/**
+ * Variables CSS compartidas entre client-pwa y driver-app
+ * Define colores, espaciados, tipografías y otros valores reutilizables
+ */
+
+:root {
+  /* ===== COLORES PRINCIPALES ===== */
+  --desvare-primary: #0055ff;
+  --desvare-primary-rgb: 0, 85, 255;
+  --desvare-primary-contrast: #ffffff;
+  
+  --desvare-secondary: #223D62;
+  --desvare-secondary-rgb: 34, 61, 98;
+  --desvare-secondary-contrast: #ffffff;
+  
+  --desvare-tertiary: #475569;
+  --desvare-tertiary-rgb: 71, 85, 105;
+  
+  --desvare-success: #2dd36f;
+  --desvare-success-rgb: 45, 211, 111;
+  
+  --desvare-warning: #ffc409;
+  --desvare-warning-rgb: 255, 196, 9;
+  
+  --desvare-danger: #eb445a;
+  --desvare-danger-rgb: 235, 68, 90;
+  
+  --desvare-dark: #9CA3AF;
+  --desvare-dark-rgb: 156, 163, 175;
+  
+  --desvare-medium: #E5E7EB;
+  --desvare-medium-rgb: 229, 231, 235;
+  
+  --desvare-light: #F7F7F7;
+  --desvare-light-rgb: 249, 250, 251;
+  
+  /* ===== ESPACIADOS ===== */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  
+  /* ===== TIPOGRAFÍA ===== */
+  --font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+
+  /* Font weights de Gilroy (disponibles: 300, 400, 500, 700, 900) */
+  --font-weight-light: 300;      /* Gilroy Light */
+  --font-weight-regular: 400;    /* Gilroy Regular */
+  --font-weight-medium: 500;     /* Gilroy Medium */
+  --font-weight-bold: 700;       /* Gilroy Bold */
+  --font-weight-heavy: 900;      /* Gilroy Heavy */
+    
+    /* Font sizes */
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-xxl: 32px;
+  
+  /* ===== BORDES Y SOMBRAS ===== */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.16);
+  
+  /* ===== TRANSICIONES ===== */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* ===== Z-INDEX ===== */
+  --z-index-dropdown: 1000;
+  --z-index-modal: 2000;
+  --z-index-toast: 3000;
+  --z-index-tooltip: 4000;
+}
+

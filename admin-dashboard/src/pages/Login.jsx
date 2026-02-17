@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonSpinner, IonText } from '@ionic/react';
 import { Lock, User } from 'iconsax-react';
-import Input from '../../../shared/components/Input/Input';
+import Input from '../components/Input/Input';
 import { authAPI } from '../services/adminAPI';
-import logo from '../../../shared/src/img/Desvare-white.svg';
+import logo from '../assets/img/Desvare-white.svg';
 import './Login.css';
 
 const Login = () => {

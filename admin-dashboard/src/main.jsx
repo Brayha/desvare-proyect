@@ -15,8 +15,8 @@ import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
 /* Shared styles */
-import '../../shared/styles/global.css';
-import '../../shared/styles/variables.css';
+import './styles/global.css';
+import './styles/variables.css';
 
 /* App styles */
 import './index.css';

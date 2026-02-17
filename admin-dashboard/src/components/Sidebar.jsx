@@ -2,7 +2,7 @@ import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Category, People, Truck, DocumentText, Chart, Setting2, LogoutCurve } from 'iconsax-react';
 import { authAPI } from '../services/adminAPI';
-import logo from '../../../shared/src/img/Desvare-white.svg';
+import logo from '../assets/img/Desvare-white.svg';
 import './Sidebar.css';
 
 const Sidebar = () => {
