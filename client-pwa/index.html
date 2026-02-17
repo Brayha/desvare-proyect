@@ -1,31 +1,88 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-CO">
   <head>
     <meta charset="UTF-8" />
-    
-    <!-- PWA Meta Tags -->
+
+    <!-- ===== VIEWPORT & PWA ===== -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
-    <meta name="description" content="Solicita servicio de grúa de forma rápida y segura. Recibe cotizaciones en tiempo real de conductores cercanos." />
-    <meta name="theme-color" content="#2563eb" />
-    
-    <!-- iOS PWA Meta Tags -->
+    <meta name="theme-color" content="#0055ff" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- ===== SEO BÁSICO ===== -->
+    <title>Desvare — Pide tu grúa en minutos</title>
+    <meta name="description" content="Solicita servicio de grúa de forma rápida y segura. Recibe cotizaciones en tiempo real de conductores cercanos, compara precios y elige la mejor opción." />
+    <meta name="keywords" content="grúa Colombia, servicio de grúa, grúa Medellín, grúa Bogotá, asistencia vial, grúa urgente, cotizar grúa, auxilio mecánico" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Desvare" />
+    <link rel="canonical" href="https://www.desvare.app/" />
+
+    <!-- ===== OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ===== -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.desvare.app/" />
+    <meta property="og:site_name" content="Desvare" />
+    <meta property="og:title" content="Desvare — Pide tu grúa en minutos" />
+    <meta property="og:description" content="Cotiza en tiempo real, compara precios y recibe ayuda al instante. La forma más fácil de pedir grúa en Colombia." />
+    <meta property="og:image" content="https://www.desvare.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Desvare - Servicio de grúa en tiempo real" />
+    <meta property="og:locale" content="es_CO" />
+
+    <!-- ===== TWITTER CARD ===== -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@desvare" />
+    <meta name="twitter:title" content="Desvare — Pide tu grúa en minutos" />
+    <meta name="twitter:description" content="Cotiza en tiempo real, compara precios y recibe ayuda al instante." />
+    <meta name="twitter:image" content="https://www.desvare.app/og-image.jpg" />
+    <meta name="twitter:image:alt" content="Desvare - Servicio de grúa en tiempo real" />
+
+    <!-- ===== FAVICON ===== -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+
+    <!-- ===== PWA MANIFEST & iOS ===== -->
+    <link rel="manifest" href="/manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Desvare" />
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    
-    <title>Desvare - Servicio de Grúas</title>
-    
-    <!-- Preload de fuentes críticas para mejor rendimiento -->
-    <link rel="preload" href="/shared/src/gilroy-bold-webfont/Gilroy-Regular.woff" as="font" type="font/woff" crossorigin="anonymous">
-    <link rel="preload" href="/shared/src/gilroy-bold-webfont/Gilroy-Bold.woff" as="font" type="font/woff" crossorigin="anonymous">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+
+    <!-- ===== STRUCTURED DATA (JSON-LD) ===== -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Desvare",
+      "description": "Plataforma de cotizaciones de grúa en tiempo real. Conecta clientes con conductores de grúa verificados en Colombia.",
+      "url": "https://www.desvare.app",
+      "applicationCategory": "TransportationApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "COP",
+        "description": "Servicio gratuito para solicitar cotizaciones"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "120"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Desvare",
+        "url": "https://www.desvare.app",
+        "logo": "https://www.desvare.app/icons/icon-512x512.png"
+      }
+    }
+    </script>
+
+    <!-- ===== PRELOAD DE RECURSOS CRÍTICOS ===== -->
+    <link rel="preload" href="/fonts/Gilroy-Bold.woff" as="font" type="font/woff" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/Gilroy-Regular.woff" as="font" type="font/woff" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/Gilroy-Medium.woff" as="font" type="font/woff" crossorigin="anonymous" />
   </head>
   <body>
     <div id="root"></div>
