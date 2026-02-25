@@ -1,8 +1,10 @@
 /* ========================================
-   Importar tema compartido (incluye fuentes Gilroy, variables y animaciones)
+   Importar estilos locales (fuentes, variables, tema y animaciones)
    ======================================== */
-@import '../../shared/styles/theme.css';
-@import '../../shared/styles/animations.css';
+@import './styles/fonts.css';
+@import './styles/variables.css';
+@import './styles/theme.css';
+@import './styles/animations.css';
 
 :root {
   font-family: var(--font-family);
