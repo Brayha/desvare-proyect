@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { IonContent, IonPage } from "@ionic/react";
 import socketService from "../services/socket";
-import mapBg from "../assets/img/map-home-responsive.png";
+import mapBg from "../assets/img/map-home-responsive.webp";
 import logo from "../assets/img/Desvare.svg";
 import "./Home.css";
 
