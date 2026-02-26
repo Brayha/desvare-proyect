@@ -131,6 +131,26 @@ const FirebaseNotificationListener = () => {
 };
 
 function App() {
+  // Corrige el problema de 100vh en browsers móviles (barra de dirección / nav bar)
+  // VisualViewport API da la altura REAL visible, no la máxima teórica
+  useEffect(() => {
+    const setRealViewportHeight = () => {
+      const h = window.visualViewport?.height ?? window.innerHeight;
+      document.documentElement.style.setProperty('--real-vh', `${h}px`);
+    };
+
+    setRealViewportHeight();
+    window.visualViewport?.addEventListener('resize', setRealViewportHeight);
+    window.visualViewport?.addEventListener('scroll', setRealViewportHeight);
+    window.addEventListener('resize', setRealViewportHeight);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', setRealViewportHeight);
+      window.visualViewport?.removeEventListener('scroll', setRealViewportHeight);
+      window.removeEventListener('resize', setRealViewportHeight);
+    };
+  }, []);
+
   // Conectar Socket.IO una sola vez al iniciar la app
   useEffect(() => {
     console.log('🚀 Inicializando Socket.IO...');

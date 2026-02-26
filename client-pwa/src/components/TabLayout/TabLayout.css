@@ -1,8 +1,11 @@
 /* TabLayout Styles */
 .custom-tab-bar {
   --background: var(--ion-background-color, #F7F7F7);
-  padding-bottom: env(safe-area-inset-bottom);
-  height: calc(80px + env(safe-area-inset-bottom));
+  /* env(safe-area-inset-bottom) cubre el notch de iOS y la barra de gestos de Android.
+     max() garantiza un mínimo de 4px incluso cuando el navegador devuelve 0
+     (ej: Android con botones físicos o barra navegación por botones). */
+  padding-bottom: max(env(safe-area-inset-bottom), 4px);
+  height: calc(80px + max(env(safe-area-inset-bottom), 4px));
 }
 
 .custom-tab-bar ion-tab-button {
