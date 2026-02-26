@@ -678,18 +678,26 @@ router.get('/clients/:id', async (req, res) => {
     }
 
     // Obtener servicios del cliente
-    const services = await Request.find({ clientId: client._id })
-      .populate('driverId', 'name phone')
-      .select('status totalAmount createdAt origin destination')
-      .limit(20)
-      .sort({ createdAt: -1 });
+    const [services, totalServices, completedServices, cancelledServices, activeServices] = await Promise.all([
+      Request.find({ clientId: client._id })
+        .populate('driverId', 'name phone')
+        .select('status totalAmount createdAt origin destination rating vehicleSnapshot completedAt driverId')
+        .limit(50)
+        .sort({ createdAt: -1 }),
+      Request.countDocuments({ clientId: client._id }),
+      Request.countDocuments({ clientId: client._id, status: 'completed' }),
+      Request.countDocuments({ clientId: client._id, status: 'cancelled' }),
+      Request.countDocuments({ clientId: client._id, status: 'in_progress' })
+    ]);
 
     res.json({
       client,
       services: {
         list: services,
-        total: await Request.countDocuments({ clientId: client._id }),
-        completed: await Request.countDocuments({ clientId: client._id, status: 'completed' })
+        total: totalServices,
+        completed: completedServices,
+        cancelled: cancelledServices,
+        active: activeServices
       }
     });
 

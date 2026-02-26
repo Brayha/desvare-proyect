@@ -12,6 +12,8 @@ const ClientDetail = () => {
   const history = useHistory();
   const [client, setClient] = useState(null);
   const [services, setServices] = useState([]);
+  const [serviceStats, setServiceStats] = useState({ total: 0, completed: 0, cancelled: 0, active: 0 });
+  const [serviceFilter, setServiceFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -25,6 +27,12 @@ const ClientDetail = () => {
       const response = await clientsAPI.getById(id);
       setClient(response.data.client);
       setServices(response.data.services?.list || []);
+      setServiceStats({
+        total: response.data.services?.total || 0,
+        completed: response.data.services?.completed || 0,
+        cancelled: response.data.services?.cancelled || 0,
+        active: response.data.services?.active || 0,
+      });
     } catch (error) {
       console.error('❌ Error cargando detalle:', error);
     } finally {
@@ -224,19 +232,19 @@ const ClientDetail = () => {
             <h3>Estadísticas</h3>
             <div className="stats-grid">
               <div className="stat-box">
-                <span className="stat-box-value">{services.length}</span>
+                <span className="stat-box-value">{serviceStats.total}</span>
                 <span className="stat-box-label">Servicios Totales</span>
               </div>
-              <div className="stat-box">
-                <span className="stat-box-value">
-                  {services.filter(s => s.status === 'completed').length}
-                </span>
+              <div className="stat-box" style={{ background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)' }}>
+                <span className="stat-box-value" style={{ color: '#10B981' }}>{serviceStats.completed}</span>
                 <span className="stat-box-label">Completados</span>
               </div>
-              <div className="stat-box">
-                <span className="stat-box-value">
-                  {services.filter(s => s.status === 'cancelled').length}
-                </span>
+              <div className="stat-box" style={{ background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)' }}>
+                <span className="stat-box-value" style={{ color: '#F59E0B' }}>{serviceStats.active}</span>
+                <span className="stat-box-label">En Curso</span>
+              </div>
+              <div className="stat-box" style={{ background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)' }}>
+                <span className="stat-box-value" style={{ color: '#EF4444' }}>{serviceStats.cancelled}</span>
                 <span className="stat-box-label">Cancelados</span>
               </div>
               <div className="stat-box">
@@ -267,26 +275,79 @@ const ClientDetail = () => {
 
           {/* Services History */}
           <div className="detail-section">
-            <h3>Historial de Servicios</h3>
-            {services.length === 0 ? (
-              <p className="no-services">Este cliente no ha solicitado servicios aún</p>
+            <div className="section-title-row">
+              <h3>Historial de Servicios</h3>
+              <div className="service-history-filters">
+                {['all', 'completed', 'in_progress', 'cancelled'].map((f) => (
+                  <button
+                    key={f}
+                    className={`history-filter-btn ${serviceFilter === f ? 'active' : ''}`}
+                    onClick={() => setServiceFilter(f)}
+                  >
+                    {f === 'all' && 'Todos'}
+                    {f === 'completed' && '✅ Completados'}
+                    {f === 'in_progress' && '🔄 En curso'}
+                    {f === 'cancelled' && '❌ Cancelados'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {services.filter(s => serviceFilter === 'all' || s.status === serviceFilter).length === 0 ? (
+              <p className="no-services">
+                {serviceFilter === 'all'
+                  ? 'Este cliente no ha solicitado servicios aún'
+                  : 'No hay servicios con este filtro'}
+              </p>
             ) : (
               <div className="services-table">
-                {services.map((service) => (
+                {services
+                  .filter(s => serviceFilter === 'all' || s.status === serviceFilter)
+                  .map((service) => (
                   <div key={service._id} className="service-row">
                     <div className="service-info-col">
                       <span className="service-id">#{service._id.slice(-6)}</span>
                       <span className="service-date">
-                        {new Date(service.createdAt).toLocaleDateString('es-CO')}
+                        {new Date(service.createdAt).toLocaleDateString('es-CO', {
+                          day: '2-digit', month: 'short', year: 'numeric'
+                        })}
                       </span>
+                      {service.vehicleSnapshot?.brand?.name && (
+                        <span className="service-vehicle">
+                          🚗 {service.vehicleSnapshot.brand.name} {service.vehicleSnapshot.model?.name || ''}
+                        </span>
+                      )}
                     </div>
                     <div className="service-details-col">
                       <p className="service-route">
-                        📍 {service.origin?.address?.substring(0, 40)}...
+                        📍 {service.origin?.address?.substring(0, 45)}{service.origin?.address?.length > 45 ? '...' : ''}
                       </p>
+                      {service.destination?.address && (
+                        <p className="service-route" style={{ color: '#10B981' }}>
+                          🏁 {service.destination.address.substring(0, 45)}{service.destination.address.length > 45 ? '...' : ''}
+                        </p>
+                      )}
                       <p className="service-driver">
                         🚛 {service.driverId?.name || 'Sin conductor asignado'}
                       </p>
+                      {service.status === 'completed' && (
+                        <div className="service-rating">
+                          {service.rating?.stars ? (
+                            <>
+                              <span className="rating-stars">
+                                {[1,2,3,4,5].map(i => (
+                                  <span key={i} className={i <= service.rating.stars ? 'star filled' : 'star'}>★</span>
+                                ))}
+                              </span>
+                              {service.rating.comment && (
+                                <span className="rating-comment">"{service.rating.comment}"</span>
+                              )}
+                            </>
+                          ) : (
+                            <span className="no-rating">Sin calificación</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="service-status-col">
                       {getServiceStatusBadge(service.status)}
