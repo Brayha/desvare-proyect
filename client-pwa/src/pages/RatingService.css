@@ -1,5 +1,5 @@
 .rating-service-page {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: #F7F7F7;
 }
 
 /* Container Principal */
@@ -19,7 +19,7 @@
 }
 
 .rating-logo {
-  height: 60px;
+  height: 32px;
   filter: brightness(0) invert(1);
 }
 
@@ -27,14 +27,14 @@
 .rating-header {
   text-align: center;
   margin-bottom: 24px;
-  color: white;
+  color: secondary;
 }
 
 .rating-title {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: white;
+  color: secondary;
 }
 
 .rating-subtitle {
@@ -56,7 +56,6 @@
 .stars-section {
   text-align: center;
   padding: 20px 0;
-  border-bottom: 1px solid #e0e0e0;
 }
 
 .stars-label {
@@ -99,7 +98,6 @@
 /* Sección de Comentario */
 .comment-section {
   padding: 20px 0;
-  border-bottom: 1px solid #e0e0e0;
 }
 
 .comment-label {
