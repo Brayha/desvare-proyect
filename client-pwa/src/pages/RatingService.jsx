@@ -216,16 +216,6 @@ const RatingService = () => {
                 "Enviar Calificación"
               )}
             </IonButton>
-
-            <IonButton
-              expand="block"
-              fill="clear"
-              onClick={handleSkip}
-              disabled={isSubmitting}
-              className="skip-button"
-            >
-              Saltar por ahora
-            </IonButton>
           </div>
         </div>
       </IonContent>

@@ -44,17 +44,18 @@
 
 /* Card Principal */
 .rating-card {
+  padding: 20px;
   width: 100%;
   border-radius: 20px;
 border: 1px solid #E5E7EB;
 background: #FFF;
 box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+margin-bottom: 20px;
 }
 
 /* Sección de Estrellas */
 .stars-section {
   text-align: center;
-  padding: 20px 0;
 }
 
 .stars-label {
@@ -96,7 +97,7 @@ box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 
 /* Sección de Comentario */
 .comment-section {
-  padding: 20px 0;
+  padding: 0;
 }
 
 .comment-label {
@@ -183,7 +184,7 @@ box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
 .submit-button {
-  --background: linear-gradient(135deg, #10dc60 0%, #0ea54f 100%);
+  --background: #0055ff;
   --border-radius: 12px;
   height: 50px;
   font-weight: 600;
