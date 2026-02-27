@@ -680,8 +680,8 @@ router.get('/clients/:id', async (req, res) => {
     // Obtener servicios del cliente
     const [services, totalServices, completedServices, cancelledServices, activeServices] = await Promise.all([
       Request.find({ clientId: client._id })
-        .populate('driverId', 'name phone')
-        .select('status totalAmount createdAt origin destination rating vehicleSnapshot completedAt driverId')
+        .populate('assignedDriverId', 'name phone')
+        .select('status totalAmount createdAt origin destination rating vehicleSnapshot completedAt assignedDriverId')
         .limit(50)
         .sort({ createdAt: -1 }),
       Request.countDocuments({ clientId: client._id }),

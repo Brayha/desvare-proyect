@@ -328,7 +328,7 @@ const ClientDetail = () => {
                         </p>
                       )}
                       <p className="service-driver">
-                        🚛 {service.driverId?.name || 'Sin conductor asignado'}
+                        🚛 {service.assignedDriverId?.name || 'Sin conductor asignado'}
                       </p>
                       {service.status === 'completed' && (
                         <div className="service-rating">
