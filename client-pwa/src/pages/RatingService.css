@@ -45,10 +45,10 @@
 /* Card Principal */
 .rating-card {
   width: 100%;
-  max-width: 500px;
   border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  margin-bottom: 20px;
+border: 1px solid #E5E7EB;
+background: #FFF;
+box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Sección de Estrellas */
