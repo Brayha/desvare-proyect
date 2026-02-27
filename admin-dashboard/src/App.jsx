@@ -8,6 +8,8 @@ import Drivers from './pages/Drivers';
 import DriverDetail from './pages/DriverDetail';
 import Clients from './pages/Clients';
 import ClientDetail from './pages/ClientDetail';
+import Services from './pages/Services';
+import ServiceDetail from './pages/ServiceDetail';
 import Reports from './pages/Reports';
 
 import './App.css';
@@ -43,6 +45,8 @@ function App() {
           <PrivateRoute exact path="/drivers/:id" component={DriverDetail} />
           <PrivateRoute exact path="/clients" component={Clients} />
           <PrivateRoute exact path="/clients/:id" component={ClientDetail} />
+          <PrivateRoute exact path="/services" component={Services} />
+          <PrivateRoute exact path="/services/:id" component={ServiceDetail} />
           <PrivateRoute exact path="/reports" component={Reports} />
           <Route exact path="/">
             <Redirect to="/dashboard" />

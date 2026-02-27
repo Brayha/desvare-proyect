@@ -13,8 +13,8 @@ const Sidebar = () => {
     { path: '/dashboard', icon: <Category size="24" />, label: 'Dashboard' },
     { path: '/drivers', icon: <Truck size="24" />, label: 'Conductores' },
     { path: '/clients', icon: <People size="24" />, label: 'Clientes' },
-    { path: '/reports', icon: <Chart size="24" />, label: 'Reportes' },
     { path: '/services', icon: <DocumentText size="24" />, label: 'Servicios' },
+    { path: '/reports', icon: <Chart size="24" />, label: 'Reportes' },
     { path: '/settings', icon: <Setting2 size="24" />, label: 'Configuración' },
   ];
 

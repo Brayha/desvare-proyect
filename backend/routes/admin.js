@@ -818,5 +818,124 @@ router.delete('/clients/:id', async (req, res) => {
   }
 });
 
+// ============================================
+// GESTIÓN DE SERVICIOS
+// ============================================
+
+/**
+ * GET /api/admin/services
+ * Lista todos los servicios con filtros y paginación
+ */
+router.get('/services', async (req, res) => {
+  try {
+    const { status, search, clientId, driverId, page = 1, limit = 20, sortBy = 'createdAt', order = 'desc' } = req.query;
+    
+    const query = {};
+    
+    // Filtro por estado
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    
+    // Filtro por cliente específico
+    if (clientId) {
+      query.clientId = clientId;
+    }
+    
+    // Filtro por conductor específico
+    if (driverId) {
+      query.assignedDriverId = driverId;
+    }
+    
+    // Búsqueda por ID de servicio o dirección
+    if (search) {
+      query.$or = [
+        { _id: { $regex: search, $options: 'i' } },
+        { 'origin.address': { $regex: search, $options: 'i' } },
+        { 'destination.address': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const sortOrder = order === 'desc' ? -1 : 1;
+    const sortOptions = { [sortBy]: sortOrder };
+
+    const services = await Request.find(query)
+      .populate('clientId', 'name phone email')
+      .populate('assignedDriverId', 'name phone driverProfile.rating')
+      .sort(sortOptions)
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .lean();
+
+    const total = await Request.countDocuments(query);
+
+    // Calcular estadísticas generales
+    const [totalServices, completedServices, activeServices, cancelledServices, pendingServices] = await Promise.all([
+      Request.countDocuments(),
+      Request.countDocuments({ status: 'completed' }),
+      Request.countDocuments({ status: 'in_progress' }),
+      Request.countDocuments({ status: 'cancelled' }),
+      Request.countDocuments({ status: { $in: ['pending', 'quoted', 'accepted'] } })
+    ]);
+
+    res.json({
+      services,
+      pagination: {
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / limit),
+        limit: parseInt(limit)
+      },
+      stats: {
+        total: totalServices,
+        completed: completedServices,
+        active: activeServices,
+        cancelled: cancelledServices,
+        pending: pendingServices
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo servicios:', error);
+    res.status(500).json({ error: 'Error al obtener servicios' });
+  }
+});
+
+/**
+ * GET /api/admin/services/:id
+ * Detalle completo de un servicio
+ */
+router.get('/services/:id', async (req, res) => {
+  try {
+    const service = await Request.findById(req.params.id)
+      .populate('clientId', 'name phone email vehicles')
+      .populate('assignedDriverId', 'name phone email driverProfile')
+      .populate('quotes.driverId', 'name phone driverProfile.rating')
+      .lean();
+
+    if (!service) {
+      return res.status(404).json({ error: 'Servicio no encontrado' });
+    }
+
+    // Calcular duración del servicio si está completado
+    let serviceDuration = null;
+    if (service.completedAt && service.acceptedAt) {
+      const duration = new Date(service.completedAt) - new Date(service.acceptedAt);
+      serviceDuration = Math.floor(duration / 1000 / 60); // en minutos
+    }
+
+    res.json({
+      service: {
+        ...service,
+        serviceDuration
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo detalle servicio:', error);
+    res.status(500).json({ error: 'Error al obtener detalle' });
+  }
+});
+
 module.exports = router;
 

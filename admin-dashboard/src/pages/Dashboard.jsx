@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IonPage, IonContent, IonSpinner } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { dashboardAPI } from '../services/adminAPI';
@@ -7,6 +8,7 @@ import { People, Truck, DocumentText, DollarCircle, Star } from 'iconsax-react';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const history = useHistory();
   const [stats, setStats] = useState(null);
   const [activeServices, setActiveServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -145,7 +147,11 @@ const Dashboard = () => {
           ) : (
             <div className="services-list">
               {activeServices.slice(0, 5).map((service) => (
-                <div key={service._id} className="service-card">
+                <div 
+                  key={service._id} 
+                  className="service-card clickable"
+                  onClick={() => history.push(`/services/${service._id}`)}
+                >
                   <div className="service-header">
                     <span className="service-id">#{service._id.slice(-6)}</span>
                     <span className="service-status active">En curso</span>
@@ -155,7 +161,7 @@ const Dashboard = () => {
                       👤 {service.clientId?.name || 'Cliente'}
                     </p>
                     <p className="service-driver">
-                      🚛 {service.driverId?.name || 'Conductor asignado'}
+                      🚛 {service.assignedDriverId?.name || 'Conductor asignado'}
                     </p>
                     <p className="service-route">
                       📍 {service.origin?.address?.substring(0, 40)}...
