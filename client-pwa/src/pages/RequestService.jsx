@@ -669,8 +669,7 @@ const RequestService = () => {
                 {/* Botón Buscar Cotizaciones - Solo si hay vehículo */}
                 {vehicleData?.vehicleSnapshot && (
                   <Button
-                    variant="primary"
-                    size="large"
+                    className="search-service-button"
                     fullWidth
                     onClick={handleConfirmRoute}
                     disabled={!routeInfo || isSendingRequest}

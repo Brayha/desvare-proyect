@@ -501,6 +501,19 @@
   height: 52px;
 }
 
+.search-service-button {
+  border-radius: 15px;
+border: 1px solid rgba(34, 61, 98, 0.20);
+background: #0055ff;
+color: #FFF;
+font-size: 16px;
+font-style: normal;
+font-weight: 700;
+line-height: 24px;
+padding: 10px 20px;
+width: 100%;
+}
+
 /* Modo oscuro */
 @media (prefers-color-scheme: dark) {
   .search-fab {

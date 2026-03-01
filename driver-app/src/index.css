@@ -1,5 +1,5 @@
-/* Importar tema compartido (incluye fuentes Gilroy y variables) */
-@import '../../shared/styles/theme.css';
+/* Importar tema local (incluye fuentes Gilroy y variables) */
+@import './styles/theme.css';
 
 :root {
   font-family: var(--font-family);
