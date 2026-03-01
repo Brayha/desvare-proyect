@@ -93,9 +93,9 @@ const Dashboard = () => {
               <DocumentText size="32" color="#F59E0B" variant="Bold" />
             </div>
             <div className="kpi-content">
-              <h3 className="kpi-value">{stats?.services?.completed || 0}</h3>
-              <p className="kpi-label">Servicios</p>
-              <span className="kpi-badge warning">{stats?.services?.active || 0} en curso</span>
+              <h3 className="kpi-value">{stats?.services?.active || 0}</h3>
+              <p className="kpi-label">Servicios en Curso</p>
+              <span className="kpi-badge success">{stats?.services?.completed || 0} completados</span>
             </div>
           </div>
 
@@ -110,12 +110,12 @@ const Dashboard = () => {
           </div>
 
           <div className="kpi-card">
-            <div className="kpi-icon" style={{ background: '#FEF2F2' }}>
-              <Star size="32" color="#F59E0B" variant="Bold" />
+            <div className="kpi-icon" style={{ background: '#F0FDF4' }}>
+              <DollarCircle size="32" color="#10B981" variant="Bold" />
             </div>
             <div className="kpi-content">
-              <h3 className="kpi-value">{stats?.rating?.average || 0}</h3>
-              <p className="kpi-label">Rating Promedio</p>
+              <h3 className="kpi-value">{formatCurrency(stats?.revenue?.platformEarnings || 0)}</h3>
+              <p className="kpi-label">Ganancias (10%)</p>
             </div>
           </div>
 

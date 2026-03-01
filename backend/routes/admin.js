@@ -161,6 +161,9 @@ router.get('/stats', async (req, res) => {
 
     const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
 
+    // Calcular ganancias de la plataforma (10% de comisión)
+    const platformEarnings = Math.round(totalRevenue * 0.10);
+
     // Calcular rating promedio de conductores
     const ratingResult = await User.aggregate([
       { $match: { userType: 'driver', 'driverProfile.status': 'approved' } },
@@ -187,7 +190,8 @@ router.get('/stats', async (req, res) => {
         cancelled: cancelledServices
       },
       revenue: {
-        total: totalRevenue
+        total: totalRevenue,
+        platformEarnings: platformEarnings
       },
       rating: {
         average: Math.round(avgRating * 10) / 10
