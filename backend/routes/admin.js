@@ -217,7 +217,7 @@ router.get('/services/active', async (req, res) => {
       status: 'in_progress' 
     })
     .populate('clientId', 'name phone')
-    .populate('driverId', 'name phone driverProfile.isOnline')
+    .populate('assignedDriverId', 'name phone driverProfile.isOnline')
     .sort({ createdAt: -1 })
     .limit(20)
     .lean();

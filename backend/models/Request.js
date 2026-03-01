@@ -194,6 +194,13 @@ const requestSchema = new mongoose.Schema({
     default: null
   },
   
+  // Monto total del servicio (guardado al aceptar cotización)
+  totalAmount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  
   // Código de seguridad (generado al confirmar servicio)
   securityCode: { 
     type: String,

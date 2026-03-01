@@ -378,6 +378,8 @@ router.post('/:id/accept', async (req, res) => {
     // Actualizar solicitud
     request.status = 'accepted';
     request.assignedDriverId = driverId;
+    request.totalAmount = quote.amount;
+    request.acceptedAt = new Date();
     request.securityCode = securityCode;
     request.updatedAt = new Date();
     await request.save();
