@@ -190,9 +190,38 @@ io.on('connection', (socket) => {
   });
 
   // Registro de cliente
-  socket.on('client:register', (clientId) => {
+  socket.on('client:register', async (clientId) => {
     connectedClients.set(clientId, socket.id);
-    console.log(`👤 Cliente registrado: ${clientId}`);
+    console.log(`👤 Cliente registrado: ${clientId} (socketId: ${socket.id})`);
+
+    // Reconstruir activeServices si el cliente tiene un servicio en curso
+    // Esto resuelve el problema cuando el backend se reinicia o el cliente reconecta
+    try {
+      const Request = require('./models/Request');
+      const activeRequest = await Request.findOne({
+        'trackingData.clientId': clientId,
+        'trackingData.isActive': true,
+        status: { $in: ['accepted', 'in_progress'] }
+      }).select('_id trackingData assignedDriverId');
+
+      if (activeRequest) {
+        const requestId = activeRequest._id.toString();
+        const driverId = activeRequest.trackingData.driverId || activeRequest.assignedDriverId?.toString();
+        const existingService = activeServices.get(requestId);
+
+        // Actualizar o crear entrada en activeServices con el nuevo socketId del cliente
+        activeServices.set(requestId, {
+          clientId: clientId,
+          driverId: driverId,
+          clientSocketId: socket.id,
+          driverSocketId: existingService?.driverSocketId || connectedDrivers.get(driverId)?.socketId || null
+        });
+
+        console.log(`🔄 activeServices reconstruido para servicio ${requestId} (cliente reconectó)`);
+      }
+    } catch (err) {
+      console.error('❌ Error reconstruyendo activeServices al registrar cliente:', err.message);
+    }
   });
 
   // Cliente solicita cotización
@@ -336,7 +365,7 @@ io.on('connection', (socket) => {
       const Request = require('./models/Request');
       const User = require('./models/User');
       
-      // ✅ Actualizar estado de la solicitud en la base de datos
+      // Actualizar estado de la solicitud en la base de datos + desactivar tracking
       const request = await Request.findByIdAndUpdate(
         data.requestId,
         {
@@ -344,10 +373,16 @@ io.on('connection', (socket) => {
           cancelledAt: new Date(),
           cancellationReason: data.reason,
           cancellationCustomReason: data.customReason || null,
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          'trackingData.isActive': false
         },
         { new: true }
       );
+
+      // Limpiar de RAM también
+      if (data.requestId) {
+        activeServices.delete(data.requestId.toString());
+      }
       
       if (!request) {
         console.error('❌ Solicitud no encontrada para cancelar:', data.requestId);
@@ -413,13 +448,13 @@ io.on('connection', (socket) => {
   });
 
   // Cliente acepta una cotización
-  socket.on('service:accept', (data) => {
+  socket.on('service:accept', async (data) => {
     console.log('✅ Cliente aceptó cotización:', data);
     console.log(`👤 Cliente: ${data.clientId}`);
     console.log(`🚗 Conductor aceptado: ${data.acceptedDriverId}`);
     console.log(`❌ Otros conductores: ${data.otherDriverIds?.length || 0}`);
     
-    // 🆕 Guardar servicio activo para tracking
+    // Guardar servicio activo para tracking (RAM + MongoDB para persistencia)
     const clientSocketId = connectedClients.get(data.clientId);
     const driverData = connectedDrivers.get(data.acceptedDriverId);
     
@@ -430,7 +465,21 @@ io.on('connection', (socket) => {
         clientSocketId: clientSocketId,
         driverSocketId: driverData.socketId
       });
-      console.log(`📍 Servicio ${data.requestId} registrado para tracking en tiempo real`);
+      console.log(`📍 Servicio ${data.requestId} registrado para tracking en tiempo real (RAM)`);
+    }
+
+    // Persistir en MongoDB para sobrevivir reinicios del backend
+    try {
+      const Request = require('./models/Request');
+      await Request.findByIdAndUpdate(data.requestId, {
+        'trackingData.clientId': data.clientId,
+        'trackingData.driverId': data.acceptedDriverId,
+        'trackingData.isActive': true,
+        'trackingData.startedAt': new Date()
+      });
+      console.log(`💾 Tracking persistido en MongoDB para servicio ${data.requestId}`);
+    } catch (err) {
+      console.error('❌ Error persistiendo tracking en MongoDB:', err.message);
     }
     
     // Notificar al conductor aceptado
@@ -485,15 +534,25 @@ io.on('connection', (socket) => {
   // ========================================
   // Completar Servicio
   // ========================================
-  socket.on('service:complete', (data) => {
+  socket.on('service:complete', async (data) => {
     console.log('✅ Servicio completado:', data);
     console.log(`🚗 Conductor: ${data.driverName}`);
     console.log(`📦 Request ID: ${data.requestId}`);
     
-    // 🆕 Eliminar servicio activo del tracking
+    // Eliminar servicio activo del tracking (RAM + MongoDB)
     if (data.requestId) {
       activeServices.delete(data.requestId);
-      console.log(`📍 Servicio ${data.requestId} removido del tracking`);
+      console.log(`📍 Servicio ${data.requestId} removido del tracking (RAM)`);
+
+      try {
+        const Request = require('./models/Request');
+        await Request.findByIdAndUpdate(data.requestId, {
+          'trackingData.isActive': false
+        });
+        console.log(`💾 Tracking desactivado en MongoDB para servicio ${data.requestId}`);
+      } catch (err) {
+        console.error('❌ Error desactivando tracking en MongoDB:', err.message);
+      }
     }
     
     // Notificar al cliente que el servicio fue completado
@@ -527,42 +586,71 @@ io.on('connection', (socket) => {
   });
 
   // ========================================
-  // 🆕 TRACKING EN TIEMPO REAL - Ubicación del Conductor
+  // TRACKING EN TIEMPO REAL - Ubicación del Conductor
   // ========================================
-  socket.on('driver:location-update', (data) => {
+  socket.on('driver:location-update', async (data) => {
     const { requestId, driverId, location, heading, speed, accuracy } = data;
-    
-    // Buscar el servicio activo
-    const service = activeServices.get(requestId);
-    
-    if (service && service.clientSocketId) {
-      // Enviar ubicación al cliente
-      io.to(service.clientSocketId).emit('driver:location-update', {
+
+    const sendLocationToClient = (clientSocketId, clientId) => {
+      io.to(clientSocketId).emit('driver:location-update', {
         requestId,
         driverId,
-        location: {
-          lat: location.lat,
-          lng: location.lng
-        },
+        location: { lat: location.lat, lng: location.lng },
         heading: heading || 0,
         speed: speed || 0,
         accuracy: accuracy || 0,
         timestamp: new Date()
       });
-      
-      // Log cada 10 actualizaciones para no saturar consola
+
       if (!socket.locationUpdateCount) socket.locationUpdateCount = 0;
       socket.locationUpdateCount++;
-      
       if (socket.locationUpdateCount % 10 === 0) {
-        console.log(`📍 Ubicación actualizada - Conductor: ${driverId} → Cliente: ${service.clientId}`);
+        console.log(`📍 Ubicación actualizada - Conductor: ${driverId} → Cliente: ${clientId}`);
       }
-    } else {
-      // Solo log la primera vez que no encuentra el servicio
-      if (!socket.serviceNotFoundLogged) {
-        console.log(`⚠️ Servicio ${requestId} no encontrado en activeServices`);
-        socket.serviceNotFoundLogged = true;
+    };
+
+    // Intentar desde RAM primero (camino rápido)
+    const service = activeServices.get(requestId);
+    if (service && service.clientSocketId) {
+      sendLocationToClient(service.clientSocketId, service.clientId);
+      return;
+    }
+
+    // Fallback: buscar en MongoDB si no está en RAM (backend reiniciado o cliente reconectó)
+    try {
+      const Request = require('./models/Request');
+      const activeRequest = await Request.findOne({
+        _id: requestId,
+        'trackingData.isActive': true,
+        status: { $in: ['accepted', 'in_progress'] }
+      }).select('trackingData clientId assignedDriverId');
+
+      if (!activeRequest) {
+        if (!socket.serviceNotFoundLogged) {
+          console.log(`⚠️ Servicio ${requestId} no encontrado en RAM ni en MongoDB`);
+          socket.serviceNotFoundLogged = true;
+        }
+        return;
       }
+
+      const clientId = activeRequest.trackingData.clientId || activeRequest.clientId?.toString();
+      const clientSocketId = connectedClients.get(clientId);
+
+      if (clientSocketId) {
+        // Reconstruir en RAM para las próximas actualizaciones (evitar consultas repetidas)
+        activeServices.set(requestId, {
+          clientId,
+          driverId,
+          clientSocketId,
+          driverSocketId: socket.id
+        });
+        console.log(`🔄 activeServices reconstruido desde MongoDB para servicio ${requestId}`);
+        sendLocationToClient(clientSocketId, clientId);
+      } else {
+        console.log(`⚠️ Cliente ${clientId} del servicio ${requestId} no está conectado`);
+      }
+    } catch (err) {
+      console.error('❌ Error buscando servicio en MongoDB para tracking:', err.message);
     }
   });
 

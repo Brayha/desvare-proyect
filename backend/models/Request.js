@@ -200,6 +200,14 @@ const requestSchema = new mongoose.Schema({
     default: 0,
     min: 0
   },
+
+  // Datos de tracking en tiempo real (persiste aunque el backend se reinicie)
+  trackingData: {
+    clientId: { type: String, default: null },
+    driverId: { type: String, default: null },
+    isActive: { type: Boolean, default: false },
+    startedAt: { type: Date, default: null }
+  },
   
   // Código de seguridad (generado al confirmar servicio)
   securityCode: { 
