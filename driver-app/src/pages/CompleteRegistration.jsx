@@ -501,13 +501,47 @@ const CompleteRegistration = () => {
     }
   };
 
-  // Función para convertir archivo a base64
+  // Comprimir imagen y convertir a base64
+  // Reduce fotos de cámara nativa (~5-10MB) a ~200-400KB sin perder legibilidad de documentos
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          const QUALITY = 0.75;
+
+          let width = img.width;
+          let height = img.height;
+
+          // Escalar manteniendo proporción
+          if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+            if (width / height > MAX_WIDTH / MAX_HEIGHT) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            } else {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convertir a JPEG comprimido (menor tamaño que PNG)
+          const compressed = canvas.toDataURL('image/jpeg', QUALITY);
+          resolve(compressed);
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
     });
   };
 
