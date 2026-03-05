@@ -309,6 +309,65 @@
 }
 
 /* ======================================
+   REENVÍO DE CÓDIGO OTP
+   ====================================== */
+.otp-resend-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+}
+
+.otp-resend-countdown {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+  text-align: center;
+  font-weight: 400;
+}
+
+.otp-resend-countdown strong {
+  color: #0055ff;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.otp-resend-btn {
+  background: transparent;
+  border: none;
+  color: #0055ff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.2s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+}
+
+.otp-resend-btn:hover:not(:disabled) {
+  background: rgba(0, 85, 255, 0.08);
+}
+
+.otp-resend-btn:active:not(:disabled) {
+  opacity: 0.7;
+}
+
+.otp-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.otp-resend-spinner {
+  width: 14px;
+  height: 14px;
+  color: #0055ff;
+}
+
+/* ======================================
    RESPONSIVE
    ====================================== */
 @media (max-width: 375px) {
