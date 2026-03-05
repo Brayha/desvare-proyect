@@ -1,11 +1,14 @@
 /**
  * Servicio de Push Notifications para Driver App
- * Maneja permisos y registro de FCM token
+ * Maneja permisos, registro FCM y canal de notificaciones Android
  */
 
 import { PushNotifications } from '@capacitor/push-notifications';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
+// Control para evitar registrar listeners múltiples veces
+let listenersRegistered = false;
 
 /**
  * Inicializar push notifications para el conductor
@@ -25,7 +28,7 @@ export const initializePushNotifications = async (driverId) => {
     let permStatus = await PushNotifications.checkPermissions();
     console.log('📱 Permisos actuales:', permStatus.receive);
 
-    // 2. Si no tiene permisos, solicitarlos
+    // 2. Solicitar permisos si aún no se han dado
     if (permStatus.receive === 'prompt' || permStatus.receive === 'prompt-with-rationale') {
       console.log('🔔 Solicitando permisos de notificaciones...');
       permStatus = await PushNotifications.requestPermissions();
@@ -39,12 +42,17 @@ export const initializePushNotifications = async (driverId) => {
 
     console.log('✅ Permisos de notificaciones concedidos');
 
-    // 4. Registrar con FCM
-    await PushNotifications.register();
-    console.log('✅ Registrado con FCM');
+    // 4. Crear canal Android ANTES de registrar
+    // Android 8+ requiere un canal para mostrar notificaciones
+    await createNotificationChannel();
 
-    // 5. Listeners de notificaciones
+    // 5. Registrar listeners ANTES de llamar register()
+    // Así no se pierde el evento 'registration' por race condition
     setupNotificationListeners(driverId);
+
+    // 6. Registrar con FCM (dispara el evento 'registration' con el token)
+    await PushNotifications.register();
+    console.log('✅ Registro FCM iniciado');
 
     return true;
   } catch (error) {
@@ -54,72 +62,98 @@ export const initializePushNotifications = async (driverId) => {
 };
 
 /**
- * Configurar listeners de notificaciones
+ * Crea el canal de notificaciones requerido por Android 8+
+ */
+const createNotificationChannel = async () => {
+  try {
+    await PushNotifications.createChannel({
+      id: 'desvare_requests',
+      name: 'Solicitudes de servicio',
+      description: 'Notificaciones de nuevas solicitudes de grúa',
+      importance: 5, // IMPORTANCE_HIGH — muestra heads-up notification
+      visibility: 1, // VISIBILITY_PUBLIC
+      sound: 'default',
+      lights: true,
+      vibration: true,
+    });
+    console.log('✅ Canal de notificaciones Android creado');
+  } catch (err) {
+    // En iOS o si el canal ya existe, esto no falla de forma crítica
+    console.log('ℹ️ Canal de notificaciones:', err?.message || 'ya existe o no aplica');
+  }
+};
+
+/**
+ * Configura los listeners de notificaciones.
+ * Usa una bandera para evitar registrar los mismos listeners múltiples veces.
  * @param {string} driverId - ID del conductor
  */
 const setupNotificationListeners = (driverId) => {
-  // Listener: Token registrado
+  if (listenersRegistered) {
+    console.log('ℹ️ Listeners de push ya registrados, omitiendo...');
+    return;
+  }
+
+  // Listener: Token FCM obtenido
   PushNotifications.addListener('registration', async (token) => {
     console.log('✅ Token FCM obtenido:', token.value);
-    
-    // Enviar token al backend
+
     try {
       const response = await fetch(`${API_URL}/api/drivers/fcm-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
-          driverId: driverId,
+          driverId,
           fcmToken: token.value,
-          platform: 'android'
-        })
+          platform: 'android',
+        }),
       });
 
       if (response.ok) {
         console.log('✅ Token FCM registrado en el servidor');
-        // Guardar token en localStorage para referencia
         localStorage.setItem('fcmToken', token.value);
       } else {
-        console.error('❌ Error al registrar token FCM en el servidor');
+        console.error('❌ Error al registrar token FCM en el servidor:', response.status);
       }
     } catch (error) {
       console.error('❌ Error al enviar token FCM al backend:', error);
     }
   });
 
-  // Listener: Error de registro
+  // Listener: Error de registro FCM
   PushNotifications.addListener('registrationError', (error) => {
-    console.error('❌ Error en registro de push notifications:', error);
+    console.error('❌ Error en registro FCM:', error);
   });
 
-  // Listener: Notificación recibida (app en foreground)
+  // Listener: Notificación recibida con app en foreground
   PushNotifications.addListener('pushNotificationReceived', (notification) => {
-    console.log('📬 Notificación recibida en foreground:', notification);
-    
-    // Aquí podrías mostrar un toast o modal
-    // Por ahora solo lo logueamos
+    console.log('📬 Notificación en foreground:', notification);
+    // La app ya muestra las solicitudes en tiempo real por Socket.IO,
+    // así que en foreground no necesitamos acción adicional.
   });
 
-  // Listener: Notificación clickeada (app en background)
-  PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-    console.log('👆 Notificación clickeada:', notification);
-    
-    // Navegar según el tipo de notificación
-    const data = notification.notification.data;
-    
-    if (data.requestId) {
-      // Navegar al detalle del request
-      window.location.href = `/request/${data.requestId}`;
+  // Listener: Usuario toca la notificación (app en background o cerrada)
+  PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+    console.log('👆 Notificación tocada:', action);
+    const data = action.notification?.data;
+
+    if (data?.type === 'NEW_REQUEST') {
+      // Llevar al conductor directamente al Home donde verá la solicitud
+      window.location.href = '/home';
+    } else if (data?.requestId) {
+      window.location.href = '/home';
     }
   });
 
-  console.log('✅ Listeners de notificaciones configurados');
+  listenersRegistered = true;
+  console.log('✅ Listeners de push notifications configurados');
 };
 
 /**
- * Eliminar token FCM del backend (cuando el conductor se desloguea)
+ * Eliminar token FCM del backend cuando el conductor cierra sesión
  * @param {string} driverId - ID del conductor
  */
 export const removeFCMToken = async (driverId) => {
@@ -131,15 +165,13 @@ export const removeFCMToken = async (driverId) => {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({
-        driverId: driverId,
-        fcmToken: token
-      })
+      body: JSON.stringify({ driverId, fcmToken: token }),
     });
 
     localStorage.removeItem('fcmToken');
+    listenersRegistered = false; // Permite re-registrar en el próximo login
     console.log('✅ Token FCM eliminado del servidor');
   } catch (error) {
     console.error('❌ Error al eliminar token FCM:', error);

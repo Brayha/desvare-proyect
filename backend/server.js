@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const { notifyNewRequest } = require('./services/notifications');
 
 const app = express();
 const server = http.createServer(app);
@@ -277,6 +278,29 @@ io.on('connection', (socket) => {
     });
     
     console.log(`✅ Solicitud emitida a ${activeDriversCount} conductores ACTIVOS`);
+
+    // Enviar push notification a conductores aprobados con FCM token
+    // (cubre los que tienen la app en background o cerrada)
+    try {
+      const User = require('./models/User');
+      const driversWithToken = await User.find({
+        userType: 'driver',
+        'driverProfile.status': 'approved',
+        'driverProfile.fcmToken': { $exists: true, $ne: null }
+      }).select('driverProfile.fcmToken name').lean();
+
+      if (driversWithToken.length > 0) {
+        console.log(`📲 Enviando push notification a ${driversWithToken.length} conductores con FCM token...`);
+        await notifyNewRequest(driversWithToken, {
+          requestId: data.requestId || '',
+          clientName: data.clientName || 'Un cliente',
+        });
+      } else {
+        console.log('ℹ️ No hay conductores con FCM token para push notification');
+      }
+    } catch (pushErr) {
+      console.warn('⚠️ Error enviando push notifications (no crítico):', pushErr.message);
+    }
   });
 
   // Conductor envía respuesta
