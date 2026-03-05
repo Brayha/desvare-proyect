@@ -680,6 +680,10 @@ const WaitingQuotes = () => {
             quote={notification.quote}
             duration={notification.duration}
             onClose={() => closeNotification(notification.id)}
+            onViewDetail={(quote) => {
+              closeNotification(notification.id);
+              handleQuoteClick(quote);
+            }}
           />
         ))}
 
