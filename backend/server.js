@@ -226,7 +226,7 @@ io.on('connection', (socket) => {
   });
 
   // Cliente solicita cotización
-  socket.on('request:new', (data) => {
+  socket.on('request:new', async (data) => {
     console.log('📢 Nueva solicitud de cotización recibida');
     console.log('📦 Datos completos:', JSON.stringify(data, null, 2));
     
