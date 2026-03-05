@@ -16,10 +16,11 @@ const Splash = () => {
     // Timer para la animación del splash
     const timer = setTimeout(() => {
       if (token && user) {
-        // Usuario ya autenticado, ir a Home
+        // Usuario ya autenticado
         const userData = JSON.parse(user);
         if (userData.userType === 'driver') {
-          history.replace('/home');
+          // Pasar por /permissions: si ya los tiene concedidos, redirige solo a /home
+          history.replace('/permissions');
         } else {
           // No es conductor, limpiar y ir a login
           localStorage.clear();

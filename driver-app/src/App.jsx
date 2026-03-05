@@ -20,6 +20,7 @@ import '@ionic/react/css/display.css';
 
 import Splash from './pages/Splash';
 import Onboarding from './pages/Onboarding';
+import PermissionsSetup from './pages/PermissionsSetup';
 import LoginOTP from './pages/LoginOTP';
 import Register from './pages/Register';
 import VerifyOTP from './pages/VerifyOTP';
@@ -43,6 +44,7 @@ function App() {
         <IonRouterOutlet>
           <Route exact path="/splash" component={Splash} />
           <Route exact path="/onboarding" component={Onboarding} />
+          <Route exact path="/permissions" component={PermissionsSetup} />
           <Route exact path="/login" component={LoginOTP} />
           <Route exact path="/register" component={Register} />
           <Route exact path="/verify-otp" component={VerifyOTP} />

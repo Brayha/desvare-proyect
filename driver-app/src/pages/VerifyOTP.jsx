@@ -117,17 +117,17 @@ const VerifyOTP = () => {
           console.log('🚀 Navegando a under-review...');
           history.replace('/under-review');
         } else if (driverStatus === 'approved') {
-          // Aprobado: ir a home
-          console.log('🚀 Navegando a home...');
-          history.replace('/home');
+          // Aprobado: verificar permisos antes de ir a home
+          console.log('🚀 Navegando a permissions...');
+          history.replace('/permissions');
         } else if (driverStatus === 'rejected') {
           // Rechazado: mostrar mensaje y permitir re-envío
           console.log('🚀 Navegando a rejected...');
           history.replace('/rejected');
         } else {
-          // Estado desconocido: ir a home por defecto
+          // Estado desconocido: verificar permisos antes de ir a home
           console.warn('⚠️ Estado desconocido:', driverStatus);
-          history.replace('/home');
+          history.replace('/permissions');
         }
       }, 100);
     } catch (error) {
