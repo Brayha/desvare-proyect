@@ -191,6 +191,66 @@
 }
 
 /* ======================================
+   REENVÍO DE CÓDIGO
+   ====================================== */
+.verify-otp-resend {
+  margin-top: 20px;
+  text-align: center;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resend-countdown {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0;
+  font-weight: 400;
+}
+
+.resend-countdown strong {
+  color: var(--desvare-primary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.resend-active-btn {
+  background: transparent;
+  border: none;
+  color: var(--desvare-primary);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-family, inherit);
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: opacity 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resend-active-btn:hover:not(:disabled) {
+  background: rgba(0, 102, 255, 0.08);
+}
+
+.resend-active-btn:active:not(:disabled) {
+  opacity: 0.7;
+}
+
+.resend-active-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resend-spinner {
+  width: 16px;
+  height: 16px;
+  color: var(--desvare-primary);
+}
+
+/* ======================================
    RESPONSIVE
    ====================================== */
 @media (max-width: 375px) {

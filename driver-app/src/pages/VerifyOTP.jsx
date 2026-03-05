@@ -5,6 +5,8 @@ import { Lock, ArrowLeft } from 'iconsax-react';
 import { authAPI } from '../services/api';
 import './VerifyOTP.css';
 
+const RESEND_SECONDS = 60;
+
 const VerifyOTP = () => {
   const history = useHistory();
   const [otp, setOtp] = useState('');
@@ -13,9 +15,44 @@ const VerifyOTP = () => {
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const otpRefs = useRef([]);
 
+  // Contador para reenvío
+  const [countdown, setCountdown] = useState(RESEND_SECONDS);
+  const [canResend, setCanResend] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+
   // Obtener datos temporales del registro
   const userId = localStorage.getItem('tempDriverId');
   const phone = localStorage.getItem('tempDriverPhone');
+
+  // Contador regresivo para reenvío
+  useEffect(() => {
+    if (countdown <= 0) {
+      setCanResend(true);
+      return;
+    }
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [countdown]);
+
+  // Reenviar código OTP
+  const handleResend = async () => {
+    if (!phone) return;
+    setResendLoading(true);
+    setError('');
+    try {
+      await authAPI.loginDriverOTP({ phone });
+      setOtp('');
+      setCanResend(false);
+      setCountdown(RESEND_SECONDS);
+      otpRefs.current[0]?.focus();
+    } catch {
+      setError('No se pudo reenviar el código. Intenta de nuevo.');
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Si no hay userId o phone Y no acabamos de verificar exitosamente, redirigir a registro
@@ -205,6 +242,26 @@ const VerifyOTP = () => {
           >
             {isLoading ? <IonSpinner name="crescent" /> : 'Validar código'}
           </button>
+
+          {/* Reenvío de código */}
+          <div className="verify-otp-resend">
+            {canResend ? (
+              <button
+                className="resend-active-btn"
+                onClick={handleResend}
+                disabled={resendLoading}
+              >
+                {resendLoading
+                  ? <IonSpinner name="crescent" className="resend-spinner" />
+                  : '¿No recibiste el código? Reenviar'}
+              </button>
+            ) : (
+              <p className="resend-countdown">
+                Reenviar código en{' '}
+                <strong>0:{String(countdown).padStart(2, '0')}</strong>
+              </p>
+            )}
+          </div>
         </div>
       </IonContent>
     </IonPage>
