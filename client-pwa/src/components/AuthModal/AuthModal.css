@@ -245,39 +245,46 @@
   line-height: 1.5;
 }
 
-.otp-inputs-container {
+/* Input único OTP */
+.otp-single-wrap {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
-.otp-input-box {
-  width: 56px;
-  height: 56px;
+.otp-single-input {
+  width: 100%;
+  height: 64px;
   border: 2px solid #E5E7EB;
-  border-radius: 12px;
+  border-radius: 16px;
   text-align: center;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: #1F2937;
   background: #F9FAFB;
-  transition: all 0.2s ease;
+  letter-spacing: 10px;
   outline: none;
+  transition: all 0.2s ease;
+  font-family: 'Courier New', monospace;
 }
 
-.otp-input-box:focus {
+.otp-single-input::placeholder {
+  color: #D1D5DB;
+  letter-spacing: 8px;
+}
+
+.otp-single-input:focus {
   border-color: #0055FF;
   background: #EFF6FF;
   box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
 }
 
-.otp-input-box:not(:placeholder-shown) {
-  border-color: #0055FF;
-  background: #EFF6FF;
+.otp-single-input.otp-single-complete {
+  border-color: #10B981;
+  background: #ECFDF5;
 }
 
-.otp-input-box:disabled {
+.otp-single-input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -287,6 +294,48 @@
   text-align: center;
   margin-bottom: 16px;
   font-size: 12px;
+}
+
+/* Reenvío de código */
+.otp-resend-container {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0;
+  min-height: 28px;
+}
+
+.otp-resend-countdown {
+  font-size: 13px;
+  color: #6B7280;
+  text-align: center;
+  margin: 0;
+}
+
+.otp-resend-countdown strong {
+  color: #0055FF;
+}
+
+.otp-resend-btn {
+  background: none;
+  border: none;
+  color: #0055FF;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.otp-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.otp-resend-spinner {
+  width: 14px;
+  height: 14px;
 }
 
 /* ======================================
@@ -306,14 +355,10 @@
     font-size: 18px;
   }
 
-  .otp-input-box {
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
-  }
-
-  .otp-inputs-container {
-    gap: 8px;
+  .otp-single-input {
+    height: 56px;
+    font-size: 24px;
+    letter-spacing: 8px;
   }
 }
 

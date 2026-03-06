@@ -668,9 +668,8 @@ const RequestService = () => {
 
                 {/* Botón Buscar Cotizaciones - Solo si hay vehículo */}
                 {vehicleData?.vehicleSnapshot && (
-                  <Button
-                    className="search-service-button"
-                    fullWidth
+                  <button
+                    className="lp-btn lp-btn--primary lp-nav__cta-mobile"
                     onClick={handleConfirmRoute}
                     disabled={!routeInfo || isSendingRequest}
                     loading={isSendingRequest}
@@ -678,7 +677,7 @@ const RequestService = () => {
                     {isSendingRequest
                       ? "Enviando solicitud..."
                       : "Buscar Cotizaciones"}
-                  </Button>
+                  </button>
                 )}
               </div>
             </div>

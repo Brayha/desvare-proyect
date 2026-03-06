@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -52,9 +52,6 @@ const RequestAuth = () => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
 
-  // Refs para OTP inputs
-  const otpRefs = useRef([]);
-
   // Control del modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -94,25 +91,10 @@ const RequestAuth = () => {
     setter(cleaned);
   };
 
-  // Funciones para manejar OTP
-  const handleOTPChange = (index, value) => {
-    if (!/^\d*$/.test(value)) return; // Solo números
-
-    const newOtp = otp.split("");
-    newOtp[index] = value;
-    setOtp(newOtp.join(""));
+  const handleOTPChange = (e) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setOtp(val);
     setOtpError("");
-
-    // Auto-focus siguiente input
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOTPKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
   };
 
   // Resetear contador cada vez que se llega al paso 2 (nuevo código enviado)
@@ -153,7 +135,6 @@ const RequestAuth = () => {
       setOtp("");
       setCanResend(false);
       setCountdown(RESEND_SECONDS);
-      otpRefs.current[0]?.focus();
       showSuccess("Nuevo código enviado");
     } catch {
       setOtpError("No se pudo reenviar el código. Intenta de nuevo.");
@@ -824,22 +805,19 @@ const RequestAuth = () => {
                   )}
                 </p>
               </div>
-              {/* Input OTP personalizado (6 dígitos) */}
-              <div className="otp-inputs-container">
-                {[0, 1, 2, 3, 4, 5].map((index) => (
-                  <input
-                    key={index}
-                    ref={(el) => (otpRefs.current[index] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    className="otp-input-box"
-                    value={otp[index] || ""}
-                    onChange={(e) => handleOTPChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOTPKeyDown(index, e)}
-                    disabled={isLoading}
-                  />
-                ))}
+              {/* Input único OTP (6 dígitos) */}
+              <div className="otp-single-wrap">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  className={`otp-single-input${otp.length === 6 ? " otp-single-complete" : ""}`}
+                  value={otp}
+                  onChange={handleOTPChange}
+                  disabled={isLoading}
+                  autoFocus
+                  placeholder="000000"
+                />
               </div>
 
               {otpError && (

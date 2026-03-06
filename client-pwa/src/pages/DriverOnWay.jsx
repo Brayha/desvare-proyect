@@ -161,6 +161,7 @@ const DriverOnWay = () => {
     // Primero, ofrecer llamar al conductor
     presentAlert({
       header: '⚠️ Cancelar Servicio',
+      mode: "ios",
       message: serviceData?.driver?.phone 
         ? `¿Deseas llamar a ${serviceData.driver.name} antes de cancelar?`
         : '¿Estás seguro que deseas cancelar el servicio?',

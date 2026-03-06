@@ -479,6 +479,7 @@ const ActiveService = () => {
   const handleVerifySecurityCode = () => {
     presentAlert({
       header: "🔒 Validar Código de Seguridad",
+      mode: "ios",
       message: "Solicita al cliente el código de 4 dígitos para ver el destino",
       inputs: [
         {
