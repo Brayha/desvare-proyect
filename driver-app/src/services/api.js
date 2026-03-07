@@ -37,6 +37,9 @@ export const authAPI = {
   uploadDriverDocuments: (data) => api.post('/api/drivers/upload-documents', data), // Ahora envía JSON con base64
   setDriverCapabilities: (data) => api.post('/api/drivers/set-capabilities', data),
   
+  // Actualizar perfil
+  updateProfile: (driverId, data) => api.put(`/api/drivers/profile/${driverId}`, data),
+
   // Estado del conductor
   getDriverStatus: (userId) => api.get(`/api/drivers/status/${userId}`),
   toggleDriverOnline: (data) => api.put('/api/drivers/toggle-online', data),

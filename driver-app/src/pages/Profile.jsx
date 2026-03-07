@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import {
   IonContent,
   IonHeader,
@@ -19,24 +19,25 @@ import {
   IonIcon,
   IonBadge,
   IonSpinner,
-} from '@ionic/react';
-import { 
-  personOutline, 
-  callOutline, 
-  mailOutline, 
+} from "@ionic/react";
+import {
+  personOutline,
+  callOutline,
+  mailOutline,
   locationOutline,
   starOutline,
   cashOutline,
   logOutOutline,
-  carSportOutline
-} from 'ionicons/icons';
-import socketService from '../services/socket';
-import './Profile.css';
+  carSportOutline,
+  settingsOutline,
+} from "ionicons/icons";
+import socketService from "../services/socket";
+import "./Profile.css";
 
 // ============================================
 // API URL Configuration
 // ============================================
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const Profile = () => {
   const history = useHistory();
@@ -45,9 +46,9 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem("user");
     if (!userData) {
-      history.push('/login');
+      history.push("/login");
       return;
     }
 
@@ -60,27 +61,29 @@ const Profile = () => {
 
   const loadProfile = async (driverId) => {
     try {
-      const response = await fetch(`${API_URL}/api/drivers/profile/${driverId}`);
+      const response = await fetch(
+        `${API_URL}/api/drivers/profile/${driverId}`,
+      );
       const data = await response.json();
-      
+
       if (response.ok) {
         setProfile(data.driver);
       } else {
-        console.error('Error al cargar perfil:', data);
+        console.error("Error al cargar perfil:", data);
       }
     } catch (error) {
-      console.error('❌ Error al cargar perfil:', error);
+      console.error("❌ Error al cargar perfil:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('hasSeenLocationModal');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("hasSeenLocationModal");
     socketService.disconnect();
-    history.push('/login');
+    history.push("/login");
   };
 
   if (loading) {
@@ -135,20 +138,79 @@ const Profile = () => {
         </IonToolbar>
       </IonHeader>
 
-      <IonContent className="ion-padding profile-content">
-        {/* Avatar y nombre */}
-        <div className="profile-header">
-          <img 
-            src={profile.documents?.selfie || 'https://ionicframework.com/docs/img/demos/avatar.svg'} 
-            alt={profile.name}
-            className="profile-avatar"
-          />
-          <IonText>
-            <h2>{profile.name}</h2>
-          </IonText>
-          <IonBadge color={profile.status === 'approved' ? 'success' : 'warning'}>
-            {profile.status === 'approved' ? 'Aprobado' : profile.status}
-          </IonBadge>
+      <IonContent className="ion-padding profile-content-body">
+        <div className="profile-container ">
+          <div className="profile-header">
+            <div className="profile-header-left">
+              <img
+                src={
+                  profile.documents?.selfie ||
+                  "https://ionicframework.com/docs/img/demos/avatar.svg"
+                }
+                alt={profile.name}
+                className="profile-avatar"
+              />
+              <div className="profile-header-left-text">
+                <h2 className="profile-name">{profile.name}</h2>
+                <p className="profile-subtitle">{profile.phone}</p>
+              </div>
+            </div>
+            <div
+              className="profile-header-right"
+              onClick={() => history.push("/edit-profile")}
+              style={{ cursor: "pointer" }}
+            >
+              <IonIcon icon={settingsOutline} slot="start" color="primary" />
+            </div>
+          </div>
+          {/* Mi grua */}
+          <div className="vehicles-container">
+            <div className="vehicles-header">
+              <h2>Mi Grúa</h2>
+            </div>
+
+            <div className="vehicles-content">
+              {!profile.towTruck ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px 20px",
+                    width: "100%",
+                  }}
+                >
+                  <IonText color="medium">
+                    <p style={{ margin: "0 0 8px 0", fontSize: "14px" }}>
+                      No tienes grúa registrada
+                    </p>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "12px",
+                        color: "#9CA3AF",
+                      }}
+                    >
+                      Contacta al administrador para registrar tu vehículo
+                    </p>
+                  </IonText>
+                </div>
+              ) : (
+                <div className="vehicles-content-item">
+                  <div className="vehicles-content-item-left">
+                    <div className="tow-truck-icon-wrapper">
+                      <IonIcon icon={carSportOutline} className="tow-truck-icon" />
+                    </div>
+                    <div className="vehicles-content-item-text">
+                      <h3>
+                        {profile.towTruck.brand} {profile.towTruck.model}
+                        {profile.towTruck.year ? ` (${profile.towTruck.year})` : ""}
+                      </h3>
+                      <p>{profile.towTruck.licensePlate}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+          </div>
+        </div>
         </div>
 
         {/* Información personal */}
@@ -226,44 +288,32 @@ const Profile = () => {
         </IonCard>
 
         {/* Capacidades */}
-        {profile.vehicleCapabilities && profile.vehicleCapabilities.length > 0 && (
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>Capacidades</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <div className="capabilities-badges">
-                {profile.vehicleCapabilities.map((cap, index) => (
-                  <IonBadge key={index} color="primary" className="capability-badge">
-                    {cap}
-                  </IonBadge>
-                ))}
-              </div>
-            </IonCardContent>
-          </IonCard>
-        )}
-
-        {/* Grúa */}
-        {profile.towTruck && (
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>Mi Grúa</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <IonText>
-                <p><strong>Marca:</strong> {profile.towTruck.brand}</p>
-                <p><strong>Modelo:</strong> {profile.towTruck.model}</p>
-                <p><strong>Placa:</strong> {profile.towTruck.licensePlate}</p>
-                {profile.towTruck.year && <p><strong>Año:</strong> {profile.towTruck.year}</p>}
-              </IonText>
-            </IonCardContent>
-          </IonCard>
-        )}
+        {profile.vehicleCapabilities &&
+          profile.vehicleCapabilities.length > 0 && (
+            <IonCard>
+              <IonCardHeader>
+                <IonCardTitle>Capacidades</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent>
+                <div className="capabilities-badges">
+                  {profile.vehicleCapabilities.map((cap, index) => (
+                    <IonBadge
+                      key={index}
+                      color="primary"
+                      className="capability-badge"
+                    >
+                      {cap}
+                    </IonBadge>
+                  ))}
+                </div>
+              </IonCardContent>
+            </IonCard>
+          )}
 
         {/* Botón de cerrar sesión */}
-        <IonButton 
-          expand="block" 
-          color="danger" 
+        <IonButton
+          expand="block"
+          color="danger"
           onClick={handleLogout}
           className="logout-button"
         >
@@ -276,4 +326,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
