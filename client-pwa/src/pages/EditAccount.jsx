@@ -77,7 +77,7 @@ const EditAccount = () => {
   const loadCities = async () => {
     try {
       const res = await citiesAPI.getAll();
-      if (Array.isArray(res.data)) setCities(res.data);
+      setCities(res.data.cities || []);
     } catch {
       setCities([]);
     }
@@ -290,7 +290,7 @@ const EditAccount = () => {
                 max={new Date().toISOString().split("T")[0]}
               />
               {!birthDate && (
-                <span className="ea-date-placeholder">Fecha de nacimiento</span>
+                <span className="ea-date-placeholder"></span>
               )}
             </div>
           </div>
