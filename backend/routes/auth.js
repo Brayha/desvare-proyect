@@ -384,6 +384,75 @@ router.post('/verify-otp', async (req, res) => {
   }
 });
 
+// GET /api/auth/profile/:id - Obtener perfil del cliente
+router.get('/profile/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user || user.userType !== 'client') {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({
+      message: 'Perfil obtenido exitosamente',
+      profile: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        clientProfile: user.clientProfile || {},
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo perfil:', error);
+    res.status(500).json({ error: 'Error al obtener perfil', details: error.message });
+  }
+});
+
+// PUT /api/auth/profile/:id - Actualizar perfil del cliente
+router.put('/profile/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, city, address, documentType, documentNumber, birthDate } = req.body;
+
+    const user = await User.findById(id);
+    if (!user || user.userType !== 'client') {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    if (name && name.trim().length >= 2) user.name = name.trim();
+    if (email !== undefined) user.email = email || undefined;
+
+    if (!user.clientProfile) user.clientProfile = {};
+    if (city !== undefined) user.clientProfile.city = city || undefined;
+    if (address !== undefined) user.clientProfile.address = address || undefined;
+    if (documentType !== undefined) user.clientProfile.documentType = documentType || undefined;
+    if (documentNumber !== undefined) user.clientProfile.documentNumber = documentNumber || undefined;
+    if (birthDate !== undefined) user.clientProfile.birthDate = birthDate ? new Date(birthDate) : undefined;
+
+    await user.save();
+
+    console.log(`✅ Perfil actualizado para cliente ${id}`);
+
+    res.json({
+      message: 'Perfil actualizado exitosamente',
+      profile: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        clientProfile: user.clientProfile,
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error actualizando perfil:', error);
+    res.status(500).json({ error: 'Error al actualizar perfil', details: error.message });
+  }
+});
+
 // POST /api/auth/fcm-token - Guardar/actualizar token FCM para notificaciones push
 router.post('/fcm-token', async (req, res) => {
   try {

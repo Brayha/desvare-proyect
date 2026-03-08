@@ -565,17 +565,34 @@ router.get('/client/:id', async (req, res) => {
     const requests = await Request.find({ clientId: id })
       .sort({ createdAt: -1 }); // Más recientes primero
 
+    // Obtener nombre del conductor asignado para cada request
+    const enriched = await Promise.all(requests.map(async (r) => {
+      let driverName = null;
+      if (r.assignedDriverId) {
+        try {
+          const driver = await User.findById(r.assignedDriverId).select('name');
+          driverName = driver?.name || null;
+        } catch { /* sin conductor */ }
+      }
+      return {
+        id: r._id,
+        status: r.status,
+        origin: r.origin?.address || null,
+        destination: r.destination?.address || null,
+        vehicleSnapshot: r.vehicleSnapshot || null,
+        totalAmount: r.totalAmount || 0,
+        driverName,
+        rating: r.rating?.stars || null,
+        createdAt: r.createdAt,
+        startedAt: r.startedAt || null,
+        completedAt: r.completedAt || null,
+      };
+    }));
+
     res.json({
       message: 'Solicitudes obtenidas exitosamente',
-      count: requests.length,
-      requests: requests.map(req => ({
-        id: req._id,
-        clientName: req.clientName,
-        status: req.status,
-        quotesCount: req.quotes.length,
-        quotes: req.quotes,
-        createdAt: req.createdAt
-      }))
+      count: enriched.length,
+      requests: enriched,
     });
 
   } catch (error) {

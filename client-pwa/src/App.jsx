@@ -33,6 +33,9 @@ import WaitingQuotes from './pages/WaitingQuotes';
 import DriverOnWay from './pages/DriverOnWay';
 import RatingService from './pages/RatingService';
 import TabLayout from './components/TabLayout/TabLayout';
+import EditAccount from './pages/EditAccount';
+import ServiceHistory from './pages/ServiceHistory';
+import ServiceDetail from './pages/ServiceDetail';
 
 setupIonicReact();
 
@@ -185,6 +188,9 @@ function App() {
             }} />
             <Route exact path="/driver-on-way" component={DriverOnWay} />
             <Route exact path="/rate-service" component={RatingService} />
+            <Route exact path="/edit-account" component={EditAccount} />
+            <Route exact path="/service-history" component={ServiceHistory} />
+            <Route exact path="/service-detail/:id" component={ServiceDetail} />
             
             {/* Tabs (Desvare + Mi cuenta) */}
             <Route path="/tabs" component={TabLayout} />

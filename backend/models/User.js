@@ -51,6 +51,20 @@ const userSchema = new mongoose.Schema({
   suspensionReason: String,
   
   // ========================================
+  // PERFIL DEL CLIENTE
+  // ========================================
+  clientProfile: {
+    city: String,
+    address: String,
+    documentType: {
+      type: String,
+      enum: ['CC', 'CE', 'Pasaporte', 'NIT'],
+    },
+    documentNumber: String,
+    birthDate: Date,
+  },
+
+  // ========================================
   // PERFIL DEL CONDUCTOR
   // ========================================
   driverProfile: {

@@ -230,7 +230,11 @@ Mi consulta es: `;
                 </IonText>
               </div>
 
-              <div className="profile-header-right">
+              <div
+                className="profile-header-right"
+                onClick={() => history.push("/edit-account")}
+                style={{ cursor: "pointer" }}
+              >
                 <Setting2 size={20} color="#9CA3AF" />
               </div>
             </div>
@@ -317,7 +321,7 @@ Mi consulta es: `;
             </div>
 
             <div className="options-profile">
-              <div className="options-profile-item">
+              <div className="options-profile-item" onClick={() => history.push("/service-history")}>
                 <Verify size={20} color="#9CA3AF" />
                 <p>Servicios tomados</p>
               </div>

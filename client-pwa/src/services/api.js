@@ -38,6 +38,17 @@ export const authAPI = {
   verifyOTP: (data) => api.post('/api/auth/verify-otp', data),
 };
 
+// API de perfil del cliente
+export const profileAPI = {
+  getProfile: (userId) => api.get(`/api/auth/profile/${userId}`),
+  updateProfile: (userId, data) => api.put(`/api/auth/profile/${userId}`, data),
+};
+
+// API de ciudades
+export const citiesAPI = {
+  getAll: () => api.get('/api/cities'),
+};
+
 // API de solicitudes
 export const requestAPI = {
   createRequest: (data) => api.post('/api/requests/new', data),

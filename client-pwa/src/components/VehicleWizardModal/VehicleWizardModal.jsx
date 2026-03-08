@@ -691,11 +691,31 @@ const VehicleWizardModal = ({
 
       case 'category':
         return (
-          <VehicleCategorySelector
-            categories={categories}
-            onSelect={handleSelectCategory}
-            selectedCategory={vehicleData.category}
-          />
+          <div className="wizard-category-wrapper">
+            <VehicleCategorySelector
+              categories={categories.filter(
+                (c) => !['GRUA_LIVIANA', 'GRUA_PESADA'].includes(c.id)
+              )}
+              onSelect={handleSelectCategory}
+              selectedCategory={vehicleData.category}
+            />
+            {!userId && (
+              <div className="wizard-login-prompt">
+                <p className="wizard-login-prompt-text">
+                  ¿Ya tienes una cuenta en Desvare?
+                </p>
+                <button
+                  className="wizard-login-prompt-btn"
+                  onClick={() => {
+                    console.log('🔐 Usuario quiere iniciar sesión → Abriendo modal de auth');
+                    setShowAuthModal(true);
+                  }}
+                >
+                  Iniciar sesión
+                </button>
+              </div>
+            )}
+          </div>
         );
 
       case 'brand':
@@ -787,24 +807,9 @@ const VehicleWizardModal = ({
           </IonButtons>
           <IonTitle>{currentStepInfo.title}</IonTitle>
           <IonButtons slot="end">
-            {/* Botón "Ya tienes cuenta" si no está logueado */}
-            {!userId && currentStep === 0 ? (
-              <IonButton 
-                onClick={() => {
-                  console.log('🔐 Usuario quiere iniciar sesión → Abriendo modal de auth');
-                  setShowAuthModal(true);
-                }}
-                size="small"
-              >
-                <IonText style={{ fontSize: '13px', whiteSpace: 'nowrap' }}>
-                  ¿Ya tienes cuenta?
-                </IonText>
-              </IonButton>
-            ) : (
-              <IonText color="medium" style={{ fontSize: '14px', marginRight: '12px' }}>
-                {currentStep + 1}/{totalSteps}
-              </IonText>
-            )}
+            <IonText color="medium" style={{ fontSize: '14px', marginRight: '12px' }}>
+              {currentStep + 1}/{totalSteps}
+            </IonText>
           </IonButtons>
         </IonToolbar>
         <IonProgressBar value={progress / 100} color="primary" />
