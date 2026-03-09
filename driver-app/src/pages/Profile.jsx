@@ -12,7 +12,9 @@ import {
   IonIcon,
   IonSpinner,
 } from "@ionic/react";
-import { carSportOutline, settingsOutline } from "ionicons/icons";
+import { settingsOutline } from "ionicons/icons";
+import planchonImg from "../assets/img/vehicles/planchon.svg";
+import ganchoImg from "../assets/img/vehicles/gancho.svg";
 import socketService from "../services/socket";
 import "./Profile.css";
 import { Logout, Verify, MessageQuestion, Moneys } from "iconsax-react";
@@ -57,6 +59,28 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleWhatsAppSupport = () => {
+    const phoneNumber = '573505790415';
+
+    const brand = profile?.towTruck?.baseBrand || profile?.towTruck?.customBrand || profile?.towTruck?.brand || 'N/A';
+    const model = profile?.towTruck?.baseModel || profile?.towTruck?.customModel || profile?.towTruck?.model || 'N/A';
+    const plate = profile?.towTruck?.licensePlate || 'N/A';
+
+    const message = `Hola, necesito ayuda con Desvare (conductor).
+
+*Datos del conductor:*
+- Nombre: ${profile?.name || 'N/A'}
+- Teléfono: ${profile?.phone || 'N/A'}
+- Email: ${profile?.email || 'No registrado'}
+- Grúa: ${brand} ${model}
+- Placa: ${plate}
+
+Mi consulta es: `;
+
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
 
   const handleLogout = () => {
@@ -180,17 +204,17 @@ const Profile = () => {
                 <div className="vehicles-content-item">
                   <div className="vehicles-content-item-left">
                     <div className="tow-truck-icon-wrapper">
-                      <IonIcon
-                        icon={carSportOutline}
+                      <img
+                        src={profile.towTruck.truckType === "GRUA_PESADA" ? ganchoImg : planchonImg}
+                        alt="Grúa"
                         className="tow-truck-icon"
                       />
                     </div>
                     <div className="vehicles-content-item-text">
                       <h3>
-                        {profile.towTruck.brand} {profile.towTruck.model}
-                        {profile.towTruck.year
-                          ? ` (${profile.towTruck.year})`
-                          : ""}
+                        {profile.towTruck.baseBrand || profile.towTruck.customBrand || profile.towTruck.brand}{" "}
+                        {profile.towTruck.baseModel || profile.towTruck.customModel || profile.towTruck.model}
+                        {profile.towTruck.year ? ` (${profile.towTruck.year})` : ""}
                       </h3>
                       <p>{profile.towTruck.licensePlate}</p>
                     </div>
@@ -215,7 +239,7 @@ const Profile = () => {
               <p>Servicios Completados</p>
               <p className="options-profile-item-value">{profile.totalServices}</p>
             </div>
-            <div className="options-profile-item">
+            <div className="options-profile-item" onClick={handleWhatsAppSupport} style={{ cursor: "pointer" }}>
               <MessageQuestion size={20} color="#9CA3AF" />
               <p>Ayuda</p>
             </div>

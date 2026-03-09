@@ -219,9 +219,9 @@ Mi consulta es: `;
           <div className="profile-container">
             <div className="profile-header">
               <div className="profile-header-left">
-                <IonAvatar className="profile-avatar">
+                {/* <IonAvatar className="profile-avatar">
                   <IonIcon icon={personCircleOutline} />
-                </IonAvatar>
+                </IonAvatar> */}
                 <IonText>
                   <h1 className="profile-name">
                     Hola, {user?.name || "Usuario"}
