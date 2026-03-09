@@ -556,6 +556,50 @@ router.delete('/:requestId/quote/:driverId', async (req, res) => {
   }
 });
 
+// GET /api/requests/driver/:id - Obtener servicios completados de un conductor
+router.get('/driver/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const requests = await Request.find({
+      assignedDriverId: id,
+      status: 'completed',
+    }).sort({ completedAt: -1 });
+
+    const services = requests.map(r => ({
+      id: r._id,
+      status: r.status,
+      clientName: r.clientName,
+      origin: r.origin?.address || null,
+      destination: r.destination?.address || null,
+      vehicleSnapshot: r.vehicleSnapshot
+        ? {
+            category: r.vehicleSnapshot.category || null,
+            brand: r.vehicleSnapshot.brand || null,
+            model: r.vehicleSnapshot.model || null,
+            // placa omitida intencionalmente
+          }
+        : null,
+      totalAmount: r.totalAmount || 0,
+      rating: r.rating?.stars || null,
+      ratingComment: r.rating?.comment || null,
+      createdAt: r.createdAt,
+      startedAt: r.startedAt || null,
+      completedAt: r.completedAt || null,
+    }));
+
+    res.json({
+      message: 'Servicios obtenidos exitosamente',
+      count: services.length,
+      services,
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo servicios del conductor:', error);
+    res.status(500).json({ error: 'Error al obtener servicios', details: error.message });
+  }
+});
+
 // GET /api/requests/client/:id - Obtener solicitudes de un cliente
 router.get('/client/:id', async (req, res) => {
   try {

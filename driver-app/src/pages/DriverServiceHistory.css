@@ -1,0 +1,168 @@
+.dsh-content {
+  --background: #f5f5f5;
+}
+
+.dsh-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 64px 24px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.dsh-empty-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0;
+}
+
+.dsh-empty-sub {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.dsh-error-text {
+  font-size: 14px;
+  color: #ef4444;
+  margin: 0;
+}
+
+/* ── Lista ── */
+.dsh-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+/* ── Card ── */
+.dsh-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dsh-card:active {
+  opacity: 0.85;
+}
+
+.dsh-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dsh-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dsh-card-client {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.dsh-card-vehicle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.dsh-card-date {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dsh-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.dsh-card-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+/* ── Ruta ── */
+.dsh-card-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dsh-route-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dsh-route-dot--origin { background: #3b82f6; }
+.dsh-route-dot--dest   { background: #10b981; }
+
+.dsh-route-text {
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dsh-route-line {
+  width: 1px;
+  height: 10px;
+  background: #e5e7eb;
+  margin-left: 3px;
+}
+
+/* ── Footer ── */
+.dsh-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.dsh-stars {
+  font-size: 14px;
+  color: #f59e0b;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.dsh-card-comment {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -243,3 +243,53 @@ ion-card ion-label p {
   color: #333;
 }
 
+
+
+.options-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+
+
+.options-profile-item {
+  display: flex;
+  padding: 0;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 10px;
+  margin: 0 -10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
+
+.my-account-footer-text {
+  font-size: 14px;
+  font-weight: 400;
+  margin: 0;
+  color: #9CA3AF;
+  text-align: center;
+}
+
+.my-account-footer-text a {
+  color: #0055ff;
+  text-decoration: none;
+}
+
+.my-account-footer-text a:hover {
+  text-decoration: underline;
+}
+
+.options-profile-item-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: green;
+  margin-left: auto;
+}

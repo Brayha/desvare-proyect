@@ -35,6 +35,8 @@ import CancellationDetail from './pages/CancellationDetail';
 import RequestDetail from './pages/RequestDetail';
 import QuoteDetail from './pages/QuoteDetail';
 import QuoteAmount from './pages/QuoteAmount';
+import DriverServiceHistory from './pages/DriverServiceHistory';
+import DriverServiceDetail from './pages/DriverServiceDetail';
 
 setupIonicReact();
 
@@ -60,6 +62,8 @@ function App() {
           <Route exact path="/request-detail" component={RequestDetail} />
           <Route exact path="/quote-detail/:requestId" component={QuoteDetail} />
           <Route exact path="/quote-amount" component={QuoteAmount} />
+          <Route exact path="/driver-service-history" component={DriverServiceHistory} />
+          <Route exact path="/driver-service-detail/:id" component={DriverServiceDetail} />
           <Route exact path="/">
             <Redirect to="/splash" />
           </Route>

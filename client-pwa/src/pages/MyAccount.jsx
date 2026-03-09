@@ -336,7 +336,8 @@ Mi consulta es: `;
             </div>
 
             <p className="my-account-footer-text">
-              v.1.5.69 · <a href="/terms">Terms & Conditions</a> · <a href="/privacy">Politicas de privacidad</a></p>
+              v.1.5.69 · <a href="/terms">Terms & Conditions</a> · <a href="/privacy">Politicas de privacidad</a>
+              </p>
           </div>
         </div>
       </IonContent>

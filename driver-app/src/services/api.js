@@ -51,6 +51,7 @@ export const requestAPI = {
   getRequest: (requestId) => api.get(`/api/requests/${requestId}`),
   getNearbyRequests: (driverId) => api.get(`/api/requests/nearby/${driverId}`),
   cancelQuote: (requestId, driverId, data) => api.delete(`/api/requests/${requestId}/quote/${driverId}`, { data }),
+  getDriverServices: (driverId) => api.get(`/api/requests/driver/${driverId}`),
 };
 
 // API de ciudades

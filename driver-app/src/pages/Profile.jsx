@@ -8,31 +8,14 @@ import {
   IonToolbar,
   IonButtons,
   IonBackButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonItem,
-  IonLabel,
   IonText,
-  IonButton,
   IonIcon,
-  IonBadge,
   IonSpinner,
 } from "@ionic/react";
-import {
-  personOutline,
-  callOutline,
-  mailOutline,
-  locationOutline,
-  starOutline,
-  cashOutline,
-  logOutOutline,
-  carSportOutline,
-  settingsOutline,
-} from "ionicons/icons";
+import { carSportOutline, settingsOutline } from "ionicons/icons";
 import socketService from "../services/socket";
 import "./Profile.css";
+import { Logout, Verify, MessageQuestion, Moneys } from "iconsax-react";
 
 // ============================================
 // API URL Configuration
@@ -41,7 +24,6 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const Profile = () => {
   const history = useHistory();
-  const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +35,6 @@ const Profile = () => {
     }
 
     const parsedUser = JSON.parse(userData);
-    setUser(parsedUser);
 
     // Cargar perfil completo
     loadProfile(parsedUser._id);
@@ -151,8 +132,10 @@ const Profile = () => {
                 className="profile-avatar"
               />
               <div className="profile-header-left-text">
-                <h2 className="profile-name">{profile.name}</h2>
-                <p className="profile-subtitle">{profile.phone}</p>
+                <h2 className="profile-name">
+                  {profile.name}
+                </h2>
+                <p className="profile-subtitle">{profile.phone} <span> / {profile.rating.toFixed(1)} ⭐</span></p>
               </div>
             </div>
             <div
@@ -197,129 +180,55 @@ const Profile = () => {
                 <div className="vehicles-content-item">
                   <div className="vehicles-content-item-left">
                     <div className="tow-truck-icon-wrapper">
-                      <IonIcon icon={carSportOutline} className="tow-truck-icon" />
+                      <IonIcon
+                        icon={carSportOutline}
+                        className="tow-truck-icon"
+                      />
                     </div>
                     <div className="vehicles-content-item-text">
                       <h3>
                         {profile.towTruck.brand} {profile.towTruck.model}
-                        {profile.towTruck.year ? ` (${profile.towTruck.year})` : ""}
+                        {profile.towTruck.year
+                          ? ` (${profile.towTruck.year})`
+                          : ""}
                       </h3>
                       <p>{profile.towTruck.licensePlate}</p>
                     </div>
                   </div>
                 </div>
               )}
+            </div>
           </div>
+
+          <div className="options-profile">
+            <div className="options-profile-item">
+              <Moneys size={20} color="#9CA3AF" />
+              <p>Ganancias Totales</p>
+              <p className="options-profile-item-value">${profile.totalEarnings.toLocaleString()}</p>
+            </div>
+            <div
+              className="options-profile-item"
+              onClick={() => history.push("/driver-service-history")}
+              style={{ cursor: "pointer" }}
+            >
+              <Verify size={20} color="#9CA3AF" />
+              <p>Servicios Completados</p>
+              <p className="options-profile-item-value">{profile.totalServices}</p>
+            </div>
+            <div className="options-profile-item">
+              <MessageQuestion size={20} color="#9CA3AF" />
+              <p>Ayuda</p>
+            </div>
+            <div className="options-profile-item" onClick={handleLogout}>
+              <Logout size={20} color="#9CA3AF" />
+              <p>Cerrar sesión</p>
+            </div>
+          </div>
+          <p className="my-account-footer-text">
+            v.1.5.69 · <a href="/terms">Terms & Conditions</a> ·{" "}
+            <a href="/privacy">Politicas de privacidad</a>
+          </p>
         </div>
-        </div>
-
-        {/* Información personal */}
-        <IonCard>
-          <IonCardHeader>
-            <IonCardTitle>Información Personal</IonCardTitle>
-          </IonCardHeader>
-          <IonCardContent>
-            <IonItem lines="none">
-              <IonIcon icon={personOutline} slot="start" color="primary" />
-              <IonLabel>
-                <h3>Nombre</h3>
-                <p>{profile.name}</p>
-              </IonLabel>
-            </IonItem>
-
-            <IonItem lines="none">
-              <IonIcon icon={callOutline} slot="start" color="primary" />
-              <IonLabel>
-                <h3>Teléfono</h3>
-                <p>{profile.phone}</p>
-              </IonLabel>
-            </IonItem>
-
-            {profile.email && (
-              <IonItem lines="none">
-                <IonIcon icon={mailOutline} slot="start" color="primary" />
-                <IonLabel>
-                  <h3>Email</h3>
-                  <p>{profile.email}</p>
-                </IonLabel>
-              </IonItem>
-            )}
-
-            <IonItem lines="none">
-              <IonIcon icon={locationOutline} slot="start" color="primary" />
-              <IonLabel>
-                <h3>Ciudad</h3>
-                <p>{profile.city}</p>
-              </IonLabel>
-            </IonItem>
-          </IonCardContent>
-        </IonCard>
-
-        {/* Estadísticas */}
-        <IonCard>
-          <IonCardHeader>
-            <IonCardTitle>Estadísticas</IonCardTitle>
-          </IonCardHeader>
-          <IonCardContent>
-            <IonItem lines="none">
-              <IonIcon icon={starOutline} slot="start" color="warning" />
-              <IonLabel>
-                <h3>Calificación</h3>
-                <p>{profile.rating.toFixed(1)} ⭐</p>
-              </IonLabel>
-            </IonItem>
-
-            <IonItem lines="none">
-              <IonIcon icon={carSportOutline} slot="start" color="primary" />
-              <IonLabel>
-                <h3>Servicios Completados</h3>
-                <p>{profile.totalServices}</p>
-              </IonLabel>
-            </IonItem>
-
-            <IonItem lines="none">
-              <IonIcon icon={cashOutline} slot="start" color="success" />
-              <IonLabel>
-                <h3>Ganancias Totales</h3>
-                <p>${profile.totalEarnings.toLocaleString()}</p>
-              </IonLabel>
-            </IonItem>
-          </IonCardContent>
-        </IonCard>
-
-        {/* Capacidades */}
-        {profile.vehicleCapabilities &&
-          profile.vehicleCapabilities.length > 0 && (
-            <IonCard>
-              <IonCardHeader>
-                <IonCardTitle>Capacidades</IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <div className="capabilities-badges">
-                  {profile.vehicleCapabilities.map((cap, index) => (
-                    <IonBadge
-                      key={index}
-                      color="primary"
-                      className="capability-badge"
-                    >
-                      {cap}
-                    </IonBadge>
-                  ))}
-                </div>
-              </IonCardContent>
-            </IonCard>
-          )}
-
-        {/* Botón de cerrar sesión */}
-        <IonButton
-          expand="block"
-          color="danger"
-          onClick={handleLogout}
-          className="logout-button"
-        >
-          <IonIcon icon={logOutOutline} slot="start" />
-          Cerrar Sesión
-        </IonButton>
       </IonContent>
     </IonPage>
   );
