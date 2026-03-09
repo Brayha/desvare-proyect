@@ -822,7 +822,13 @@ router.get('/profile/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const driver = await User.findById(id);
+    const Request = require('../models/Request');
+
+    const [driver, totalServices] = await Promise.all([
+      User.findById(id),
+      Request.countDocuments({ assignedDriverId: id, status: 'completed' }),
+    ]);
+
     if (!driver || driver.userType !== 'driver') {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
@@ -838,7 +844,7 @@ router.get('/profile/:id', async (req, res) => {
         status: driver.driverProfile.status,
         isOnline: driver.driverProfile.isOnline,
         rating: driver.driverProfile.rating,
-        totalServices: driver.driverProfile.totalServices,
+        totalServices,
         totalEarnings: driver.driverProfile.totalEarnings,
         vehicleCapabilities: driver.driverProfile.vehicleCapabilities,
         towTruck: driver.driverProfile.towTruck,
