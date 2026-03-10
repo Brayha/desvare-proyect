@@ -69,6 +69,7 @@ const Home = () => {
   const history = useHistory();
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [hasActiveSearch] = useState(() => !!localStorage.getItem('currentRequestId'));
 
   /* Registrar cliente con socket si está autenticado */
   useEffect(() => {
@@ -289,14 +290,34 @@ const Home = () => {
             <p className="lp-hero__desc">
               Cotiza en tiempo real, compara precios y recibe ayuda al instante.
             </p>
-            <button
-              className="lp-btn lp-btn--primary lp-btn--large lp-btn--full"
-              onClick={handleRequestTowTruck}
-            >
-              Cotizar servicio de grúa
-              <IconArrow />
-            </button>
-            <p className="lp-hero__disclaimer">Gratis · Sin registro previo · Colombia</p>
+            {hasActiveSearch ? (
+              <>
+                <button
+                  className="lp-btn lp-btn--active-search lp-btn--large lp-btn--full"
+                  onClick={() => history.push("/waiting-quotes")}
+                >
+                  🔎 Ver tu búsqueda activa
+                  <IconArrow />
+                </button>
+                <p
+                  className="lp-hero__disclaimer lp-hero__new-search"
+                  onClick={handleRequestTowTruck}
+                >
+                  o iniciar una nueva búsqueda →
+                </p>
+              </>
+            ) : (
+              <>
+                <button
+                  className="lp-btn lp-btn--primary lp-btn--large lp-btn--full"
+                  onClick={handleRequestTowTruck}
+                >
+                  Cotizar servicio de grúa
+                  <IconArrow />
+                </button>
+                <p className="lp-hero__disclaimer">Gratis · Sin registro previo · Colombia</p>
+              </>
+            )}
           </div>
         </section>
 
