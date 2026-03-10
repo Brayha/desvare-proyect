@@ -90,7 +90,7 @@ const Home = () => {
         const response = await fetch(`${API_URL}/api/drivers/profile/${parsedUser._id}`);
         if (response.ok) {
           const data = await response.json();
-          const selfie = data.driver?.driverProfile?.documents?.selfie;
+          const selfie = data.driver?.documents?.selfie;
           
           if (selfie) {
             // Actualizar solo el selfie en localStorage

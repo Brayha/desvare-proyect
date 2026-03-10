@@ -16,7 +16,7 @@ import { Notification } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import { useNotification } from "../hooks/useNotification";
-import QuoteNotification from "../components/QuoteNotification/QuoteNotification";
+import QuoteSlider from "../components/QuoteSlider/QuoteSlider";
 import QuoteDetailSheet from "../components/QuoteDetailSheet/QuoteDetailSheet";
 import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
@@ -80,8 +80,8 @@ const WaitingQuotes = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
   const [presentAlert] = useIonAlert();
-  const { activeNotifications, showQuoteNotification, closeNotification } =
-    useNotification();
+  const { playSound, vibrate } = useNotification();
+  const [activeQuoteIndex, setActiveQuoteIndex] = useState(0);
 
   const [user, setUser] = useState(null);
   const [routeData, setRouteData] = useState(null);
@@ -218,12 +218,9 @@ const WaitingQuotes = () => {
         // Agregar cotización a la lista
         setQuotesReceived((prev) => [...prev, quote]);
 
-        // ✅ Mostrar notificación visual + sonido + vibración
-        showQuoteNotification(quote, {
-          playSound: true,
-          vibrate: true,
-          duration: 5000,
-        });
+        // Sonido + vibración al llegar cotización (el card inferior es la notificación visual)
+        playSound();
+        vibrate();
       });
 
       // ✅ Escuchar cancelaciones de cotizaciones
@@ -673,20 +670,6 @@ const WaitingQuotes = () => {
           />
         </IonRefresher>
 
-        {/* ✅ Notificaciones visuales cuando llega una cotización */}
-        {activeNotifications.map((notification) => (
-          <QuoteNotification
-            key={notification.id}
-            quote={notification.quote}
-            duration={notification.duration}
-            onClose={() => closeNotification(notification.id)}
-            onViewDetail={(quote) => {
-              closeNotification(notification.id);
-              handleQuoteClick(quote);
-            }}
-          />
-        ))}
-
         {/* Mapa fullscreen - Sin header ni footer */}
         <div className="map-container-fullscreen-no-header">
           <MapPicker
@@ -695,9 +678,10 @@ const WaitingQuotes = () => {
             onRouteCalculated={() => {}}
             quotes={quotesReceived}
             onQuoteClick={handleQuoteClick}
+            focusedQuoteLocation={quotesReceived[activeQuoteIndex]?.location || null}
           />
 
-          {/* Card flotante superior - Notificación SMS */}
+          {/* Sin cotizaciones: aviso SMS + spinner */}
           {quotesReceived.length === 0 && (
             <div className="floating-card-top">
               <div className="sms-notification-card">
@@ -715,7 +699,6 @@ const WaitingQuotes = () => {
             </div>
           )}
 
-          {/* Card flotante inferior - Spinner y botón cancelar */}
           {quotesReceived.length === 0 && (
             <div className="floating-card-bottom">
               <div className="search-status-card">
@@ -723,7 +706,7 @@ const WaitingQuotes = () => {
                   <IonText className="search-text">
                     <h3>Buscando cotizaciones...</h3>
                     <p>
-                      Las grúas estan revisando tu servicio y pronto llegaran
+                      Las grúas están revisando tu servicio y pronto llegarán
                       sus cotizaciones
                     </p>
                   </IonText>
@@ -736,10 +719,20 @@ const WaitingQuotes = () => {
                   onClick={handleCancelRequest}
                   className="cancel-request-button"
                 >
-                  <p>Cancelar busqueda</p>
+                  <p>Cancelar búsqueda</p>
                 </button>
               </div>
             </div>
+          )}
+
+          {/* Con cotizaciones: slider inferior */}
+          {quotesReceived.length > 0 && (
+            <QuoteSlider
+              quotes={quotesReceived}
+              onQuoteClick={handleQuoteClick}
+              onSlideChange={(index) => setActiveQuoteIndex(index)}
+              onCancel={handleCancelRequest}
+            />
           )}
         </div>
 

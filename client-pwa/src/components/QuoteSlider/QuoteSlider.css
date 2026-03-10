@@ -1,0 +1,187 @@
+/* ============================================
+   QUOTE SLIDER - Bottom panel de cotizaciones
+   ============================================ */
+
+.qs-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 0 0 12px 0;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  animation: qs-slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes qs-slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header con contador y hint */
+.qs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 8px 16px;
+}
+
+.qs-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+  background: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.qs-hint {
+  font-size: 12px;
+  color: #6b7280;
+  background: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Swiper */
+.qs-swiper {
+  width: 100%;
+  padding-left: 16px !important;
+  overflow: visible !important;
+}
+
+.qs-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+/* Card individual */
+.qs-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+
+.qs-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.qs-card-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+/* Avatar */
+.qs-avatar-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qs-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.qs-avatar-placeholder {
+  font-size: 18px;
+  font-weight: 700;
+  color: #374151;
+}
+
+/* Info del conductor */
+.qs-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.qs-driver-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qs-stars {
+  font-size: 12px;
+  margin: 0 0 2px 0;
+  line-height: 1.4;
+}
+
+.qs-services {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Columna de precio */
+.qs-price-col {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.qs-amount {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0055ff;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+}
+
+.qs-tap-hint {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Botón cancelar */
+.qs-cancel-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 32px);
+  margin: 8px 16px 0;
+  padding: 13px 20px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qs-cancel-button p {
+  color: #9ca3af;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.qs-cancel-button:active {
+  background: #f9fafb;
+}

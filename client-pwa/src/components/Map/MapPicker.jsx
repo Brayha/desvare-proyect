@@ -28,6 +28,7 @@ const INITIAL_VIEW_STATE = {
  * @param {Number} driverHeading - Dirección del vehículo (0-360°)
  * @param {String} driverPhoto - URL de la foto del conductor
  * @param {String} driverName - Nombre del conductor
+ * @param {Object} focusedQuoteLocation - Ubicación { lat, lng } de la cotización activa en el slider
  */
 const MapPicker = ({
   origin,
@@ -39,6 +40,7 @@ const MapPicker = ({
   driverHeading = 0,
   driverPhoto = null,
   driverName = 'Conductor',
+  focusedQuoteLocation = null,
 }) => {
   const mapRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -159,6 +161,18 @@ const MapPicker = ({
       maxZoom: 15, // No acercar demasiado
     });
   }, [driverLocation, origin, isMapLoaded]);
+
+  // Centrar mapa en la cotización activa del slider
+  useEffect(() => {
+    if (!focusedQuoteLocation || !mapRef.current || !isMapLoaded) return;
+
+    mapRef.current.flyTo({
+      center: [focusedQuoteLocation.lng, focusedQuoteLocation.lat],
+      zoom: 14,
+      duration: 800,
+      offset: [0, -80],
+    });
+  }, [focusedQuoteLocation, isMapLoaded]);
 
   const calculateRoute = async () => {
     setIsCalculatingRoute(true);

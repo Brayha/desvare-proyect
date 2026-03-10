@@ -126,7 +126,7 @@ const EditProfile = () => {
   const loadCities = async () => {
     try {
       const response = await citiesAPI.getAll();
-      if (Array.isArray(response.data)) setCities(response.data);
+      setCities(response.data.cities || []);
     } catch {
       setCities([]);
     }

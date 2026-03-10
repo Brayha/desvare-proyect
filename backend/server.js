@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const { notifyNewRequest } = require('./services/notifications');
+const { notifyNewRequest, notifyQuoteAccepted } = require('./services/notifications');
 
 const app = express();
 const server = http.createServer(app);
@@ -536,6 +536,26 @@ io.on('connection', (socket) => {
       }
     } else {
       console.log(`⚠️ Conductor ${data.acceptedDriverId} no está conectado`);
+    }
+
+    // Push notification al conductor aceptado (cubre app en background o cerrada)
+    try {
+      const User = require('./models/User');
+      const acceptedDriver = await User.findById(data.acceptedDriverId)
+        .select('driverProfile.fcmToken name')
+        .lean();
+
+      if (acceptedDriver?.driverProfile?.fcmToken) {
+        await notifyQuoteAccepted(acceptedDriver.driverProfile.fcmToken, {
+          requestId: data.requestId || '',
+          amount: data.amount || 0,
+        });
+        console.log(`📲 Push notification enviada al conductor ${acceptedDriver.name}`);
+      } else {
+        console.log(`ℹ️ Conductor ${data.acceptedDriverId} no tiene FCM token`);
+      }
+    } catch (pushErr) {
+      console.warn('⚠️ Error enviando push notification al conductor (no crítico):', pushErr.message);
     }
     
     // Notificar a otros conductores que el servicio ya fue tomado
