@@ -246,6 +246,37 @@ const notifyAccountRejected = async (fcmToken, reason) => {
   );
 };
 
+/**
+ * Envía notificación al cliente cuando llega una nueva cotización
+ * @param {string} fcmToken - Token FCM del cliente
+ * @param {Object} quoteData - Datos de la cotización
+ * @param {string} quoteData.requestId - ID de la solicitud
+ * @param {string} quoteData.driverName - Nombre del conductor
+ * @param {number} quoteData.amount - Valor cotizado
+ * @returns {Promise<string>}
+ */
+const notifyClientNewQuote = async (fcmToken, quoteData) => {
+  const formattedAmount = quoteData.amount
+    ? `$${Number(quoteData.amount).toLocaleString('es-CO')}`
+    : '';
+  const body = formattedAmount
+    ? `${quoteData.driverName} te cotizó ${formattedAmount}`
+    : `${quoteData.driverName} envió una cotización`;
+
+  return await sendPushNotification(
+    fcmToken,
+    '🚗 Nueva cotización recibida',
+    body,
+    {
+      type: 'QUOTE_RECEIVED',
+      requestId: quoteData.requestId || '',
+      driverName: quoteData.driverName || '',
+      amount: quoteData.amount?.toString() || '0',
+      url: '/waiting-quotes',
+    }
+  );
+};
+
 module.exports = {
   sendPushNotification,
   sendMultipleNotifications,
@@ -253,6 +284,7 @@ module.exports = {
   notifyQuoteAccepted,
   notifyServiceCancelled,
   notifyAccountApproved,
-  notifyAccountRejected
+  notifyAccountRejected,
+  notifyClientNewQuote
 };
 

@@ -12,12 +12,12 @@ import {
   useIonAlert,
 } from "@ionic/react";
 import { chevronDownCircleOutline } from "ionicons/icons";
-import { Notification } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import { useNotification } from "../hooks/useNotification";
 import QuoteSlider from "../components/QuoteSlider/QuoteSlider";
 import QuoteDetailSheet from "../components/QuoteDetailSheet/QuoteDetailSheet";
+import InstallBanner from "../components/InstallBanner/InstallBanner";
 import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
 import "./WaitingQuotes.css";
@@ -700,22 +700,9 @@ const WaitingQuotes = () => {
             focusedQuoteLocation={quotesReceived[activeQuoteIndex]?.location || null}
           />
 
-          {/* Sin cotizaciones: aviso SMS + spinner */}
+          {/* Sin cotizaciones: banner de instalación PWA */}
           {quotesReceived.length === 0 && (
-            <div className="floating-card-top">
-              <div className="sms-notification-card">
-                <Notification
-                  size="28"
-                  variant="Bold"
-                  className="sms-icon"
-                  color="#0055ff"
-                />
-                <IonText className="sms-text">
-                  Cuando lleguen las cotizaciones te notificaremos vía mensaje
-                  de texto
-                </IonText>
-              </div>
-            </div>
+            <InstallBanner variant="waiting" />
           )}
 
           {quotesReceived.length === 0 && (

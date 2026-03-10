@@ -4,6 +4,7 @@ import { IonContent, IonPage } from "@ionic/react";
 import socketService from "../services/socket";
 import mapBg from "../assets/img/map-home-responsive.webp";
 import logo from "../assets/img/Desvare.svg";
+import InstallBanner from "../components/InstallBanner/InstallBanner";
 import "./Home.css";
 
 /* ─── Iconos inline SVG (sin librerías externas = carga instantánea) ─── */
@@ -566,6 +567,10 @@ const Home = () => {
         </footer>
 
       </IonContent>
+
+      {/* Banner de instalación PWA - flotante inferior */}
+      <InstallBanner variant="home" />
+
     </IonPage>
   );
 };

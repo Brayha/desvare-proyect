@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const { notifyNewRequest, notifyQuoteAccepted } = require('./services/notifications');
+const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote } = require('./services/notifications');
 
 const app = express();
 const server = http.createServer(app);
@@ -373,8 +373,26 @@ io.on('connection', (socket) => {
         });
         io.to(clientSocketId).emit('quote:received', quoteData);
       } else {
-        console.log('⚠️ Cliente no encontrado con ID:', data.clientId);
+        console.log('⚠️ Cliente no conectado (socket), intentando push notification al cliente...');
       }
+
+      // Push notification al cliente (cubre app en background o pantalla bloqueada)
+      try {
+        const clientUser = await User.findById(data.clientId).select('fcmToken').lean();
+        if (clientUser?.fcmToken) {
+          await notifyClientNewQuote(clientUser.fcmToken, {
+            requestId: data.requestId || '',
+            driverName: data.driverName || '',
+            amount: data.amount || 0,
+          });
+          console.log(`📲 Push notification enviada al cliente por nueva cotización`);
+        } else {
+          console.log('ℹ️ Cliente sin FCM token registrado, no se envía push');
+        }
+      } catch (pushErr) {
+        console.warn('⚠️ Error enviando push notification al cliente (no crítico):', pushErr.message);
+      }
+
     } catch (error) {
       console.error('❌ Error al procesar cotización:', error);
     }
