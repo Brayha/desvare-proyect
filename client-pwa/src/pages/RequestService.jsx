@@ -116,7 +116,6 @@ const RequestService = () => {
   // ✅ Cargar datos previos del localStorage (cuando cliente cancela búsqueda)
   useEffect(() => {
     const savedRequestData = localStorage.getItem('requestData');
-    const currentRequestId = localStorage.getItem('currentRequestId');
     
     if (savedRequestData) {
       try {

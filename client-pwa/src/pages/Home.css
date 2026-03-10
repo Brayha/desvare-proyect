@@ -174,17 +174,6 @@
   50%       { box-shadow: 0 4px 32px rgba(0, 176, 80, 0.75); }
 }
 
-.lp-hero__new-search {
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  color: rgba(255,255,255,0.75);
-  transition: color 0.2s ease;
-}
-
-.lp-hero__new-search:hover {
-  color: #ffffff;
-}
 
 /* ═══════════════════════════════════════════════════════════════
    NAVBAR

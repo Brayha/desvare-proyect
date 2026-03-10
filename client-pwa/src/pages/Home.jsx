@@ -69,7 +69,12 @@ const Home = () => {
   const history = useHistory();
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
-  const [hasActiveSearch] = useState(() => !!localStorage.getItem('currentRequestId'));
+  // 'service' = conductor en camino | 'searching' = buscando/cotizaciones | null = nada activo
+  const [activeState] = useState(() => {
+    if (localStorage.getItem('activeService'))    return 'service';
+    if (localStorage.getItem('currentRequestId')) return 'searching';
+    return null;
+  });
 
   /* Registrar cliente con socket si está autenticado */
   useEffect(() => {
@@ -290,34 +295,32 @@ const Home = () => {
             <p className="lp-hero__desc">
               Cotiza en tiempo real, compara precios y recibe ayuda al instante.
             </p>
-            {hasActiveSearch ? (
-              <>
-                <button
-                  className="lp-btn lp-btn--active-search lp-btn--large lp-btn--full"
-                  onClick={() => history.push("/waiting-quotes")}
-                >
-                  🔎 Ver tu búsqueda activa
-                  <IconArrow />
-                </button>
-                <p
-                  className="lp-hero__disclaimer lp-hero__new-search"
-                  onClick={handleRequestTowTruck}
-                >
-                  o iniciar una nueva búsqueda →
-                </p>
-              </>
+            {activeState === 'service' ? (
+              <button
+                className="lp-btn lp-btn--active-search lp-btn--large lp-btn--full"
+                onClick={() => history.push("/driver-on-way")}
+              >
+                🚛 Seguir tu servicio activo
+                <IconArrow />
+              </button>
+            ) : activeState === 'searching' ? (
+              <button
+                className="lp-btn lp-btn--active-search lp-btn--large lp-btn--full"
+                onClick={() => history.push("/waiting-quotes")}
+              >
+                🔎 Ver tu búsqueda activa
+                <IconArrow />
+              </button>
             ) : (
-              <>
-                <button
-                  className="lp-btn lp-btn--primary lp-btn--large lp-btn--full"
-                  onClick={handleRequestTowTruck}
-                >
-                  Cotizar servicio de grúa
-                  <IconArrow />
-                </button>
-                <p className="lp-hero__disclaimer">Gratis · Sin registro previo · Colombia</p>
-              </>
+              <button
+                className="lp-btn lp-btn--primary lp-btn--large lp-btn--full"
+                onClick={handleRequestTowTruck}
+              >
+                Cotizar servicio de grúa
+                <IconArrow />
+              </button>
             )}
+            <p className="lp-hero__disclaimer">Gratis · Sin registro previo · Colombia</p>
           </div>
         </section>
 
