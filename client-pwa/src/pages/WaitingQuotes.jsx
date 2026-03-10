@@ -145,6 +145,8 @@ const WaitingQuotes = () => {
       if (!storedRouteData) {
         if (isMounted) {
           console.log("❌ No hay datos de ruta, redirigiendo a /home");
+          // Limpiar requestId huérfano para evitar bucle con el botón verde del Home
+          localStorage.removeItem("currentRequestId");
           showError("No se encontraron datos de la ruta");
           history.push("/home");
         }

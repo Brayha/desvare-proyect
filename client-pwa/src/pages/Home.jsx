@@ -71,8 +71,9 @@ const Home = () => {
   const [openFaq, setOpenFaq] = useState(null);
   // 'service' = conductor en camino | 'searching' = buscando/cotizaciones | null = nada activo
   const [activeState] = useState(() => {
-    if (localStorage.getItem('activeService'))    return 'service';
-    if (localStorage.getItem('currentRequestId')) return 'searching';
+    if (localStorage.getItem('activeService')) return 'service';
+    // Requiere AMBOS para evitar botón verde con requestId huérfano (sin datos de ruta)
+    if (localStorage.getItem('currentRequestId') && localStorage.getItem('requestData')) return 'searching';
     return null;
   });
 
