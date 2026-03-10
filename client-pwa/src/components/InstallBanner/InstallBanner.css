@@ -4,16 +4,15 @@
 
 .ib-banner {
   z-index: 200;
-  animation: ib-slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Variante Home: flotante inferior */
+/* Variante Home: flotante superior con animación desde arriba */
 .ib-banner--home {
   position: fixed;
-  bottom: 20px;
+  top: calc(16px + env(safe-area-inset-top));
   left: 16px;
   right: 16px;
-  bottom: calc(20px + env(safe-area-inset-bottom));
+  animation: ib-slideDown 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Variante WaitingQuotes: flotante superior (reemplaza card SMS) */
@@ -22,10 +21,11 @@
   top: 10%;
   left: 16px;
   right: 16px;
+  animation: ib-slideDown 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes ib-slideUp {
-  from { opacity: 0; transform: translateY(30px); }
+@keyframes ib-slideDown {
+  from { opacity: 0; transform: translateY(-28px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
