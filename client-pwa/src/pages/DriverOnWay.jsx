@@ -47,6 +47,10 @@ const DriverOnWay = () => {
     setServiceData(parsedData);
     setIsLoading(false);
 
+    // Obtener ID del cliente para re-registros
+    const storedUser = localStorage.getItem("user");
+    const clientId = storedUser ? JSON.parse(storedUser)?.id || JSON.parse(storedUser)?._id : null;
+
     // Socket.IO ya está conectado desde App.jsx
     if (!socketService.socket?.connected) {
       console.log("🔌 Conectando Socket.IO...");
@@ -54,6 +58,29 @@ const DriverOnWay = () => {
     } else {
       console.log("✅ Socket.IO ya conectado");
     }
+
+    // Re-registrar cliente al reconectar (cubre desconexión por segundo plano o red)
+    const handleReconnect = () => {
+      console.log("🔄 Socket reconectado durante servicio activo - re-registrando cliente...");
+      if (clientId) {
+        socketService.registerClient(clientId);
+      }
+    };
+    socketService.socket?.on("reconnect", handleReconnect);
+
+    // Detectar cuando el usuario vuelve a la app (desbloquea pantalla / regresa de otra app)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log("👁️ App visible de nuevo - verificando socket...");
+        if (!socketService.socket?.connected) {
+          socketService.connect();
+        }
+        if (clientId) {
+          socketService.registerClient(clientId);
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // ✅ Escuchar cuando el conductor completa el servicio
     socketService.onServiceCompleted((data) => {
@@ -98,7 +125,9 @@ const DriverOnWay = () => {
     return () => {
       console.log("🧹 DriverOnWay - Cleanup");
       socketService.offServiceCompleted();
-      socketService.offLocationUpdate(); // 🆕 Limpiar listener de ubicación
+      socketService.offLocationUpdate();
+      socketService.socket?.off("reconnect", handleReconnect);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
