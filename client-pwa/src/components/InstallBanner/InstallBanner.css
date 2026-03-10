@@ -117,8 +117,8 @@
   color: #374151;
 }
 
-/* Instrucciones iOS */
-.ib-ios-steps {
+/* Instrucciones paso a paso (iOS y Android) */
+.ib-steps {
   background: #f0f5ff;
   border-radius: 12px;
   padding: 12px 14px;
@@ -131,14 +131,14 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.ib-ios-steps p {
+.ib-steps p {
   font-size: 13px;
   color: #374151;
   margin: 0 0 6px 0;
   line-height: 1.5;
 }
 
-.ib-ios-steps p:last-child {
+.ib-steps p:last-child {
   margin-bottom: 0;
 }
 

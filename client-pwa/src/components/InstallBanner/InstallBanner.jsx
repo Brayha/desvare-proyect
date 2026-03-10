@@ -1,24 +1,28 @@
-import { useState, useEffect } from 'react';
-
-const appIcon = '/icons/icon-192x192.png';
+import { useState, useEffect, useRef } from 'react';
 import './InstallBanner.css';
+
+const APP_ICON = '/icons/icon-192x192.png';
+const DISMISS_KEY = 'pwaInstallDismissedUntil';
+const DISMISS_DAYS = 3; // vuelve a aparecer después de 3 días
 
 /**
  * Banner de instalación PWA.
- * - Android: usa beforeinstallprompt para instalar directamente.
+ * - Siempre visible en móvil si la app no está instalada y no fue descartada recientemente.
+ * - Android: usa beforeinstallprompt si está disponible; si no, muestra instrucciones manuales.
  * - iOS: muestra instrucciones (Safari → Compartir → Añadir a pantalla de inicio).
- * - variant 'home': flotante en la parte inferior.
- * - variant 'waiting': flotante en la parte superior (reemplaza card SMS).
+ * - variant 'home': flotante superior con animación desde arriba.
+ * - variant 'waiting': flotante superior dentro del mapa.
  */
 const InstallBanner = ({ variant = 'home' }) => {
   const [showBanner, setShowBanner] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showSteps, setShowSteps] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [showIOSSteps, setShowIOSSteps] = useState(false);
+  const deferredPromptRef = useRef(null);
 
   useEffect(() => {
-    // No mostrar si ya fue descartado
-    if (localStorage.getItem('pwaInstallDismissed')) return;
+    // No mostrar si ya fue descartado recientemente
+    const dismissedUntil = localStorage.getItem(DISMISS_KEY);
+    if (dismissedUntil && Date.now() < Number(dismissedUntil)) return;
 
     // No mostrar si ya está instalada como PWA
     const isStandalone =
@@ -33,21 +37,15 @@ const InstallBanner = ({ variant = 'home' }) => {
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     setIsIOS(ios);
 
-    if (ios) {
-      // En iOS no hay evento beforeinstallprompt; mostrar directamente
-      setShowBanner(true);
-      return;
-    }
+    // Mostrar el banner siempre en móvil (Android o iOS)
+    setShowBanner(true);
 
-    // Android: esperar el evento beforeinstallprompt
+    // En Android, capturar el evento nativo por si está disponible
     const handlePrompt = (e) => {
       e.preventDefault();
-      setDeferredPrompt(e);
-      setShowBanner(true);
+      deferredPromptRef.current = e;
     };
     window.addEventListener('beforeinstallprompt', handlePrompt);
-
-    // Si la PWA se instala, ocultar el banner
     window.addEventListener('appinstalled', () => setShowBanner(false));
 
     return () => {
@@ -56,42 +54,50 @@ const InstallBanner = ({ variant = 'home' }) => {
   }, []);
 
   const handleInstall = async () => {
-    if (isIOS) {
-      setShowIOSSteps((prev) => !prev);
-      return;
-    }
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+    if (deferredPromptRef.current) {
+      // Android con soporte nativo: abrir el diálogo del sistema
+      deferredPromptRef.current.prompt();
+      const { outcome } = await deferredPromptRef.current.userChoice;
       if (outcome === 'accepted') {
         setShowBanner(false);
-        setDeferredPrompt(null);
+        deferredPromptRef.current = null;
       }
+    } else {
+      // iOS o Android sin evento: mostrar/ocultar instrucciones
+      setShowSteps((prev) => !prev);
     }
   };
 
   const handleDismiss = () => {
-    localStorage.setItem('pwaInstallDismissed', 'true');
+    const until = Date.now() + DISMISS_DAYS * 24 * 60 * 60 * 1000;
+    localStorage.setItem(DISMISS_KEY, String(until));
     setShowBanner(false);
+    setShowSteps(false);
   };
 
   if (!showBanner) return null;
 
+  const installLabel = deferredPromptRef.current
+    ? 'Instalar'
+    : showSteps
+    ? 'Ocultar'
+    : 'Cómo instalar';
+
   return (
     <div className={`ib-banner ib-banner--${variant}`}>
       <div className="ib-main">
-        <img src={appIcon} alt="Desvare" className="ib-icon" />
+        <img src={APP_ICON} alt="Desvare" className="ib-icon" />
         <div className="ib-text">
           <p className="ib-title">Instala Desvare</p>
           <p className="ib-sub">
             {variant === 'waiting'
-              ? 'Recibe las cotizaciones aunque bloquees tu pantalla'
+              ? 'Recibe cotizaciones aunque bloquees tu pantalla'
               : 'Recibe cotizaciones al instante · Gratis'}
           </p>
         </div>
         <div className="ib-actions">
           <button className="ib-btn-install" onClick={handleInstall}>
-            {isIOS ? 'Cómo instalar' : 'Instalar'}
+            {installLabel}
           </button>
           <button className="ib-btn-close" onClick={handleDismiss} aria-label="Cerrar">
             ✕
@@ -99,12 +105,23 @@ const InstallBanner = ({ variant = 'home' }) => {
         </div>
       </div>
 
-      {/* Instrucciones para iOS */}
-      {isIOS && showIOSSteps && (
-        <div className="ib-ios-steps">
-          <p>1. Toca el ícono <strong>Compartir</strong> <span className="ib-share-icon">⎙</span> en Safari</p>
-          <p>2. Selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
-          <p>3. Toca <strong>"Añadir"</strong> y listo 🎉</p>
+      {/* Instrucciones paso a paso */}
+      {showSteps && (
+        <div className="ib-steps">
+          {isIOS ? (
+            <>
+              <p>1. Abre esta página en <strong>Safari</strong></p>
+              <p>2. Toca el ícono <strong>Compartir</strong> <span className="ib-share-icon">⎙</span></p>
+              <p>3. Selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
+              <p>4. Toca <strong>"Añadir"</strong> y listo 🎉</p>
+            </>
+          ) : (
+            <>
+              <p>1. Toca el menú <strong>⋮</strong> de tu navegador</p>
+              <p>2. Selecciona <strong>"Instalar aplicación"</strong> o <strong>"Añadir a pantalla de inicio"</strong></p>
+              <p>3. Toca <strong>"Instalar"</strong> y listo 🎉</p>
+            </>
+          )}
         </div>
       )}
     </div>
