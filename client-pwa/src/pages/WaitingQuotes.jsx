@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -102,6 +102,34 @@ const WaitingQuotes = () => {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
+
+  // Carga las cotizaciones guardadas en BD (útil al reconectar o al hacer pull-to-refresh)
+  const fetchQuotesFromBackend = useCallback(async () => {
+    const currentRequestId = localStorage.getItem("currentRequestId");
+    if (!currentRequestId) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/requests/${currentRequestId}`);
+      const data = await response.json();
+
+      if (response.ok && data.request?.quotes?.length > 0) {
+        const formattedQuotes = data.request.quotes.map((q) => ({
+          driverId: q.driverId,
+          driverName: q.driverName,
+          amount: q.amount,
+          location: q.location || null,
+          timestamp: q.timestamp,
+          driverPhoto: q.driverPhoto || null,
+          driverRating: q.driverRating || 5,
+          driverServiceCount: q.driverServiceCount || 0,
+        }));
+        setQuotesReceived(formattedQuotes);
+        console.log(`✅ ${formattedQuotes.length} cotizaciones cargadas del backend`);
+      }
+    } catch (error) {
+      console.error("❌ Error al obtener cotizaciones del backend:", error);
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true; // Flag para evitar actualizaciones si el componente se desmonta
@@ -225,6 +253,21 @@ const WaitingQuotes = () => {
         vibrate();
       });
 
+      // Reconexión: re-registrar cliente y recuperar cotizaciones perdidas
+      const rawSocket = socketService.getSocket();
+      if (rawSocket) {
+        rawSocket.on('reconnect', () => {
+          if (!isMounted) return;
+          console.log('🔄 Socket reconectado - re-registrando cliente y recuperando cotizaciones');
+          const userData = localStorage.getItem("user");
+          if (userData) {
+            const parsedUser = JSON.parse(userData);
+            socketService.registerClient(parsedUser.id);
+          }
+          fetchQuotesFromBackend();
+        });
+      }
+
       // ✅ Escuchar cancelaciones de cotizaciones
       socketService.onQuoteCancelled((data) => {
         console.log("🚫 Cotización cancelada en WaitingQuotes:", data);
@@ -266,6 +309,8 @@ const WaitingQuotes = () => {
       isMounted = false;
       socketService.offQuoteReceived();
       socketService.offQuoteCancelled();
+      const rawSocket = socketService.getSocket();
+      if (rawSocket) rawSocket.off('reconnect');
       console.log("🔇 Listeners de cotizaciones removidos");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -418,37 +463,9 @@ const WaitingQuotes = () => {
   // Pull to Refresh - Recargar cotizaciones desde el backend
   const handleRefresh = async (event) => {
     console.log("🔄 Pull to refresh activado");
-
     try {
-      const currentRequestId = localStorage.getItem("currentRequestId");
-
-      if (currentRequestId) {
-        // Llamar al backend para obtener cotizaciones actualizadas
-        const response = await fetch(
-          `${API_URL}/api/requests/${currentRequestId}`
-        );
-        const data = await response.json();
-
-        if (response.ok && data.request) {
-          console.log("✅ Cotizaciones actualizadas:", data.request.quotes);
-
-          // Actualizar lista con cotizaciones del backend
-          const formattedQuotes = data.request.quotes.map((q) => ({
-            driverId: q.driverId,
-            driverName: q.driverName,
-            amount: q.amount,
-            location: q.location || null,
-            timestamp: q.timestamp,
-            // ✅ NUEVOS CAMPOS: Foto, rating y servicios del conductor
-            driverPhoto: q.driverPhoto || null,
-            driverRating: q.driverRating || 5,
-            driverServiceCount: q.driverServiceCount || 0
-          }));
-
-          setQuotesReceived(formattedQuotes);
-          showSuccess(`${formattedQuotes.length} cotizaciones actualizadas`);
-        }
-      }
+      await fetchQuotesFromBackend();
+      showSuccess("Cotizaciones actualizadas");
     } catch (error) {
       console.error("❌ Error al refrescar cotizaciones:", error);
       showError("Error al actualizar cotizaciones");

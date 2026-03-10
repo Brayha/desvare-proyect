@@ -141,7 +141,13 @@ const setupNotificationListeners = (driverId) => {
     const data = action.notification?.data;
 
     if (data?.type === 'NEW_REQUEST') {
-      // Llevar al conductor directamente al Home donde verá la solicitud
+      // Nueva solicitud → Home para verla en tiempo real
+      window.location.href = '/home';
+    } else if (data?.type === 'QUOTE_ACCEPTED') {
+      // Cliente aceptó la cotización → ir directo al servicio activo
+      window.location.href = '/active-service';
+    } else if (data?.type === 'SERVICE_CANCELLED') {
+      // Servicio cancelado → Home
       window.location.href = '/home';
     } else if (data?.requestId) {
       window.location.href = '/home';
