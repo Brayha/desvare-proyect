@@ -1,339 +1,528 @@
-.active-service-page {
-  background: #f7f7f7;
-}
+/* ============================================
+   ActiveService — Layout principal
+   ============================================ */
 
-.detail-content-active-service {
-  padding: 10px;
-  margin-top: -40px; /* Superponer ligeramente sobre el mapa */
-  position: relative;
-  z-index: 2;
+.as-page {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  background: #f3f4f6;
+  overflow: hidden;
 }
 
-.request-detail-content-active-service {
-  background: #22c55e;
-  padding: 2px;
-  overflow: auto;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
-  border-radius: 20px;
+/* Loading screen */
+.as-loading {
   display: flex;
   flex-direction: column;
-}
-
-.vehicle-problem-card-confirmed {
-  display: flex;
-  padding: 5px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
-  align-self: stretch;
-  border-radius: 20px;
-  border: 1px solid #e5e7eb;
-  background: #f7f7f7;
-}
-
-.vehicle-icon-confirmed {
-  display: flex;
-  width: 60px;
-  height: 60px;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 8.571px;
-}
-
-.vehicle-details-confirmed {
-  display: flex;
-  flex-direction: column;
   justify-content: center;
-  align-items: flex-start;
-  flex: 1 0 0;
+  height: 100%;
+  gap: 14px;
+  padding: 24px;
 }
 
-.vehicle-brand-confirmed {
-  overflow: hidden;
-  color: #4b5563;
-  font-size: 16px;
-  font-weight: bold;
-  margin: 0;
+/* ============================================
+   MAPA
+   ============================================ */
+
+.as-map-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  height: 42vh;
+  min-height: 220px;
 }
 
-.vehicle-model-confirmed {
-  overflow: hidden;
-  color: #9ca3af;
-  font-size: 12px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.type-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: white;
-  margin: 0;
-  text-align: center;
-  margin: 5px;
-  width: auto;
-}
-
-.request-detail-content {
+/* Etiqueta de fase (top-left flotante sobre el mapa) */
+.as-map-phase-label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: white;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.as-map-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.as-map-dot--origin {
+  background: #f97316;
+}
+
+.as-map-dot--dest {
+  background: #0055ff;
+}
+
+/* Botón flotante de navegación (top-right) */
+.as-map-nav-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+}
+
+.as-map-nav-btn:active {
+  background: #f3f4f6;
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+
+.as-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  padding: 12px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+.as-step {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 4px;
 }
 
-.person-icon {
-  width: 40px;
-  height: 40px;
+.as-step-circle {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  background: #f7f7f7;
+  font-size: 13px;
+  font-weight: 700;
+  background: #e5e7eb;
+  color: #9ca3af;
+  transition: background 0.3s, color 0.3s;
 }
 
-.call-button {
-  border-radius: 10px;
+.as-step--active .as-step-circle {
+  background: #f97316;
+  color: white;
+}
+
+.as-step--done .as-step-circle {
+  background: #1f2937;
+  color: white;
+}
+
+.as-step-check {
+  font-size: 14px;
+}
+
+.as-step-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.as-step--active .as-step-label,
+.as-step--done .as-step-label {
+  color: #1f2937;
+}
+
+/* Línea conectora */
+.as-step-line {
+  flex: 1;
+  height: 2px;
+  background: #e5e7eb;
+  margin: 0 6px;
+  margin-bottom: 14px;
+  transition: background 0.3s;
+  max-width: 60px;
+}
+
+.as-step-line--done {
+  background: #1f2937;
+}
+
+/* ============================================
+   CARD SCROLLABLE
+   ============================================ */
+
+.as-card-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 12px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.as-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.as-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 0 16px;
+}
+
+/* ============================================
+   SECCIONES DE LA CARD
+   ============================================ */
+
+.as-section {
+  padding: 14px 16px;
+}
+
+.as-section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  letter-spacing: 0.6px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* Cliente */
+.as-client-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.as-client-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.as-client-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.as-client-phone {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.as-call-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
   border: 1px solid #e5e7eb;
-  background: #fff;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
   flex-shrink: 0;
-  padding: 10px;
 }
 
-.go-to-navigation-button {
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+/* Vehículo */
+.as-vehicle-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+}
+
+.as-vehicle-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
   flex-shrink: 0;
-  padding: 10px;
+}
+
+.as-vehicle-info {
+  flex: 1;
   display: flex;
-  gap: 10px;
-  color: #9CA3AF;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.as-vehicle-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.as-vehicle-sub {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.as-plate {
+  background: #111827;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.as-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-top: 10px;
 }
 
-.vehicle-plate-confirmed {
-  display: flex;
-  padding: 5px;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  border-radius: 5px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  background: #f6c343;
-  color: #000;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.vehicle-additional-badge-active-service {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 5px;
-  width: 100%;
-}
-
-
-.vehicle-info-confirmed {
-  display: flex;
-  padding: 0 15px 0 10px;
-  align-items: center;
-  gap: 10px;
-  align-self: stretch;
-  border-radius: 15px;
+.as-badge {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  background: #f9fafb;
   border: 1px solid #e5e7eb;
-  background: #fff;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  padding: 4px 10px;
 }
 
-.detail-content {
-  background: white;
-  padding: 10px;
-  overflow: auto;
-  border-radius: 20px;
+.as-problem {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Valor acordado */
+.as-amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.as-amount-label {
+  font-size: 14px;
+  color: #374151;
+}
+
+.as-amount-right {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: flex-end;
+  gap: 2px;
 }
 
-/* Cards */
-.client-card,
-.location-card,
-.vehicle-card,
-.security-card,
-.amount-card {
-  margin: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.as-amount {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
 }
 
-/* Card Headers */
-.card-header {
+.as-amount-sub {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Ubicaciones */
+.as-location-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 15px;
-}
-
-.card-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.header-icon {
-  font-size: 24px;
-  color: var(--ion-color-primary);
-}
-
-/* Info Rows */
-.info-row {
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 10px;
 }
 
-.info-row:last-child {
-  border-bottom: none;
+.as-location-header .as-section-label {
+  margin-bottom: 0;
 }
 
-.info-row .label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
+.as-completed-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+  letter-spacing: 0.3px;
 }
 
-.info-row .value {
+.as-location-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.as-location-row--done {
+  opacity: 0.5;
+}
+
+.as-dest-flag {
+  font-size: 20px;
+  line-height: 1;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.as-location-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.as-location-sub {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.as-location-addr {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
-  text-align: right;
-  max-width: 60%;
+  color: #111827;
 }
 
-/* Security Code Display */
-.security-code-display {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin: 20px 0;
+.as-location-addr--done {
+  text-decoration: line-through;
+  color: #9ca3af;
 }
 
-.code-digit-large {
-  width: 60px;
-  height: 70px;
+.as-location-locked {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    135deg,
-    var(--ion-color-primary) 0%,
-    var(--ion-color-primary-shade) 100%
-  );
-  color: white;
-  font-size: 32px;
-  font-weight: bold;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  gap: 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
 }
 
-.code-instruction {
-  text-align: center;
+.as-locked-text {
   font-size: 13px;
-  margin: 12px 0 16px 0;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ============================================
+   SECCIÓN CÓDIGO
+   ============================================ */
+
+.as-code-section {
+  padding: 16px;
+}
+
+.as-code-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px;
+}
+
+.as-code-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 16px;
   line-height: 1.5;
 }
 
-.verify-button {
-  margin-top: 8px;
-}
-
-/* Amount Display */
-.amount-display {
-  text-align: center;
-  font-size: 36px;
-  font-weight: bold;
-  color: var(--ion-color-success);
-  margin: 20px 0;
-  padding: 20px;
-  background: linear-gradient(
-    135deg,
-    rgba(46, 213, 115, 0.1) 0%,
-    rgba(46, 213, 115, 0.05) 100%
-  );
-  border-radius: 12px;
-}
-
-/* Action Buttons Container */
-.action-buttons-container {
-  padding: 16px;
-  padding-bottom: 32px;
-}
-
-.action-button {
-  margin-bottom: 12px;
-  --border-radius: 12px;
-  height: 48px;
-  font-weight: 600;
-}
-
-.complete-button {
-  margin-top: 8px;
-}
-
-/* Vehicle Additional Details */
-.vehicle-additional-details {
+.as-code-inputs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
+.as-code-input {
+  width: 56px;
+  height: 64px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.as-code-input:focus {
+  border-color: #111827;
+  background: white;
+}
+
+.as-verify-btn {
+  width: 100%;
+  padding: 16px;
+  background: #111827;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.as-verify-btn:active {
+  opacity: 0.85;
+}
+
+/* ============================================
+   BOTÓN FINALIZAR
+   ============================================ */
+
+.as-complete-wrapper {
+  padding: 16px;
+}
+
+.as-complete-btn {
+  width: 100%;
+  padding: 16px;
+  background: #0055ff;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.as-complete-btn:active {
+  opacity: 0.85;
+}
+
+.as-complete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mantener clase detail-badge para compatibilidad */
 .detail-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
-  background: #f7f7f7;
+  padding: 4px 10px;
+  background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #4b5563;
-  white-space: nowrap;
-}
-
-/* Responsive */
-@media (max-width: 375px) {
-  .code-digit-large {
-    width: 50px;
-    height: 60px;
-    font-size: 28px;
-  }
-
-  .amount-display {
-    font-size: 28px;
-  }
-
-  .detail-badge {
-    font-size: 12px;
-    padding: 5px 10px;
-  }
+  color: #374151;
 }

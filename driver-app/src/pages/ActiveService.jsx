@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Geolocation } from "@capacitor/geolocation";
 import { Capacitor } from "@capacitor/core";
 // BackgroundGeolocation se importa dinámicamente solo en plataforma nativa
@@ -6,22 +6,15 @@ import { Capacitor } from "@capacitor/core";
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonText,
   IonSpinner,
-  IonButtons,
-  IonBackButton,
-  IonBadge,
+  IonText,
   useIonToast,
   useIonAlert,
 } from "@ionic/react";
-import { Routing, Call, Location, UserTick } from "iconsax-react";
+import { Call, Location } from "iconsax-react";
 import RequestDetailMap from "../components/RequestDetailMap";
-import socketService from "../services/socket"; // ✅ Importar socketService
-import "./ActiveService.css"; // ✅ Reutilizar mismo CSS
+import socketService from "../services/socket";
+import "./ActiveService.css";
 
 // Importar iconos SVG de vehículos
 import carIcon from "../assets/img/vehicles/car.svg";
@@ -44,67 +37,95 @@ const ActiveService = () => {
 
   const [serviceData, setServiceData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [completing, setCompleting] = useState(false); // ✅ Estado para loading al completar
+  const [completing, setCompleting] = useState(false);
 
-  // ✅ Estados para el mapa y conductor
   const [driverPhoto, setDriverPhoto] = useState(
     "https://ionicframework.com/docs/img/demos/avatar.svg",
   );
-  const [driverAddress, setDriverAddress] = useState("Obteniendo ubicación...");
+  const [, setDriverAddress] = useState("Obteniendo ubicación...");
   const [driverLocation, setDriverLocation] = useState({
     lat: 4.6097,
     lng: -74.0817,
-  }); // Bogotá por defecto
+  });
 
-  // ✅ Estado para controlar las 2 fases
+  // Estado para controlar las 3 fases
   const [codeValidated, setCodeValidated] = useState(false);
 
-  // 🗺️ Función para abrir navegación en apps externas
-  const openNavigation = (destinationCoords, destinationAddress) => {
-    if (!destinationCoords || !destinationCoords.coordinates) {
-      present({
-        message: "No hay coordenadas disponibles para navegar",
-        duration: 2000,
-        color: "warning",
-      });
+  // Inputs inline del código de seguridad
+  const [codeDigits, setCodeDigits] = useState(["", "", "", ""]);
+  const codeInputRefs = useRef([]);
+
+  // Extrae lat/lng de un objeto de coordenadas (soporta ambos formatos)
+  const extractCoords = (coordsObj) => {
+    if (!coordsObj) return null;
+    if (coordsObj.coordinates && Array.isArray(coordsObj.coordinates)) {
+      return { lng: coordsObj.coordinates[0], lat: coordsObj.coordinates[1] };
+    }
+    if (coordsObj.lat != null && coordsObj.lng != null) {
+      return { lat: coordsObj.lat, lng: coordsObj.lng };
+    }
+    return null;
+  };
+
+  // Abre selector de app de navegación con las coordenadas del destino actual
+  const openNavigation = (coordsObj) => {
+    const coords = extractCoords(coordsObj);
+    if (!coords) {
+      present({ message: "No hay coordenadas disponibles para navegar", duration: 2000, color: "warning" });
       return;
     }
-
-    const [lng, lat] = destinationCoords.coordinates;
-
-    // URLs para cada app de navegación
+    const { lat, lng } = coords;
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     const wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
     const appleMapsUrl = `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
 
+    // Guardamos las URLs antes de abrir el alert para evitar problemas de closure en Capacitor
+    const urls = { google: googleMapsUrl, waze: wazeUrl, apple: appleMapsUrl };
+
     presentAlert({
-      header: "Abrir en:",
-      message: "Selecciona tu app de navegación preferida",
+      header: "Abrir con",
       buttons: [
-        {
-          text: "🗺️ Google Maps",
-          handler: () => {
-            window.open(googleMapsUrl, "_system");
-          },
-        },
-        {
-          text: "🚗 Waze",
-          handler: () => {
-            window.open(wazeUrl, "_system");
-          },
-        },
-        {
-          text: "🍎 Apple Maps",
-          handler: () => {
-            window.open(appleMapsUrl, "_system");
-          },
-        },
-        {
-          text: "Cancelar",
-          role: "cancel",
-        },
+        { text: "🗺️ Google Maps", handler: () => { setTimeout(() => window.open(urls.google, "_system"), 100); } },
+        { text: "🚗 Waze",        handler: () => { setTimeout(() => window.open(urls.waze, "_system"), 100); } },
+        { text: "🍎 Apple Maps",  handler: () => { setTimeout(() => window.open(urls.apple, "_system"), 100); } },
+        { text: "Cancelar", role: "cancel" },
       ],
     });
+  };
+
+  // Maneja el cambio en cada caja del código de seguridad
+  const handleCodeDigitChange = (index, value) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const newDigits = [...codeDigits];
+    newDigits[index] = digit;
+    setCodeDigits(newDigits);
+    if (digit && index < 3) {
+      codeInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleCodeKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !codeDigits[index] && index > 0) {
+      codeInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  // Verifica el código ingresado en los inputs inline
+  const handleInlineCodeVerify = () => {
+    const inputCode = codeDigits.join("");
+    if (inputCode.length !== 4) {
+      present({ message: "Ingresa los 4 dígitos del código", duration: 2000, color: "warning" });
+      return;
+    }
+    const correctCode = serviceData.securityCode?.toString();
+    if (inputCode === correctCode) {
+      setCodeValidated(true);
+      present({ message: "✅ Código correcto. Ahora puedes ver el destino.", duration: 2500, color: "success" });
+    } else {
+      present({ message: "❌ Código incorrecto. Intenta de nuevo.", duration: 2000, color: "danger" });
+      setCodeDigits(["", "", "", ""]);
+      setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
+    }
   };
 
   useEffect(() => {
@@ -449,27 +470,10 @@ const ActiveService = () => {
     }
   };
 
-  const handleStartNavigation = () => {
-    // FASE 1: Navegar al origen (recogida)
-    // FASE 2: Navegar al destino
-    const targetLocation = codeValidated
-      ? serviceData?.destination?.coordinates
-      : serviceData?.origin?.coordinates;
-
-    if (targetLocation) {
-      const [lng, lat] = targetLocation;
-      const destination = codeValidated ? "destino" : "punto de recogida";
-
-      // Abrir Google Maps con navegación
-      const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-      window.open(mapsUrl, "_blank");
-
-      present({
-        message: `🧭 Navegando al ${destination}...`,
-        duration: 2000,
-        color: "success",
-      });
-    }
+  // Navegar al destino activo según la fase (usado por botón flotante del mapa)
+  const handleFloatingNav = () => {
+    const target = codeValidated ? serviceData?.destination : serviceData?.origin;
+    openNavigation(target);
   };
 
   const getVehicleIcon = (iconEmoji) => {
@@ -495,52 +499,6 @@ const ActiveService = () => {
     return iconMap[iconEmoji] || categoryMap[iconEmoji] || carIcon;
   };
 
-  const handleVerifySecurityCode = () => {
-    presentAlert({
-      header: "🔒 Validar Código de Seguridad",
-      mode: "ios",
-      message: "Solicita al cliente el código de 4 dígitos para ver el destino",
-      inputs: [
-        {
-          name: "code",
-          type: "tel",
-          placeholder: "••••",
-          maxlength: 4,
-        },
-      ],
-      buttons: [
-        {
-          text: "Cancelar",
-          role: "cancel",
-        },
-        {
-          text: "Verificar",
-          handler: (data) => {
-            const inputCode = data.code?.toString();
-            const correctCode = serviceData.securityCode?.toString();
-
-            if (inputCode === correctCode) {
-              setCodeValidated(true);
-              present({
-                message: "✅ Código correcto. Ahora puedes ver el destino.",
-                duration: 2500,
-                color: "success",
-              });
-              console.log("✅ Código validado - Mostrando destino");
-            } else {
-              present({
-                message: "❌ Código incorrecto. Intenta de nuevo.",
-                duration: 2000,
-                color: "danger",
-              });
-              console.log("❌ Código incorrecto");
-              return false; // Mantener el alert abierto
-            }
-          },
-        },
-      ],
-    });
-  };
 
   const handleCompleteService = () => {
     presentAlert({
@@ -662,417 +620,278 @@ const ActiveService = () => {
   if (isLoading || !serviceData) {
     return (
       <IonPage>
-        <IonContent className="ion-padding ion-text-center">
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              gap: "15px",
-            }}
-          >
-            <IonSpinner name="crescent" />
-            <IonText color="medium">
-              <p>Cargando servicio activo...</p>
-            </IonText>
-          </div>
-        </IonContent>
+        <div className="as-loading">
+          <IonSpinner name="crescent" />
+          <IonText color="medium"><p>Cargando servicio activo...</p></IonText>
+        </div>
       </IonPage>
     );
   }
 
-  // Validar que existan coordenadas (formato flexible)
   const hasValidOrigin =
     serviceData.origin &&
-    ((serviceData.origin.coordinates &&
-      serviceData.origin.coordinates.length === 2) ||
+    ((serviceData.origin.coordinates && serviceData.origin.coordinates.length === 2) ||
       (serviceData.origin.lat && serviceData.origin.lng));
 
   if (!hasValidOrigin) {
-    console.error("❌ Coordenadas inválidas:", {
-      origin: serviceData.origin,
-      destination: serviceData.destination,
-    });
-
     return (
       <IonPage>
-        <IonContent className="ion-padding">
+        <div className="as-loading">
           <IonText color="danger">
-            <h3>Error: No se encontraron coordenadas del servicio</h3>
-            <p>Estructura del origen: {JSON.stringify(serviceData.origin)}</p>
-            <p>Por favor, intenta aceptar el servicio nuevamente.</p>
+            <p>Error: No se encontraron coordenadas del servicio.</p>
           </IonText>
-          <button
-            className="send-quote-button"
-            onClick={() => history.push("/home")}
-            style={{ margin: "20px" }}
-          >
+          <button className="as-complete-btn" onClick={() => history.push("/home")}>
             Volver al Inicio
           </button>
-        </IonContent>
+        </div>
       </IonPage>
     );
   }
 
+  // Datos del vehículo normalizados
+  const veh = serviceData.vehicle;
+  const vehBrand = veh ? (typeof veh.brand === "object" ? veh.brand?.name : veh.brand) : null;
+  const vehModel = veh ? (typeof veh.model === "object" ? veh.model?.name || veh.model?.id : veh.model) : null;
+  const vehColor = veh?.color || null;
+  const vehYear  = veh?.year  || null;
+  const vehSubtitle = [vehModel, vehYear, vehColor].filter(Boolean).join(" · ");
+
   return (
     <IonPage>
-      <div className="request-detail-page">
-        {/* Mapa */}
-        <div className="map-section">
+      <div className="as-page">
+
+        {/* ── MAPA ── */}
+        <div className="as-map-wrapper">
           <RequestDetailMap
             request={{
               origin: serviceData.origin,
-              destination:
-                codeValidated && serviceData.destination
-                  ? serviceData.destination
-                  : null,
-              vehicle: serviceData.vehicle,
-              problem:
-                serviceData.problem || serviceData.serviceDetails?.problem,
+              destination: codeValidated && serviceData.destination ? serviceData.destination : null,
+              vehicle: veh,
+              problem: serviceData.problem || serviceData.serviceDetails?.problem,
             }}
             driverLocation={driverLocation}
             driverPhoto={driverPhoto}
             showDestination={codeValidated}
           />
+
+          {/* Etiqueta fase (top-left) */}
+          <div className="as-map-phase-label">
+            <span className={`as-map-dot ${codeValidated ? "as-map-dot--dest" : "as-map-dot--origin"}`} />
+            {codeValidated ? "Destino" : "Recogida"}
+          </div>
+
+          {/* Botón flotante de navegación (top-right) */}
+          <button className="as-map-nav-btn" onClick={handleFloatingNav}>
+            🗺️ Navegar
+          </button>
         </div>
 
-        {/* Contenido de detalles */}
-        <div className="detail-content-active-service">
-          <div className="request-detail-content-active-service">
-            <h2 className="type-title">Servicio Activo</h2>
-            <div className="detail-content">
-              <div className="request-detail-content">
-                {/* Monto Acordado Destacado */}
-                <div
-                  style={{
-                    width: "100%",
-                    background: "white",
-                    padding: "10px",
-                    borderRadius: "10px",
-                    textAlign: "center",
-                    border: "1px solid #E5E7EB",
-                  }}
-                >
-                  <IonText
-                    style={{
-                      color: "#9CA3AF",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      display: "block",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    Monto Acordado
-                  </IonText>
-                  <IonText
-                    style={{
-                      color: "#9CA3AF",
-                      fontSize: "24px",
-                      fontWeight: "bold",
-                      display: "block",
-                      margin: "0",
-                    }}
-                  >
-                    {formatAmount(serviceData.amount)}
-                  </IonText>
+        {/* ── PROGRESS BAR ── */}
+        <div className="as-progress">
+          {/* Paso 1 */}
+          <div className={`as-step ${!codeValidated ? "as-step--active" : "as-step--done"}`}>
+            <div className="as-step-circle">
+              {codeValidated ? <span className="as-step-check">✓</span> : <span>1</span>}
+            </div>
+            <span className="as-step-label">Al cliente</span>
+          </div>
+
+          <div className={`as-step-line ${codeValidated ? "as-step-line--done" : ""}`} />
+
+          {/* Paso 2 */}
+          <div className={`as-step ${codeValidated ? "as-step--done" : ""}`}>
+            <div className="as-step-circle">
+              {codeValidated ? <span className="as-step-check">✓</span> : <span>2</span>}
+            </div>
+            <span className="as-step-label">Verificar</span>
+          </div>
+
+          <div className={`as-step-line ${codeValidated ? "as-step-line--done" : ""}`} />
+
+          {/* Paso 3 */}
+          <div className={`as-step ${codeValidated ? "as-step--active" : ""}`}>
+            <div className="as-step-circle"><span>3</span></div>
+            <span className="as-step-label">Al destino</span>
+          </div>
+        </div>
+
+        {/* ── CARD SCROLLABLE ── */}
+        <div className="as-card-scroll">
+          <div className="as-card">
+
+            {/* CLIENTE */}
+            <div className="as-section">
+              <span className="as-section-label">CLIENTE</span>
+              <div className="as-client-row">
+                <div className="as-client-info">
+                  <span className="as-client-name">{serviceData.clientName}</span>
+                  <span className="as-client-phone">{serviceData.clientPhone}</span>
                 </div>
-
-                {/* Cliente */}
-                <div className="location-section">
-                  <div className="person-icon">
-                    <UserTick size="24" variant="Bulk" color="#9CA3AF" />
-                  </div>
-                  <div className="location-text">
-                    <IonText color="medium" className="location-label">
-                      {serviceData.clientName}
-                    </IonText>
-                    <IonText className="location-address">
-                      {serviceData.clientPhone}
-                    </IonText>
-                  </div>
-                  {/* Botones de Acción */}
-                  <button className="call-button" onClick={handleCall}>
-                    <Call size="24" variant="Bulk" color="#9CA3AF" />
-                  </button>
-                </div>
-
-                {/* Vehículo */}
-                {serviceData.vehicle && (
-                  <div className="vehicle-problem-card-confirmed">
-                    <div className="vehicle-info-confirmed">
-                      <div className="vehicle-icon-confirmed">
-                        <img
-                          src={getVehicleIcon(
-                            serviceData.vehicle.icon ||
-                              serviceData.vehicle.category?.id ||
-                              "🚗",
-                          )}
-                          alt={
-                            typeof serviceData.vehicle.category === "object"
-                              ? serviceData.vehicle.category?.name
-                              : serviceData.vehicle.category || "Vehículo"
-                          }
-                          className="vehicle-svg-icon"
-                        />
-                      </div>
-                      <div className="vehicle-details-confirmed">
-                        <h3 className="vehicle-brand-confirmed">
-                          {typeof serviceData.vehicle.brand === "object"
-                            ? serviceData.vehicle.brand?.name
-                            : serviceData.vehicle.brand || "N/A"}
-                        </h3>
-                        <p className="vehicle-model-confirmed">
-                          {typeof serviceData.vehicle.model === "object"
-                            ? serviceData.vehicle.model?.id
-                            : serviceData.vehicle.model || "N/A"}
-                        </p>
-                      </div>
-                      <p className="vehicle-plate-confirmed">
-                        {serviceData.vehicle.licensePlate}
-                      </p>
-                    </div>
-
-                    {serviceData.problem && (
-                      <div className="problem-section">
-                        <IonText color="medium" className="section-label">
-                          Problema reportado
-                        </IonText>
-                        <IonText className="problem-text">
-                          {serviceData.problem}
-                        </IonText>
-                      </div>
-                    )}
-
-                    {/* Datos adicionales del vehículo */}
-                    {(serviceData.vehicle.isArmored ||
-                      serviceData.serviceDetails?.basement?.isInBasement ||
-                      serviceData.vehicle.truckData ||
-                      serviceData.vehicle.busData) && (
-                      <div className="vehicle-additional-badge-active-service">
-                        {/* Blindado (Autos y Camionetas) */}
-                        {serviceData.vehicle.isArmored && (
-                          <div className="detail-badge">🛡️ Blindado</div>
-                        )}
-
-                        {/* Sótano (del serviceDetails actual) */}
-                        {serviceData.serviceDetails?.basement?.isInBasement && (
-                          <div className="detail-badge">
-                            🏢 Sótano nivel{" "}
-                            {serviceData.serviceDetails.basement.level}
-                          </div>
-                        )}
-
-                        {/* Datos específicos de CAMIONES */}
-                        {serviceData.vehicle.truckData && (
-                          <>
-                            {serviceData.vehicle.truckData.trailerType && (
-                              <div className="detail-badge">
-                                🚛{" "}
-                                {serviceData.vehicle.truckData.trailerType
-                                  .replace("_", " ")
-                                  .replace(/\b\w/g, (l) => l.toUpperCase())}
-                              </div>
-                            )}
-                            {serviceData.vehicle.truckData.axleType && (
-                              <div className="detail-badge">
-                                🛞{" "}
-                                {serviceData.vehicle.truckData.axleType ===
-                                "sencilla"
-                                  ? "Llanta Sencilla"
-                                  : "Llanta Doble"}
-                              </div>
-                            )}
-                            {serviceData.vehicle.truckData.length && (
-                              <div className="detail-badge">
-                                📏 Largo: {serviceData.vehicle.truckData.length}{" "}
-                                m
-                              </div>
-                            )}
-                            {serviceData.vehicle.truckData.height && (
-                              <div className="detail-badge">
-                                📐 Alto: {serviceData.vehicle.truckData.height}{" "}
-                                m
-                              </div>
-                            )}
-                            {serviceData.vehicle.truckData.tonnage && (
-                              <div className="detail-badge">
-                                ⚖️ {serviceData.vehicle.truckData.tonnage} ton
-                              </div>
-                            )}
-                            {serviceData.serviceDetails?.truckCurrentState
-                              ?.isLoaded && (
-                              <div className="detail-badge">
-                                📦 Cargado:{" "}
-                                {
-                                  serviceData.serviceDetails.truckCurrentState
-                                    .currentWeight
-                                }{" "}
-                                ton
-                              </div>
-                            )}
-                          </>
-                        )}
-
-                        {/* Datos específicos de BUSES */}
-                        {serviceData.vehicle.busData && (
-                          <>
-                            {serviceData.vehicle.busData.passengerCapacity && (
-                              <div className="detail-badge">
-                                👥{" "}
-                                {serviceData.vehicle.busData.passengerCapacity}{" "}
-                                pasajeros
-                              </div>
-                            )}
-                            {serviceData.vehicle.busData.axleType && (
-                              <div className="detail-badge">
-                                🛞{" "}
-                                {serviceData.vehicle.busData.axleType ===
-                                "sencilla"
-                                  ? "Llanta Sencilla"
-                                  : "Llanta Doble"}
-                              </div>
-                            )}
-                            {serviceData.vehicle.busData.length && (
-                              <div className="detail-badge">
-                                📏 Largo: {serviceData.vehicle.busData.length} m
-                              </div>
-                            )}
-                            {serviceData.vehicle.busData.height && (
-                              <div className="detail-badge">
-                                📐 Alto: {serviceData.vehicle.busData.height} m
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* FASE 1: Punto de Recogida (Origen) */}
-                {!codeValidated && (
-                  <div className="location-section">
-                    <div className="location-icon">
-                      <Location size="24" variant="Bulk" color="#0055FF" />
-                    </div>
-                    <div className="location-text">
-                      <IonText color="medium" className="location-label">
-                        Punto de Recogida
-                      </IonText>
-                      <IonText className="location-address">
-                        {serviceData.origin.address}
-                      </IonText>
-                      <button
-                        className="go-to-navigation-button"
-                        onClick={() =>
-                          openNavigation(
-                            serviceData.origin,
-                            serviceData.origin.address,
-                          )
-                        }
-                      >
-                        <Routing size="24" variant="Bulk" color="#9CA3AF" />
-                        Abrir ruta
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* FASE 2: Destino Final (solo después de validar código) */}
-                {codeValidated && serviceData.destination && (
-                  <div className="location-section">
-                    <div className="location-icon-destination">
-                      <Location size="24" variant="Bold" color="#eb445a" />
-                    </div>
-                    <div className="location-text">
-                      <IonText color="medium" className="location-label">
-                        🔴 Destino Final
-                      </IonText>
-                      <IonText className="location-address">
-                        {serviceData.destination.address}
-                      </IonText>
-                      <button
-                        className="go-to-navigation-button"
-                        onClick={() =>
-                          openNavigation(
-                            serviceData.destination,
-                            serviceData.destination.address,
-                          )
-                        }
-                      >
-                        <Routing size="24" variant="Bulk" color="#9CA3AF" />
-                        Navegar al destino
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* FASE 1: Código de Seguridad Pendiente */}
-                {!codeValidated && (
-                  <div
-                    style={{
-                      width: "100%",
-                      background:
-                        "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
-                      padding: "25px",
-                      borderRadius: "15px",
-                      textAlign: "center",
-                      boxShadow: "0 4px 10px rgba(243, 156, 18, 0.3)",
-                    }}
-                  >
-                    <IonText
-                      style={{
-                        color: "white",
-                        fontSize: "16px",
-                        fontWeight: "700",
-                        display: "block",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      🔒 Código de Seguridad Requerido
-                    </IonText>
-                    <IonText
-                      style={{
-                        color: "white",
-                        fontSize: "14px",
-                        display: "block",
-                        marginBottom: "15px",
-                        opacity: 0.9,
-                      }}
-                    >
-                      Solicita al cliente el código de 4 dígitos en el punto de
-                      recogida para ver el destino
-                    </IonText>
-                    <button
-                      className="send-quote-button"
-                      style={{
-                        background: "white",
-                        color: "#f39c12",
-                        marginBottom: 0,
-                      }}
-                      onClick={handleVerifySecurityCode}
-                    >
-                      🔐 Validar Código
-                    </button>
-                  </div>
-                )}
-
-                
-
-                {codeValidated && (
-                  <button
-                    className="send-quote-button"
-                    onClick={handleCompleteService}
-                    disabled={completing}
-                    style={{ background: "#0055ff" }}
-                  >
-                    {completing ? "⏳ Completando..." : "Completar Servicio"}
-                  </button>
-                )}
+                <button className="as-call-btn" onClick={handleCall}>
+                  <Call size="22" variant="Bulk" color="#22c55e" />
+                </button>
               </div>
             </div>
+
+            <div className="as-divider" />
+
+            {/* VEHÍCULO A REMOLCAR */}
+            {veh && (
+              <>
+                <div className="as-section">
+                  <span className="as-section-label">VEHÍCULO A REMOLCAR</span>
+                  <div className="as-vehicle-row">
+                    <img
+                      src={getVehicleIcon(veh.icon || veh.category?.id || "🚗")}
+                      alt={vehBrand || "Vehículo"}
+                      className="as-vehicle-icon"
+                    />
+                    <div className="as-vehicle-info">
+                      <span className="as-vehicle-name">{vehBrand || "N/A"}</span>
+                      {vehSubtitle ? <span className="as-vehicle-sub">{vehSubtitle}</span> : null}
+                    </div>
+                    {veh.licensePlate && (
+                      <span className="as-plate">{veh.licensePlate}</span>
+                    )}
+                  </div>
+
+                  {/* Badges adicionales (blindado, sótano, camión, bus) */}
+                  {(veh.isArmored || serviceData.serviceDetails?.basement?.isInBasement ||
+                    veh.truckData || veh.busData) && (
+                    <div className="as-badges">
+                      {veh.isArmored && <span className="as-badge">🛡️ Blindado</span>}
+                      {serviceData.serviceDetails?.basement?.isInBasement && (
+                        <span className="as-badge">🏢 Sótano nivel {serviceData.serviceDetails.basement.level}</span>
+                      )}
+                      {veh.truckData?.trailerType && (
+                        <span className="as-badge">🚛 {veh.truckData.trailerType.replace("_", " ")}</span>
+                      )}
+                      {veh.truckData?.axleType && (
+                        <span className="as-badge">🛞 {veh.truckData.axleType === "sencilla" ? "Llanta Sencilla" : "Llanta Doble"}</span>
+                      )}
+                      {veh.truckData?.length && <span className="as-badge">📏 Largo: {veh.truckData.length} m</span>}
+                      {veh.truckData?.height && <span className="as-badge">📐 Alto: {veh.truckData.height} m</span>}
+                      {veh.truckData?.tonnage && <span className="as-badge">⚖️ {veh.truckData.tonnage} ton</span>}
+                      {serviceData.serviceDetails?.truckCurrentState?.isLoaded && (
+                        <span className="as-badge">📦 Cargado: {serviceData.serviceDetails.truckCurrentState.currentWeight} ton</span>
+                      )}
+                      {veh.busData?.passengerCapacity && (
+                        <span className="as-badge">👥 {veh.busData.passengerCapacity} pasajeros</span>
+                      )}
+                      {veh.busData?.axleType && (
+                        <span className="as-badge">🛞 {veh.busData.axleType === "sencilla" ? "Llanta Sencilla" : "Llanta Doble"}</span>
+                      )}
+                      {veh.busData?.length && <span className="as-badge">📏 Largo: {veh.busData.length} m</span>}
+                      {veh.busData?.height && <span className="as-badge">📐 Alto: {veh.busData.height} m</span>}
+                    </div>
+                  )}
+
+                  {serviceData.problem && (
+                    <p className="as-problem">{serviceData.problem}</p>
+                  )}
+                </div>
+                <div className="as-divider" />
+              </>
+            )}
+
+            {/* VALOR ACORDADO */}
+            <div className="as-section">
+              <span className="as-section-label">VALOR ACORDADO</span>
+              <div className="as-amount-row">
+                <span className="as-amount-label">Total del servicio</span>
+                <div className="as-amount-right">
+                  <span className="as-amount">{formatAmount(serviceData.amount)}</span>
+                  <span className="as-amount-sub">Aceptado por el cliente</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="as-divider" />
+
+            {/* DIRECCIÓN DE RECOGIDA */}
+            <div className="as-section">
+              <div className="as-location-header">
+                <span className="as-section-label">DIRECCIÓN DE RECOGIDA</span>
+                {codeValidated && (
+                  <span className="as-completed-badge">✓ COMPLETADA</span>
+                )}
+              </div>
+              <div className={`as-location-row ${codeValidated ? "as-location-row--done" : ""}`}>
+                <Location size="20" variant="Bulk" color={codeValidated ? "#9CA3AF" : "#0055FF"} />
+                <div className="as-location-info">
+                  <span className="as-location-sub">Ubicación del cliente</span>
+                  <span className={`as-location-addr ${codeValidated ? "as-location-addr--done" : ""}`}>
+                    {serviceData.origin.address}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="as-divider" />
+
+            {/* DESTINO */}
+            <div className="as-section">
+              <span className="as-section-label">DESTINO</span>
+              {codeValidated && serviceData.destination ? (
+                <div className="as-location-row">
+                  <span className="as-dest-flag">🏁</span>
+                  <div className="as-location-info">
+                    <span className="as-location-sub">Taller destino</span>
+                    <span className="as-location-addr">{serviceData.destination.address}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="as-location-locked">
+                  <span>🔒</span>
+                  <span className="as-locked-text">Se revelará al verificar el vehículo</span>
+                </div>
+              )}
+            </div>
+
+            {/* SECCIÓN DE CÓDIGO (Paso 1 y 2) */}
+            {!codeValidated && (
+              <>
+                <div className="as-divider" />
+                <div className="as-code-section">
+                  <h3 className="as-code-title">Verificar recogida</h3>
+                  <p className="as-code-desc">
+                    Cuando el vehículo esté sobre la grúa, pídele al cliente el código de 4 dígitos.
+                  </p>
+                  <div className="as-code-inputs">
+                    {codeDigits.map((digit, i) => (
+                      <input
+                        key={i}
+                        ref={(el) => (codeInputRefs.current[i] = el)}
+                        className="as-code-input"
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleCodeDigitChange(i, e.target.value)}
+                        onKeyDown={(e) => handleCodeKeyDown(i, e)}
+                      />
+                    ))}
+                  </div>
+                  <button className="as-verify-btn" onClick={handleInlineCodeVerify}>
+                    🔒 Verificar código
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* BOTÓN FINALIZAR (Paso 3) */}
+            {codeValidated && (
+              <div className="as-complete-wrapper">
+                <button
+                  className="as-complete-btn"
+                  onClick={handleCompleteService}
+                  disabled={completing}
+                >
+                  {completing ? "⏳ Finalizando..." : "🏁 Finalizar servicio"}
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
