@@ -20,6 +20,8 @@ import {
   IonRefresherContent,
   IonSpinner,
 } from '@ionic/react';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 import { requestAPI } from '../services/api';
 import socketService from '../services/socket';
 import { useDriverLocation } from '../hooks/useDriverLocation';
@@ -53,6 +55,8 @@ const Home = () => {
   // Estados para modal de cancelación
   const [showCancellationModal, setShowCancellationModal] = useState(false);
   const [cancellationData, setCancellationData] = useState(null);
+  // Estado para banner de notificaciones denegadas
+  const [notifDenied, setNotifDenied] = useState(false);
 
   // Hook de geolocalización del conductor
   const { 
@@ -157,7 +161,9 @@ const Home = () => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // 🔔 Inicializar push notifications
-    initializePushNotifications(parsedUser._id);
+    initializePushNotifications(parsedUser._id).then((granted) => {
+      if (granted === false) setNotifDenied(true);
+    });
 
     // Cargar solicitudes iniciales
     loadRequests(parsedUser._id);
@@ -359,6 +365,64 @@ const Home = () => {
     }
   }, [locationError]);
 
+  // Solicitar permiso de notificaciones desde el banner
+  const handleRequestNotifPermission = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      present({ message: 'Las notificaciones push solo funcionan en la app instalada (APK)', duration: 3000, color: 'medium' });
+      return;
+    }
+    try {
+      const { PushNotifications } = await import('@capacitor/push-notifications');
+      const status = await PushNotifications.requestPermissions();
+      if (status.receive === 'granted') {
+        setNotifDenied(false);
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const u = JSON.parse(storedUser);
+          initializePushNotifications(u._id);
+        }
+        present({ message: '✅ Notificaciones activadas', duration: 2000, color: 'success' });
+      } else {
+        present({ message: 'Ve a Ajustes → Notificaciones para activarlas', duration: 4000, color: 'warning' });
+      }
+    } catch (err) {
+      console.error('Error solicitando permiso de notificaciones:', err);
+      present({ message: 'No se pudo solicitar el permiso. Ve a Ajustes.', duration: 3000, color: 'danger' });
+    }
+  };
+
+  // Solicitar permiso de ubicación desde el banner de error
+  const handleRequestLocationPermission = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      // En navegador: intentar geolocalización directamente para disparar el prompt del browser
+      try {
+        await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
+        );
+      } catch {
+        // El usuario rechazó desde el navegador, abrir ajustes no es posible en web
+        present({ message: 'Activa la ubicación en la configuración de tu navegador', duration: 4000, color: 'warning' });
+      }
+      return;
+    }
+
+    try {
+      const status = await Geolocation.requestPermissions({ permissions: ['location', 'coarseLocation'] });
+      const granted = status.location === 'granted' || status.coarseLocation === 'granted';
+      if (granted) {
+        present({ message: '✅ Permiso de ubicación concedido', duration: 2000, color: 'success' });
+        // Recargar la página para que el hook de ubicación se reinicie
+        window.location.reload();
+      } else {
+        // Permiso denegado permanentemente → instruir al usuario
+        present({ message: 'Ve a Ajustes → Permisos → Ubicación para activarla', duration: 4000, color: 'warning' });
+      }
+    } catch (err) {
+      console.error('Error solicitando permiso de ubicación:', err);
+      present({ message: 'No se pudo solicitar el permiso. Ve a Ajustes del dispositivo.', duration: 4000, color: 'danger' });
+    }
+  };
+
   // ✅ Recargar cotizaciones cuando el componente se vuelve a mostrar
   // Función para cargar solicitudes
   const loadRequests = async (driverId) => {
@@ -559,8 +623,8 @@ const Home = () => {
     event.detail.complete();
   };
 
-  // Manejar solicitud de permisos de ubicación
-  const handleRequestLocationPermission = () => {
+  // Manejar solicitud de permisos de ubicación desde el modal (diferente al banner)
+  const handleRequestLocationFromModal = () => {
     localStorage.setItem('hasSeenLocationModal', 'true');
     setShowLocationModal(false);
     
@@ -593,13 +657,29 @@ const Home = () => {
           <IonRefresherContent />
         </IonRefresher>
 
-        {/* Mostrar banner de ubicación solo si hay error */}
+        {/* Banner de ubicación */}
         {locationError && (
           <LocationBanner 
             loading={locationLoading} 
             error={locationError} 
-            location={driverLocation} 
+            location={driverLocation}
+            onRequestPermission={handleRequestLocationPermission}
           />
+        )}
+
+        {/* Banner de notificaciones denegadas */}
+        {notifDenied && (
+          <div className="location-banner location-banner-error">
+            <span style={{ fontSize: 28, flexShrink: 0 }}>🔕</span>
+            <div className="location-text">
+              <span className="location-title">Notificaciones desactivadas</span>
+              <span className="location-subtitle">No recibirás avisos de nuevos servicios</span>
+            </div>
+            <button className="location-action-btn" onClick={handleRequestNotifPermission}>
+              <span style={{ fontSize: 16 }}>🔔</span>
+              <span>Activar</span>
+            </button>
+          </div>
         )}
 
         {/* Título */}
@@ -708,7 +788,7 @@ const Home = () => {
         <LocationPermissionModal
           isOpen={showLocationModal}
           onDismiss={handleDismissLocationModal}
-          onRequestPermission={handleRequestLocationPermission}
+          onRequestPermission={handleRequestLocationFromModal}
         />
 
         {/* Modal de detalle de cancelación */}

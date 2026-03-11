@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Geolocation } from "@capacitor/geolocation";
 import { Capacitor } from "@capacitor/core";
+import BackgroundGeolocation from "@capacitor-community/background-geolocation";
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -163,11 +164,12 @@ const ActiveService = () => {
     }
   }, [history, present]);
 
-  // TRACKING EN TIEMPO REAL - Enviar ubicación GPS al cliente
-  // Usa @capacitor/geolocation (plugin nativo) para funcionar aunque la app
-  // esté en segundo plano, pantalla bloqueada o el conductor cambie de app.
+  // TRACKING EN TIEMPO REAL CON BACKGROUND GPS
+  // Usa @capacitor-community/background-geolocation que levanta un Foreground Service
+  // en Android: muestra una notificación persistente y mantiene el GPS activo
+  // aunque el conductor cambie de app, use Waze/Google Maps o bloquee la pantalla.
   useEffect(() => {
-    let watchId = null;
+    let watcherId = null;
     let lastSentLocation = null;
     const MIN_DISTANCE_METERS = 10;
 
@@ -177,14 +179,13 @@ const ActiveService = () => {
       const φ2 = lat2 * Math.PI / 180;
       const Δφ = (lat2 - lat1) * Math.PI / 180;
       const Δλ = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
                 Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ/2) * Math.sin(Δλ/2);
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     };
 
-    const sendLocation = (coords) => {
-      const location = { lat: coords.latitude, lng: coords.longitude };
+    const sendLocation = (location) => {
       let shouldSend = true;
       if (lastSentLocation) {
         shouldSend = calculateDistance(
@@ -197,72 +198,113 @@ const ActiveService = () => {
           requestId: serviceData.requestId,
           driverId: serviceData.driverId,
           location,
-          heading: coords.heading || 0,
-          speed: coords.speed || 0,
-          accuracy: coords.accuracy || 0,
+          heading: location.bearing || 0,
+          speed: location.speed || 0,
+          accuracy: location.accuracy || 0,
         });
         lastSentLocation = location;
-        console.log('📍 Ubicación GPS enviada:', location, `±${coords.accuracy || 0}m`);
+        console.log('📍 Ubicación enviada:', location, `±${location.accuracy || 0}m`);
       }
     };
 
-    const startLocationTracking = async () => {
+    const startTracking = async () => {
       if (!serviceData?.requestId) return;
-      console.log('📍 Iniciando tracking GPS nativo (background-safe)...');
 
-      // PASO 1: Ubicación inicial rápida
-      try {
-        const isNative = Capacitor.isNativePlatform();
-        if (isNative) {
-          const pos = await Geolocation.getCurrentPosition({
-            enableHighAccuracy: false,
-            timeout: 5000,
-            maximumAge: 30000,
-          });
-          sendLocation(pos.coords);
-          console.log('⚡ Ubicación inicial enviada');
-        }
-      } catch (err) {
-        console.warn('⚠️ No se pudo obtener ubicación inicial:', err.message);
+      if (!Capacitor.isNativePlatform()) {
+        // Fallback para desarrollo en navegador (sin background)
+        console.log('🎯 Tracking GPS web (modo desarrollo)');
+        const id = navigator.geolocation.watchPosition(
+          (pos) => sendLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            bearing: pos.coords.heading || 0,
+            speed: pos.coords.speed || 0,
+            accuracy: pos.coords.accuracy || 0,
+          }),
+          (err) => console.error('❌ Error GPS web:', err),
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 }
+        );
+        watcherId = { type: 'web', id };
+        return;
       }
 
-      // PASO 2: Tracking continuo nativo (funciona en segundo plano en Android)
+      console.log('📍 Iniciando Background GPS (Foreground Service)...');
       try {
-        if (Capacitor.isNativePlatform()) {
-          watchId = await Geolocation.watchPosition(
+        // Registrar el watcher con Foreground Service
+        // Android mostrará: "Desvare - Servicio activo en curso"
+        watcherId = await BackgroundGeolocation.addWatcher(
+          {
+            backgroundMessage: 'Tu ubicación está siendo compartida con el cliente',
+            backgroundTitle: 'Desvare — Servicio activo',
+            requestPermissions: true,   // Solicita permisos si no están dados
+            stale: false,               // No usar ubicaciones cacheadas
+            distanceFilter: MIN_DISTANCE_METERS, // Solo actualizar si se movió ≥10m
+          },
+          (location, error) => {
+            if (error) {
+              if (error.code === 'NOT_AUTHORIZED') {
+                console.warn('⚠️ Permiso de ubicación denegado');
+              } else {
+                console.error('❌ Error Background GPS:', error);
+              }
+              return;
+            }
+            if (location) {
+              sendLocation({
+                lat: location.latitude,
+                lng: location.longitude,
+                bearing: location.bearing || 0,
+                speed: location.speed || 0,
+                accuracy: location.accuracy || 0,
+              });
+            }
+          }
+        );
+        console.log('✅ Background GPS iniciado, watcherId:', watcherId);
+      } catch (err) {
+        console.error('❌ Error iniciando Background GPS:', err);
+        // Fallback a @capacitor/geolocation si falla el background
+        console.log('🔄 Cayendo a Geolocation estándar como fallback...');
+        try {
+          const id = await Geolocation.watchPosition(
             { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 },
-            (position, err) => {
-              if (err) { console.error('❌ Error GPS nativo:', err); return; }
-              if (position) sendLocation(position.coords);
+            (pos, e) => {
+              if (e) { console.error('❌ Error GPS fallback:', e); return; }
+              if (pos) sendLocation({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                bearing: pos.coords.heading || 0,
+                speed: pos.coords.speed || 0,
+                accuracy: pos.coords.accuracy || 0,
+              });
             }
           );
-          console.log('🎯 Tracking GPS nativo iniciado, watchId:', watchId);
-        } else {
-          // Fallback para desarrollo en navegador
-          watchId = navigator.geolocation.watchPosition(
-            (pos) => sendLocation(pos.coords),
-            (err) => console.error('❌ Error GPS web:', err),
-            { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 }
-          );
-          console.log('🎯 Tracking GPS web iniciado (modo desarrollo)');
+          watcherId = { type: 'capacitor', id };
+        } catch (fallbackErr) {
+          console.error('❌ Error en fallback GPS:', fallbackErr);
         }
-      } catch (err) {
-        console.error('❌ Error iniciando watchPosition nativo:', err);
       }
     };
 
     if (serviceData?.requestId) {
-      startLocationTracking();
+      startTracking();
     }
 
+    // Cleanup: detener el Foreground Service al salir de la vista
     return () => {
-      if (watchId !== null) {
-        if (Capacitor.isNativePlatform()) {
-          Geolocation.clearWatch({ id: watchId });
-        } else {
-          navigator.geolocation.clearWatch(watchId);
-        }
-        console.log('🛑 Tracking GPS detenido');
+      if (watcherId === null) return;
+
+      if (typeof watcherId === 'string') {
+        // Es un watcherId de BackgroundGeolocation (string UUID)
+        BackgroundGeolocation.removeWatcher({ id: watcherId })
+          .then(() => console.log('🛑 Background GPS detenido'))
+          .catch((e) => console.warn('⚠️ Error deteniendo Background GPS:', e));
+      } else if (watcherId?.type === 'web') {
+        navigator.geolocation.clearWatch(watcherId.id);
+        console.log('🛑 GPS web detenido');
+      } else if (watcherId?.type === 'capacitor') {
+        Geolocation.clearWatch({ id: watcherId.id });
+        console.log('🛑 GPS Capacitor detenido');
       }
     };
   }, [serviceData]);

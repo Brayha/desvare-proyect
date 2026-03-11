@@ -380,6 +380,7 @@ router.post('/:id/accept', async (req, res) => {
     request.assignedDriverId = driverId;
     request.totalAmount = quote.amount;
     request.acceptedAt = new Date();
+    request.startedAt = new Date(); // Hora de inicio del servicio (cliente aceptó)
     request.securityCode = securityCode;
     request.updatedAt = new Date();
     await request.save();

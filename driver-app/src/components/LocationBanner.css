@@ -70,3 +70,29 @@
   display: block;
 }
 
+/* Botón de acción dentro del banner */
+.location-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 6px 10px;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.location-action-btn ion-icon {
+  font-size: 18px;
+}
+
+.location-action-btn:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
