@@ -118,14 +118,24 @@ const PermissionsSetup = () => {
       let granted = check.location === 'granted';
 
       if (!granted && check.location !== 'denied') {
-        const result = await Geolocation.requestPermissions();
-        granted = result.location === 'granted';
+        // Solicitar ubicación en primer plano
+        const result = await Geolocation.requestPermissions({ permissions: ['location', 'coarseLocation'] });
+        granted = result.location === 'granted' || result.coarseLocation === 'granted';
+      }
+
+      // Si ya tiene el permiso en primer plano, intentar solicitar background
+      // Android mostrará "Permitir siempre" vs "Solo mientras se usa la app"
+      if (granted) {
+        try {
+          await Geolocation.requestPermissions({ permissions: ['location'] });
+        } catch {
+          // No crítico si el dispositivo no soporta background location
+        }
       }
 
       setPermStatus((prev) => ({ ...prev, location: granted }));
       setDeniedMap((prev) => ({ ...prev, location: !granted }));
 
-      // Avanzar al siguiente slide independientemente del resultado
       setTimeout(() => goToNextSlide(), 400);
     } catch {
       setDeniedMap((prev) => ({ ...prev, location: true }));

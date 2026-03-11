@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Geolocation } from "@capacitor/geolocation";
+import { Capacitor } from "@capacitor/core";
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -161,135 +163,105 @@ const ActiveService = () => {
     }
   }, [history, present]);
 
-  // 🆕 TRACKING EN TIEMPO REAL - Enviar ubicación GPS al cliente
+  // TRACKING EN TIEMPO REAL - Enviar ubicación GPS al cliente
+  // Usa @capacitor/geolocation (plugin nativo) para funcionar aunque la app
+  // esté en segundo plano, pantalla bloqueada o el conductor cambie de app.
   useEffect(() => {
     let watchId = null;
     let lastSentLocation = null;
-    const MIN_DISTANCE_METERS = 10; // Solo enviar si se movió más de 10 metros
-    
-    // Función para calcular distancia entre dos puntos (Haversine)
+    const MIN_DISTANCE_METERS = 10;
+
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
-      const R = 6371e3; // Radio de la Tierra en metros
+      const R = 6371e3;
       const φ1 = lat1 * Math.PI / 180;
       const φ2 = lat2 * Math.PI / 180;
       const Δφ = (lat2 - lat1) * Math.PI / 180;
       const Δλ = (lon2 - lon1) * Math.PI / 180;
-
       const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
                 Math.cos(φ1) * Math.cos(φ2) *
                 Math.sin(Δλ/2) * Math.sin(Δλ/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    };
 
-      return R * c; // Distancia en metros
-    };
-    
-    const startLocationTracking = () => {
-      if (!serviceData || !serviceData.requestId) {
-        console.log('⚠️ No hay servicio activo para tracking');
-        return;
+    const sendLocation = (coords) => {
+      const location = { lat: coords.latitude, lng: coords.longitude };
+      let shouldSend = true;
+      if (lastSentLocation) {
+        shouldSend = calculateDistance(
+          lastSentLocation.lat, lastSentLocation.lng,
+          location.lat, location.lng
+        ) >= MIN_DISTANCE_METERS;
       }
-      
-      console.log('📍 Iniciando tracking GPS en tiempo real...');
-      
-      // 🆕 ESTRATEGIA HÍBRIDA: Primero ubicación rápida, luego GPS preciso
-      
-      // PASO 1: Obtener ubicación inicial rápida (WiFi/Cell - 2-3 segundos)
-      console.log('⚡ Obteniendo ubicación inicial rápida...');
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          
-          const heading = position.coords.heading || 0;
-          const speed = position.coords.speed || 0;
-          const accuracy = position.coords.accuracy || 0;
-          
-          // Enviar ubicación inicial inmediatamente
-          socketService.sendLocationUpdate({
-            requestId: serviceData.requestId,
-            driverId: serviceData.driverId,
-            location,
-            heading,
-            speed,
-            accuracy
-          });
-          
-          lastSentLocation = location;
-          console.log('⚡ Ubicación inicial enviada (rápida):', location, `Precisión: ±${accuracy}m`);
-        },
-        (error) => {
-          console.warn('⚠️ No se pudo obtener ubicación rápida:', error.message);
-          // No es crítico, el watchPosition tomará el control
-        },
-        {
-          enableHighAccuracy: false,  // Ubicación rápida (WiFi/Cell)
-          timeout: 5000,              // Solo 5 segundos
-          maximumAge: 30000           // Acepta ubicaciones de hasta 30s
-        }
-      );
-      
-      // PASO 2: Iniciar tracking continuo de alta precisión (GPS)
-      console.log('🎯 Iniciando tracking GPS de alta precisión...');
-      watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          const location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          
-          const heading = position.coords.heading || 0;
-          const speed = position.coords.speed || 0;
-          const accuracy = position.coords.accuracy || 0;
-          
-          // Solo enviar si se movió más de 10 metros
-          let shouldSend = true;
-          if (lastSentLocation) {
-            const distance = calculateDistance(
-              lastSentLocation.lat,
-              lastSentLocation.lng,
-              location.lat,
-              location.lng
-            );
-            shouldSend = distance >= MIN_DISTANCE_METERS;
-          }
-          
-          if (shouldSend) {
-            // Enviar ubicación vía Socket.IO
-            socketService.sendLocationUpdate({
-              requestId: serviceData.requestId,
-              driverId: serviceData.driverId,
-              location,
-              heading,
-              speed,
-              accuracy
-            });
-            
-            lastSentLocation = location;
-            console.log('📍 Ubicación GPS enviada:', location, `Precisión: ±${accuracy}m`);
-          }
-        },
-        (error) => {
-          console.error('❌ Error obteniendo GPS:', error);
-        },
-        {
-          enableHighAccuracy: true,  // GPS de alta precisión
-          timeout: 20000,            // 20 segundos (más tiempo para GPS)
-          maximumAge: 5000           // Usar ubicación cacheada si tiene menos de 5s
-        }
-      );
+      if (shouldSend) {
+        socketService.sendLocationUpdate({
+          requestId: serviceData.requestId,
+          driverId: serviceData.driverId,
+          location,
+          heading: coords.heading || 0,
+          speed: coords.speed || 0,
+          accuracy: coords.accuracy || 0,
+        });
+        lastSentLocation = location;
+        console.log('📍 Ubicación GPS enviada:', location, `±${coords.accuracy || 0}m`);
+      }
     };
-    
-    // Iniciar tracking solo si hay servicio activo
-    if (serviceData && serviceData.requestId) {
+
+    const startLocationTracking = async () => {
+      if (!serviceData?.requestId) return;
+      console.log('📍 Iniciando tracking GPS nativo (background-safe)...');
+
+      // PASO 1: Ubicación inicial rápida
+      try {
+        const isNative = Capacitor.isNativePlatform();
+        if (isNative) {
+          const pos = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 30000,
+          });
+          sendLocation(pos.coords);
+          console.log('⚡ Ubicación inicial enviada');
+        }
+      } catch (err) {
+        console.warn('⚠️ No se pudo obtener ubicación inicial:', err.message);
+      }
+
+      // PASO 2: Tracking continuo nativo (funciona en segundo plano en Android)
+      try {
+        if (Capacitor.isNativePlatform()) {
+          watchId = await Geolocation.watchPosition(
+            { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 },
+            (position, err) => {
+              if (err) { console.error('❌ Error GPS nativo:', err); return; }
+              if (position) sendLocation(position.coords);
+            }
+          );
+          console.log('🎯 Tracking GPS nativo iniciado, watchId:', watchId);
+        } else {
+          // Fallback para desarrollo en navegador
+          watchId = navigator.geolocation.watchPosition(
+            (pos) => sendLocation(pos.coords),
+            (err) => console.error('❌ Error GPS web:', err),
+            { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 }
+          );
+          console.log('🎯 Tracking GPS web iniciado (modo desarrollo)');
+        }
+      } catch (err) {
+        console.error('❌ Error iniciando watchPosition nativo:', err);
+      }
+    };
+
+    if (serviceData?.requestId) {
       startLocationTracking();
     }
-    
-    // Cleanup: detener tracking al desmontar
+
     return () => {
       if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
+        if (Capacitor.isNativePlatform()) {
+          Geolocation.clearWatch({ id: watchId });
+        } else {
+          navigator.geolocation.clearWatch(watchId);
+        }
         console.log('🛑 Tracking GPS detenido');
       }
     };
@@ -571,13 +543,24 @@ const ActiveService = () => {
               console.log("✅ Backend confirmó completado:", data);
 
               // 2. Notificar por Socket.IO al cliente
-              socketService.completeService({
-                requestId: serviceData.requestId,
-                clientId: data.request.clientId,
-                driverId: user._id,
-                driverName: user.name,
-                completedAt: completedAt,
-              });
+              // El backend también enviará push notification y emitirá socket desde el REST endpoint.
+              // Este emit es redundante pero garantiza notificación inmediata si el socket está activo.
+              const emitComplete = () => {
+                return socketService.completeService({
+                  requestId: serviceData.requestId,
+                  clientId: data.request.clientId,
+                  driverId: user._id,
+                  driverName: user.name,
+                  completedAt: completedAt,
+                });
+              };
+
+              if (!emitComplete()) {
+                // Socket caído: reconectar y reintentar una vez
+                console.log('🔄 Socket caído al completar - reconectando y reintentando...');
+                socketService.connect();
+                setTimeout(() => emitComplete(), 2000);
+              }
 
               // 3. Limpiar localStorage
               localStorage.removeItem("activeService");

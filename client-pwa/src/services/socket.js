@@ -27,11 +27,12 @@ class SocketService {
     // Crear nueva conexión
     console.log('🔌 Creando nueva conexión Socket.IO...');
     this.socket = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'], // Agregar polling como fallback
+      transports: ['websocket', 'polling'], // polling como fallback en redes malas
       autoConnect: true,
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
+      reconnectionAttempts: Infinity,      // Nunca rendirse
+      reconnectionDelay: 2000,             // 2s entre intentos
+      reconnectionDelayMax: 10000,         // Máximo 10s entre intentos
       timeout: 10000,
     });
 

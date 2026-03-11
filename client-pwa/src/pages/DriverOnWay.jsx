@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 import {
   IonPage,
   IonContent,
@@ -25,9 +27,11 @@ const DriverOnWay = () => {
   const [presentAlert] = useIonAlert();
 
   const [serviceData, setServiceData] = useState(null);
-  const [driverLocation, setDriverLocation] = useState(null); // 🆕 Ubicación en tiempo real del conductor
-  const [driverHeading, setDriverHeading] = useState(0); // 🆕 Dirección del vehículo
+  const [driverLocation, setDriverLocation] = useState(null);
+  const [driverHeading, setDriverHeading] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const serviceDataRef = useRef(null); // ref para acceder en callbacks sin stale closure
+  const navigatedRef = useRef(false);  // evitar navegaciones dobles
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -45,89 +49,113 @@ const DriverOnWay = () => {
     console.log("📦 Servicio activo cargado:", parsedData);
 
     setServiceData(parsedData);
+    serviceDataRef.current = parsedData;
     setIsLoading(false);
 
-    // Obtener ID del cliente para re-registros
     const storedUser = localStorage.getItem("user");
     const clientId = storedUser ? JSON.parse(storedUser)?.id || JSON.parse(storedUser)?._id : null;
 
-    // Socket.IO ya está conectado desde App.jsx
+    // Garantizar conexión socket
     if (!socketService.socket?.connected) {
-      console.log("🔌 Conectando Socket.IO...");
       socketService.connect();
-    } else {
-      console.log("✅ Socket.IO ya conectado");
     }
 
-    // Re-registrar cliente al reconectar (cubre desconexión por segundo plano o red)
-    const handleReconnect = () => {
-      console.log("🔄 Socket reconectado durante servicio activo - re-registrando cliente...");
-      if (clientId) {
-        socketService.registerClient(clientId);
-      }
-    };
-    socketService.socket?.on("reconnect", handleReconnect);
+    // ─────────────────────────────────────────────
+    // Función central: navegar a calificación
+    // ─────────────────────────────────────────────
+    const goToRating = (completedAt) => {
+      if (navigatedRef.current) return; // evitar doble ejecución
+      navigatedRef.current = true;
 
-    // Detectar cuando el usuario vuelve a la app (desbloquea pantalla / regresa de otra app)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        console.log("👁️ App visible de nuevo - verificando socket...");
-        if (!socketService.socket?.connected) {
-          socketService.connect();
-        }
-        if (clientId) {
-          socketService.registerClient(clientId);
-        }
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    // ✅ Escuchar cuando el conductor completa el servicio
-    socketService.onServiceCompleted((data) => {
-      console.log('✅ Servicio completado por el conductor:', data);
-      
-      showSuccess('¡Servicio completado! El conductor llegó al destino.');
-      
-      // Guardar datos del servicio completado para la pantalla de calificación
+      const data = serviceDataRef.current;
       const completedServiceData = {
-        requestId: data.requestId || parsedData.requestId,
-        driver: parsedData.driver,
-        amount: parsedData.amount,
-        origin: parsedData.origin,
-        destination: parsedData.destination,
-        completedAt: data.completedAt
+        requestId: data.requestId,
+        driver: data.driver,
+        amount: data.amount,
+        origin: data.origin,
+        destination: data.destination,
+        completedAt: completedAt || new Date().toISOString(),
       };
-      
       localStorage.setItem('completedService', JSON.stringify(completedServiceData));
-      console.log('💾 Datos del servicio completado guardados para calificación');
-      
-      // Limpiar servicio activo
       localStorage.removeItem('activeService');
-      
-      // Redirigir a la pantalla de calificación después de 1.5 segundos
-      setTimeout(() => {
-        history.replace('/rate-service');
-      }, 1500);
+      localStorage.removeItem('currentRequestId');
+      localStorage.removeItem('requestData');
+      showSuccess('¡Servicio completado! El conductor llegó al destino.');
+      setTimeout(() => history.replace('/rate-service'), 1200);
+    };
+
+    // ─────────────────────────────────────────────
+    // Capa 1: socket → notificación inmediata
+    // ─────────────────────────────────────────────
+    socketService.onServiceCompleted((data) => {
+      console.log('✅ [SOCKET] Servicio completado recibido:', data);
+      goToRating(data.completedAt);
     });
 
-    // 🆕 Escuchar actualizaciones de ubicación del conductor en tiempo real
+    // ─────────────────────────────────────────────
+    // Capa 2: polling REST cada 15s (red de seguridad)
+    // Si el socket falla, esto garantiza que el cliente
+    // siempre se entera cuando el conductor termina.
+    // ─────────────────────────────────────────────
+    const checkServiceStatus = async () => {
+      if (navigatedRef.current) return;
+      const reqId = serviceDataRef.current?.requestId;
+      if (!reqId) return;
+      try {
+        const res = await fetch(`${API_URL}/api/requests/${reqId}`);
+        if (!res.ok) return;
+        const body = await res.json();
+        const status = body.request?.status || body.status;
+        if (status === 'completed') {
+          console.log('✅ [POLLING] Servicio completado detectado via REST');
+          goToRating(body.request?.completedAt || body.completedAt);
+        }
+      } catch (err) {
+        console.warn('⚠️ Error en polling de estado:', err.message);
+      }
+    };
+
+    const pollInterval = setInterval(checkServiceStatus, 15000);
+
+    // ─────────────────────────────────────────────
+    // Reconexión socket + re-registro cliente
+    // ─────────────────────────────────────────────
+    const handleReconnect = () => {
+      console.log('🔄 Socket reconectado en DriverOnWay - re-registrando cliente...');
+      if (clientId) socketService.registerClient(clientId);
+      // Verificar estado inmediatamente al reconectar (por si perdimos el evento)
+      checkServiceStatus();
+    };
+    socketService.socket?.on('reconnect', handleReconnect);
+
+    // ─────────────────────────────────────────────
+    // Visibilitychange: app visible → verificar estado
+    // Cubre: desbloquear pantalla, volver de otra app
+    // ─────────────────────────────────────────────
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ App visible - verificando socket y estado del servicio...');
+        if (!socketService.socket?.connected) socketService.connect();
+        if (clientId) socketService.registerClient(clientId);
+        checkServiceStatus();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // ─────────────────────────────────────────────
+    // Tracking de ubicación conductor en tiempo real
+    // ─────────────────────────────────────────────
     socketService.onLocationUpdate((data) => {
-      console.log('📍 Ubicación del conductor actualizada:', data);
-      
-      setDriverLocation({
-        lat: data.location.lat,
-        lng: data.location.lng
-      });
-      
+      setDriverLocation({ lat: data.location.lat, lng: data.location.lng });
       setDriverHeading(data.heading || 0);
     });
 
     return () => {
-      console.log("🧹 DriverOnWay - Cleanup");
+      clearInterval(pollInterval);
       socketService.offServiceCompleted();
       socketService.offLocationUpdate();
-      socketService.socket?.off("reconnect", handleReconnect);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      socketService.socket?.off('reconnect', handleReconnect);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

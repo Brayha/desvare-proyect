@@ -125,9 +125,36 @@ const Home = () => {
     setUser(parsedUser);
     setIsOnline(parsedUser.driverProfile?.isOnline || false);
 
-    // Conectar Socket.IO
+    // Conectar Socket.IO y registrar conductor
     socketService.connect();
     socketService.registerDriver(parsedUser._id);
+
+    // Al reconectar: re-registrar conductor para que vuelva a recibir solicitudes
+    const handleDriverReconnect = () => {
+      console.log('🔄 Socket reconectado - re-registrando conductor...');
+      socketService.registerDriver(parsedUser._id);
+      // Re-notificar disponibilidad para volver a la sala active-drivers si corresponde
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (currentUser.driverProfile?.isOnline) {
+        socketService.notifyAvailabilityChange(parsedUser._id, true);
+      }
+    };
+    socketService.onReconnect(handleDriverReconnect);
+
+    // Al volver a la app (desbloquear pantalla / regresar de otra app)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        if (!socketService.isConnected()) {
+          socketService.connect();
+        }
+        socketService.registerDriver(parsedUser._id);
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (currentUser.driverProfile?.isOnline) {
+          socketService.notifyAvailabilityChange(parsedUser._id, true);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // 🔔 Inicializar push notifications
     initializePushNotifications(parsedUser._id);
@@ -312,6 +339,8 @@ const Home = () => {
     });
 
     return () => {
+      socketService.offReconnect(handleDriverReconnect);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       socketService.offRequestReceived();
       socketService.offRequestCancelled();
       socketService.offServiceAccepted();

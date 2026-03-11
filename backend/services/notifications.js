@@ -247,6 +247,25 @@ const notifyAccountRejected = async (fcmToken, reason) => {
 };
 
 /**
+ * Envía notificación al cliente cuando el conductor completa el servicio
+ * @param {string} fcmToken - Token FCM del cliente
+ * @param {Object} serviceData
+ * @returns {Promise<string>}
+ */
+const notifyClientServiceCompleted = async (fcmToken, serviceData) => {
+  return await sendPushNotification(
+    fcmToken,
+    '✅ ¡Servicio completado!',
+    `${serviceData.driverName} llegó al destino. ¿Cómo te fue?`,
+    {
+      type: 'SERVICE_COMPLETED',
+      requestId: serviceData.requestId || '',
+      url: '/rate-service',
+    }
+  );
+};
+
+/**
  * Envía notificación al cliente cuando llega una nueva cotización
  * @param {string} fcmToken - Token FCM del cliente
  * @param {Object} quoteData - Datos de la cotización
@@ -285,6 +304,7 @@ module.exports = {
   notifyServiceCancelled,
   notifyAccountApproved,
   notifyAccountRejected,
-  notifyClientNewQuote
+  notifyClientNewQuote,
+  notifyClientServiceCompleted
 };
 

@@ -905,6 +905,7 @@ router.post('/:id/complete', async (req, res) => {
     
     console.log(`✅ Servicio ${id} marcado como completado`);
     
+    // Responder al conductor antes de las notificaciones (no bloquear)
     res.json({
       message: 'Servicio completado exitosamente',
       request: {
@@ -914,6 +915,52 @@ router.post('/:id/complete', async (req, res) => {
         clientId: request.clientId
       }
     });
+
+    // ─── Notificar al cliente por socket (path directo desde REST) ───────────
+    // Esto garantiza que el cliente sea notificado aunque el socket del conductor
+    // esté caído y no pueda emitir el evento service:complete.
+    try {
+      const clientId = request.clientId?.toString();
+      const clientSocketId = global.connectedClients?.get(clientId);
+      if (clientSocketId && global.io) {
+        global.io.to(clientSocketId).emit('service:completed', {
+          requestId: id,
+          completedAt: request.completedAt,
+          message: '¡Servicio completado! ¿Cómo te fue?'
+        });
+        console.log(`📡 Evento service:completed emitido via REST al cliente ${clientId}`);
+      }
+
+      // Limpiar activeServices en RAM
+      if (global.activeServices) {
+        global.activeServices.delete(id);
+      }
+    } catch (socketErr) {
+      console.warn('⚠️ Error emitiendo socket desde REST (no crítico):', socketErr.message);
+    }
+
+    // ─── Push notification al cliente (cubre PWA cerrada o en background) ────
+    try {
+      const User = require('../models/User');
+      const { notifyClientServiceCompleted } = require('../services/notifications');
+
+      const [clientUser, driverUser] = await Promise.all([
+        User.findById(request.clientId).select('fcmToken').lean(),
+        User.findById(driverId).select('name').lean(),
+      ]);
+
+      if (clientUser?.fcmToken) {
+        await notifyClientServiceCompleted(clientUser.fcmToken, {
+          requestId: id,
+          driverName: driverUser?.name || 'El conductor',
+        });
+        console.log(`📲 Push notification enviada al cliente por servicio completado`);
+      } else {
+        console.log('ℹ️ Cliente sin FCM token registrado');
+      }
+    } catch (pushErr) {
+      console.warn('⚠️ Error enviando push de completado (no crítico):', pushErr.message);
+    }
     
   } catch (error) {
     console.error('❌ Error al completar servicio:', error);
