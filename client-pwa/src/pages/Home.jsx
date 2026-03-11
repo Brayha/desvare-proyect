@@ -215,12 +215,6 @@ const Home = () => {
             </div>
             <div className="lp-nav__actions">
               <button
-                className="lp-btn lp-btn--ghost"
-                onClick={() => history.push("/login")}
-              >
-                Iniciar sesión
-              </button>
-              <button
                 className="lp-btn lp-btn--primary"
                 onClick={handleRequestTowTruck}
               >
