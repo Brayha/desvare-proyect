@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Geolocation } from "@capacitor/geolocation";
 import { Capacitor } from "@capacitor/core";
-import BackgroundGeolocation from "@capacitor-community/background-geolocation";
+// BackgroundGeolocation se importa dinámicamente solo en plataforma nativa
+// para evitar que Vite intente resolverlo al compilar (el paquete no tiene bundle web)
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -230,6 +231,9 @@ const ActiveService = () => {
 
       console.log('📍 Iniciando Background GPS (Foreground Service)...');
       try {
+        // Import dinámico: solo se resuelve en runtime nativo, no en build web
+        const { default: BackgroundGeolocation } = await import('@capacitor-community/background-geolocation');
+
         // Registrar el watcher con Foreground Service
         // Android mostrará: "Desvare - Servicio activo en curso"
         watcherId = await BackgroundGeolocation.addWatcher(
@@ -296,7 +300,8 @@ const ActiveService = () => {
 
       if (typeof watcherId === 'string') {
         // Es un watcherId de BackgroundGeolocation (string UUID)
-        BackgroundGeolocation.removeWatcher({ id: watcherId })
+        import('@capacitor-community/background-geolocation')
+          .then(({ default: BG }) => BG.removeWatcher({ id: watcherId }))
           .then(() => console.log('🛑 Background GPS detenido'))
           .catch((e) => console.warn('⚠️ Error deteniendo Background GPS:', e));
       } else if (watcherId?.type === 'web') {

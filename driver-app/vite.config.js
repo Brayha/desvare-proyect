@@ -9,7 +9,18 @@ export default defineConfig({
     dedupe: ['react', 'react-dom', '@ionic/react'],
   },
   server: {
-    host: '0.0.0.0', // Permite acceso desde red local
+    host: '0.0.0.0',
     port: 5175,
+  },
+  optimizeDeps: {
+    // Excluir paquetes nativos de Capacitor que no tienen bundle web
+    exclude: ['@capacitor-community/background-geolocation'],
+  },
+  build: {
+    rollupOptions: {
+      // El paquete solo existe en el entorno nativo (Android APK),
+      // Vite no debe intentar bundlearlo
+      external: ['@capacitor-community/background-geolocation'],
+    },
   },
 })
