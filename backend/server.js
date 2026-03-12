@@ -225,6 +225,15 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Heartbeat del cliente (mantiene el socket vivo en iOS Safari)
+  socket.on('client:ping', ({ clientId }) => {
+    if (clientId) {
+      // Actualizar el socketId en caso de que haya cambiado (reconexión)
+      connectedClients.set(clientId, socket.id);
+    }
+    socket.emit('client:pong');
+  });
+
   // Cliente solicita cotización
   socket.on('request:new', async (data) => {
     console.log('📢 Nueva solicitud de cotización recibida');

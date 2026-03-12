@@ -102,6 +102,8 @@ const WaitingQuotes = () => {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
+  // Estado de conexión: 'connected' | 'reconnecting' | 'offline'
+  const [connectionStatus, setConnectionStatus] = useState('connected');
 
   // Carga las cotizaciones guardadas en BD (útil al reconectar o al hacer pull-to-refresh)
   const fetchQuotesFromBackend = useCallback(async () => {
@@ -253,20 +255,99 @@ const WaitingQuotes = () => {
         vibrate();
       });
 
-      // Reconexión: re-registrar cliente y recuperar cotizaciones perdidas
+      // ─────────────────────────────────────────────
+      // Función central de recuperación (socket + quotes)
+      // Se llama en cualquier evento de reconexión
+      // ─────────────────────────────────────────────
+      const recoverConnection = () => {
+        if (!isMounted) return;
+        console.log('🔄 Recuperando conexión - re-registrando cliente y cargando cotizaciones...');
+        const latestUser = localStorage.getItem("user");
+        if (latestUser) {
+          const parsedUser = JSON.parse(latestUser);
+          if (!socketService.isConnected()) {
+            socketService.connect();
+          }
+          socketService.registerClient(parsedUser.id || parsedUser._id);
+        }
+        fetchQuotesFromBackend();
+      };
+
+      // ─────────────────────────────────────────────
+      // Fix 1: socket.on('connect') — evento correcto en Socket.IO v4
+      // Dispara en conexión inicial Y en cada reconexión
+      // ─────────────────────────────────────────────
       const rawSocket = socketService.getSocket();
       if (rawSocket) {
-        rawSocket.on('reconnect', () => {
+        rawSocket.on('connect', () => {
           if (!isMounted) return;
-          console.log('🔄 Socket reconectado - re-registrando cliente y recuperando cotizaciones');
-          const userData = localStorage.getItem("user");
-          if (userData) {
-            const parsedUser = JSON.parse(userData);
-            socketService.registerClient(parsedUser.id);
-          }
-          fetchQuotesFromBackend();
+          console.log('✅ Socket conectado/reconectado — re-registrando cliente');
+          setConnectionStatus('connected');
+          recoverConnection();
+        });
+        rawSocket.on('disconnect', () => {
+          if (!isMounted) return;
+          console.log('⚠️ Socket desconectado — mostrando estado reconectando');
+          setConnectionStatus('reconnecting');
         });
       }
+
+      // ─────────────────────────────────────────────
+      // Fix 2: visibilitychange — usuario vuelve a la pestaña/app
+      // Cubre: volver de WhatsApp, desbloquear pantalla, cambiar apps
+      // ─────────────────────────────────────────────
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible' && isMounted) {
+          console.log('👁️ App visible — verificando conexión y cotizaciones');
+          recoverConnection();
+        }
+      };
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
+      // ─────────────────────────────────────────────
+      // Fix 5: online event — red recuperada (salió del metro, etc.)
+      // ─────────────────────────────────────────────
+      const handleOnline = () => {
+        if (!isMounted) return;
+        console.log('🌐 Red recuperada — reconectando socket y cargando cotizaciones');
+        setConnectionStatus('connected');
+        recoverConnection();
+      };
+      const handleOffline = () => {
+        if (!isMounted) return;
+        console.log('📵 Sin red — marcando como offline');
+        setConnectionStatus('offline');
+      };
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+
+      // ─────────────────────────────────────────────
+      // Fix 3: Polling REST cada 10s — red de seguridad
+      // Funciona aunque el socket esté muerto permanentemente
+      // ─────────────────────────────────────────────
+      const pollInterval = setInterval(() => {
+        if (!isMounted) return;
+        console.log('⏱️ Polling — verificando cotizaciones en BD');
+        fetchQuotesFromBackend();
+      }, 10000);
+
+      // ─────────────────────────────────────────────
+      // Fix 4: Heartbeat cada 25s — mantiene socket vivo en iOS
+      // iOS mata WebSockets inactivos en ~30s; este ping lo previene
+      // ─────────────────────────────────────────────
+      const heartbeatInterval = setInterval(() => {
+        if (!isMounted) return;
+        const latestUser = localStorage.getItem("user");
+        if (latestUser && socketService.isConnected()) {
+          const parsedUser = JSON.parse(latestUser);
+          const clientId = parsedUser.id || parsedUser._id;
+          socketService.getSocket()?.emit('client:ping', { clientId });
+          console.log('💓 Heartbeat enviado');
+        } else if (!socketService.isConnected()) {
+          console.log('💓 Heartbeat — socket caído, intentando reconectar');
+          recoverConnection();
+        }
+      }, 25000);
 
       // ✅ Escuchar cancelaciones de cotizaciones
       socketService.onQuoteCancelled((data) => {
@@ -310,8 +391,16 @@ const WaitingQuotes = () => {
       socketService.offQuoteReceived();
       socketService.offQuoteCancelled();
       const rawSocket = socketService.getSocket();
-      if (rawSocket) rawSocket.off('reconnect');
-      console.log("🔇 Listeners de cotizaciones removidos");
+      if (rawSocket) {
+        rawSocket.off('connect');
+        rawSocket.off('disconnect');
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      clearInterval(pollInterval);
+      clearInterval(heartbeatInterval);
+      console.log("🔇 Listeners, polling y heartbeat removidos");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar al montar el componente
@@ -708,6 +797,15 @@ const WaitingQuotes = () => {
           {quotesReceived.length === 0 && (
             <div className="floating-card-bottom">
               <div className="search-status-card">
+                {/* Indicador de estado de conexión */}
+                {connectionStatus !== 'connected' && (
+                  <div className={`wq-connection-banner wq-connection-banner--${connectionStatus}`}>
+                    <span className="wq-connection-dot" />
+                    {connectionStatus === 'reconnecting'
+                      ? '⚡ Reconectando... las cotizaciones llegarán en breve'
+                      : '📵 Sin conexión — esperando red...'}
+                  </div>
+                )}
                 <div className="spinner-container">
                   <IonText className="search-text">
                     <h3>Buscando cotizaciones...</h3>

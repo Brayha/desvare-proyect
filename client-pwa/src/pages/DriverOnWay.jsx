@@ -77,11 +77,18 @@ const DriverOnWay = () => {
         completedAt: completedAt || new Date().toISOString(),
       };
       localStorage.setItem('completedService', JSON.stringify(completedServiceData));
-      localStorage.removeItem('activeService');
-      localStorage.removeItem('currentRequestId');
-      localStorage.removeItem('requestData');
+
+      // Navegar ANTES de limpiar para evitar que WaitingQuotes (en memoria)
+      // detecte el cambio de key y redirija a /home antes que nosotros
       showSuccess('¡Servicio completado! El conductor llegó al destino.');
-      setTimeout(() => history.replace('/rate-service'), 1200);
+      history.replace('/rate-service');
+
+      // Limpiar después de navegar (ya no afecta WaitingQuotes)
+      setTimeout(() => {
+        localStorage.removeItem('activeService');
+        localStorage.removeItem('currentRequestId');
+        localStorage.removeItem('requestData');
+      }, 500);
     };
 
     // ─────────────────────────────────────────────

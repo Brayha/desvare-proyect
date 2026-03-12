@@ -416,3 +416,47 @@
 .info-card {
   animation: fadeIn 0.4s ease-out;
 }
+
+/* ── Indicador de estado de conexión ── */
+.wq-connection-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.wq-connection-banner--reconnecting {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.wq-connection-banner--offline {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.wq-connection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.wq-connection-banner--reconnecting .wq-connection-dot {
+  background: #f59e0b;
+}
+
+.wq-connection-banner--offline .wq-connection-dot {
+  background: #ef4444;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.8); }
+}
