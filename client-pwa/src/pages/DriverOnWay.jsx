@@ -125,15 +125,23 @@ const DriverOnWay = () => {
     const pollInterval = setInterval(checkServiceStatus, 15000);
 
     // ─────────────────────────────────────────────
-    // Reconexión socket + re-registro cliente
+    // Función central de recuperación de conexión
     // ─────────────────────────────────────────────
-    const handleReconnect = () => {
-      console.log('🔄 Socket reconectado en DriverOnWay - re-registrando cliente...');
+    const recoverConnection = () => {
+      if (!socketService.isConnected()) socketService.connect();
       if (clientId) socketService.registerClient(clientId);
-      // Verificar estado inmediatamente al reconectar (por si perdimos el evento)
       checkServiceStatus();
     };
-    socketService.socket?.on('reconnect', handleReconnect);
+
+    // Fix: socket.on('connect') es el evento correcto en Socket.IO v4
+    // Dispara en conexión inicial Y en cada reconexión (reconnect no dispara en v4)
+    const rawSocket = socketService.getSocket();
+    if (rawSocket) {
+      rawSocket.on('connect', () => {
+        console.log('🔄 Socket reconectado en DriverOnWay - re-registrando cliente...');
+        recoverConnection();
+      });
+    }
 
     // ─────────────────────────────────────────────
     // Visibilitychange: app visible → verificar estado
@@ -141,13 +149,32 @@ const DriverOnWay = () => {
     // ─────────────────────────────────────────────
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('👁️ App visible - verificando socket y estado del servicio...');
-        if (!socketService.socket?.connected) socketService.connect();
-        if (clientId) socketService.registerClient(clientId);
-        checkServiceStatus();
+        console.log('👁️ DriverOnWay visible - verificando socket y estado del servicio...');
+        recoverConnection();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // ─────────────────────────────────────────────
+    // window.online: red recuperada (sale del metro, etc.)
+    // ─────────────────────────────────────────────
+    const handleOnline = () => {
+      console.log('🌐 Red recuperada en DriverOnWay - reconectando...');
+      recoverConnection();
+    };
+    window.addEventListener('online', handleOnline);
+
+    // ─────────────────────────────────────────────
+    // Heartbeat cada 25s: mantiene socket vivo en iOS
+    // iOS mata WebSockets inactivos en ~30s
+    // ─────────────────────────────────────────────
+    const heartbeatInterval = setInterval(() => {
+      if (clientId && socketService.isConnected()) {
+        socketService.getSocket()?.emit('client:ping', { clientId });
+      } else if (!socketService.isConnected()) {
+        recoverConnection();
+      }
+    }, 25000);
 
     // ─────────────────────────────────────────────
     // Tracking de ubicación conductor en tiempo real
@@ -159,10 +186,13 @@ const DriverOnWay = () => {
 
     return () => {
       clearInterval(pollInterval);
+      clearInterval(heartbeatInterval);
       socketService.offServiceCompleted();
       socketService.offLocationUpdate();
-      socketService.socket?.off('reconnect', handleReconnect);
+      const rawSock = socketService.getSocket();
+      if (rawSock) rawSock.off('connect');
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote } = require('./services/notifications');
+const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote, notifyClientServiceCompleted } = require('./services/notifications');
 
 const app = express();
 const server = http.createServer(app);
@@ -295,6 +295,7 @@ io.on('connection', (socket) => {
       const driversWithToken = await User.find({
         userType: 'driver',
         'driverProfile.status': 'approved',
+        'driverProfile.isOnline': true, // Solo conductores disponibles (no ocupados)
         'driverProfile.fcmToken': { $exists: true, $ne: null }
       }).select('driverProfile.fcmToken name').lean();
 
@@ -635,9 +636,25 @@ io.on('connection', (socket) => {
         completedAt: data.completedAt,
         message: '¡Servicio completado! ¿Cómo fue tu experiencia?'
       });
-      console.log(`✅ Cliente ${data.clientId} notificado de servicio completado`);
+      console.log(`✅ Cliente ${data.clientId} notificado de servicio completado (socket)`);
     } else {
-      console.log(`⚠️ Cliente ${data.clientId} no está conectado`);
+      console.log(`⚠️ Cliente ${data.clientId} no conectado por socket - enviando push notification...`);
+      // Push notification como fallback cuando el cliente está en background o cerró la app
+      try {
+        const User = require('./models/User');
+        const clientUser = await User.findById(data.clientId).select('fcmToken').lean();
+        if (clientUser?.fcmToken) {
+          await notifyClientServiceCompleted(clientUser.fcmToken, {
+            requestId: data.requestId || '',
+            driverName: data.driverName || 'Tu conductor',
+          });
+          console.log(`📲 Push notification de servicio completado enviada al cliente ${data.clientId}`);
+        } else {
+          console.log(`ℹ️ Cliente ${data.clientId} sin FCM token registrado`);
+        }
+      } catch (pushErr) {
+        console.warn('⚠️ Error enviando push de servicio completado (no crítico):', pushErr.message);
+      }
     }
     
     // Actualizar estado del conductor a disponible

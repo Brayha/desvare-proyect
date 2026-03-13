@@ -492,21 +492,29 @@ router.delete('/:requestId/quote/:driverId', async (req, res) => {
       });
     }
 
-    // Verificar que la solicitud no esté aceptada o completada
-    if (['accepted', 'in_progress', 'completed'].includes(request.status)) {
-      return res.status(400).json({ 
-        error: 'No puedes cancelar una cotización de un servicio ya aceptado. Debes cancelar el servicio completo.' 
-      });
-    }
-
-    // Buscar la cotización del conductor
+    // Buscar la cotización del conductor (pendiente o en cualquier estado activo)
     const quoteIndex = request.quotes.findIndex(
-      q => q.driverId.toString() === driverId && q.status === 'pending'
+      q => q.driverId.toString() === driverId && !['cancelled', 'expired'].includes(q.status)
     );
 
     if (quoteIndex === -1) {
       return res.status(404).json({ 
-        error: 'Cotización no encontrada o ya fue cancelada/aceptada' 
+        error: 'Cotización no encontrada o ya fue cancelada' 
+      });
+    }
+
+    // Si la cotización de ESTE conductor fue la aceptada, no puede cancelarla así
+    // (debe cancelar el servicio completo)
+    if (request.quotes[quoteIndex].status === 'accepted' && request.assignedDriverId?.toString() === driverId) {
+      return res.status(400).json({ 
+        error: 'No puedes cancelar una cotización ya aceptada. Debes cancelar el servicio completo.' 
+      });
+    }
+
+    // Si el servicio fue completado, no se puede hacer nada
+    if (request.status === 'completed') {
+      return res.status(400).json({ 
+        error: 'El servicio ya fue completado.' 
       });
     }
 
