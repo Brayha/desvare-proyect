@@ -115,16 +115,26 @@ const WaitingQuotes = () => {
       const data = await response.json();
 
       if (response.ok && data.request?.quotes?.length > 0) {
-        const formattedQuotes = data.request.quotes.map((q) => ({
-          driverId: q.driverId,
-          driverName: q.driverName,
-          amount: q.amount,
-          location: q.location || null,
-          timestamp: q.timestamp,
-          driverPhoto: q.driverPhoto || null,
-          driverRating: q.driverRating || 5,
-          driverServiceCount: q.driverServiceCount || 0,
-        }));
+        const formattedQuotes = data.request.quotes.map((q) => {
+          // Normalizar location: puede venir como {lat,lng} o como GeoJSON {coordinates:[lng,lat]}
+          let location = null;
+          if (q.location?.lat != null && q.location?.lng != null) {
+            location = { lat: q.location.lat, lng: q.location.lng };
+          } else if (Array.isArray(q.location?.coordinates) && q.location.coordinates.length === 2) {
+            location = { lat: q.location.coordinates[1], lng: q.location.coordinates[0] };
+          }
+          return {
+            driverId: q.driverId,
+            driverName: q.driverName,
+            amount: q.amount,
+            location,
+            timestamp: q.timestamp,
+            driverPhoto: q.driverPhoto || null,
+            driverRating: q.driverRating || 5,
+            driverServiceCount: q.driverServiceCount || 0,
+            requestId: q.requestId || data.request._id,
+          };
+        });
         setQuotesReceived(formattedQuotes);
         console.log(`✅ ${formattedQuotes.length} cotizaciones cargadas del backend`);
       }
@@ -220,6 +230,13 @@ const WaitingQuotes = () => {
     // Inicializar datos
     const success = initializeData();
 
+    // Declarar fuera del if(success) para que el cleanup pueda acceder a ellas
+    let handleVisibilityChange = () => {};
+    let handleOnline = () => {};
+    let handleOffline = () => {};
+    let pollInterval = null;
+    let heartbeatInterval = null;
+
     // Solo registrar listener si la inicialización fue exitosa
     if (success) {
       console.log("👂 Registrando listener de cotizaciones");
@@ -296,7 +313,7 @@ const WaitingQuotes = () => {
       // Fix 2: visibilitychange — usuario vuelve a la pestaña/app
       // Cubre: volver de WhatsApp, desbloquear pantalla, cambiar apps
       // ─────────────────────────────────────────────
-      const handleVisibilityChange = () => {
+      handleVisibilityChange = () => {
         if (document.visibilityState === 'visible' && isMounted) {
           console.log('👁️ App visible — verificando conexión y cotizaciones');
           recoverConnection();
@@ -307,13 +324,13 @@ const WaitingQuotes = () => {
       // ─────────────────────────────────────────────
       // Fix 5: online event — red recuperada (salió del metro, etc.)
       // ─────────────────────────────────────────────
-      const handleOnline = () => {
+      handleOnline = () => {
         if (!isMounted) return;
         console.log('🌐 Red recuperada — reconectando socket y cargando cotizaciones');
         setConnectionStatus('connected');
         recoverConnection();
       };
-      const handleOffline = () => {
+      handleOffline = () => {
         if (!isMounted) return;
         console.log('📵 Sin red — marcando como offline');
         setConnectionStatus('offline');
@@ -325,7 +342,7 @@ const WaitingQuotes = () => {
       // Fix 3: Polling REST cada 10s — red de seguridad
       // Funciona aunque el socket esté muerto permanentemente
       // ─────────────────────────────────────────────
-      const pollInterval = setInterval(() => {
+      pollInterval = setInterval(() => {
         if (!isMounted) return;
         console.log('⏱️ Polling — verificando cotizaciones en BD');
         fetchQuotesFromBackend();
@@ -335,7 +352,7 @@ const WaitingQuotes = () => {
       // Fix 4: Heartbeat cada 25s — mantiene socket vivo en iOS
       // iOS mata WebSockets inactivos en ~30s; este ping lo previene
       // ─────────────────────────────────────────────
-      const heartbeatInterval = setInterval(() => {
+      heartbeatInterval = setInterval(() => {
         if (!isMounted) return;
         const latestUser = localStorage.getItem("user");
         if (latestUser && socketService.isConnected()) {

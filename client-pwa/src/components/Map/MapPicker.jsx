@@ -165,9 +165,11 @@ const MapPicker = ({
   // Centrar mapa en la cotización activa del slider
   useEffect(() => {
     if (!focusedQuoteLocation || !mapRef.current || !isMapLoaded) return;
+    const { lat, lng } = focusedQuoteLocation;
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
 
     mapRef.current.flyTo({
-      center: [focusedQuoteLocation.lng, focusedQuoteLocation.lat],
+      center: [lng, lat],
       zoom: 14,
       duration: 800,
       offset: [0, -80],
