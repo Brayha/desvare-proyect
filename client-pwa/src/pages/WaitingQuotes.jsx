@@ -548,9 +548,10 @@ const WaitingQuotes = () => {
       );
     }
 
-    // ✅ Limpiar solo la solicitud actual, MANTENER requestData para edición
-    // localStorage.removeItem("requestData"); ← NO eliminar, mantener origen/destino/vehículo
-    // localStorage.removeItem("currentRequestId"); ← NO eliminar AQUÍ, RequestService lo limpiará
+    // Limpiar el estado activo de la búsqueda
+    // currentRequestId se elimina para que Home y RequestService no muestren banner/botón
+    // requestData se mantiene para pre-llenar el formulario al volver a /tabs/desvare
+    localStorage.removeItem("currentRequestId");
     localStorage.removeItem("activeService");
     localStorage.removeItem("quotesReceived");
 

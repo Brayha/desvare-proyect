@@ -155,12 +155,23 @@ router.post('/:id/quote', async (req, res) => {
       });
     }
 
+    // Convertir {lat,lng} a GeoJSON antes de guardar (el schema de Mongoose es GeoJSON)
+    let locationGeoJSON = null;
+    if (location?.lat != null && location?.lng != null) {
+      locationGeoJSON = {
+        type: 'Point',
+        coordinates: [location.lng, location.lat] // GeoJSON: [lng, lat]
+      };
+    } else if (Array.isArray(location?.coordinates) && location.coordinates.length === 2) {
+      locationGeoJSON = location; // ya viene en formato GeoJSON
+    }
+
     // Agregar cotización con ubicación del conductor
     request.quotes.push({
       driverId,
       driverName,
       amount: parseFloat(amount),
-      location: location || null, // Ubicación del conductor
+      location: locationGeoJSON,
       timestamp: new Date()
     });
 

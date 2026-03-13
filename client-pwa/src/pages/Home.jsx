@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { IonContent, IonPage } from "@ionic/react";
+import { IonContent, IonPage, useIonViewWillEnter } from "@ionic/react";
 import socketService from "../services/socket";
 import mapBg from "../assets/img/map-home-responsive.webp";
 import logo from "../assets/img/Desvare.svg";
@@ -70,12 +70,17 @@ const Home = () => {
   const history = useHistory();
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
-  // 'service' = conductor en camino | 'searching' = buscando/cotizaciones | null = nada activo
-  const [activeState] = useState(() => {
+  const getActiveState = () => {
     if (localStorage.getItem('activeService')) return 'service';
-    // Requiere AMBOS para evitar botón verde con requestId huérfano (sin datos de ruta)
     if (localStorage.getItem('currentRequestId') && localStorage.getItem('requestData')) return 'searching';
     return null;
+  };
+  // 'service' = conductor en camino | 'searching' = buscando/cotizaciones | null = nada activo
+  const [activeState, setActiveState] = useState(() => getActiveState());
+
+  // Re-evaluar al volver a la vista (las tabs se cachean en Ionic y no se remontan)
+  useIonViewWillEnter(() => {
+    setActiveState(getActiveState());
   });
 
   /* Registrar cliente con socket si está autenticado */

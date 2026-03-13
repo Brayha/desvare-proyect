@@ -16,6 +16,7 @@ import {
   IonLabel,
   IonIcon,
   IonButton,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { navigateCircleOutline, add } from "ionicons/icons";
 import { Location, Refresh } from "iconsax-react";
@@ -71,13 +72,22 @@ const RequestService = () => {
 
   const [isSendingRequest, setIsSendingRequest] = useState(false); // Para detectar cambios reales
 
-  // Banner estado activo — requiere AMBOS para evitar banner con requestId huérfano
-  const [activeBannerState] = useState(() => {
+  const getActiveBannerState = () => {
     if (localStorage.getItem('activeService')) return 'service';
     if (localStorage.getItem('currentRequestId') && localStorage.getItem('requestData')) return 'searching';
     return null;
+  };
+  // Banner estado activo — requiere AMBOS para evitar banner con requestId huérfano
+  const [activeBannerState, setActiveBannerState] = useState(() => getActiveBannerState());
+  const [showActiveBanner, setShowActiveBanner] = useState(() => getActiveBannerState() !== null);
+
+  // Re-evaluar al volver a la vista (las tabs se cachean en Ionic y no se remontan)
+  useIonViewWillEnter(() => {
+    const state = getActiveBannerState();
+    setActiveBannerState(state);
+    setShowActiveBanner(state !== null);
   });
-  const [showActiveBanner, setShowActiveBanner] = useState(() => activeBannerState !== null);
+
   const dismissActiveBanner = () => {
     localStorage.removeItem('currentRequestId');
     setShowActiveBanner(false);
