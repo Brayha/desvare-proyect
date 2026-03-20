@@ -604,6 +604,24 @@ io.on('connection', (socket) => {
   });
 
   // ========================================
+  // Código de seguridad validado → servicio en curso
+  // ========================================
+  socket.on('service:code-validated', (data) => {
+    console.log(`🔑 Código validado para servicio ${data.requestId} — notificando cliente ${data.clientId}`);
+    const clientSocketId = connectedClients.get(data.clientId);
+    if (clientSocketId) {
+      io.to(clientSocketId).emit('service:started', {
+        requestId: data.requestId,
+        driverName: data.driverName,
+        message: '¡El código fue ingresado! Tu vehículo ya está en la grúa.',
+      });
+      console.log(`✅ Cliente ${data.clientId} notificado de inicio de servicio (socket)`);
+    } else {
+      console.log(`⚠️ Cliente ${data.clientId} no conectado al validar código`);
+    }
+  });
+
+  // ========================================
   // Completar Servicio
   // ========================================
   socket.on('service:complete', async (data) => {

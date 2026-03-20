@@ -121,6 +121,16 @@ const ActiveService = () => {
     if (inputCode === correctCode) {
       setCodeValidated(true);
       present({ message: "✅ Código correcto. Ahora puedes ver el destino.", duration: 2500, color: "success" });
+
+      // Notificar al cliente que el código fue validado y el servicio está en curso
+      const storedUser = localStorage.getItem("user");
+      const driverUser = storedUser ? JSON.parse(storedUser) : null;
+      socketService.getSocket()?.emit('service:code-validated', {
+        requestId: serviceData.requestId,
+        clientId: serviceData.clientId,
+        driverId: driverUser?.id || driverUser?._id,
+        driverName: driverUser?.name || 'Tu conductor',
+      });
     } else {
       present({ message: "❌ Código incorrecto. Intenta de nuevo.", duration: 2000, color: "danger" });
       setCodeDigits(["", "", "", ""]);

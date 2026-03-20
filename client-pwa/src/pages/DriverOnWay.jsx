@@ -32,6 +32,8 @@ const DriverOnWay = () => {
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverHeading, setDriverHeading] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  // true cuando el conductor ingresó el código → servicio "en camino al destino"
+  const [serviceStarted, setServiceStarted] = useState(false);
   const serviceDataRef = useRef(null); // ref para acceder en callbacks sin stale closure
   const navigatedRef = useRef(false);  // evitar navegaciones dobles
   const pageRef = useRef(null);        // ref para la IonPage (deshabilitar swipe-back)
@@ -203,13 +205,30 @@ const DriverOnWay = () => {
       setDriverHeading(data.heading || 0);
     });
 
+    // ─────────────────────────────────────────────
+    // Capa 3: escuchar que el conductor validó el código
+    // → mostrar nueva UI "en camino al destino"
+    // ─────────────────────────────────────────────
+    const rawSocket2 = socketService.getSocket();
+    if (rawSocket2) {
+      rawSocket2.off('service:started');
+      rawSocket2.on('service:started', (data) => {
+        console.log('🔑 [SOCKET] Código validado — servicio en curso:', data);
+        setServiceStarted(true);
+        showSuccess('¡Tu vehículo ya está en la grúa! En camino al destino.');
+      });
+    }
+
     return () => {
       clearInterval(pollInterval);
       clearInterval(heartbeatInterval);
       socketService.offServiceCompleted();
       socketService.offLocationUpdate();
       const rawSock = socketService.getSocket();
-      if (rawSock) rawSock.off('connect');
+      if (rawSock) {
+        rawSock.off('connect');
+        rawSock.off('service:started');
+      }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);
     };
@@ -222,6 +241,32 @@ const DriverOnWay = () => {
     } else {
       showError("No se pudo obtener el teléfono del conductor");
     }
+  };
+
+  const handleShareLocation = () => {
+    const driverName = serviceData?.driver?.name || 'el conductor';
+    const plate = serviceData?.driver?.towTruck?.licensePlate
+      ? `Placa: ${formatLicensePlate(serviceData.driver.towTruck.licensePlate)}.`
+      : '';
+    const amount = formatAmount(serviceData?.amount || 0);
+    const originAddr = serviceData?.origin?.address || '';
+    const destAddr = serviceData?.destination?.address || '';
+
+    let mapsLink = '';
+    if (driverLocation?.lat && driverLocation?.lng) {
+      mapsLink = `\n📍 Ubicación actual del conductor: https://maps.google.com/?q=${driverLocation.lat},${driverLocation.lng}`;
+    }
+
+    const text = `Hola, estoy usando Desvare 🚛\n\n` +
+      `Mi vehículo fue recogido por ${driverName}. ${plate}\n` +
+      `💰 Valor acordado: ${amount}\n` +
+      `📌 Origen: ${originAddr}\n` +
+      `🏁 Destino: ${destAddr}` +
+      mapsLink +
+      `\n\nPor favor haz seguimiento de mi trayecto.`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   // Generar estrellas dinámicamente basadas en el rating
@@ -539,36 +584,70 @@ const DriverOnWay = () => {
                     </div>
                   </div>
                 </div>
-                
-                <div className="code-box">
-                  <div className="box-info">
-                    <h4>🔒 Código de Seguridad</h4>
-                    <div className="code-digits">
-                      {serviceData.securityCode
-                        ?.split("")
-                        .map((digit, index) => (
-                          <div key={index} className="digit">
-                            {digit}
-                          </div>
-                        ))}
+
+                {!serviceStarted ? (
+                  /* ── Estado: esperando que el conductor ingrese el código ── */
+                  <div className="code-box">
+                    <div className="box-info">
+                      <h4>🔒 Código de Seguridad</h4>
+                      <div className="code-digits">
+                        {serviceData.securityCode
+                          ?.split("")
+                          .map((digit, index) => (
+                            <div key={index} className="digit">
+                              {digit}
+                            </div>
+                          ))}
+                      </div>
                     </div>
+                    <p>
+                      Cuando tu vehículo esté sobre la grúa, dale este código al
+                      conductor para habilitarle el destino
+                    </p>
                   </div>
-                  <p>
-                    Cuando tu vehículo este sobre la grúa, dale este código al
-                    condutor para habilitarle el destino
-                  </p>
-                </div>
+                ) : (
+                  /* ── Estado: código validado → servicio en curso ── */
+                  <div className="service-in-progress-box">
+                    <div className="sip-header">
+                      <span className="sip-icon">🚛</span>
+                      <div>
+                        <h4 className="sip-title">¡Tu vehículo está en camino!</h4>
+                        <p className="sip-subtitle">El conductor ya tiene la dirección del destino</p>
+                      </div>
+                    </div>
+                    <div className="sip-route">
+                      <div className="sip-route-item sip-route-item--done">
+                        <span className="sip-dot sip-dot--done">✓</span>
+                        <span>{serviceData.origin?.address || 'Origen'}</span>
+                      </div>
+                      <div className="sip-route-line" />
+                      <div className="sip-route-item">
+                        <span className="sip-dot sip-dot--dest">🏁</span>
+                        <span>{serviceData.destination?.address || 'Destino'}</span>
+                      </div>
+                    </div>
+                    <IonButton
+                      expand="block"
+                      onClick={handleShareLocation}
+                      className="share-location-button"
+                    >
+                      📤 Compartir seguimiento por WhatsApp
+                    </IonButton>
+                  </div>
+                )}
               </div>
 
-              <IonButton
-                expand="block"
-                fill="clear"
-                color="danger"
-                onClick={handleCancelService}
-                className="cancel-service-button"
-              >
-                Cancelar Servicio
-              </IonButton>
+              {!serviceStarted && (
+                <IonButton
+                  expand="block"
+                  fill="clear"
+                  color="danger"
+                  onClick={handleCancelService}
+                  className="cancel-service-button"
+                >
+                  Cancelar Servicio
+                </IonButton>
+              )}
             </div>
           </div>
         </div>
