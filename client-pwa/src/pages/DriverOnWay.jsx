@@ -11,6 +11,8 @@ import {
   IonCardContent,
   IonSpinner,
   useIonAlert,
+  useIonViewWillEnter,
+  useIonViewWillLeave,
 } from "@ionic/react";
 import { call } from "ionicons/icons";
 import { Moneys, Refresh2 } from "iconsax-react";
@@ -32,6 +34,23 @@ const DriverOnWay = () => {
   const [isLoading, setIsLoading] = useState(true);
   const serviceDataRef = useRef(null); // ref para acceder en callbacks sin stale closure
   const navigatedRef = useRef(false);  // evitar navegaciones dobles
+  const pageRef = useRef(null);        // ref para la IonPage (deshabilitar swipe-back)
+
+  // Deshabilitar swipe-back de Ionic mientras el usuario está rastreando al conductor
+  useIonViewWillEnter(() => {
+    if (pageRef.current) {
+      const ionRouter = document.querySelector('ion-router-outlet');
+      if (ionRouter) {
+        ionRouter.swipeGesture = false;
+      }
+    }
+  });
+  useIonViewWillLeave(() => {
+    const ionRouter = document.querySelector('ion-router-outlet');
+    if (ionRouter) {
+      ionRouter.swipeGesture = true;
+    }
+  });
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -434,8 +453,8 @@ const DriverOnWay = () => {
   }
 
   return (
-    <IonPage>
-      <IonContent className="driver-on-way-page" fullscreen>
+    <IonPage ref={pageRef} className="ion-page-no-swipe-back">
+      <IonContent className="driver-on-way-page" fullscreen scrollY={false}>
         <div className="logo-content" onClick={() => history.replace("/home")}>
           <img src={logo} alt="logo" />
         </div>

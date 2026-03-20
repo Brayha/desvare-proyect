@@ -184,8 +184,12 @@ class SocketService {
   // ========================================
 
   sendLocationUpdate(data) {
-    if (this.socket) {
+    if (this.socket && this.socket.connected) {
       this.socket.emit('driver:location-update', data);
+    } else if (this.socket && !this.socket.connected) {
+      // Socket existe pero desconectado: reconectar (el Background GPS sigue enviando)
+      console.log('🔄 Socket caído durante tracking — reconectando...');
+      this.socket.connect();
     }
   }
 

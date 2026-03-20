@@ -196,6 +196,7 @@ class SocketService {
 
   onLocationUpdate(callback) {
     if (this.socket) {
+      this.socket.off('driver:location-update'); // Evitar listeners duplicados al reconectar
       this.socket.on('driver:location-update', callback);
     }
   }

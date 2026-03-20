@@ -2,6 +2,11 @@
   --background: #f5f5f5;
 }
 
+/* Deshabilitar swipe-back de Ionic en la vista de tracking */
+.ion-page-no-swipe-back {
+  --swipe-back-enabled: 0;
+}
+
 /* Mapa */
 .map-container-tracking {
   display: flex;

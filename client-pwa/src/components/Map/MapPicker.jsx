@@ -47,6 +47,11 @@ const MapPicker = ({
   const [route, setRoute] = useState(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  // Controla si el mapa ya se centró automáticamente por primera vez en el conductor
+  // Después de ese primer centrado, el usuario controla el mapa libremente
+  const hasAutocenteredDriver = useRef(false);
+  // Muestra/oculta el botón de re-centrar cuando el usuario mueve el mapa
+  const [showRecenterBtn, setShowRecenterBtn] = useState(false);
 
   // Calcular ruta cuando ambos puntos estén definidos
   useEffect(() => {
@@ -133,34 +138,48 @@ const MapPicker = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quotes.length, origin, destination, isMapLoaded]); // ✅ Incluir isMapLoaded
 
-  // 🆕 Ajustar viewport cuando aparece la ubicación del conductor (tracking en tiempo real)
+  // Centrar mapa la PRIMERA VEZ que aparece la ubicación del conductor
+  // Después de ese primer centrado el usuario controla el mapa libremente (como Uber/Pickup)
   useEffect(() => {
     if (!origin || !driverLocation || !mapRef.current || !isMapLoaded) return;
+    if (hasAutocenteredDriver.current) return; // Solo la primera vez
 
-    console.log('🚗 Ajustando mapa para mostrar conductor + origen');
+    console.log('🚗 Primer centrado automático conductor + origen');
+    hasAutocenteredDriver.current = true;
 
-    // Crear bounds que incluyan origen y conductor
     const coordinates = [
       [origin.lng, origin.lat],
       [driverLocation.lng, driverLocation.lat]
     ];
 
-    const bounds = coordinates.reduce((bounds, coord) => {
-      return bounds.extend(coord);
-    }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+    const bounds = coordinates.reduce((b, coord) => b.extend(coord),
+      new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
+    );
 
-    // Aplicar bounds con padding generoso
     mapRef.current.fitBounds(bounds, {
-      padding: {
-        top: 100,
-        bottom: 250,  // Espacio para la tarjeta del conductor
-        left: 80,
-        right: 80,
-      },
-      duration: 1500,
-      maxZoom: 15, // No acercar demasiado
+      padding: { top: 100, bottom: 250, left: 80, right: 80 },
+      duration: 1200,
+      maxZoom: 15,
     });
   }, [driverLocation, origin, isMapLoaded]);
+
+  // Función para re-centrar manualmente (botón 📍)
+  const handleRecenter = () => {
+    if (!origin || !driverLocation || !mapRef.current) return;
+    const coordinates = [
+      [origin.lng, origin.lat],
+      [driverLocation.lng, driverLocation.lat]
+    ];
+    const bounds = coordinates.reduce((b, coord) => b.extend(coord),
+      new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
+    );
+    mapRef.current.fitBounds(bounds, {
+      padding: { top: 100, bottom: 250, left: 80, right: 80 },
+      duration: 800,
+      maxZoom: 15,
+    });
+    setShowRecenterBtn(false);
+  };
 
   // Centrar mapa en la cotización activa del slider
   useEffect(() => {
@@ -218,6 +237,10 @@ const MapPicker = ({
         ref={mapRef}
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
+        onDragStart={() => {
+          // El usuario mueve el mapa manualmente → mostrar botón re-centrar
+          if (driverLocation) setShowRecenterBtn(true);
+        }}
         onLoad={() => {
           console.log('🗺️ Mapa cargado completamente');
           setIsMapLoaded(true);
@@ -338,6 +361,17 @@ const MapPicker = ({
           </Source>
         )}
       </Map>
+
+      {/* Botón re-centrar: aparece cuando el usuario mueve el mapa manualmente */}
+      {showRecenterBtn && driverLocation && (
+        <button
+          onClick={handleRecenter}
+          className="map-recenter-btn"
+          aria-label="Re-centrar mapa"
+        >
+          📍
+        </button>
+      )}
 
       {/* Overlay de carga */}
       {isCalculatingRoute && (
