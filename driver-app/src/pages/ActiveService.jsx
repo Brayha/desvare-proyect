@@ -218,6 +218,10 @@ const ActiveService = () => {
     };
 
     const sendLocation = (location) => {
+      // Actualizar el marcador del conductor en el mapa local en cada lectura GPS
+      // independientemente del filtro de distancia para el socket
+      setDriverLocation({ lat: location.lat, lng: location.lng });
+
       let shouldSend = true;
       if (lastSentLocation) {
         shouldSend = calculateDistance(
