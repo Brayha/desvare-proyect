@@ -73,12 +73,23 @@ const DriverOnWay = () => {
     serviceDataRef.current = parsedData;
     setIsLoading(false);
 
+    // Usar clientId del activeService (guardado en el momento de aceptar la cotización)
+    // como fuente primaria, con fallback a localStorage.user
     const storedUser = localStorage.getItem("user");
-    const clientId = storedUser ? JSON.parse(storedUser)?.id || JSON.parse(storedUser)?._id : null;
+    const clientId = parsedData.clientId
+      || (storedUser ? JSON.parse(storedUser)?.id || JSON.parse(storedUser)?._id : null);
 
     // Garantizar conexión socket
     if (!socketService.socket?.connected) {
       socketService.connect();
+    }
+
+    // Registrar cliente INMEDIATAMENTE al entrar al tracking.
+    // Esto actualiza activeServices en el backend con el socketId actual,
+    // evitando que los location-updates del conductor lleguen a un socket viejo.
+    if (clientId) {
+      socketService.registerClient(clientId);
+      console.log('📡 Cliente registrado en socket al entrar a DriverOnWay:', clientId);
     }
 
     // ─────────────────────────────────────────────

@@ -230,9 +230,16 @@ const ActiveService = () => {
         ) >= MIN_DISTANCE_METERS;
       }
       if (shouldSend) {
+        // driverId: serviceData.driverId puede ser undefined (el evento service:accepted
+        // no lo incluye). Se usa el ID del usuario del driver como fuente confiable.
+        const driverUserRaw = localStorage.getItem('user');
+        const driverUserId = driverUserRaw
+          ? (JSON.parse(driverUserRaw)?._id || JSON.parse(driverUserRaw)?.id)
+          : null;
+
         socketService.sendLocationUpdate({
           requestId: serviceData.requestId,
-          driverId: serviceData.driverId,
+          driverId: driverUserId || serviceData.driverId,
           location,
           heading: location.bearing || 0,
           speed: location.speed || 0,

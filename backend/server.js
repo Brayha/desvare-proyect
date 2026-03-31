@@ -697,8 +697,14 @@ io.on('connection', (socket) => {
   socket.on('driver:location-update', async (data) => {
     const { requestId, driverId, location, heading, speed, accuracy } = data;
 
-    const sendLocationToClient = (clientSocketId, clientId) => {
-      io.to(clientSocketId).emit('driver:location-update', {
+    const sendLocationToClient = (storedClientSocketId, clientId) => {
+      // Siempre consultar connectedClients para obtener el socketId más reciente.
+      // Esto evita enviar a un socket obsoleto si el cliente reconectó después
+      // de que se registró el servicio activo (p.ej. navegó de WaitingQuotes a DriverOnWay).
+      const freshSocketId = connectedClients.get(clientId) || storedClientSocketId;
+      if (!freshSocketId) return;
+
+      io.to(freshSocketId).emit('driver:location-update', {
         requestId,
         driverId,
         location: { lat: location.lat, lng: location.lng },
@@ -708,16 +714,24 @@ io.on('connection', (socket) => {
         timestamp: new Date()
       });
 
+      // Actualizar el socketId en RAM si cambió (se reconectó)
+      if (freshSocketId !== storedClientSocketId) {
+        const existingService = activeServices.get(requestId);
+        if (existingService) {
+          activeServices.set(requestId, { ...existingService, clientSocketId: freshSocketId });
+        }
+      }
+
       if (!socket.locationUpdateCount) socket.locationUpdateCount = 0;
       socket.locationUpdateCount++;
       if (socket.locationUpdateCount % 10 === 0) {
-        console.log(`📍 Ubicación actualizada - Conductor: ${driverId} → Cliente: ${clientId}`);
+        console.log(`📍 Ubicación actualizada - Conductor: ${driverId} → Cliente: ${clientId} (socket: ${freshSocketId})`);
       }
     };
 
     // Intentar desde RAM primero (camino rápido)
     const service = activeServices.get(requestId);
-    if (service && service.clientSocketId) {
+    if (service && (service.clientSocketId || connectedClients.get(service.clientId))) {
       sendLocationToClient(service.clientSocketId, service.clientId);
       return;
     }

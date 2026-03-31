@@ -696,10 +696,13 @@ const WaitingQuotes = () => {
         });
 
         // Guardar datos del servicio aceptado
+        // clientId se guarda para que DriverOnWay pueda registrarse en el socket
+        // sin depender de parsear localStorage.user
         localStorage.setItem(
           "activeService",
           JSON.stringify({
             requestId: currentRequestId,
+            clientId: user.id || user._id,
             driver: data.request.assignedDriver,
             securityCode: data.request.securityCode,
             amount: quote.amount,
