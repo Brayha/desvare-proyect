@@ -57,11 +57,32 @@ const calculateBounds = (coordinates) => {
   ];
 };
 
+// Distancia mínima (metros) que debe moverse el conductor para recalcular la ruta.
+// Si solo se movió unos metros, el marcador se mueve pero NO se vuelven a hacer
+// las llamadas HTTP a Mapbox ni se reinicia la animación del mapa.
+const ROUTE_RECALC_MIN_METERS = 50;
+
+const haversineMapMeters = (lat1, lng1, lat2, lng2) => {
+  const R = 6371000;
+  const toRad = deg => deg * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestination = true }) => {
   const mapRef = useRef(null);
   const [driverToOriginRoute, setDriverToOriginRoute] = useState(null);
   const [originToDestinationRoute, setOriginToDestinationRoute] = useState(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
+
+  // Última posición del conductor usada para CALCULAR la ruta (no el marcador).
+  // Permite actualizar el marcador visualmente sin recalcular rutas en cada GPS tick.
+  const lastRouteCalcLocRef = useRef(null);
+  const lastShowDestinationRef = useRef(showDestination);
+  const lastRequestRef = useRef(null);
   
   // Estados para controlar la animación secuencial
   const [showDriver, setShowDriver] = useState(false);
@@ -100,8 +121,32 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
     zoom: 12,
   });
 
-  // Calcular rutas cuando cambian los datos
+  // Calcular rutas cuando:
+  // - Cambia el request (nueva solicitud)
+  // - Cambia showDestination (conductor validó el código)
+  // - El conductor se movió ≥50m desde la última vez que se calculó la ruta
+  //
+  // NO recalcula si solo cambió driverLocation en menos de 50m: en ese caso
+  // el marcador se mueve en el JSX (via prop) sin recalcular ni re-animar.
   useEffect(() => {
+    if (!request || !driverLocation || !MAPBOX_TOKEN) return;
+
+    const requestChanged = lastRequestRef.current !== request;
+    const showDestChanged = lastShowDestinationRef.current !== showDestination;
+
+    if (!requestChanged && !showDestChanged && lastRouteCalcLocRef.current) {
+      const dist = haversineMapMeters(
+        lastRouteCalcLocRef.current.lat, lastRouteCalcLocRef.current.lng,
+        driverLocation.lat, driverLocation.lng
+      );
+      if (dist < ROUTE_RECALC_MIN_METERS) return; // Marcador se mueve, ruta no cambia
+    }
+
+    // Actualizar refs antes de calcular
+    lastRouteCalcLocRef.current = { lat: driverLocation.lat, lng: driverLocation.lng };
+    lastShowDestinationRef.current = showDestination;
+    lastRequestRef.current = request;
+
     const calculateRoutes = async () => {
     setIsCalculatingRoute(true);
     
@@ -255,9 +300,7 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
     }
     };
 
-    if (request && driverLocation && MAPBOX_TOKEN) {
-      calculateRoutes();
-    }
+    calculateRoutes();
   }, [request, driverLocation, showDestination]);
 
   if (!MAPBOX_TOKEN) {

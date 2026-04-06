@@ -218,10 +218,6 @@ const ActiveService = () => {
     };
 
     const sendLocation = (location) => {
-      // Actualizar el marcador del conductor en el mapa local en cada lectura GPS
-      // independientemente del filtro de distancia para el socket
-      setDriverLocation({ lat: location.lat, lng: location.lng });
-
       let shouldSend = true;
       if (lastSentLocation) {
         shouldSend = calculateDistance(
@@ -230,6 +226,10 @@ const ActiveService = () => {
         ) >= MIN_DISTANCE_METERS;
       }
       if (shouldSend) {
+        // Actualizar marcador del mapa solo cuando el conductor se movió ≥10m.
+        // Antes estaba fuera del bloque y se llamaba en cada tick GPS, causando
+        // que RequestDetailMap recalculara rutas y animaciones constantemente.
+        setDriverLocation({ lat: location.lat, lng: location.lng });
         // driverId: serviceData.driverId puede ser undefined (el evento service:accepted
         // no lo incluye). Se usa el ID del usuario del driver como fuente confiable.
         const driverUserRaw = localStorage.getItem('user');

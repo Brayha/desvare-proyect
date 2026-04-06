@@ -567,6 +567,7 @@ io.on('connection', (socket) => {
     if (driverData) {
       io.to(driverData.socketId).emit('service:accepted', {
         requestId: data.requestId,
+        clientId: data.clientId,        // ← necesario para service:code-validated
         clientName: data.clientName,
         clientPhone: data.clientPhone,
         securityCode: data.securityCode,
