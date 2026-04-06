@@ -721,12 +721,43 @@ io.on('connection', (socket) => {
   socket.on('driver:location-update', async (data) => {
     const { requestId, driverId, location, heading, speed, accuracy } = data;
 
+    // Contador de updates para este socket (se reinicia si el socket reconecta)
+    if (!socket.locationUpdateCount) socket.locationUpdateCount = 0;
+    socket.locationUpdateCount++;
+
+    console.log(`📍 [#${socket.locationUpdateCount}] GPS Conductor: ${driverId} (${location.lat?.toFixed(5)}, ${location.lng?.toFixed(5)})`);
+
+    // ─────────────────────────────────────────────────────────────────────
+    // PERSISTENCIA EN MONGODB: SIEMPRE, sin importar si el cliente tiene socket.
+    // Esta es la fuente de datos para el polling REST de iOS Safari.
+    // Si solo se guarda cuando el socket del cliente está activo, iOS nunca
+    // recibe la ubicación porque su socket muere constantemente.
+    // ─────────────────────────────────────────────────────────────────────
+    if (socket.locationUpdateCount === 1 || socket.locationUpdateCount % 3 === 0) {
+      try {
+        const Request = require('./models/Request');
+        await Request.findByIdAndUpdate(requestId, {
+          'trackingData.lastDriverLocation.lat': location.lat,
+          'trackingData.lastDriverLocation.lng': location.lng,
+          'trackingData.lastDriverLocation.heading': heading || 0,
+          'trackingData.lastDriverLocation.speed': speed || 0,
+          'trackingData.lastDriverLocation.updatedAt': new Date()
+        });
+        console.log(`💾 [#${socket.locationUpdateCount}] lastDriverLocation guardado en DB para ${requestId}`);
+      } catch (dbErr) {
+        console.warn('⚠️ Error guardando lastDriverLocation:', dbErr.message);
+      }
+    }
+
     const sendLocationToClient = (storedClientSocketId, clientId) => {
       // Siempre consultar connectedClients para obtener el socketId más reciente.
       // Esto evita enviar a un socket obsoleto si el cliente reconectó después
       // de que se registró el servicio activo (p.ej. navegó de WaitingQuotes a DriverOnWay).
       const freshSocketId = connectedClients.get(clientId) || storedClientSocketId;
-      if (!freshSocketId) return;
+      if (!freshSocketId) {
+        console.log(`⚠️ Cliente ${clientId} sin socket activo — ubicación ya persistida en DB para polling REST`);
+        return;
+      }
 
       io.to(freshSocketId).emit('driver:location-update', {
         requestId,
@@ -746,27 +777,7 @@ io.on('connection', (socket) => {
         }
       }
 
-      if (!socket.locationUpdateCount) socket.locationUpdateCount = 0;
-      socket.locationUpdateCount++;
-      // Log cada update para diagnóstico de tracking
-      console.log(`📍 [#${socket.locationUpdateCount}] GPS Conductor: ${driverId} (${location.lat?.toFixed(5)}, ${location.lng?.toFixed(5)}) → Cliente socket: ${freshSocketId}`);
-
-      // Persistir última ubicación en MongoDB: en el primer update y luego cada 3
-      // Esto permite el polling REST desde iOS Safari cuando el socket cae
-      if (socket.locationUpdateCount === 1 || socket.locationUpdateCount % 3 === 0) {
-        try {
-          const Request = require('./models/Request');
-          await Request.findByIdAndUpdate(requestId, {
-            'trackingData.lastDriverLocation.lat': location.lat,
-            'trackingData.lastDriverLocation.lng': location.lng,
-            'trackingData.lastDriverLocation.heading': heading || 0,
-            'trackingData.lastDriverLocation.speed': speed || 0,
-            'trackingData.lastDriverLocation.updatedAt': new Date()
-          });
-        } catch (dbErr) {
-          // No crítico — el socket ya envió la ubicación
-        }
-      }
+      console.log(`📡 Ubicación enviada por socket al cliente ${clientId} (${freshSocketId})`);
     };
 
     // Intentar desde RAM primero (camino rápido)

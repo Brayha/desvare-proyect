@@ -234,6 +234,8 @@ const WaitingQuotes = () => {
     let handleVisibilityChange = () => {};
     let handleOnline = () => {};
     let handleOffline = () => {};
+    let handleWQConnect = () => {};
+    let handleWQDisconnect = () => {};
     let pollInterval = null;
     let heartbeatInterval = null;
 
@@ -293,15 +295,16 @@ const WaitingQuotes = () => {
       // ─────────────────────────────────────────────
       // Fix 1: socket.on('connect') — evento correcto en Socket.IO v4
       // Dispara en conexión inicial Y en cada reconexión
-      // Usamos handlers nombrados para cleanup selectivo (off con referencia)
+      // Los handlers se asignan a variables declaradas en el scope externo
+      // para que el cleanup pueda removerlos con off(event, handler)
       // ─────────────────────────────────────────────
-      const handleWQConnect = () => {
+      handleWQConnect = () => {
         if (!isMounted) return;
         console.log('✅ Socket conectado/reconectado — re-registrando cliente');
         setConnectionStatus('connected');
         recoverConnection();
       };
-      const handleWQDisconnect = () => {
+      handleWQDisconnect = () => {
         if (!isMounted) return;
         console.log('⚠️ Socket desconectado — mostrando estado reconectando');
         setConnectionStatus('reconnecting');
