@@ -122,15 +122,32 @@ const ActiveService = () => {
       setCodeValidated(true);
       present({ message: "✅ Código correcto. Ahora puedes ver el destino.", duration: 2500, color: "success" });
 
-      // Notificar al cliente que el código fue validado y el servicio está en curso
       const storedUser = localStorage.getItem("user");
       const driverUser = storedUser ? JSON.parse(storedUser) : null;
+      const driverId = driverUser?.id || driverUser?._id;
+      const driverName = driverUser?.name || 'Tu conductor';
+
+      // Canal 1: Socket (inmediato si está conectado)
       socketService.getSocket()?.emit('service:code-validated', {
         requestId: serviceData.requestId,
         clientId: serviceData.clientId,
-        driverId: driverUser?.id || driverUser?._id,
-        driverName: driverUser?.name || 'Tu conductor',
+        driverId,
+        driverName,
       });
+
+      // Canal 2: REST (garantía — funciona aunque el socket esté reconectando)
+      // La PWA lo detecta via polling (status === 'in_progress') en el siguiente tick.
+      fetch(`${API_URL}/api/requests/${serviceData.requestId}/validate-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: inputCode,
+          driverId,
+          driverName,
+          clientId: serviceData.clientId,
+        }),
+      }).catch(err => console.warn('⚠️ validate-code REST falló (no crítico):', err.message));
+
     } else {
       present({ message: "❌ Código incorrecto. Intenta de nuevo.", duration: 2000, color: "danger" });
       setCodeDigits(["", "", "", ""]);

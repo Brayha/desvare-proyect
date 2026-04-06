@@ -700,6 +700,64 @@ router.get('/:id/driver-location', async (req, res) => {
   }
 });
 
+// POST /api/requests/:id/validate-code
+// Fallback REST para cuando el socket está caído al momento de validar el código.
+// El conductor llama a este endpoint ADEMÁS de emitir el evento socket.
+// La PWA lo detecta via polling (status === 'in_progress').
+router.post('/:id/validate-code', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { code, driverId, driverName, clientId } = req.body;
+
+    const request = await Request.findById(id).select('securityCode status clientId trackingData');
+    if (!request) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    if (request.status !== 'accepted') {
+      // Ya validado previamente o estado inválido — no es error, solo informar
+      return res.json({ success: true, alreadyValidated: true, status: request.status });
+    }
+
+    const correctCode = request.securityCode?.toString();
+    if (!correctCode || code?.toString() !== correctCode) {
+      return res.status(400).json({ error: 'Código incorrecto' });
+    }
+
+    // Marcar servicio como en curso
+    await Request.findByIdAndUpdate(id, {
+      status: 'in_progress',
+      updatedAt: new Date()
+    });
+
+    console.log(`🔑 [REST] Código validado para servicio ${id} por conductor ${driverName || driverId}`);
+
+    // Intentar notificar al cliente via socket si está conectado
+    const resolvedClientId = clientId || request.clientId?.toString() || request.trackingData?.clientId;
+    const io = global.io;
+    const connectedClients = global.connectedClients;
+
+    if (io && connectedClients && resolvedClientId) {
+      const clientSocketId = connectedClients.get(resolvedClientId);
+      if (clientSocketId) {
+        io.to(clientSocketId).emit('service:started', {
+          requestId: id,
+          driverName: driverName || 'Tu conductor',
+          message: '¡El código fue ingresado! Tu vehículo ya está en la grúa.',
+        });
+        console.log(`📡 [REST] service:started emitido al cliente ${resolvedClientId} via socket`);
+      } else {
+        console.log(`⚠️ [REST] Cliente ${resolvedClientId} no conectado — PWA detectará via polling`);
+      }
+    }
+
+    return res.json({ success: true, status: 'in_progress' });
+  } catch (err) {
+    console.error('❌ Error en validate-code REST:', err.message);
+    return res.status(500).json({ error: 'Error validando código' });
+  }
+});
+
 // GET /api/requests/:id - Obtener una solicitud específica
 router.get('/:id', async (req, res) => {
   try {
