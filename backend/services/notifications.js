@@ -296,6 +296,32 @@ const notifyClientNewQuote = async (fcmToken, quoteData) => {
   );
 };
 
+/**
+ * Notifica al cliente que su conductor está llegando (a menos de X metros)
+ * @param {string} fcmToken - Token FCM del cliente
+ * @param {Object} data
+ * @param {string} data.requestId - ID de la solicitud
+ * @param {string} data.driverName - Nombre del conductor
+ * @param {number} data.distanceMeters - Distancia aproximada al origen
+ * @returns {Promise<string>}
+ */
+const notifyClientDriverArriving = async (fcmToken, data) => {
+  const minutes = data.distanceMeters <= 200 ? 1 : Math.ceil(data.distanceMeters / 300);
+  const eta = minutes <= 1 ? 'en menos de 1 minuto' : `en aproximadamente ${minutes} min`;
+
+  return await sendPushNotification(
+    fcmToken,
+    '🚛 ¡Tu grúa está llegando!',
+    `${data.driverName} llega ${eta}. Prepárate.`,
+    {
+      type: 'DRIVER_ARRIVING',
+      requestId: data.requestId || '',
+      distanceMeters: data.distanceMeters?.toString() || '0',
+      url: '/driver-on-way',
+    }
+  );
+};
+
 module.exports = {
   sendPushNotification,
   sendMultipleNotifications,
@@ -305,6 +331,7 @@ module.exports = {
   notifyAccountApproved,
   notifyAccountRejected,
   notifyClientNewQuote,
-  notifyClientServiceCompleted
+  notifyClientServiceCompleted,
+  notifyClientDriverArriving,
 };
 

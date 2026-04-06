@@ -34,6 +34,8 @@ const DriverOnWay = () => {
   const [isLoading, setIsLoading] = useState(true);
   // true cuando el conductor ingresó el código → servicio "en camino al destino"
   const [serviceStarted, setServiceStarted] = useState(false);
+  // true cuando el conductor está a <500m del origen → banner "está llegando"
+  const [driverArriving, setDriverArriving] = useState(false);
   const serviceDataRef = useRef(null); // ref para acceder en callbacks sin stale closure
   const navigatedRef = useRef(false);  // evitar navegaciones dobles
   const pageRef = useRef(null);        // ref para la IonPage (deshabilitar swipe-back)
@@ -178,13 +180,20 @@ const DriverOnWay = () => {
     }
 
     // ─────────────────────────────────────────────
-    // Visibilitychange: app visible → verificar estado
+    // Visibilitychange: app visible → verificar estado Y ubicación inmediata
     // Cubre: desbloquear pantalla, volver de otra app
+    // Al volver, se fuerza pollDriverLocation() inmediatamente sin esperar
+    // el próximo tick del setInterval (que puede tardar hasta 4 segundos).
+    // Así el cliente ve la posición actual del conductor al instante.
     // ─────────────────────────────────────────────
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('👁️ DriverOnWay visible - verificando socket y estado del servicio...');
+        console.log('👁️ DriverOnWay visible - actualizando ubicación y estado...');
         recoverConnection();
+        // Forzar lastSocketUpdate a 0 para que pollDriverLocation ignore
+        // el "socket alive" check y haga el fetch inmediatamente
+        lastSocketUpdate = 0;
+        pollDriverLocation();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -285,10 +294,22 @@ const DriverOnWay = () => {
       setServiceStarted(true);
       showSuccess('¡Tu vehículo ya está en la grúa! En camino al destino.');
     };
+
+    // ─────────────────────────────────────────────
+    // Capa 4: escuchar que el conductor está llegando (<500m)
+    // El banner se muestra en la UI mientras el conductor se acerca
+    // ─────────────────────────────────────────────
+    const handleDriverArriving = (data) => {
+      console.log('🚛 [SOCKET] Conductor llegando:', data);
+      setDriverArriving(true);
+    };
+
     const rawSocket2 = socketService.getSocket();
     if (rawSocket2) {
       rawSocket2.off('service:started', handleServiceStarted);
       rawSocket2.on('service:started', handleServiceStarted);
+      rawSocket2.off('driver:arriving', handleDriverArriving);
+      rawSocket2.on('driver:arriving', handleDriverArriving);
     }
 
     return () => {
@@ -301,6 +322,7 @@ const DriverOnWay = () => {
       if (rawSock) {
         rawSock.off('connect', handleSocketConnect);
         rawSock.off('service:started', handleServiceStarted);
+        rawSock.off('driver:arriving', handleDriverArriving);
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);
@@ -657,6 +679,17 @@ const DriverOnWay = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Banner "conductor llegando": aparece cuando el conductor está a <500m */}
+                {driverArriving && !serviceStarted && (
+                  <div className="driver-arriving-banner">
+                    <span className="arriving-pulse">🚛</span>
+                    <div>
+                      <strong>¡Tu grúa está llegando!</strong>
+                      <p>El conductor está muy cerca. Prepárate.</p>
+                    </div>
+                  </div>
+                )}
 
                 {!serviceStarted ? (
                   /* ── Estado: esperando que el conductor ingrese el código ── */

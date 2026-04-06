@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote, notifyClientServiceCompleted } = require('./services/notifications');
+const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote, notifyClientServiceCompleted, notifyClientDriverArriving } = require('./services/notifications');
 
 const app = express();
 const server = http.createServer(app);
@@ -133,10 +133,29 @@ const connectedDrivers = new Map(); // Almacena { driverId: { socketId, isOnline
 const connectedClients = new Map(); // Almacena socket.id de clientes conectados
 const activeServices = new Map(); // Almacena { requestId: { clientId, driverId, clientSocketId, driverSocketId } }
 
+// Control de notificación "conductor llegando": evita enviar más de una vez por servicio
+const driverArrivingNotified = new Set(); // Set de requestIds ya notificados
+
 // 🆕 EXPORTAR para usarlo en las rutas
 global.connectedClients = connectedClients;
 global.connectedDrivers = connectedDrivers;
 global.activeServices = activeServices;
+
+/**
+ * Calcula distancia en metros entre dos puntos GPS usando la fórmula de Haversine.
+ * @param {number} lat1 @param {number} lng1
+ * @param {number} lat2 @param {number} lng2
+ * @returns {number} distancia en metros
+ */
+function haversineMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const toRad = deg => deg * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 io.on('connection', (socket) => {
   console.log('🔌 Nuevo cliente conectado:', socket.id);
@@ -656,6 +675,7 @@ io.on('connection', (socket) => {
     // Eliminar servicio activo del tracking (RAM + MongoDB)
     if (data.requestId) {
       activeServices.delete(data.requestId);
+      driverArrivingNotified.delete(data.requestId); // Limpiar flag para posibles futuros servicios
       console.log(`📍 Servicio ${data.requestId} removido del tracking (RAM)`);
 
       try {
@@ -747,6 +767,66 @@ io.on('connection', (socket) => {
       } catch (dbErr) {
         console.warn('⚠️ Error guardando lastDriverLocation:', dbErr.message);
       }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // NOTIFICACIÓN "CONDUCTOR LLEGANDO": se dispara UNA sola vez cuando el
+    // conductor está a menos de 500m del origen del cliente.
+    // Usa driverArrivingNotified (Set en RAM) para evitar spam.
+    // También emite socket 'driver:arriving' para clientes conectados.
+    // ─────────────────────────────────────────────────────────────────────
+    if (!driverArrivingNotified.has(requestId)) {
+      // Ejecutar en background para no bloquear el envío de ubicación
+      (async () => {
+        try {
+          const Request = require('./models/Request');
+          const User = require('./models/User');
+          const req = await Request.findById(requestId)
+            .select('origin clientId clientName status trackingData assignedDriverId')
+            .lean();
+
+          if (!req || req.status !== 'accepted') return; // Solo cuando va en camino, no in_progress
+          if (!req.origin?.coordinates?.length) return;
+
+          const [originLng, originLat] = req.origin.coordinates; // GeoJSON: [lng, lat]
+          const dist = haversineMeters(location.lat, location.lng, originLat, originLng);
+
+          console.log(`📏 Distancia conductor→origen: ${Math.round(dist)}m (servicio ${requestId})`);
+
+          if (dist <= 500) {
+            driverArrivingNotified.add(requestId); // Marcar para no volver a notificar
+
+            // Buscar nombre del conductor (driver snapshot o consulta)
+            const service = activeServices.get(requestId);
+            const driverInfo = connectedDrivers.get(driverId);
+            const driverName = driverInfo?.name || 'Tu conductor';
+
+            // 1. Notificación FCM (funciona aunque el cliente no esté en la app)
+            const clientUser = await User.findById(req.clientId).select('fcmToken').lean();
+            if (clientUser?.fcmToken) {
+              await notifyClientDriverArriving(clientUser.fcmToken, {
+                requestId,
+                driverName,
+                distanceMeters: Math.round(dist),
+              }).catch(e => console.warn('⚠️ FCM driver:arriving error:', e.message));
+              console.log(`🔔 Notificación "conductor llegando" enviada al cliente (${Math.round(dist)}m)`);
+            }
+
+            // 2. Evento socket (si el cliente está conectado, se actualiza la UI inmediatamente)
+            const clientSocketId = service?.clientSocketId || connectedClients.get(req.clientId?.toString());
+            if (clientSocketId) {
+              io.to(clientSocketId).emit('driver:arriving', {
+                requestId,
+                driverName,
+                distanceMeters: Math.round(dist),
+              });
+              console.log(`📡 Evento driver:arriving enviado por socket al cliente`);
+            }
+          }
+        } catch (arrivingErr) {
+          console.warn('⚠️ Error en notificación driver:arriving:', arrivingErr.message);
+        }
+      })();
     }
 
     const sendLocationToClient = (storedClientSocketId, clientId) => {

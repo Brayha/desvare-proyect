@@ -471,6 +471,47 @@
   margin: 0;
 }
 
+/* Banner "conductor llegando" */
+.driver-arriving-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  color: #fff;
+  animation: arriving-slide-in 0.4s ease;
+}
+
+.driver-arriving-banner strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.driver-arriving-banner p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.arriving-pulse {
+  font-size: 28px;
+  animation: arriving-bounce 0.8s infinite alternate ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes arriving-bounce {
+  from { transform: translateX(-3px); }
+  to   { transform: translateX(3px); }
+}
+
+@keyframes arriving-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .code-digit {

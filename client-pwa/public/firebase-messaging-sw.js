@@ -4,15 +4,15 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
-// Configuración de Firebase (reemplazar con tus credenciales reales)
-// Estas son las mismas que usas en el frontend
+// Configuración de Firebase — proyecto desvare-production
+// Debe coincidir EXACTAMENTE con las variables VITE_FIREBASE_* del .env
 const firebaseConfig = {
-  apiKey: "AIzaSyDsHoj8trl_sIf5SCWNF3BFJQOuj9kwvMk",
-  authDomain: "app-desvare.firebaseapp.com",
-  projectId: "app-desvare",
-  storageBucket: "app-desvare.firebasestorage.app",
-  messagingSenderId: "805328160383",
-  appId: "1:805328160383:web:51a99efb6881693f16614a"
+  apiKey: "AIzaSy8nF2OsNcq4FS-aYVs_ymPEdPK8N2wze_Q",
+  authDomain: "desvare-production.firebaseapp.com",
+  projectId: "desvare-production",
+  storageBucket: "desvare-production.firebasestorage.app",
+  messagingSenderId: "200097542658",
+  appId: "1:200097542658:web:22e41ad8dbef3c6889ed1b"
 };
 
 // Inicializar Firebase en el Service Worker

@@ -27,7 +27,7 @@ class SocketService {
     // Crear nueva conexión
     console.log('🔌 Creando nueva conexión Socket.IO...');
     this.socket = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'], // polling como fallback en redes malas
+      transports: ['polling', 'websocket'], // polling primero: más compatible con iOS Safari y proxies móviles
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: Infinity,      // Nunca rendirse
