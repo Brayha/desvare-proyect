@@ -226,10 +226,20 @@ io.on('connection', (socket) => {
   });
 
   // Heartbeat del cliente (mantiene el socket vivo en iOS Safari)
-  socket.on('client:ping', ({ clientId }) => {
+  socket.on('client:ping', async ({ clientId }) => {
     if (clientId) {
-      // Actualizar el socketId en caso de que haya cambiado (reconexión)
+      // Actualizar socketId en connectedClients
       connectedClients.set(clientId, socket.id);
+
+      // También actualizar activeServices con el socketId actual
+      // Esto es crítico para iOS: el socket puede cambiar de ID entre heartbeats
+      // sin que se haya emitido un client:register explícito
+      for (const [requestId, service] of activeServices.entries()) {
+        if (service.clientId === clientId && service.clientSocketId !== socket.id) {
+          activeServices.set(requestId, { ...service, clientSocketId: socket.id });
+          console.log(`🏓 [PING] activeServices actualizado para servicio ${requestId} (nuevo socketId: ${socket.id})`);
+        }
+      }
     }
     socket.emit('client:pong');
   });
@@ -606,8 +616,22 @@ io.on('connection', (socket) => {
   // ========================================
   // Código de seguridad validado → servicio en curso
   // ========================================
-  socket.on('service:code-validated', (data) => {
+  socket.on('service:code-validated', async (data) => {
     console.log(`🔑 Código validado para servicio ${data.requestId} — notificando cliente ${data.clientId}`);
+
+    // Persistir status en MongoDB para que el polling REST del cliente detecte el cambio
+    // aunque el socket esté caído (iOS Safari)
+    try {
+      const Request = require('./models/Request');
+      await Request.findByIdAndUpdate(data.requestId, {
+        status: 'in_progress',
+        updatedAt: new Date()
+      });
+      console.log(`💾 Status actualizado a 'in_progress' en MongoDB para servicio ${data.requestId}`);
+    } catch (err) {
+      console.error('❌ Error actualizando status in_progress:', err.message);
+    }
+
     const clientSocketId = connectedClients.get(data.clientId);
     if (clientSocketId) {
       io.to(clientSocketId).emit('service:started', {
@@ -617,7 +641,7 @@ io.on('connection', (socket) => {
       });
       console.log(`✅ Cliente ${data.clientId} notificado de inicio de servicio (socket)`);
     } else {
-      console.log(`⚠️ Cliente ${data.clientId} no conectado al validar código`);
+      console.log(`⚠️ Cliente ${data.clientId} no conectado al validar código — status ya persistido en DB`);
     }
   });
 
@@ -724,8 +748,24 @@ io.on('connection', (socket) => {
 
       if (!socket.locationUpdateCount) socket.locationUpdateCount = 0;
       socket.locationUpdateCount++;
-      if (socket.locationUpdateCount % 10 === 0) {
-        console.log(`📍 Ubicación actualizada - Conductor: ${driverId} → Cliente: ${clientId} (socket: ${freshSocketId})`);
+      // Log cada update para diagnóstico de tracking
+      console.log(`📍 [#${socket.locationUpdateCount}] GPS Conductor: ${driverId} (${location.lat?.toFixed(5)}, ${location.lng?.toFixed(5)}) → Cliente socket: ${freshSocketId}`);
+
+      // Persistir última ubicación en MongoDB: en el primer update y luego cada 3
+      // Esto permite el polling REST desde iOS Safari cuando el socket cae
+      if (socket.locationUpdateCount === 1 || socket.locationUpdateCount % 3 === 0) {
+        try {
+          const Request = require('./models/Request');
+          await Request.findByIdAndUpdate(requestId, {
+            'trackingData.lastDriverLocation.lat': location.lat,
+            'trackingData.lastDriverLocation.lng': location.lng,
+            'trackingData.lastDriverLocation.heading': heading || 0,
+            'trackingData.lastDriverLocation.speed': speed || 0,
+            'trackingData.lastDriverLocation.updatedAt': new Date()
+          });
+        } catch (dbErr) {
+          // No crítico — el socket ya envió la ubicación
+        }
       }
     };
 

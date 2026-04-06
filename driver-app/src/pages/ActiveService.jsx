@@ -356,6 +356,36 @@ const ActiveService = () => {
     };
   }, [serviceData]);
 
+  // Re-registrar el conductor cada vez que el socket reconecta.
+  // Sin esto, connectedDrivers en el servidor queda con el socketId viejo
+  // y el conductor no recibe eventos como service:complete correctamente.
+  useEffect(() => {
+    if (!serviceData?.requestId) return;
+
+    const driverUserRaw = localStorage.getItem('user');
+    if (!driverUserRaw) return;
+    const driverUser = JSON.parse(driverUserRaw);
+    const driverId = driverUser?._id || driverUser?.id;
+    if (!driverId) return;
+
+    const reRegisterDriver = () => {
+      console.log('🔄 [RECONEXIÓN] Re-registrando conductor en socket:', driverId);
+      socketService.registerDriver(driverId);
+    };
+
+    // Registrar inmediatamente (por si el socket ya está conectado al montar)
+    if (socketService.isConnected()) {
+      reRegisterDriver();
+    }
+
+    // Registrar callback para cada reconexión futura
+    socketService.onReconnect(reRegisterDriver);
+
+    return () => {
+      socketService.offReconnect(reRegisterDriver);
+    };
+  }, [serviceData]);
+
   const loadDriverPhoto = async () => {
     try {
       const userData = localStorage.getItem("user");

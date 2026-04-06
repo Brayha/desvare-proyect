@@ -293,20 +293,23 @@ const WaitingQuotes = () => {
       // ─────────────────────────────────────────────
       // Fix 1: socket.on('connect') — evento correcto en Socket.IO v4
       // Dispara en conexión inicial Y en cada reconexión
+      // Usamos handlers nombrados para cleanup selectivo (off con referencia)
       // ─────────────────────────────────────────────
+      const handleWQConnect = () => {
+        if (!isMounted) return;
+        console.log('✅ Socket conectado/reconectado — re-registrando cliente');
+        setConnectionStatus('connected');
+        recoverConnection();
+      };
+      const handleWQDisconnect = () => {
+        if (!isMounted) return;
+        console.log('⚠️ Socket desconectado — mostrando estado reconectando');
+        setConnectionStatus('reconnecting');
+      };
       const rawSocket = socketService.getSocket();
       if (rawSocket) {
-        rawSocket.on('connect', () => {
-          if (!isMounted) return;
-          console.log('✅ Socket conectado/reconectado — re-registrando cliente');
-          setConnectionStatus('connected');
-          recoverConnection();
-        });
-        rawSocket.on('disconnect', () => {
-          if (!isMounted) return;
-          console.log('⚠️ Socket desconectado — mostrando estado reconectando');
-          setConnectionStatus('reconnecting');
-        });
+        rawSocket.on('connect', handleWQConnect);
+        rawSocket.on('disconnect', handleWQDisconnect);
       }
 
       // ─────────────────────────────────────────────
@@ -409,8 +412,8 @@ const WaitingQuotes = () => {
       socketService.offQuoteCancelled();
       const rawSocket = socketService.getSocket();
       if (rawSocket) {
-        rawSocket.off('connect');
-        rawSocket.off('disconnect');
+        rawSocket.off('connect', handleWQConnect);
+        rawSocket.off('disconnect', handleWQDisconnect);
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);

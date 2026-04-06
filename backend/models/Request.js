@@ -206,7 +206,15 @@ const requestSchema = new mongoose.Schema({
     clientId: { type: String, default: null },
     driverId: { type: String, default: null },
     isActive: { type: Boolean, default: false },
-    startedAt: { type: Date, default: null }
+    startedAt: { type: Date, default: null },
+    // Última ubicación conocida del conductor (para polling REST en iOS)
+    lastDriverLocation: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+      heading: { type: Number, default: 0 },
+      speed: { type: Number, default: 0 },
+      updatedAt: { type: Date, default: null }
+    }
   },
   
   // Código de seguridad (generado al confirmar servicio)

@@ -45,6 +45,9 @@ const MapPicker = ({
   const mapRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [route, setRoute] = useState(null);
+  // Ruta del conductor hacia el origen del cliente (línea de tracking)
+  const [driverRoute, setDriverRoute] = useState(null);
+  const lastRouteCalcLocation = useRef(null); // posición donde se calculó la última ruta
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   // Controla si el mapa ya se centró automáticamente por primera vez en el conductor
@@ -181,6 +184,47 @@ const MapPicker = ({
     setShowRecenterBtn(false);
   };
 
+  // Calcular ruta del conductor → origen del cliente para mostrar en el mapa de tracking.
+  // Solo aplica cuando hay driverLocation y origin, y NO hay destination (pantalla DriverOnWay).
+  // Se recalcula cuando el conductor se aleja más de 150m del punto donde se calculó la última ruta,
+  // evitando llamadas excesivas a la API de Mapbox.
+  useEffect(() => {
+    if (!driverLocation || !origin || destination) return; // Solo en pantalla de tracking
+
+    const haversineDist = (lat1, lng1, lat2, lng2) => {
+      const R = 6371e3;
+      const f1 = lat1 * Math.PI / 180, f2 = lat2 * Math.PI / 180;
+      const df = (lat2 - lat1) * Math.PI / 180;
+      const dl = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(df/2)**2 + Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    };
+
+    const prev = lastRouteCalcLocation.current;
+    const RECALC_THRESHOLD = 150; // metros
+
+    // Recalcular si es la primera vez o si el conductor se movió ≥150m
+    if (prev && haversineDist(prev.lat, prev.lng, driverLocation.lat, driverLocation.lng) < RECALC_THRESHOLD) {
+      return;
+    }
+
+    lastRouteCalcLocation.current = driverLocation;
+
+    const calcDriverRoute = async () => {
+      try {
+        const routeData = await getRoute(
+          [driverLocation.lng, driverLocation.lat],
+          [origin.lng, origin.lat]
+        );
+        setDriverRoute(routeData);
+      } catch {
+        // Silencioso: la línea simplemente no aparece si falla
+      }
+    };
+
+    calcDriverRoute();
+  }, [driverLocation, origin, destination]);
+
   // Centrar mapa en la cotización activa del slider
   useEffect(() => {
     if (!focusedQuoteLocation || !mapRef.current || !isMapLoaded) return;
@@ -220,14 +264,26 @@ const MapPicker = ({
     }
   };
 
-  // Estilo de la línea de ruta (negra y delgada)
+  // Estilo de la ruta principal (origen → destino): negra y delgada
   const routeLayerStyle = {
     id: 'route',
     type: 'line',
     paint: {
-      'line-color': '#000000',  // Negro
-      'line-width': 3,          // Más delgada
+      'line-color': '#000000',
+      'line-width': 3,
       'line-opacity': 0.8,
+    },
+  };
+
+  // Estilo de la ruta del conductor → origen del cliente: azul punteada
+  const driverRouteLayerStyle = {
+    id: 'driver-route',
+    type: 'line',
+    paint: {
+      'line-color': '#3b82f6',
+      'line-width': 4,
+      'line-opacity': 0.85,
+      'line-dasharray': [2, 2],
     },
   };
 
@@ -305,7 +361,7 @@ const MapPicker = ({
           );
         })}
 
-        {/* 🆕 Marcador del Conductor en Tiempo Real (con foto circular) */}
+        {/* Marcador del Conductor en Tiempo Real (con foto circular) */}
         {driverLocation && (
           <Marker
             longitude={driverLocation.lng}
@@ -315,20 +371,23 @@ const MapPicker = ({
             <div className="driver-marker-container">
               {/* Pulso animado de fondo */}
               <div className="driver-marker-pulse"></div>
-              
-              {/* Foto circular del conductor */}
-              <div 
-                className="driver-marker-photo"
-                style={{
-                  transform: `rotate(${driverHeading}deg)`
-                }}
+
+              {/* Flecha de dirección: rota con el heading del vehículo.
+                  Combinamos translateX(-50%) (centrado CSS) + rotate(heading) */}
+              <div
+                className="driver-marker-arrow"
+                style={{ transform: `translateX(-50%) rotate(${driverHeading}deg)` }}
               >
+                ▲
+              </div>
+
+              {/* Foto circular del conductor: NUNCA rota (la cara siempre mirando hacia arriba) */}
+              <div className="driver-marker-photo">
                 {driverPhoto ? (
-                  <img 
-                    src={driverPhoto} 
+                  <img
+                    src={driverPhoto}
                     alt={driverName}
                     onError={(e) => {
-                      // Fallback si la imagen no carga
                       e.target.style.display = 'none';
                       e.target.parentElement.classList.add('driver-marker-fallback');
                       e.target.parentElement.textContent = driverName?.charAt(0) || 'C';
@@ -340,21 +399,18 @@ const MapPicker = ({
                   </div>
                 )}
               </div>
-              
-              {/* Indicador de dirección (flecha) */}
-              <div 
-                className="driver-marker-arrow"
-                style={{
-                  transform: `rotate(${driverHeading}deg)`
-                }}
-              >
-                ▲
-              </div>
             </div>
           </Marker>
         )}
 
-        {/* Línea de Ruta */}
+        {/* Ruta del conductor → origen del cliente (línea azul punteada, pantalla de tracking) */}
+        {driverRoute && driverRoute.geometry && (
+          <Source id="driver-route" type="geojson" data={driverRoute.geometry}>
+            <Layer {...driverRouteLayerStyle} />
+          </Source>
+        )}
+
+        {/* Línea de Ruta principal (origen → destino) */}
         {route && route.geometry && (
           <Source id="route" type="geojson" data={route.geometry}>
             <Layer {...routeLayerStyle} />

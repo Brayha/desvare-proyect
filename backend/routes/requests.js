@@ -668,6 +668,38 @@ router.get('/client/:id', async (req, res) => {
   }
 });
 
+// GET /api/requests/:id/driver-location
+// Devuelve la última ubicación conocida del conductor (para polling iOS Safari)
+router.get('/:id/driver-location', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const request = await Request.findById(id)
+      .select('trackingData.lastDriverLocation trackingData.isActive status')
+      .lean();
+
+    if (!request) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    const loc = request.trackingData?.lastDriverLocation;
+    if (!loc || loc.lat == null || loc.lng == null) {
+      return res.status(204).end(); // Sin ubicación disponible todavía
+    }
+
+    return res.json({
+      lat: loc.lat,
+      lng: loc.lng,
+      heading: loc.heading || 0,
+      speed: loc.speed || 0,
+      updatedAt: loc.updatedAt,
+      isActive: request.trackingData?.isActive,
+      status: request.status
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'Error obteniendo ubicación del conductor' });
+  }
+});
+
 // GET /api/requests/:id - Obtener una solicitud específica
 router.get('/:id', async (req, res) => {
   try {

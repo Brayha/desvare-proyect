@@ -167,12 +167,14 @@ const DriverOnWay = () => {
 
     // Fix: socket.on('connect') es el evento correcto en Socket.IO v4
     // Dispara en conexión inicial Y en cada reconexión (reconnect no dispara en v4)
+    // Usamos handler nombrado para poder removerlo con off(event, handler) en cleanup
+    const handleSocketConnect = () => {
+      console.log('🔄 Socket reconectado en DriverOnWay - re-registrando cliente...');
+      recoverConnection();
+    };
     const rawSocket = socketService.getSocket();
     if (rawSocket) {
-      rawSocket.on('connect', () => {
-        console.log('🔄 Socket reconectado en DriverOnWay - re-registrando cliente...');
-        recoverConnection();
-      });
+      rawSocket.on('connect', handleSocketConnect);
     }
 
     // ─────────────────────────────────────────────
@@ -209,36 +211,96 @@ const DriverOnWay = () => {
     }, 25000);
 
     // ─────────────────────────────────────────────
-    // Tracking de ubicación conductor en tiempo real
+    // CAPA SOCKET: ubicación en tiempo real inmediata
+    // Funciona bien en Android y cuando iOS está activo
     // ─────────────────────────────────────────────
+    // Inicializar con Date.now() para que el polling no dispare en los primeros 6s
+    // mientras el socket tiene oportunidad de conectarse y enviar la primera ubicación
+    let lastSocketUpdate = Date.now();
     socketService.onLocationUpdate((data) => {
       setDriverLocation({ lat: data.location.lat, lng: data.location.lng });
       setDriverHeading(data.heading || 0);
+      lastSocketUpdate = Date.now();
+      console.log('📡 [SOCKET] Ubicación conductor recibida:', data.location);
     });
+
+    // ─────────────────────────────────────────────
+    // CAPA POLLING REST: fallback para iOS Safari
+    // iOS mata WebSockets agresivamente. Este polling
+    // garantiza que la ubicación se actualice aunque
+    // el socket esté caído (como hacen Uber/Picap).
+    // Cada petición HTTP es independiente y no requiere
+    // conexión persistente.
+    // ─────────────────────────────────────────────
+    const pollDriverLocation = async () => {
+      if (navigatedRef.current) return;
+      const reqId = serviceDataRef.current?.requestId;
+      if (!reqId) return;
+
+      // Solo usar polling si el socket no ha enviado nada en los últimos 6s
+      // (si el socket funciona bien, no se hace la petición REST innecesariamente)
+      const socketIsAlive = (Date.now() - lastSocketUpdate) < 6000;
+      if (socketIsAlive) return;
+
+      try {
+        const res = await fetch(`${API_URL}/api/requests/${reqId}/driver-location`);
+        if (res.status === 204) return; // Sin ubicación todavía
+        if (!res.ok) return;
+        const body = await res.json();
+        if (body.lat && body.lng) {
+          setDriverLocation({ lat: body.lat, lng: body.lng });
+          setDriverHeading(body.heading || 0);
+          console.log('🔄 [POLLING] Ubicación conductor actualizada via REST:', body.lat, body.lng);
+        }
+        // Detectar código validado por el conductor cuando el socket estaba caído.
+        // El status cambia a 'in_progress' cuando el conductor ingresa el código correctamente.
+        if (body.status === 'in_progress') {
+          setServiceStarted(true);
+          console.log('🔑 [POLLING] Código validado detectado via REST — servicio en curso');
+        }
+        // Detectar servicio completado durante la desconexión
+        if (body.status === 'completed') {
+          console.log('✅ [POLLING-LOC] Servicio completado detectado');
+          const fullRes = await fetch(`${API_URL}/api/requests/${reqId}`);
+          if (fullRes.ok) {
+            const full = await fullRes.json();
+            goToRating(full.request?.completedAt);
+          }
+        }
+      } catch {
+        // Silencioso: es un fallback, no el canal principal
+      }
+    };
+
+    // Polling cada 4 segundos (similar a Uber/Picap)
+    const locationPollInterval = setInterval(pollDriverLocation, 4000);
 
     // ─────────────────────────────────────────────
     // Capa 3: escuchar que el conductor validó el código
     // → mostrar nueva UI "en camino al destino"
+    // Usamos handler nombrado para cleanup selectivo
     // ─────────────────────────────────────────────
+    const handleServiceStarted = (data) => {
+      console.log('🔑 [SOCKET] Código validado — servicio en curso:', data);
+      setServiceStarted(true);
+      showSuccess('¡Tu vehículo ya está en la grúa! En camino al destino.');
+    };
     const rawSocket2 = socketService.getSocket();
     if (rawSocket2) {
-      rawSocket2.off('service:started');
-      rawSocket2.on('service:started', (data) => {
-        console.log('🔑 [SOCKET] Código validado — servicio en curso:', data);
-        setServiceStarted(true);
-        showSuccess('¡Tu vehículo ya está en la grúa! En camino al destino.');
-      });
+      rawSocket2.off('service:started', handleServiceStarted);
+      rawSocket2.on('service:started', handleServiceStarted);
     }
 
     return () => {
       clearInterval(pollInterval);
       clearInterval(heartbeatInterval);
+      clearInterval(locationPollInterval);
       socketService.offServiceCompleted();
       socketService.offLocationUpdate();
       const rawSock = socketService.getSocket();
       if (rawSock) {
-        rawSock.off('connect');
-        rawSock.off('service:started');
+        rawSock.off('connect', handleSocketConnect);
+        rawSock.off('service:started', handleServiceStarted);
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);
