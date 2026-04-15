@@ -34,8 +34,9 @@ const DriverOnWay = () => {
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverHeading, setDriverHeading] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  // lastLocationSource diferencia si la última ubicación vino por socket o por polling REST
   const [lastLocationSource, setLastLocationSource] = useState(null);
+  // true cuando el conductor ingresó el código y el vehículo ya está en la grúa
+  const [serviceStarted, setServiceStarted] = useState(false);
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -165,6 +166,13 @@ const DriverOnWay = () => {
       setLastLocationSource('socket');
     });
 
+    // El conductor ingresó el código: vehículo en la grúa, vamos al destino
+    socketService.onServiceStarted((data) => {
+      console.log('🚛 Servicio iniciado (código validado):', data);
+      setServiceStarted(true);
+      showSuccess('¡Tu vehículo ya está en la grúa! Vamos al destino 🚛');
+    });
+
     // Primera consulta inmediata al montar (muestra la última posición conocida)
     pollDriverLocation();
     const locationPollInterval = setInterval(pollDriverLocation, LOCATION_POLL_INTERVAL_MS);
@@ -176,6 +184,7 @@ const DriverOnWay = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       socketService.offReconnect(handleSocketReconnect);
       socketService.offServiceCompleted();
+      socketService.offServiceStarted();
       socketService.offLocationUpdate();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -504,26 +513,62 @@ const DriverOnWay = () => {
                   </div>
                 </div>
                 
-                <div className="code-box">
-                  <div className="box-info">
-                    <h4>🔒 Código de Seguridad</h4>
-                    <div className="code-digits">
-                      {serviceData.securityCode
-                        ?.split("")
-                        .map((digit, index) => (
-                          <div key={index} className="digit">
-                            {digit}
-                          </div>
-                        ))}
+                {/* ── FASE 1: Esperando código (conductor en camino) ── */}
+                {!serviceStarted && (
+                  <div className="code-box">
+                    <div className="box-info">
+                      <h4>🔒 Código de Seguridad</h4>
+                      <div className="code-digits">
+                        {serviceData.securityCode
+                          ?.split("")
+                          .map((digit, index) => (
+                            <div key={index} className="digit">
+                              {digit}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                    <p>
+                      Cuando tu vehículo esté sobre la grúa, dale este código al
+                      conductor para habilitarle el destino
+                    </p>
+                  </div>
+                )}
+
+                {/* ── FASE 2: Código validado → vamos al destino ── */}
+                {serviceStarted && (
+                  <div className="service-in-progress-box">
+                    <div className="sip-header">
+                      <span className="sip-icon">🚛</span>
+                      <div>
+                        <p className="sip-title">¡Tu vehículo ya está en la grúa!</p>
+                        <p className="sip-subtitle">Vamos hacia el destino</p>
+                      </div>
+                    </div>
+
+                    <div className="sip-route">
+                      {/* Origen: completado */}
+                      <div className="sip-route-item sip-route-item--done">
+                        <span className="sip-dot sip-dot--done">✓</span>
+                        <span>
+                          {serviceData.origin?.address || 'Punto de recogida'}
+                        </span>
+                      </div>
+                      <div className="sip-route-line" />
+                      {/* Destino: activo */}
+                      <div className="sip-route-item">
+                        <span className="sip-dot sip-dot--dest">📍</span>
+                        <span>
+                          {serviceData.destination?.address || 'Destino del servicio'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <p>
-                    Cuando tu vehículo este sobre la grúa, dale este código al
-                    condutor para habilitarle el destino
-                  </p>
-                </div>
+                )}
               </div>
 
+              {/* Botón cancelar solo antes de que inicie el servicio */}
+              {!serviceStarted && (
               <IonButton
                 expand="block"
                 fill="clear"
@@ -533,6 +578,7 @@ const DriverOnWay = () => {
               >
                 Cancelar Servicio
               </IonButton>
+              )}
             </div>
           </div>
         </div>

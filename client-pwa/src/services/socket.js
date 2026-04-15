@@ -177,6 +177,20 @@ class SocketService {
     }
   }
 
+  // Conductor ingresó el código correctamente → servicio en curso hacia el destino
+  onServiceStarted(callback) {
+    if (this.socket) {
+      this.socket.off('service:started');
+      this.socket.on('service:started', callback);
+    }
+  }
+
+  offServiceStarted() {
+    if (this.socket) {
+      this.socket.off('service:started');
+    }
+  }
+
   // ========================================
   // COMPLETAR SERVICIO
   // ========================================
