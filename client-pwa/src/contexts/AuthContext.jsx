@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { vehicleAPI } from '../services/vehicleAPI';
+import { requestNotificationPermission } from '../services/fcmService';
 
 const AuthContext = createContext();
 
@@ -37,6 +38,15 @@ export const AuthProvider = ({ children }) => {
         
         // Cargar vehículos automáticamente
         await loadVehicles(parsedUser.id);
+
+        // Refrescar token FCM en silencio si ya hay permisos (mantiene MongoDB actualizado)
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          setTimeout(() => {
+            requestNotificationPermission(parsedUser.id).catch(e =>
+              console.warn('⚠️ No se pudo refrescar token FCM al iniciar:', e.message)
+            );
+          }, 3000);
+        }
       } else {
         console.log('ℹ️ No hay sesión activa');
         setIsLoggedIn(false);
@@ -85,20 +95,22 @@ export const AuthProvider = ({ children }) => {
     // Solicitar permisos de notificaciones después del login (con delay de 2 segundos)
     setTimeout(() => {
       const promptDismissed = localStorage.getItem('notificationPromptDismissed') === 'true';
-      const shouldPrompt =
-        typeof window !== 'undefined' &&
-        'Notification' in window &&
-        Notification.permission === 'default' &&
-        !promptDismissed;
-      
-      if (shouldPrompt) {
+      const hasNotificationAPI = typeof window !== 'undefined' && 'Notification' in window;
+
+      if (hasNotificationAPI && Notification.permission === 'granted') {
+        // Permisos ya concedidos → refrescar token en silencio para mantener MongoDB actualizado
+        console.log('🔄 Refrescando token FCM en background...');
+        requestNotificationPermission(userData.id).catch(e =>
+          console.warn('⚠️ No se pudo refrescar token FCM:', e.message)
+        );
+      } else if (hasNotificationAPI && Notification.permission === 'default' && !promptDismissed) {
         console.log('🔔 Mostrando prompt de notificaciones...');
         setShowNotificationPrompt(true);
       } else {
         console.log('ℹ️ Prompt de notificaciones no necesario:', {
           promptDismissed,
-          notificationAvailable: 'Notification' in window,
-          permission: typeof Notification !== 'undefined' ? Notification.permission : 'N/A'
+          notificationAvailable: hasNotificationAPI,
+          permission: hasNotificationAPI ? Notification.permission : 'N/A'
         });
       }
     }, 2000);

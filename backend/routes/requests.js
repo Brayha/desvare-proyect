@@ -265,7 +265,10 @@ router.post('/:id/quote', async (req, res) => {
           }
         } catch (pushError) {
           console.error('⚠️ Error enviando push notification (no crítico):', pushError.message);
-          // No fallar la request si el push falla
+          if (pushError.isInvalidToken) {
+            await User.findByIdAndUpdate(request.clientId, { $unset: { fcmToken: 1 } });
+            console.log('🗑️ Token FCM inválido eliminado de MongoDB (cliente online)');
+          }
         }
       } else {
         console.log('⚠️ Cliente no conectado vía Socket.IO (ID:', request.clientId.toString(), ')');
@@ -292,6 +295,10 @@ router.post('/:id/quote', async (req, res) => {
           }
         } catch (pushError) {
           console.error('⚠️ Error enviando push notification:', pushError.message);
+          if (pushError.isInvalidToken) {
+            await User.findByIdAndUpdate(request.clientId, { $unset: { fcmToken: 1 } });
+            console.log('🗑️ Token FCM inválido eliminado de MongoDB (cliente offline)');
+          }
         }
       }
     } else {

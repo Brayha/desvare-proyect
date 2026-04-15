@@ -7,7 +7,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-comp
 // Configuración de Firebase — proyecto desvare-production
 // Debe coincidir EXACTAMENTE con las variables VITE_FIREBASE_* del .env
 const firebaseConfig = {
-  apiKey: "AIzaSy8nF2OsNcq4FS-aYVs_ymPEdPK8N2wze_Q",
+  apiKey: "AIzaSyBnF2OsNcq4FS-aYVs_ymPEdPK8N2wze_Q",
   authDomain: "desvare-production.firebaseapp.com",
   projectId: "desvare-production",
   storageBucket: "desvare-production.firebasestorage.app",

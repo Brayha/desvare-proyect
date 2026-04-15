@@ -88,7 +88,18 @@ const sendPushNotification = async (fcmToken, title, body, data = {}) => {
     return response;
 
   } catch (error) {
-    console.error('❌ Error enviando notificación push:', error);
+    const invalidTokenCodes = [
+      'messaging/mismatched-credential',
+      'messaging/registration-token-not-registered',
+      'messaging/invalid-registration-token',
+      'messaging/invalid-argument',
+    ];
+    if (invalidTokenCodes.includes(error.errorInfo?.code)) {
+      error.isInvalidToken = true;
+      console.warn('⚠️ Token FCM inválido detectado (será eliminado):', error.errorInfo?.code);
+    } else {
+      console.error('❌ Error enviando notificación push:', error);
+    }
     throw error;
   }
 };

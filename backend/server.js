@@ -478,6 +478,10 @@ io.on('connection', (socket) => {
         }
       } catch (pushErr) {
         console.warn('⚠️ Error enviando push notification al cliente (no crítico):', pushErr.message);
+        if (pushErr.isInvalidToken) {
+          await User.findByIdAndUpdate(data.clientId, { $unset: { fcmToken: 1 } });
+          console.log('🗑️ Token FCM inválido eliminado de MongoDB (server.js - cotización)');
+        }
       }
 
     } catch (error) {
@@ -782,6 +786,11 @@ io.on('connection', (socket) => {
         }
       } catch (pushErr) {
         console.warn('⚠️ Error enviando push de servicio completado (no crítico):', pushErr.message);
+        if (pushErr.isInvalidToken) {
+          const User = require('./models/User');
+          await User.findByIdAndUpdate(data.clientId, { $unset: { fcmToken: 1 } });
+          console.log('🗑️ Token FCM inválido eliminado de MongoDB (server.js - completado)');
+        }
       }
     }
     
@@ -870,12 +879,20 @@ io.on('connection', (socket) => {
             // 1. Notificación FCM (funciona aunque el cliente no esté en la app)
             const clientUser = await User.findById(req.clientId).select('fcmToken').lean();
             if (clientUser?.fcmToken) {
-              await notifyClientDriverArriving(clientUser.fcmToken, {
-                requestId,
-                driverName,
-                distanceMeters: Math.round(dist),
-              }).catch(e => console.warn('⚠️ FCM driver:arriving error:', e.message));
-              console.log(`🔔 Notificación "conductor llegando" enviada al cliente (${Math.round(dist)}m)`);
+              try {
+                await notifyClientDriverArriving(clientUser.fcmToken, {
+                  requestId,
+                  driverName,
+                  distanceMeters: Math.round(dist),
+                });
+                console.log(`🔔 Notificación "conductor llegando" enviada al cliente (${Math.round(dist)}m)`);
+              } catch (e) {
+                console.warn('⚠️ FCM driver:arriving error:', e.message);
+                if (e.isInvalidToken) {
+                  await User.findByIdAndUpdate(req.clientId, { $unset: { fcmToken: 1 } });
+                  console.log('🗑️ Token FCM inválido eliminado de MongoDB (driver:arriving)');
+                }
+              }
             }
 
             // 2. Evento socket (si el cliente está conectado, se actualiza la UI inmediatamente)
