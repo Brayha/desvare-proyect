@@ -772,49 +772,6 @@ router.patch('/toggle-availability', async (req, res) => {
 });
 
 /**
- * PUT /api/drivers/profile/:id
- * Actualizar datos personales del conductor (nombre, email, ciudad, dirección)
- */
-router.put('/profile/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, email, city, address } = req.body;
-
-    const driver = await User.findById(id);
-    if (!driver || driver.userType !== 'driver') {
-      return res.status(404).json({ error: 'Conductor no encontrado' });
-    }
-
-    if (name && name.trim().length >= 3) driver.name = name.trim();
-    if (email !== undefined) driver.email = email || undefined;
-    if (city) driver.driverProfile.city = city;
-    if (address) driver.driverProfile.address = address;
-
-    await driver.save();
-
-    console.log(`✅ Perfil actualizado para conductor ${id}`);
-
-    res.json({
-      message: 'Perfil actualizado exitosamente',
-      driver: {
-        id: driver._id,
-        name: driver.name,
-        email: driver.email,
-        city: driver.driverProfile.city,
-        address: driver.driverProfile.address,
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ Error actualizando perfil:', error);
-    res.status(500).json({
-      error: 'Error al actualizar perfil',
-      details: error.message
-    });
-  }
-});
-
-/**
  * GET /api/drivers/profile/:id
  * Obtener perfil completo del conductor
  */
@@ -822,13 +779,7 @@ router.get('/profile/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const Request = require('../models/Request');
-
-    const [driver, totalServices] = await Promise.all([
-      User.findById(id),
-      Request.countDocuments({ assignedDriverId: id, status: 'completed' }),
-    ]);
-
+    const driver = await User.findById(id);
     if (!driver || driver.userType !== 'driver') {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
@@ -844,7 +795,7 @@ router.get('/profile/:id', async (req, res) => {
         status: driver.driverProfile.status,
         isOnline: driver.driverProfile.isOnline,
         rating: driver.driverProfile.rating,
-        totalServices,
+        totalServices: driver.driverProfile.totalServices,
         totalEarnings: driver.driverProfile.totalEarnings,
         vehicleCapabilities: driver.driverProfile.vehicleCapabilities,
         towTruck: driver.driverProfile.towTruck,

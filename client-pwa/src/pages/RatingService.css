@@ -1,5 +1,5 @@
 .rating-service-page {
-  --background: #F7F7F7;
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* Container Principal */
@@ -19,43 +19,44 @@
 }
 
 .rating-logo {
-  height: 32px;
+  height: 60px;
+  filter: brightness(0) invert(1);
 }
 
 /* Header */
 .rating-header {
   text-align: center;
   margin-bottom: 24px;
-  color: secondary;
+  color: white;
 }
 
 .rating-title {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: secondary;
+  color: white;
 }
 
 .rating-subtitle {
   font-size: 16px;
-  color: secondary;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
 /* Card Principal */
 .rating-card {
-  padding: 20px;
   width: 100%;
+  max-width: 500px;
   border-radius: 20px;
-border: 1px solid #E5E7EB;
-background: #FFF;
-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
-margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
 }
 
 /* Sección de Estrellas */
 .stars-section {
   text-align: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .stars-label {
@@ -97,7 +98,8 @@ margin-bottom: 20px;
 
 /* Sección de Comentario */
 .comment-section {
-  padding: 0;
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .comment-label {
@@ -116,8 +118,6 @@ margin-bottom: 20px;
   border-radius: 12px;
   font-size: 14px;
   margin-top: 8px;
-  background-color: #F7F7F7;
-  padding: 0 10px;
 }
 
 .comment-counter {
@@ -185,7 +185,7 @@ margin-bottom: 20px;
 }
 
 .submit-button {
-  --background: #0055ff;
+  --background: linear-gradient(135deg, #10dc60 0%, #0ea54f 100%);
   --border-radius: 12px;
   height: 50px;
   font-weight: 600;

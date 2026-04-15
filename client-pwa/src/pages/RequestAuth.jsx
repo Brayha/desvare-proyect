@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -34,12 +34,6 @@ const RequestAuth = () => {
   const [userId, setUserId] = useState(null); // ID del usuario para verificar OTP
   const [isLoading, setIsLoading] = useState(false);
 
-  // Reenvío de código OTP
-  const RESEND_SECONDS = 60;
-  const [countdown, setCountdown] = useState(RESEND_SECONDS);
-  const [canResend, setCanResend] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
-
   // Formulario de login (solo teléfono)
   const [loginPhone, setLoginPhone] = useState("");
 
@@ -51,6 +45,9 @@ const RequestAuth = () => {
   // OTP
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
+
+  // Refs para OTP inputs
+  const otpRefs = useRef([]);
 
   // Control del modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -91,55 +88,24 @@ const RequestAuth = () => {
     setter(cleaned);
   };
 
-  const handleOTPChange = (e) => {
-    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-    setOtp(val);
+  // Funciones para manejar OTP
+  const handleOTPChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return; // Solo números
+
+    const newOtp = otp.split("");
+    newOtp[index] = value;
+    setOtp(newOtp.join(""));
     setOtpError("");
+
+    // Auto-focus siguiente input
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
   };
 
-  // Resetear contador cada vez que se llega al paso 2 (nuevo código enviado)
-  useEffect(() => {
-    if (step === 2) {
-      setCountdown(RESEND_SECONDS);
-      setCanResend(false);
-    }
-  }, [step]);
-
-  // Contador regresivo para habilitar el reenvío
-  useEffect(() => {
-    if (step !== 2) return;
-    if (countdown <= 0) {
-      setCanResend(true);
-      return;
-    }
-    const timer = setInterval(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [countdown, step]);
-
-  // Reenviar código según el modo activo (login o registro)
-  const handleResend = async () => {
-    setResendLoading(true);
-    setOtpError("");
-    try {
-      if (authMode === "login") {
-        await authAPI.loginOTP({ phone: loginPhone });
-      } else {
-        await authAPI.registerOTP({
-          name: registerName,
-          phone: registerPhone,
-          email: registerEmail || undefined,
-        });
-      }
-      setOtp("");
-      setCanResend(false);
-      setCountdown(RESEND_SECONDS);
-      showSuccess("Nuevo código enviado");
-    } catch {
-      setOtpError("No se pudo reenviar el código. Intenta de nuevo.");
-    } finally {
-      setResendLoading(false);
+  const handleOTPKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
     }
   };
 
@@ -805,19 +771,22 @@ const RequestAuth = () => {
                   )}
                 </p>
               </div>
-              {/* Input único OTP (6 dígitos) */}
-              <div className="otp-single-wrap">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  className={`otp-single-input${otp.length === 6 ? " otp-single-complete" : ""}`}
-                  value={otp}
-                  onChange={handleOTPChange}
-                  disabled={isLoading}
-                  autoFocus
-                  placeholder="000000"
-                />
+              {/* Input OTP personalizado (6 dígitos) */}
+              <div className="otp-inputs-container">
+                {[0, 1, 2, 3, 4, 5].map((index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (otpRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    className="otp-input-box"
+                    value={otp[index] || ""}
+                    onChange={(e) => handleOTPChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOTPKeyDown(index, e)}
+                    disabled={isLoading}
+                  />
+                ))}
               </div>
 
               {otpError && (
@@ -834,28 +803,6 @@ const RequestAuth = () => {
                 {isLoading ? <IonSpinner name="crescent" /> : "Validar código"}
               </button>
 
-              {/* Reenvío de código con contador */}
-              <div className="otp-resend-container">
-                {canResend ? (
-                  <button
-                    className="otp-resend-btn"
-                    onClick={handleResend}
-                    disabled={resendLoading}
-                  >
-                    {resendLoading ? (
-                      <IonSpinner name="crescent" className="otp-resend-spinner" />
-                    ) : (
-                      "¿No recibiste el código? Reenviar"
-                    )}
-                  </button>
-                ) : (
-                  <p className="otp-resend-countdown">
-                    Reenviar código en{" "}
-                    <strong>0:{String(countdown).padStart(2, "0")}</strong>
-                  </p>
-                )}
-              </div>
-
               <button
                 className="auth-secondary-button"
                 onClick={() => {
@@ -863,7 +810,7 @@ const RequestAuth = () => {
                   setOtp("");
                   setOtpError("");
                 }}
-                disabled={isLoading || resendLoading}
+                disabled={isLoading}
               >
                 Cancelar
               </button>

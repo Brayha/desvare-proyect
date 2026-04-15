@@ -16,7 +16,6 @@ import {
   IonLabel,
   IonIcon,
   IonButton,
-  useIonViewWillEnter,
 } from "@ionic/react";
 import { navigateCircleOutline, add } from "ionicons/icons";
 import { Location, Refresh } from "iconsax-react";
@@ -72,27 +71,6 @@ const RequestService = () => {
 
   const [isSendingRequest, setIsSendingRequest] = useState(false); // Para detectar cambios reales
 
-  const getActiveBannerState = () => {
-    if (localStorage.getItem('activeService')) return 'service';
-    if (localStorage.getItem('currentRequestId') && localStorage.getItem('requestData')) return 'searching';
-    return null;
-  };
-  // Banner estado activo — requiere AMBOS para evitar banner con requestId huérfano
-  const [activeBannerState, setActiveBannerState] = useState(() => getActiveBannerState());
-  const [showActiveBanner, setShowActiveBanner] = useState(() => getActiveBannerState() !== null);
-
-  // Re-evaluar al volver a la vista (las tabs se cachean en Ionic y no se remontan)
-  useIonViewWillEnter(() => {
-    const state = getActiveBannerState();
-    setActiveBannerState(state);
-    setShowActiveBanner(state !== null);
-  });
-
-  const dismissActiveBanner = () => {
-    localStorage.removeItem('currentRequestId');
-    setShowActiveBanner(false);
-  };
-
   // Estados del wizard de vehículos
   const [showVehicleWizard, setShowVehicleWizard] = useState(false);
   const [vehicleData, setVehicleData] = useState(null); // Datos completos del vehículo y servicio
@@ -131,6 +109,7 @@ const RequestService = () => {
   // ✅ Cargar datos previos del localStorage (cuando cliente cancela búsqueda)
   useEffect(() => {
     const savedRequestData = localStorage.getItem('requestData');
+    const currentRequestId = localStorage.getItem('currentRequestId');
     
     if (savedRequestData) {
       try {
@@ -177,6 +156,12 @@ const RequestService = () => {
             placa: parsed.vehicleSnapshot.licensePlate,
             problema: parsed.serviceDetails.problem
           });
+        }
+        
+        // ✅ Limpiar currentRequestId antiguo para evitar conflictos
+        if (currentRequestId) {
+          localStorage.removeItem('currentRequestId');
+          console.log('🗑️ RequestId antiguo eliminado (usuario canceló búsqueda)');
         }
         
         showSuccess('📋 Datos previos cargados. Puedes editarlos y buscar nuevamente.');
@@ -498,38 +483,6 @@ const RequestService = () => {
           <img src={logo} alt="logo" />
         </div>
 
-        {/* Banner búsqueda activa */}
-        {showActiveBanner && (
-          <div className="active-search-banner">
-            <div className="active-search-banner__left">
-              <span className="active-search-banner__dot" />
-              <div>
-                <p className="active-search-banner__title">
-                  {activeBannerState === 'service' ? 'Servicio en curso' : 'Búsqueda activa'}
-                </p>
-                <p className="active-search-banner__sub">
-                  {activeBannerState === 'service' ? 'Tu grúa está en camino' : 'Tienes una solicitud en curso'}
-                </p>
-              </div>
-            </div>
-            <div className="active-search-banner__actions">
-              <button
-                className="active-search-banner__btn-primary"
-                onClick={() => history.push(activeBannerState === 'service' ? '/driver-on-way' : '/waiting-quotes')}
-              >
-                {activeBannerState === 'service' ? 'Ver servicio' : 'Ver cotizaciones'}
-              </button>
-              <button
-                className="active-search-banner__btn-close"
-                onClick={dismissActiveBanner}
-                aria-label="Descartar"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Mapa a pantalla completa */}
         <div className="fullscreen-map">
           {geoLoading ? (
@@ -715,8 +668,10 @@ const RequestService = () => {
 
                 {/* Botón Buscar Cotizaciones - Solo si hay vehículo */}
                 {vehicleData?.vehicleSnapshot && (
-                  <button
-                    className="button-go"
+                  <Button
+                    variant="primary"
+                    size="large"
+                    fullWidth
                     onClick={handleConfirmRoute}
                     disabled={!routeInfo || isSendingRequest}
                     loading={isSendingRequest}
@@ -724,7 +679,7 @@ const RequestService = () => {
                     {isSendingRequest
                       ? "Enviando solicitud..."
                       : "Buscar Cotizaciones"}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

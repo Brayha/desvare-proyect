@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -12,12 +12,12 @@ import {
   useIonAlert,
 } from "@ionic/react";
 import { chevronDownCircleOutline } from "ionicons/icons";
+import { Notification } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import { useNotification } from "../hooks/useNotification";
-import QuoteSlider from "../components/QuoteSlider/QuoteSlider";
+import QuoteNotification from "../components/QuoteNotification/QuoteNotification";
 import QuoteDetailSheet from "../components/QuoteDetailSheet/QuoteDetailSheet";
-import InstallBanner from "../components/InstallBanner/InstallBanner";
 import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
 import "./WaitingQuotes.css";
@@ -80,8 +80,8 @@ const WaitingQuotes = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
   const [presentAlert] = useIonAlert();
-  const { playSound, vibrate } = useNotification();
-  const [activeQuoteIndex, setActiveQuoteIndex] = useState(0);
+  const { activeNotifications, showQuoteNotification, closeNotification } =
+    useNotification();
 
   const [user, setUser] = useState(null);
   const [routeData, setRouteData] = useState(null);
@@ -102,46 +102,6 @@ const WaitingQuotes = () => {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
-  // Estado de conexión: 'connected' | 'reconnecting' | 'offline'
-  const [connectionStatus, setConnectionStatus] = useState('connected');
-
-  // Carga las cotizaciones guardadas en BD (útil al reconectar o al hacer pull-to-refresh)
-  const fetchQuotesFromBackend = useCallback(async () => {
-    const currentRequestId = localStorage.getItem("currentRequestId");
-    if (!currentRequestId) return;
-
-    try {
-      const response = await fetch(`${API_URL}/api/requests/${currentRequestId}`);
-      const data = await response.json();
-
-      if (response.ok && data.request?.quotes?.length > 0) {
-        const formattedQuotes = data.request.quotes.map((q) => {
-          // Normalizar location: puede venir como {lat,lng} o como GeoJSON {coordinates:[lng,lat]}
-          let location = null;
-          if (q.location?.lat != null && q.location?.lng != null) {
-            location = { lat: q.location.lat, lng: q.location.lng };
-          } else if (Array.isArray(q.location?.coordinates) && q.location.coordinates.length === 2) {
-            location = { lat: q.location.coordinates[1], lng: q.location.coordinates[0] };
-          }
-          return {
-            driverId: q.driverId,
-            driverName: q.driverName,
-            amount: q.amount,
-            location,
-            timestamp: q.timestamp,
-            driverPhoto: q.driverPhoto || null,
-            driverRating: q.driverRating || 5,
-            driverServiceCount: q.driverServiceCount || 0,
-            requestId: q.requestId || data.request._id,
-          };
-        });
-        setQuotesReceived(formattedQuotes);
-        console.log(`✅ ${formattedQuotes.length} cotizaciones cargadas del backend`);
-      }
-    } catch (error) {
-      console.error("❌ Error al obtener cotizaciones del backend:", error);
-    }
-  }, []);
 
   useEffect(() => {
     let isMounted = true; // Flag para evitar actualizaciones si el componente se desmonta
@@ -185,8 +145,6 @@ const WaitingQuotes = () => {
       if (!storedRouteData) {
         if (isMounted) {
           console.log("❌ No hay datos de ruta, redirigiendo a /home");
-          // Limpiar requestId huérfano para evitar bucle con el botón verde del Home
-          localStorage.removeItem("currentRequestId");
           showError("No se encontraron datos de la ruta");
           history.push("/home");
         }
@@ -230,15 +188,6 @@ const WaitingQuotes = () => {
     // Inicializar datos
     const success = initializeData();
 
-    // Declarar fuera del if(success) para que el cleanup pueda acceder a ellas
-    let handleVisibilityChange = () => {};
-    let handleOnline = () => {};
-    let handleOffline = () => {};
-    let handleWQConnect = () => {};
-    let handleWQDisconnect = () => {};
-    let pollInterval = null;
-    let heartbeatInterval = null;
-
     // Solo registrar listener si la inicialización fue exitosa
     if (success) {
       console.log("👂 Registrando listener de cotizaciones");
@@ -269,108 +218,13 @@ const WaitingQuotes = () => {
         // Agregar cotización a la lista
         setQuotesReceived((prev) => [...prev, quote]);
 
-        // Sonido + vibración al llegar cotización (el card inferior es la notificación visual)
-        playSound();
-        vibrate();
+        // ✅ Mostrar notificación visual + sonido + vibración
+        showQuoteNotification(quote, {
+          playSound: true,
+          vibrate: true,
+          duration: 5000,
+        });
       });
-
-      // ─────────────────────────────────────────────
-      // Función central de recuperación (socket + quotes)
-      // Se llama en cualquier evento de reconexión
-      // ─────────────────────────────────────────────
-      const recoverConnection = () => {
-        if (!isMounted) return;
-        console.log('🔄 Recuperando conexión - re-registrando cliente y cargando cotizaciones...');
-        const latestUser = localStorage.getItem("user");
-        if (latestUser) {
-          const parsedUser = JSON.parse(latestUser);
-          if (!socketService.isConnected()) {
-            socketService.connect();
-          }
-          socketService.registerClient(parsedUser.id || parsedUser._id);
-        }
-        fetchQuotesFromBackend();
-      };
-
-      // ─────────────────────────────────────────────
-      // Fix 1: socket.on('connect') — evento correcto en Socket.IO v4
-      // Dispara en conexión inicial Y en cada reconexión
-      // Los handlers se asignan a variables declaradas en el scope externo
-      // para que el cleanup pueda removerlos con off(event, handler)
-      // ─────────────────────────────────────────────
-      handleWQConnect = () => {
-        if (!isMounted) return;
-        console.log('✅ Socket conectado/reconectado — re-registrando cliente');
-        setConnectionStatus('connected');
-        recoverConnection();
-      };
-      handleWQDisconnect = () => {
-        if (!isMounted) return;
-        console.log('⚠️ Socket desconectado — mostrando estado reconectando');
-        setConnectionStatus('reconnecting');
-      };
-      const rawSocket = socketService.getSocket();
-      if (rawSocket) {
-        rawSocket.on('connect', handleWQConnect);
-        rawSocket.on('disconnect', handleWQDisconnect);
-      }
-
-      // ─────────────────────────────────────────────
-      // Fix 2: visibilitychange — usuario vuelve a la pestaña/app
-      // Cubre: volver de WhatsApp, desbloquear pantalla, cambiar apps
-      // ─────────────────────────────────────────────
-      handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible' && isMounted) {
-          console.log('👁️ App visible — verificando conexión y cotizaciones');
-          recoverConnection();
-        }
-      };
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-
-      // ─────────────────────────────────────────────
-      // Fix 5: online event — red recuperada (salió del metro, etc.)
-      // ─────────────────────────────────────────────
-      handleOnline = () => {
-        if (!isMounted) return;
-        console.log('🌐 Red recuperada — reconectando socket y cargando cotizaciones');
-        setConnectionStatus('connected');
-        recoverConnection();
-      };
-      handleOffline = () => {
-        if (!isMounted) return;
-        console.log('📵 Sin red — marcando como offline');
-        setConnectionStatus('offline');
-      };
-      window.addEventListener('online', handleOnline);
-      window.addEventListener('offline', handleOffline);
-
-      // ─────────────────────────────────────────────
-      // Fix 3: Polling REST cada 10s — red de seguridad
-      // Funciona aunque el socket esté muerto permanentemente
-      // ─────────────────────────────────────────────
-      pollInterval = setInterval(() => {
-        if (!isMounted) return;
-        console.log('⏱️ Polling — verificando cotizaciones en BD');
-        fetchQuotesFromBackend();
-      }, 10000);
-
-      // ─────────────────────────────────────────────
-      // Fix 4: Heartbeat cada 25s — mantiene socket vivo en iOS
-      // iOS mata WebSockets inactivos en ~30s; este ping lo previene
-      // ─────────────────────────────────────────────
-      heartbeatInterval = setInterval(() => {
-        if (!isMounted) return;
-        const latestUser = localStorage.getItem("user");
-        if (latestUser && socketService.isConnected()) {
-          const parsedUser = JSON.parse(latestUser);
-          const clientId = parsedUser.id || parsedUser._id;
-          socketService.getSocket()?.emit('client:ping', { clientId });
-          console.log('💓 Heartbeat enviado');
-        } else if (!socketService.isConnected()) {
-          console.log('💓 Heartbeat — socket caído, intentando reconectar');
-          recoverConnection();
-        }
-      }, 25000);
 
       // ✅ Escuchar cancelaciones de cotizaciones
       socketService.onQuoteCancelled((data) => {
@@ -413,17 +267,7 @@ const WaitingQuotes = () => {
       isMounted = false;
       socketService.offQuoteReceived();
       socketService.offQuoteCancelled();
-      const rawSocket = socketService.getSocket();
-      if (rawSocket) {
-        rawSocket.off('connect', handleWQConnect);
-        rawSocket.off('disconnect', handleWQDisconnect);
-      }
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      clearInterval(pollInterval);
-      clearInterval(heartbeatInterval);
-      console.log("🔇 Listeners, polling y heartbeat removidos");
+      console.log("🔇 Listeners de cotizaciones removidos");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar al montar el componente
@@ -554,10 +398,9 @@ const WaitingQuotes = () => {
       );
     }
 
-    // Limpiar el estado activo de la búsqueda
-    // currentRequestId se elimina para que Home y RequestService no muestren banner/botón
-    // requestData se mantiene para pre-llenar el formulario al volver a /tabs/desvare
-    localStorage.removeItem("currentRequestId");
+    // ✅ Limpiar solo la solicitud actual, MANTENER requestData para edición
+    // localStorage.removeItem("requestData"); ← NO eliminar, mantener origen/destino/vehículo
+    // localStorage.removeItem("currentRequestId"); ← NO eliminar AQUÍ, RequestService lo limpiará
     localStorage.removeItem("activeService");
     localStorage.removeItem("quotesReceived");
 
@@ -576,9 +419,37 @@ const WaitingQuotes = () => {
   // Pull to Refresh - Recargar cotizaciones desde el backend
   const handleRefresh = async (event) => {
     console.log("🔄 Pull to refresh activado");
+
     try {
-      await fetchQuotesFromBackend();
-      showSuccess("Cotizaciones actualizadas");
+      const currentRequestId = localStorage.getItem("currentRequestId");
+
+      if (currentRequestId) {
+        // Llamar al backend para obtener cotizaciones actualizadas
+        const response = await fetch(
+          `${API_URL}/api/requests/${currentRequestId}`
+        );
+        const data = await response.json();
+
+        if (response.ok && data.request) {
+          console.log("✅ Cotizaciones actualizadas:", data.request.quotes);
+
+          // Actualizar lista con cotizaciones del backend
+          const formattedQuotes = data.request.quotes.map((q) => ({
+            driverId: q.driverId,
+            driverName: q.driverName,
+            amount: q.amount,
+            location: q.location || null,
+            timestamp: q.timestamp,
+            // ✅ NUEVOS CAMPOS: Foto, rating y servicios del conductor
+            driverPhoto: q.driverPhoto || null,
+            driverRating: q.driverRating || 5,
+            driverServiceCount: q.driverServiceCount || 0
+          }));
+
+          setQuotesReceived(formattedQuotes);
+          showSuccess(`${formattedQuotes.length} cotizaciones actualizadas`);
+        }
+      }
     } catch (error) {
       console.error("❌ Error al refrescar cotizaciones:", error);
       showError("Error al actualizar cotizaciones");
@@ -702,13 +573,10 @@ const WaitingQuotes = () => {
         });
 
         // Guardar datos del servicio aceptado
-        // clientId se guarda para que DriverOnWay pueda registrarse en el socket
-        // sin depender de parsear localStorage.user
         localStorage.setItem(
           "activeService",
           JSON.stringify({
             requestId: currentRequestId,
-            clientId: user.id || user._id,
             driver: data.request.assignedDriver,
             securityCode: data.request.securityCode,
             amount: quote.amount,
@@ -805,6 +673,16 @@ const WaitingQuotes = () => {
           />
         </IonRefresher>
 
+        {/* ✅ Notificaciones visuales cuando llega una cotización */}
+        {activeNotifications.map((notification) => (
+          <QuoteNotification
+            key={notification.id}
+            quote={notification.quote}
+            duration={notification.duration}
+            onClose={() => closeNotification(notification.id)}
+          />
+        ))}
+
         {/* Mapa fullscreen - Sin header ni footer */}
         <div className="map-container-fullscreen-no-header">
           <MapPicker
@@ -813,31 +691,35 @@ const WaitingQuotes = () => {
             onRouteCalculated={() => {}}
             quotes={quotesReceived}
             onQuoteClick={handleQuoteClick}
-            focusedQuoteLocation={quotesReceived[activeQuoteIndex]?.location || null}
           />
 
-          {/* Sin cotizaciones: banner de instalación PWA */}
+          {/* Card flotante superior - Notificación SMS */}
           {quotesReceived.length === 0 && (
-            <InstallBanner variant="waiting" />
+            <div className="floating-card-top">
+              <div className="sms-notification-card">
+                <Notification
+                  size="28"
+                  variant="Bold"
+                  className="sms-icon"
+                  color="#0055ff"
+                />
+                <IonText className="sms-text">
+                  Cuando lleguen las cotizaciones te notificaremos vía mensaje
+                  de texto
+                </IonText>
+              </div>
+            </div>
           )}
 
+          {/* Card flotante inferior - Spinner y botón cancelar */}
           {quotesReceived.length === 0 && (
             <div className="floating-card-bottom">
               <div className="search-status-card">
-                {/* Indicador de estado de conexión */}
-                {connectionStatus !== 'connected' && (
-                  <div className={`wq-connection-banner wq-connection-banner--${connectionStatus}`}>
-                    <span className="wq-connection-dot" />
-                    {connectionStatus === 'reconnecting'
-                      ? '⚡ Reconectando... las cotizaciones llegarán en breve'
-                      : '📵 Sin conexión — esperando red...'}
-                  </div>
-                )}
                 <div className="spinner-container">
                   <IonText className="search-text">
                     <h3>Buscando cotizaciones...</h3>
                     <p>
-                      Las grúas están revisando tu servicio y pronto llegarán
+                      Las grúas estan revisando tu servicio y pronto llegaran
                       sus cotizaciones
                     </p>
                   </IonText>
@@ -850,20 +732,10 @@ const WaitingQuotes = () => {
                   onClick={handleCancelRequest}
                   className="cancel-request-button"
                 >
-                  <p>Cancelar búsqueda</p>
+                  <p>Cancelar busqueda</p>
                 </button>
               </div>
             </div>
-          )}
-
-          {/* Con cotizaciones: slider inferior */}
-          {quotesReceived.length > 0 && (
-            <QuoteSlider
-              quotes={quotesReceived}
-              onQuoteClick={handleQuoteClick}
-              onSlideChange={(index) => setActiveQuoteIndex(index)}
-              onCancel={handleCancelRequest}
-            />
           )}
         </div>
 

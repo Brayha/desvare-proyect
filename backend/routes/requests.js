@@ -155,23 +155,12 @@ router.post('/:id/quote', async (req, res) => {
       });
     }
 
-    // Convertir {lat,lng} a GeoJSON antes de guardar (el schema de Mongoose es GeoJSON)
-    let locationGeoJSON = null;
-    if (location?.lat != null && location?.lng != null) {
-      locationGeoJSON = {
-        type: 'Point',
-        coordinates: [location.lng, location.lat] // GeoJSON: [lng, lat]
-      };
-    } else if (Array.isArray(location?.coordinates) && location.coordinates.length === 2) {
-      locationGeoJSON = location; // ya viene en formato GeoJSON
-    }
-
     // Agregar cotización con ubicación del conductor
     request.quotes.push({
       driverId,
       driverName,
       amount: parseFloat(amount),
-      location: locationGeoJSON,
+      location: location || null, // Ubicación del conductor
       timestamp: new Date()
     });
 
@@ -389,9 +378,6 @@ router.post('/:id/accept', async (req, res) => {
     // Actualizar solicitud
     request.status = 'accepted';
     request.assignedDriverId = driverId;
-    request.totalAmount = quote.amount;
-    request.acceptedAt = new Date();
-    request.startedAt = new Date(); // Hora de inicio del servicio (cliente aceptó)
     request.securityCode = securityCode;
     request.updatedAt = new Date();
     await request.save();
@@ -492,29 +478,21 @@ router.delete('/:requestId/quote/:driverId', async (req, res) => {
       });
     }
 
-    // Buscar la cotización del conductor (pendiente o en cualquier estado activo)
+    // Verificar que la solicitud no esté aceptada o completada
+    if (['accepted', 'in_progress', 'completed'].includes(request.status)) {
+      return res.status(400).json({ 
+        error: 'No puedes cancelar una cotización de un servicio ya aceptado. Debes cancelar el servicio completo.' 
+      });
+    }
+
+    // Buscar la cotización del conductor
     const quoteIndex = request.quotes.findIndex(
-      q => q.driverId.toString() === driverId && !['cancelled', 'expired'].includes(q.status)
+      q => q.driverId.toString() === driverId && q.status === 'pending'
     );
 
     if (quoteIndex === -1) {
       return res.status(404).json({ 
-        error: 'Cotización no encontrada o ya fue cancelada' 
-      });
-    }
-
-    // Si la cotización de ESTE conductor fue la aceptada, no puede cancelarla así
-    // (debe cancelar el servicio completo)
-    if (request.quotes[quoteIndex].status === 'accepted' && request.assignedDriverId?.toString() === driverId) {
-      return res.status(400).json({ 
-        error: 'No puedes cancelar una cotización ya aceptada. Debes cancelar el servicio completo.' 
-      });
-    }
-
-    // Si el servicio fue completado, no se puede hacer nada
-    if (request.status === 'completed') {
-      return res.status(400).json({ 
-        error: 'El servicio ya fue completado.' 
+        error: 'Cotización no encontrada o ya fue cancelada/aceptada' 
       });
     }
 
@@ -576,50 +554,6 @@ router.delete('/:requestId/quote/:driverId', async (req, res) => {
   }
 });
 
-// GET /api/requests/driver/:id - Obtener servicios completados de un conductor
-router.get('/driver/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const requests = await Request.find({
-      assignedDriverId: id,
-      status: 'completed',
-    }).sort({ completedAt: -1 });
-
-    const services = requests.map(r => ({
-      id: r._id,
-      status: r.status,
-      clientName: r.clientName,
-      origin: r.origin?.address || null,
-      destination: r.destination?.address || null,
-      vehicleSnapshot: r.vehicleSnapshot
-        ? {
-            category: r.vehicleSnapshot.category || null,
-            brand: r.vehicleSnapshot.brand || null,
-            model: r.vehicleSnapshot.model || null,
-            // placa omitida intencionalmente
-          }
-        : null,
-      totalAmount: r.totalAmount || 0,
-      rating: r.rating?.stars || null,
-      ratingComment: r.rating?.comment || null,
-      createdAt: r.createdAt,
-      startedAt: r.startedAt || null,
-      completedAt: r.completedAt || null,
-    }));
-
-    res.json({
-      message: 'Servicios obtenidos exitosamente',
-      count: services.length,
-      services,
-    });
-
-  } catch (error) {
-    console.error('❌ Error obteniendo servicios del conductor:', error);
-    res.status(500).json({ error: 'Error al obtener servicios', details: error.message });
-  }
-});
-
 // GET /api/requests/client/:id - Obtener solicitudes de un cliente
 router.get('/client/:id', async (req, res) => {
   try {
@@ -629,34 +563,17 @@ router.get('/client/:id', async (req, res) => {
     const requests = await Request.find({ clientId: id })
       .sort({ createdAt: -1 }); // Más recientes primero
 
-    // Obtener nombre del conductor asignado para cada request
-    const enriched = await Promise.all(requests.map(async (r) => {
-      let driverName = null;
-      if (r.assignedDriverId) {
-        try {
-          const driver = await User.findById(r.assignedDriverId).select('name');
-          driverName = driver?.name || null;
-        } catch { /* sin conductor */ }
-      }
-      return {
-        id: r._id,
-        status: r.status,
-        origin: r.origin?.address || null,
-        destination: r.destination?.address || null,
-        vehicleSnapshot: r.vehicleSnapshot || null,
-        totalAmount: r.totalAmount || 0,
-        driverName,
-        rating: r.rating?.stars || null,
-        createdAt: r.createdAt,
-        startedAt: r.startedAt || null,
-        completedAt: r.completedAt || null,
-      };
-    }));
-
     res.json({
       message: 'Solicitudes obtenidas exitosamente',
-      count: enriched.length,
-      requests: enriched,
+      count: requests.length,
+      requests: requests.map(req => ({
+        id: req._id,
+        clientName: req.clientName,
+        status: req.status,
+        quotesCount: req.quotes.length,
+        quotes: req.quotes,
+        createdAt: req.createdAt
+      }))
     });
 
   } catch (error) {
@@ -665,96 +582,6 @@ router.get('/client/:id', async (req, res) => {
       error: 'Error al obtener solicitudes',
       details: error.message 
     });
-  }
-});
-
-// GET /api/requests/:id/driver-location
-// Devuelve la última ubicación conocida del conductor (para polling iOS Safari)
-router.get('/:id/driver-location', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const request = await Request.findById(id)
-      .select('trackingData.lastDriverLocation trackingData.isActive status')
-      .lean();
-
-    if (!request) {
-      return res.status(404).json({ error: 'Solicitud no encontrada' });
-    }
-
-    const loc = request.trackingData?.lastDriverLocation;
-    if (!loc || loc.lat == null || loc.lng == null) {
-      return res.status(204).end(); // Sin ubicación disponible todavía
-    }
-
-    return res.json({
-      lat: loc.lat,
-      lng: loc.lng,
-      heading: loc.heading || 0,
-      speed: loc.speed || 0,
-      updatedAt: loc.updatedAt,
-      isActive: request.trackingData?.isActive,
-      status: request.status
-    });
-  } catch (err) {
-    return res.status(500).json({ error: 'Error obteniendo ubicación del conductor' });
-  }
-});
-
-// POST /api/requests/:id/validate-code
-// Fallback REST para cuando el socket está caído al momento de validar el código.
-// El conductor llama a este endpoint ADEMÁS de emitir el evento socket.
-// La PWA lo detecta via polling (status === 'in_progress').
-router.post('/:id/validate-code', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { code, driverId, driverName, clientId } = req.body;
-
-    const request = await Request.findById(id).select('securityCode status clientId trackingData');
-    if (!request) {
-      return res.status(404).json({ error: 'Solicitud no encontrada' });
-    }
-
-    if (request.status !== 'accepted') {
-      // Ya validado previamente o estado inválido — no es error, solo informar
-      return res.json({ success: true, alreadyValidated: true, status: request.status });
-    }
-
-    const correctCode = request.securityCode?.toString();
-    if (!correctCode || code?.toString() !== correctCode) {
-      return res.status(400).json({ error: 'Código incorrecto' });
-    }
-
-    // Marcar servicio como en curso
-    await Request.findByIdAndUpdate(id, {
-      status: 'in_progress',
-      updatedAt: new Date()
-    });
-
-    console.log(`🔑 [REST] Código validado para servicio ${id} por conductor ${driverName || driverId}`);
-
-    // Intentar notificar al cliente via socket si está conectado
-    const resolvedClientId = clientId || request.clientId?.toString() || request.trackingData?.clientId;
-    const io = global.io;
-    const connectedClients = global.connectedClients;
-
-    if (io && connectedClients && resolvedClientId) {
-      const clientSocketId = connectedClients.get(resolvedClientId);
-      if (clientSocketId) {
-        io.to(clientSocketId).emit('service:started', {
-          requestId: id,
-          driverName: driverName || 'Tu conductor',
-          message: '¡El código fue ingresado! Tu vehículo ya está en la grúa.',
-        });
-        console.log(`📡 [REST] service:started emitido al cliente ${resolvedClientId} via socket`);
-      } else {
-        console.log(`⚠️ [REST] Cliente ${resolvedClientId} no conectado — PWA detectará via polling`);
-      }
-    }
-
-    return res.json({ success: true, status: 'in_progress' });
-  } catch (err) {
-    console.error('❌ Error en validate-code REST:', err.message);
-    return res.status(500).json({ error: 'Error validando código' });
   }
 });
 
@@ -1015,7 +842,6 @@ router.post('/:id/complete', async (req, res) => {
     
     console.log(`✅ Servicio ${id} marcado como completado`);
     
-    // Responder al conductor antes de las notificaciones (no bloquear)
     res.json({
       message: 'Servicio completado exitosamente',
       request: {
@@ -1025,52 +851,6 @@ router.post('/:id/complete', async (req, res) => {
         clientId: request.clientId
       }
     });
-
-    // ─── Notificar al cliente por socket (path directo desde REST) ───────────
-    // Esto garantiza que el cliente sea notificado aunque el socket del conductor
-    // esté caído y no pueda emitir el evento service:complete.
-    try {
-      const clientId = request.clientId?.toString();
-      const clientSocketId = global.connectedClients?.get(clientId);
-      if (clientSocketId && global.io) {
-        global.io.to(clientSocketId).emit('service:completed', {
-          requestId: id,
-          completedAt: request.completedAt,
-          message: '¡Servicio completado! ¿Cómo te fue?'
-        });
-        console.log(`📡 Evento service:completed emitido via REST al cliente ${clientId}`);
-      }
-
-      // Limpiar activeServices en RAM
-      if (global.activeServices) {
-        global.activeServices.delete(id);
-      }
-    } catch (socketErr) {
-      console.warn('⚠️ Error emitiendo socket desde REST (no crítico):', socketErr.message);
-    }
-
-    // ─── Push notification al cliente (cubre PWA cerrada o en background) ────
-    try {
-      const User = require('../models/User');
-      const { notifyClientServiceCompleted } = require('../services/notifications');
-
-      const [clientUser, driverUser] = await Promise.all([
-        User.findById(request.clientId).select('fcmToken').lean(),
-        User.findById(driverId).select('name').lean(),
-      ]);
-
-      if (clientUser?.fcmToken) {
-        await notifyClientServiceCompleted(clientUser.fcmToken, {
-          requestId: id,
-          driverName: driverUser?.name || 'El conductor',
-        });
-        console.log(`📲 Push notification enviada al cliente por servicio completado`);
-      } else {
-        console.log('ℹ️ Cliente sin FCM token registrado');
-      }
-    } catch (pushErr) {
-      console.warn('⚠️ Error enviando push de completado (no crítico):', pushErr.message);
-    }
     
   } catch (error) {
     console.error('❌ Error al completar servicio:', error);

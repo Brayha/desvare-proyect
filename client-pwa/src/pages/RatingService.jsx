@@ -149,8 +149,8 @@ const RatingService = () => {
           </div>
 
           {/* Card de Calificación */}
-          <div className="rating-card">
-            <div>
+          <IonCard className="rating-card">
+            <IonCardContent>
               {/* Estrellas */}
               <div className="stars-section">
                 <IonText>
@@ -197,8 +197,8 @@ const RatingService = () => {
                   <p className="comment-counter">{comment.length}/500</p>
                 </div>
               )}
-            </div>
-          </div>
+            </IonCardContent>
+          </IonCard>
 
           {/* Botones de Acción */}
           <div className="action-buttons">
@@ -215,6 +215,16 @@ const RatingService = () => {
               ) : (
                 "Enviar Calificación"
               )}
+            </IonButton>
+
+            <IonButton
+              expand="block"
+              fill="clear"
+              onClick={handleSkip}
+              disabled={isSubmitting}
+              className="skip-button"
+            >
+              Saltar por ahora
             </IonButton>
           </div>
         </div>

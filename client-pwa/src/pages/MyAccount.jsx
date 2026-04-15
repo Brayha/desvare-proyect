@@ -219,9 +219,9 @@ Mi consulta es: `;
           <div className="profile-container">
             <div className="profile-header">
               <div className="profile-header-left">
-                {/* <IonAvatar className="profile-avatar">
+                <IonAvatar className="profile-avatar">
                   <IonIcon icon={personCircleOutline} />
-                </IonAvatar> */}
+                </IonAvatar>
                 <IonText>
                   <h1 className="profile-name">
                     Hola, {user?.name || "Usuario"}
@@ -230,11 +230,7 @@ Mi consulta es: `;
                 </IonText>
               </div>
 
-              <div
-                className="profile-header-right"
-                onClick={() => history.push("/edit-account")}
-                style={{ cursor: "pointer" }}
-              >
+              <div className="profile-header-right">
                 <Setting2 size={20} color="#9CA3AF" />
               </div>
             </div>
@@ -321,7 +317,7 @@ Mi consulta es: `;
             </div>
 
             <div className="options-profile">
-              <div className="options-profile-item" onClick={() => history.push("/service-history")}>
+              <div className="options-profile-item">
                 <Verify size={20} color="#9CA3AF" />
                 <p>Servicios tomados</p>
               </div>
@@ -336,8 +332,7 @@ Mi consulta es: `;
             </div>
 
             <p className="my-account-footer-text">
-              v.1.5.69 · <a href="/terms">Terms & Conditions</a> · <a href="/privacy">Politicas de privacidad</a>
-              </p>
+              v.1.5.69 · <a href="/terms">Terms & Conditions</a> · <a href="/privacy">Politicas de privacidad</a></p>
           </div>
         </div>
       </IonContent>

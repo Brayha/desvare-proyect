@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 import {
   IonPage,
   IonContent,
@@ -11,8 +9,6 @@ import {
   IonCardContent,
   IonSpinner,
   useIonAlert,
-  useIonViewWillEnter,
-  useIonViewWillLeave,
 } from "@ionic/react";
 import { call } from "ionicons/icons";
 import { Moneys, Refresh2 } from "iconsax-react";
@@ -29,32 +25,9 @@ const DriverOnWay = () => {
   const [presentAlert] = useIonAlert();
 
   const [serviceData, setServiceData] = useState(null);
-  const [driverLocation, setDriverLocation] = useState(null);
-  const [driverHeading, setDriverHeading] = useState(0);
+  const [driverLocation, setDriverLocation] = useState(null); // 🆕 Ubicación en tiempo real del conductor
+  const [driverHeading, setDriverHeading] = useState(0); // 🆕 Dirección del vehículo
   const [isLoading, setIsLoading] = useState(true);
-  // true cuando el conductor ingresó el código → servicio "en camino al destino"
-  const [serviceStarted, setServiceStarted] = useState(false);
-  // true cuando el conductor está a <500m del origen → banner "está llegando"
-  const [driverArriving, setDriverArriving] = useState(false);
-  const serviceDataRef = useRef(null); // ref para acceder en callbacks sin stale closure
-  const navigatedRef = useRef(false);  // evitar navegaciones dobles
-  const pageRef = useRef(null);        // ref para la IonPage (deshabilitar swipe-back)
-
-  // Deshabilitar swipe-back de Ionic mientras el usuario está rastreando al conductor
-  useIonViewWillEnter(() => {
-    if (pageRef.current) {
-      const ionRouter = document.querySelector('ion-router-outlet');
-      if (ionRouter) {
-        ionRouter.swipeGesture = false;
-      }
-    }
-  });
-  useIonViewWillLeave(() => {
-    const ionRouter = document.querySelector('ion-router-outlet');
-    if (ionRouter) {
-      ionRouter.swipeGesture = true;
-    }
-  });
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -72,260 +45,60 @@ const DriverOnWay = () => {
     console.log("📦 Servicio activo cargado:", parsedData);
 
     setServiceData(parsedData);
-    serviceDataRef.current = parsedData;
     setIsLoading(false);
 
-    // Usar clientId del activeService (guardado en el momento de aceptar la cotización)
-    // como fuente primaria, con fallback a localStorage.user
-    const storedUser = localStorage.getItem("user");
-    const clientId = parsedData.clientId
-      || (storedUser ? JSON.parse(storedUser)?.id || JSON.parse(storedUser)?._id : null);
-
-    // Garantizar conexión socket
+    // Socket.IO ya está conectado desde App.jsx
     if (!socketService.socket?.connected) {
+      console.log("🔌 Conectando Socket.IO...");
       socketService.connect();
+    } else {
+      console.log("✅ Socket.IO ya conectado");
     }
 
-    // Registrar cliente INMEDIATAMENTE al entrar al tracking.
-    // Esto actualiza activeServices en el backend con el socketId actual,
-    // evitando que los location-updates del conductor lleguen a un socket viejo.
-    if (clientId) {
-      socketService.registerClient(clientId);
-      console.log('📡 Cliente registrado en socket al entrar a DriverOnWay:', clientId);
-    }
-
-    // ─────────────────────────────────────────────
-    // Función central: navegar a calificación
-    // ─────────────────────────────────────────────
-    const goToRating = (completedAt) => {
-      if (navigatedRef.current) return; // evitar doble ejecución
-      navigatedRef.current = true;
-
-      const data = serviceDataRef.current;
-      const completedServiceData = {
-        requestId: data.requestId,
-        driver: data.driver,
-        amount: data.amount,
-        origin: data.origin,
-        destination: data.destination,
-        completedAt: completedAt || new Date().toISOString(),
-      };
-      localStorage.setItem('completedService', JSON.stringify(completedServiceData));
-
-      // Navegar ANTES de limpiar para evitar que WaitingQuotes (en memoria)
-      // detecte el cambio de key y redirija a /home antes que nosotros
-      showSuccess('¡Servicio completado! El conductor llegó al destino.');
-      history.replace('/rate-service');
-
-      // Limpiar después de navegar (ya no afecta WaitingQuotes)
-      setTimeout(() => {
-        localStorage.removeItem('activeService');
-        localStorage.removeItem('currentRequestId');
-        localStorage.removeItem('requestData');
-      }, 500);
-    };
-
-    // ─────────────────────────────────────────────
-    // Capa 1: socket → notificación inmediata
-    // ─────────────────────────────────────────────
+    // ✅ Escuchar cuando el conductor completa el servicio
     socketService.onServiceCompleted((data) => {
-      console.log('✅ [SOCKET] Servicio completado recibido:', data);
-      goToRating(data.completedAt);
+      console.log('✅ Servicio completado por el conductor:', data);
+      
+      showSuccess('¡Servicio completado! El conductor llegó al destino.');
+      
+      // Guardar datos del servicio completado para la pantalla de calificación
+      const completedServiceData = {
+        requestId: data.requestId || parsedData.requestId,
+        driver: parsedData.driver,
+        amount: parsedData.amount,
+        origin: parsedData.origin,
+        destination: parsedData.destination,
+        completedAt: data.completedAt
+      };
+      
+      localStorage.setItem('completedService', JSON.stringify(completedServiceData));
+      console.log('💾 Datos del servicio completado guardados para calificación');
+      
+      // Limpiar servicio activo
+      localStorage.removeItem('activeService');
+      
+      // Redirigir a la pantalla de calificación después de 1.5 segundos
+      setTimeout(() => {
+        history.replace('/rate-service');
+      }, 1500);
     });
 
-    // ─────────────────────────────────────────────
-    // Capa 2: polling REST cada 15s (red de seguridad)
-    // Si el socket falla, esto garantiza que el cliente
-    // siempre se entera cuando el conductor termina.
-    // ─────────────────────────────────────────────
-    const checkServiceStatus = async () => {
-      if (navigatedRef.current) return;
-      const reqId = serviceDataRef.current?.requestId;
-      if (!reqId) return;
-      try {
-        const res = await fetch(`${API_URL}/api/requests/${reqId}`);
-        if (!res.ok) return;
-        const body = await res.json();
-        const status = body.request?.status || body.status;
-        if (status === 'completed') {
-          console.log('✅ [POLLING] Servicio completado detectado via REST');
-          goToRating(body.request?.completedAt || body.completedAt);
-        }
-      } catch (err) {
-        console.warn('⚠️ Error en polling de estado:', err.message);
-      }
-    };
-
-    const pollInterval = setInterval(checkServiceStatus, 15000);
-
-    // ─────────────────────────────────────────────
-    // Función central de recuperación de conexión
-    // ─────────────────────────────────────────────
-    const recoverConnection = () => {
-      if (!socketService.isConnected()) socketService.connect();
-      if (clientId) socketService.registerClient(clientId);
-      checkServiceStatus();
-    };
-
-    // Fix: socket.on('connect') es el evento correcto en Socket.IO v4
-    // Dispara en conexión inicial Y en cada reconexión (reconnect no dispara en v4)
-    // Usamos handler nombrado para poder removerlo con off(event, handler) en cleanup
-    const handleSocketConnect = () => {
-      console.log('🔄 Socket reconectado en DriverOnWay - re-registrando cliente...');
-      recoverConnection();
-    };
-    const rawSocket = socketService.getSocket();
-    if (rawSocket) {
-      rawSocket.on('connect', handleSocketConnect);
-    }
-
-    // ─────────────────────────────────────────────
-    // Visibilitychange: app visible → verificar estado Y ubicación inmediata
-    // Cubre: desbloquear pantalla, volver de otra app
-    // Al volver, se fuerza pollDriverLocation() inmediatamente sin esperar
-    // el próximo tick del setInterval (que puede tardar hasta 4 segundos).
-    // Así el cliente ve la posición actual del conductor al instante.
-    // ─────────────────────────────────────────────
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log('👁️ DriverOnWay visible - actualizando ubicación y estado...');
-        recoverConnection();
-        // Forzar lastSocketUpdate a 0 para que pollDriverLocation ignore
-        // el "socket alive" check y haga el fetch inmediatamente
-        lastSocketUpdate = 0;
-        pollDriverLocation();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // ─────────────────────────────────────────────
-    // window.online: red recuperada (sale del metro, etc.)
-    // ─────────────────────────────────────────────
-    const handleOnline = () => {
-      console.log('🌐 Red recuperada en DriverOnWay - reconectando...');
-      recoverConnection();
-    };
-    window.addEventListener('online', handleOnline);
-
-    // ─────────────────────────────────────────────
-    // Heartbeat cada 25s: mantiene socket vivo en iOS
-    // iOS mata WebSockets inactivos en ~30s
-    // ─────────────────────────────────────────────
-    const heartbeatInterval = setInterval(() => {
-      if (clientId && socketService.isConnected()) {
-        socketService.getSocket()?.emit('client:ping', { clientId });
-      } else if (!socketService.isConnected()) {
-        recoverConnection();
-      }
-    }, 25000);
-
-    // ─────────────────────────────────────────────
-    // CAPA SOCKET: ubicación en tiempo real inmediata
-    // Funciona bien en Android y cuando iOS está activo
-    // ─────────────────────────────────────────────
-    // Inicializar con Date.now() para que el polling no dispare en los primeros 6s
-    // mientras el socket tiene oportunidad de conectarse y enviar la primera ubicación
-    let lastSocketUpdate = Date.now();
+    // 🆕 Escuchar actualizaciones de ubicación del conductor en tiempo real
     socketService.onLocationUpdate((data) => {
-      setDriverLocation({ lat: data.location.lat, lng: data.location.lng });
+      console.log('📍 Ubicación del conductor actualizada:', data);
+      
+      setDriverLocation({
+        lat: data.location.lat,
+        lng: data.location.lng
+      });
+      
       setDriverHeading(data.heading || 0);
-      lastSocketUpdate = Date.now();
-      console.log('📡 [SOCKET] Ubicación conductor recibida:', data.location);
     });
-
-    // ─────────────────────────────────────────────
-    // CAPA POLLING REST: fallback para iOS Safari
-    // iOS mata WebSockets agresivamente. Este polling
-    // garantiza que la ubicación se actualice aunque
-    // el socket esté caído (como hacen Uber/Picap).
-    // Cada petición HTTP es independiente y no requiere
-    // conexión persistente.
-    // ─────────────────────────────────────────────
-    const pollDriverLocation = async () => {
-      if (navigatedRef.current) return;
-      const reqId = serviceDataRef.current?.requestId;
-      if (!reqId) return;
-
-      // Solo usar polling si el socket no ha enviado nada en los últimos 6s
-      // (si el socket funciona bien, no se hace la petición REST innecesariamente)
-      const socketIsAlive = (Date.now() - lastSocketUpdate) < 6000;
-      if (socketIsAlive) return;
-
-      try {
-        const res = await fetch(`${API_URL}/api/requests/${reqId}/driver-location`);
-        if (res.status === 204) return; // Sin ubicación todavía
-        if (!res.ok) return;
-        const body = await res.json();
-        if (body.lat && body.lng) {
-          setDriverLocation({ lat: body.lat, lng: body.lng });
-          setDriverHeading(body.heading || 0);
-          console.log('🔄 [POLLING] Ubicación conductor actualizada via REST:', body.lat, body.lng);
-        }
-        // Detectar código validado por el conductor cuando el socket estaba caído.
-        // El status cambia a 'in_progress' cuando el conductor ingresa el código correctamente.
-        if (body.status === 'in_progress') {
-          setServiceStarted(true);
-          console.log('🔑 [POLLING] Código validado detectado via REST — servicio en curso');
-        }
-        // Detectar servicio completado durante la desconexión
-        if (body.status === 'completed') {
-          console.log('✅ [POLLING-LOC] Servicio completado detectado');
-          const fullRes = await fetch(`${API_URL}/api/requests/${reqId}`);
-          if (fullRes.ok) {
-            const full = await fullRes.json();
-            goToRating(full.request?.completedAt);
-          }
-        }
-      } catch {
-        // Silencioso: es un fallback, no el canal principal
-      }
-    };
-
-    // Polling cada 4 segundos (similar a Uber/Picap)
-    const locationPollInterval = setInterval(pollDriverLocation, 4000);
-
-    // ─────────────────────────────────────────────
-    // Capa 3: escuchar que el conductor validó el código
-    // → mostrar nueva UI "en camino al destino"
-    // Usamos handler nombrado para cleanup selectivo
-    // ─────────────────────────────────────────────
-    const handleServiceStarted = (data) => {
-      console.log('🔑 [SOCKET] Código validado — servicio en curso:', data);
-      setServiceStarted(true);
-      showSuccess('¡Tu vehículo ya está en la grúa! En camino al destino.');
-    };
-
-    // ─────────────────────────────────────────────
-    // Capa 4: escuchar que el conductor está llegando (<500m)
-    // El banner se muestra en la UI mientras el conductor se acerca
-    // ─────────────────────────────────────────────
-    const handleDriverArriving = (data) => {
-      console.log('🚛 [SOCKET] Conductor llegando:', data);
-      setDriverArriving(true);
-    };
-
-    const rawSocket2 = socketService.getSocket();
-    if (rawSocket2) {
-      rawSocket2.off('service:started', handleServiceStarted);
-      rawSocket2.on('service:started', handleServiceStarted);
-      rawSocket2.off('driver:arriving', handleDriverArriving);
-      rawSocket2.on('driver:arriving', handleDriverArriving);
-    }
 
     return () => {
-      clearInterval(pollInterval);
-      clearInterval(heartbeatInterval);
-      clearInterval(locationPollInterval);
+      console.log("🧹 DriverOnWay - Cleanup");
       socketService.offServiceCompleted();
-      socketService.offLocationUpdate();
-      const rawSock = socketService.getSocket();
-      if (rawSock) {
-        rawSock.off('connect', handleSocketConnect);
-        rawSock.off('service:started', handleServiceStarted);
-        rawSock.off('driver:arriving', handleDriverArriving);
-      }
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('online', handleOnline);
+      socketService.offLocationUpdate(); // 🆕 Limpiar listener de ubicación
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -336,32 +109,6 @@ const DriverOnWay = () => {
     } else {
       showError("No se pudo obtener el teléfono del conductor");
     }
-  };
-
-  const handleShareLocation = () => {
-    const driverName = serviceData?.driver?.name || 'el conductor';
-    const plate = serviceData?.driver?.towTruck?.licensePlate
-      ? `Placa: ${formatLicensePlate(serviceData.driver.towTruck.licensePlate)}.`
-      : '';
-    const amount = formatAmount(serviceData?.amount || 0);
-    const originAddr = serviceData?.origin?.address || '';
-    const destAddr = serviceData?.destination?.address || '';
-
-    let mapsLink = '';
-    if (driverLocation?.lat && driverLocation?.lng) {
-      mapsLink = `\n📍 Ubicación actual del conductor: https://maps.google.com/?q=${driverLocation.lat},${driverLocation.lng}`;
-    }
-
-    const text = `Hola, estoy usando Desvare 🚛\n\n` +
-      `Mi vehículo fue recogido por ${driverName}. ${plate}\n` +
-      `💰 Valor acordado: ${amount}\n` +
-      `📌 Origen: ${originAddr}\n` +
-      `🏁 Destino: ${destAddr}` +
-      mapsLink +
-      `\n\nPor favor haz seguimiento de mi trayecto.`;
-
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(whatsappUrl, '_blank');
   };
 
   // Generar estrellas dinámicamente basadas en el rating
@@ -414,7 +161,6 @@ const DriverOnWay = () => {
     // Primero, ofrecer llamar al conductor
     presentAlert({
       header: '⚠️ Cancelar Servicio',
-      mode: "ios",
       message: serviceData?.driver?.phone 
         ? `¿Deseas llamar a ${serviceData.driver.name} antes de cancelar?`
         : '¿Estás seguro que deseas cancelar el servicio?',
@@ -593,8 +339,8 @@ const DriverOnWay = () => {
   }
 
   return (
-    <IonPage ref={pageRef} className="ion-page-no-swipe-back">
-      <IonContent className="driver-on-way-page" fullscreen scrollY={false}>
+    <IonPage>
+      <IonContent className="driver-on-way-page" fullscreen>
         <div className="logo-content" onClick={() => history.replace("/home")}>
           <img src={logo} alt="logo" />
         </div>
@@ -679,81 +425,36 @@ const DriverOnWay = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Banner "conductor llegando": aparece cuando el conductor está a <500m */}
-                {driverArriving && !serviceStarted && (
-                  <div className="driver-arriving-banner">
-                    <span className="arriving-pulse">🚛</span>
-                    <div>
-                      <strong>¡Tu grúa está llegando!</strong>
-                      <p>El conductor está muy cerca. Prepárate.</p>
+                
+                <div className="code-box">
+                  <div className="box-info">
+                    <h4>🔒 Código de Seguridad</h4>
+                    <div className="code-digits">
+                      {serviceData.securityCode
+                        ?.split("")
+                        .map((digit, index) => (
+                          <div key={index} className="digit">
+                            {digit}
+                          </div>
+                        ))}
                     </div>
                   </div>
-                )}
-
-                {!serviceStarted ? (
-                  /* ── Estado: esperando que el conductor ingrese el código ── */
-                  <div className="code-box">
-                    <div className="box-info">
-                      <h4>🔒 Código de Seguridad</h4>
-                      <div className="code-digits">
-                        {serviceData.securityCode
-                          ?.split("")
-                          .map((digit, index) => (
-                            <div key={index} className="digit">
-                              {digit}
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                    <p>
-                      Cuando tu vehículo esté sobre la grúa, dale este código al
-                      conductor para habilitarle el destino
-                    </p>
-                  </div>
-                ) : (
-                  /* ── Estado: código validado → servicio en curso ── */
-                  <div className="service-in-progress-box">
-                    <div className="sip-header">
-                      <span className="sip-icon">🚛</span>
-                      <div>
-                        <h4 className="sip-title">¡Tu vehículo está en camino!</h4>
-                        <p className="sip-subtitle">El conductor ya tiene la dirección del destino</p>
-                      </div>
-                    </div>
-                    <div className="sip-route">
-                      <div className="sip-route-item sip-route-item--done">
-                        <span className="sip-dot sip-dot--done">✓</span>
-                        <span>{serviceData.origin?.address || 'Origen'}</span>
-                      </div>
-                      <div className="sip-route-line" />
-                      <div className="sip-route-item">
-                        <span className="sip-dot sip-dot--dest">🏁</span>
-                        <span>{serviceData.destination?.address || 'Destino'}</span>
-                      </div>
-                    </div>
-                    <IonButton
-                      expand="block"
-                      onClick={handleShareLocation}
-                      className="share-location-button"
-                    >
-                      📤 Compartir seguimiento por WhatsApp
-                    </IonButton>
-                  </div>
-                )}
+                  <p>
+                    Cuando tu vehículo este sobre la grúa, dale este código al
+                    condutor para habilitarle el destino
+                  </p>
+                </div>
               </div>
 
-              {!serviceStarted && (
-                <IonButton
-                  expand="block"
-                  fill="clear"
-                  color="danger"
-                  onClick={handleCancelService}
-                  className="cancel-service-button"
-                >
-                  Cancelar Servicio
-                </IonButton>
-              )}
+              <IonButton
+                expand="block"
+                fill="clear"
+                color="danger"
+                onClick={handleCancelService}
+                className="cancel-service-button"
+              >
+                Cancelar Servicio
+              </IonButton>
             </div>
           </div>
         </div>

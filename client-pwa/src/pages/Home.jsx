@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { IonContent, IonPage, useIonViewWillEnter } from "@ionic/react";
+import { IonContent, IonPage } from "@ionic/react";
 import socketService from "../services/socket";
 import mapBg from "../assets/img/map-home-responsive.webp";
 import logo from "../assets/img/Desvare.svg";
-import InstallBanner from "../components/InstallBanner/InstallBanner";
 import "./Home.css";
 
 /* ─── Iconos inline SVG (sin librerías externas = carga instantánea) ─── */
@@ -70,18 +69,6 @@ const Home = () => {
   const history = useHistory();
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
-  const getActiveState = () => {
-    if (localStorage.getItem('activeService')) return 'service';
-    if (localStorage.getItem('currentRequestId') && localStorage.getItem('requestData')) return 'searching';
-    return null;
-  };
-  // 'service' = conductor en camino | 'searching' = buscando/cotizaciones | null = nada activo
-  const [activeState, setActiveState] = useState(() => getActiveState());
-
-  // Re-evaluar al volver a la vista (las tabs se cachean en Ionic y no se remontan)
-  useIonViewWillEnter(() => {
-    setActiveState(getActiveState());
-  });
 
   /* Registrar cliente con socket si está autenticado */
   useEffect(() => {
@@ -302,31 +289,13 @@ const Home = () => {
             <p className="lp-hero__desc">
               Cotiza en tiempo real, compara precios y recibe ayuda al instante.
             </p>
-            {activeState === 'service' ? (
-              <button
-                className="lp-btn lp-btn--active-search lp-btn--large lp-btn--full"
-                onClick={() => history.push("/driver-on-way")}
-              >
-                🚛 Seguir tu servicio activo
-                <IconArrow />
-              </button>
-            ) : activeState === 'searching' ? (
-              <button
-                className="lp-btn lp-btn--active-search lp-btn--large lp-btn--full"
-                onClick={() => history.push("/waiting-quotes")}
-              >
-                🔎 Ver tu búsqueda activa
-                <IconArrow />
-              </button>
-            ) : (
-              <button
-                className="lp-btn lp-btn--primary lp-btn--large lp-btn--full"
-                onClick={handleRequestTowTruck}
-              >
-                Cotizar servicio de grúa
-                <IconArrow />
-              </button>
-            )}
+            <button
+              className="lp-btn lp-btn--primary lp-btn--large lp-btn--full"
+              onClick={handleRequestTowTruck}
+            >
+              Cotizar servicio de grúa
+              <IconArrow />
+            </button>
             <p className="lp-hero__disclaimer">Gratis · Sin registro previo · Colombia</p>
           </div>
         </section>
@@ -572,10 +541,6 @@ const Home = () => {
         </footer>
 
       </IonContent>
-
-      {/* Banner de instalación PWA - flotante inferior */}
-      <InstallBanner variant="home" />
-
     </IonPage>
   );
 };
