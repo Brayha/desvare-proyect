@@ -155,12 +155,17 @@ router.post('/:id/quote', async (req, res) => {
       });
     }
 
-    // Agregar cotización con ubicación del conductor
+    // Convertir location { lat, lng } a GeoJSON { type, coordinates } antes de guardar
+    // (el schema de MongoDB usa GeoJSON; el driver app envía { lat, lng })
+    const locationGeoJSON = location?.lat != null && location?.lng != null
+      ? { type: 'Point', coordinates: [location.lng, location.lat] }
+      : null;
+
     request.quotes.push({
       driverId,
       driverName,
       amount: parseFloat(amount),
-      location: location || null, // Ubicación del conductor
+      location: locationGeoJSON,
       timestamp: new Date()
     });
 
@@ -608,8 +613,9 @@ router.get('/:id/quotes', async (req, res) => {
             .lean();
 
           // Convertir location de GeoJSON [lng, lat] al formato { lat, lng } que usa la PWA
-          const location = quote.location?.coordinates
-            ? { lat: quote.location.coordinates[1], lng: quote.location.coordinates[0] }
+          const coords = quote.location?.coordinates;
+          const location = Array.isArray(coords) && coords.length === 2 && coords[0] != null && coords[1] != null
+            ? { lat: coords[1], lng: coords[0] }
             : null;
 
           return {

@@ -29,6 +29,23 @@ import logo from "../assets/img/Desvare.svg";
 // ============================================
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
+// Normaliza la ubicación de una cotización al formato { lat, lng } que usa el mapa.
+// El backend guarda en GeoJSON { type:'Point', coordinates:[lng,lat] } pero el socket
+// entrega { lat, lng }. Esta función acepta ambos formatos y devuelve { lat, lng } o null.
+const normalizeQuoteLocation = (location) => {
+  if (!location) return null;
+  // Formato socket: { lat, lng }
+  if (location.lat != null && location.lng != null) {
+    return { lat: location.lat, lng: location.lng };
+  }
+  // Formato GeoJSON desde la BD: { type:'Point', coordinates:[lng, lat] }
+  const coords = location.coordinates;
+  if (Array.isArray(coords) && coords.length === 2 && coords[0] != null && coords[1] != null) {
+    return { lat: coords[1], lng: coords[0] };
+  }
+  return null;
+};
+
 // ============================================
 // 🧪 EXPERIMENT-QUOTES: Flag para activar/desactivar
 // ============================================
@@ -184,14 +201,20 @@ const WaitingQuotes = () => {
       }
 
       // Recuperar cotizaciones ya recibidas (por si se recargó la página)
+      // El endpoint devuelve quotes ya normalizadas a { lat, lng } desde el backend,
+      // pero pasamos también por normalizeQuoteLocation como doble seguro.
       try {
         const res = await fetch(`${API_URL}/api/requests/${currentRequestId}/quotes`);
         if (res.ok) {
           const resData = await res.json();
-          const existingQuotes = resData.quotes || [];
+          const existingQuotes = (resData.quotes || []).map((q) => ({
+            ...q,
+            location: normalizeQuoteLocation(q.location)
+          }));
           if (existingQuotes.length > 0 && isMounted) {
             console.log(`✅ WaitingQuotes - ${existingQuotes.length} cotizaciones recuperadas de la BD`);
             setQuotesReceived(existingQuotes);
+            showSuccess(`${existingQuotes.length} cotización${existingQuotes.length > 1 ? 'es' : ''} recuperada${existingQuotes.length > 1 ? 's' : ''}`);
           }
         }
       } catch (fetchErr) {
@@ -267,17 +290,19 @@ const WaitingQuotes = () => {
         console.log("✅ Cotización válida para el request actual");
 
         // Agregar cotización a la lista (evitar duplicados si ya fue cargada desde la BD)
+        const normalizedQuote = { ...quote, location: normalizeQuoteLocation(quote.location) };
+
         setQuotesReceived((prev) => {
-          const alreadyExists = prev.some((q) => q.driverId === quote.driverId);
+          const alreadyExists = prev.some((q) => q.driverId === normalizedQuote.driverId);
           if (alreadyExists) {
-            console.log("ℹ️ Cotización duplicada ignorada (ya cargada desde BD):", quote.driverId);
+            console.log("ℹ️ Cotización duplicada ignorada (ya cargada desde BD):", normalizedQuote.driverId);
             return prev;
           }
-          return [...prev, quote];
+          return [...prev, normalizedQuote];
         });
 
         // ✅ Mostrar notificación visual + sonido + vibración
-        showQuoteNotification(quote, {
+        showQuoteNotification(normalizedQuote, {
           playSound: true,
           vibrate: true,
           duration: 5000,
@@ -494,13 +519,14 @@ const WaitingQuotes = () => {
           console.log("✅ Cotizaciones actualizadas:", data.request.quotes);
 
           // Actualizar lista con cotizaciones del backend
+          // normalizeQuoteLocation convierte GeoJSON → { lat, lng } que requiere el mapa
           const formattedQuotes = data.request.quotes.map((q) => ({
+            requestId: currentRequestId,
             driverId: q.driverId,
             driverName: q.driverName,
             amount: q.amount,
-            location: q.location || null,
+            location: normalizeQuoteLocation(q.location),
             timestamp: q.timestamp,
-            // ✅ NUEVOS CAMPOS: Foto, rating y servicios del conductor
             driverPhoto: q.driverPhoto || null,
             driverRating: q.driverRating || 5,
             driverServiceCount: q.driverServiceCount || 0
