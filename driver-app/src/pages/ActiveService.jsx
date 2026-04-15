@@ -212,9 +212,10 @@ const ActiveService = () => {
     const driverUser = userData ? JSON.parse(userData) : null;
     const driverId = serviceData.driverId || driverUser?._id || driverUser?.id;
 
-    // Estado mutable compartido entre el watcher y el handler de reconexión
+    // Estado mutable compartido entre el watcher, el intervalo y el handler de reconexión
     const state = {
       watcherId: null,
+      intervalId: null,
       lastLocation: null,
     };
 
@@ -256,72 +257,63 @@ const ActiveService = () => {
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Iniciar BackgroundGeolocation - funciona en background y pantalla bloqueada
+    // Función central para obtener posición y enviarla (usada por ambas estrategias)
+    const sendCurrentPosition = (pos) => {
+      const payload = {
+        requestId: serviceData.requestId,
+        driverId,
+        location: { lat: pos.latitude ?? pos.coords?.latitude, lng: pos.longitude ?? pos.coords?.longitude },
+        heading: pos.bearing ?? pos.coords?.heading ?? 0,
+        speed: pos.speed ?? pos.coords?.speed ?? 0,
+        accuracy: pos.accuracy ?? pos.coords?.accuracy ?? 0,
+      };
+      state.lastLocation = payload;
+      socketService.sendLocationUpdate(payload);
+      console.log('📍 GPS enviado:', payload.location, `±${(payload.accuracy || 0).toFixed(0)}m`);
+    };
+
+    // ESTRATEGIA 1 - BackgroundGeolocation (foreground service de Android)
+    // Mantiene el tracking activo cuando la pantalla está bloqueada o el usuario
+    // está en otra app. distanceFilter: 0 para no filtrar posiciones estáticas.
     const startBgTracking = async () => {
-      console.log('🛰️ Iniciando BackgroundGeolocation (foreground service)...');
+      console.log('🛰️ Iniciando BackgroundGeolocation...');
       try {
         state.watcherId = await BackgroundGeolocation.addWatcher(
           {
             backgroundMessage: 'El conductor está en camino. El tracking GPS está activo.',
             backgroundTitle: 'Desvare - Servicio en progreso',
             requestPermissions: true,
-            stale: false,
-            distanceFilter: 10, // metros mínimos para emitir nueva posición
+            stale: true,       // Permitir posición cacheada para respuesta inmediata
+            distanceFilter: 0, // Sin filtro: reportar cualquier actualización de GPS
           },
           (location, error) => {
             if (error) {
-              if (error.code === 'NOT_AUTHORIZED') {
-                console.warn('⚠️ Permiso de ubicación denegado en background');
-              } else {
-                console.error('❌ BackgroundGeolocation error:', error.code, error.message);
-              }
+              console.warn('⚠️ BackgroundGeolocation error:', error.code, error.message);
               return;
             }
-
-            const payload = {
-              requestId: serviceData.requestId,
-              driverId,
-              location: { lat: location.latitude, lng: location.longitude },
-              heading: location.bearing || 0,
-              speed: location.speed || 0,
-              accuracy: location.accuracy || 0,
-            };
-
-            state.lastLocation = payload;
-            socketService.sendLocationUpdate(payload);
-            console.log('📍 Ubicación enviada:', payload.location, `±${location.accuracy?.toFixed(0)}m`);
+            sendCurrentPosition(location);
           }
         );
-        console.log('✅ BackgroundGeolocation activo, watcher ID:', state.watcherId);
+        console.log('✅ BackgroundGeolocation activo, watcher:', state.watcherId);
       } catch (err) {
-        console.error('❌ No se pudo iniciar BackgroundGeolocation:', err);
-        // Fallback: usar navigator.geolocation clásico
-        startFallbackTracking();
+        console.error('❌ BackgroundGeolocation falló:', err);
       }
     };
 
-    // Fallback por si el plugin falla (no debería pasar en producción)
-    const startFallbackTracking = () => {
-      console.log('⚠️ Usando fallback navigator.geolocation...');
+    // ESTRATEGIA 2 - Intervalo con navigator.geolocation (garantía en primer plano)
+    // Se ejecuta cada 15 segundos como respaldo para asegurar que siempre
+    // lleguen actualizaciones, incluso si BackgroundGeolocation no dispara.
+    const sendPositionNow = () => {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const payload = {
-            requestId: serviceData.requestId,
-            driverId,
-            location: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-            heading: pos.coords.heading || 0,
-            speed: pos.coords.speed || 0,
-            accuracy: pos.coords.accuracy || 0,
-          };
-          state.lastLocation = payload;
-          socketService.sendLocationUpdate(payload);
-        },
-        (err) => console.warn('⚠️ Fallback GPS error:', err.message),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 15000 }
+        (pos) => sendCurrentPosition(pos.coords),
+        (err) => console.warn('⚠️ GPS puntual error:', err.message),
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
       );
     };
 
     startBgTracking();
+    sendPositionNow(); // Envío inmediato al montar
+    state.intervalId = setInterval(sendPositionNow, 15000); // Cada 15 segundos
 
     return () => {
       socketService.offReconnect(handleReconnect);
@@ -329,6 +321,10 @@ const ActiveService = () => {
       if (state.watcherId !== null) {
         BackgroundGeolocation.removeWatcher({ id: state.watcherId });
         console.log('🛑 BackgroundGeolocation detenido');
+      }
+      if (state.intervalId !== null) {
+        clearInterval(state.intervalId);
+        console.log('🛑 Intervalo GPS detenido');
       }
     };
   }, [serviceData]);
