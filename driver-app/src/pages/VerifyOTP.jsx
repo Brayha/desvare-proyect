@@ -213,8 +213,9 @@ const VerifyOTP = () => {
               <input
                 key={index}
                 ref={(el) => (otpRefs.current[index] = el)}
-                type="text"
+                type="tel"
                 inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength={1}
                 className="verify-otp-input-box"
                 value={otp[index] || ''}
