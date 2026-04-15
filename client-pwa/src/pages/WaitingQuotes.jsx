@@ -105,6 +105,8 @@ const WaitingQuotes = () => {
 
   useEffect(() => {
     let isMounted = true; // Flag para evitar actualizaciones si el componente se desmonta
+    let heartbeatInterval = null;
+    let handleVisibilityChange = null;
     console.log("🔄 WaitingQuotes - useEffect ejecutándose");
 
     const initializeData = () => {
@@ -196,6 +198,40 @@ const WaitingQuotes = () => {
       const currentRequestId = localStorage.getItem("currentRequestId");
       console.log("🎯 Listener configurado para requestId:", currentRequestId);
 
+      // Obtener clientId para heartbeat y re-registro
+      const userData = localStorage.getItem("user");
+      const clientId = userData ? JSON.parse(userData).id : null;
+
+      const ensureConnected = () => {
+        if (!socketService.isConnected()) {
+          console.log("🔌 WaitingQuotes - Reconectando socket...");
+          socketService.connect();
+        }
+        if (clientId) {
+          socketService.registerClient(clientId);
+          console.log("👤 WaitingQuotes - Cliente re-registrado:", clientId);
+        }
+      };
+
+      // Heartbeat: ping cada 25s para mantener socketId actualizado en el backend
+      heartbeatInterval = setInterval(() => {
+        if (clientId && socketService.isConnected()) {
+          socketService.getSocket()?.emit("client:ping", { clientId });
+        } else if (!socketService.isConnected()) {
+          console.log("🏓 WaitingQuotes - Socket caído, reconectando...");
+          ensureConnected();
+        }
+      }, 25000);
+
+      // Visibilitychange: cuando el usuario vuelve a la app
+      handleVisibilityChange = () => {
+        if (document.visibilityState === "visible") {
+          console.log("👁️ WaitingQuotes - App visible, verificando socket...");
+          ensureConnected();
+        }
+      };
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
       socketService.onQuoteReceived((quote) => {
         console.log("💰 Cotización recibida en WaitingQuotes:", quote);
         console.log("📍 Ubicación del conductor:", quote.location);
@@ -265,6 +301,8 @@ const WaitingQuotes = () => {
     return () => {
       console.log("🧹 WaitingQuotes - Desmontando componente");
       isMounted = false;
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      if (handleVisibilityChange) document.removeEventListener("visibilitychange", handleVisibilityChange);
       socketService.offQuoteReceived();
       socketService.offQuoteCancelled();
       console.log("🔇 Listeners de cotizaciones removidos");

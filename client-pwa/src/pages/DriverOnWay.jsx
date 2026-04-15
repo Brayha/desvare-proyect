@@ -47,13 +47,43 @@ const DriverOnWay = () => {
     setServiceData(parsedData);
     setIsLoading(false);
 
-    // Socket.IO ya está conectado desde App.jsx
-    if (!socketService.socket?.connected) {
-      console.log("🔌 Conectando Socket.IO...");
-      socketService.connect();
-    } else {
-      console.log("✅ Socket.IO ya conectado");
-    }
+    // Asegurar que el socket esté conectado y el cliente registrado
+    const userData = localStorage.getItem("user");
+    const clientId = userData ? JSON.parse(userData).id : null;
+
+    const ensureConnected = () => {
+      if (!socketService.isConnected()) {
+        console.log("🔌 DriverOnWay - Reconectando socket...");
+        socketService.connect();
+      }
+      if (clientId) {
+        socketService.registerClient(clientId);
+        console.log("👤 DriverOnWay - Cliente re-registrado:", clientId);
+      }
+    };
+
+    ensureConnected();
+
+    // Heartbeat: enviar ping cada 25s para que el backend actualice el socketId
+    // Crítico en iOS Safari — el socket puede reconectar con un ID nuevo sin avisar
+    const heartbeatInterval = setInterval(() => {
+      if (clientId && socketService.isConnected()) {
+        socketService.getSocket()?.emit("client:ping", { clientId });
+      } else if (!socketService.isConnected()) {
+        console.log("🏓 DriverOnWay - Socket caído, reconectando antes del ping...");
+        ensureConnected();
+      }
+    }, 25000);
+
+    // Visibilitychange: cuando el usuario vuelve a la app (desbloquea teléfono,
+    // cambia de pestaña, etc.) reconecta y re-registra para recibir ubicaciones
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log("👁️ DriverOnWay - App visible, verificando socket...");
+        ensureConnected();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // ✅ Escuchar cuando el conductor completa el servicio
     socketService.onServiceCompleted((data) => {
@@ -97,8 +127,10 @@ const DriverOnWay = () => {
 
     return () => {
       console.log("🧹 DriverOnWay - Cleanup");
+      clearInterval(heartbeatInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       socketService.offServiceCompleted();
-      socketService.offLocationUpdate(); // 🆕 Limpiar listener de ubicación
+      socketService.offLocationUpdate();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
