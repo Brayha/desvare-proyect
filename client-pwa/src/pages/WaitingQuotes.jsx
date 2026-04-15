@@ -124,6 +124,7 @@ const WaitingQuotes = () => {
     let isMounted = true; // Flag para evitar actualizaciones si el componente se desmonta
     let heartbeatInterval = null;
     let handleVisibilityChange = null;
+    let handleSocketReconnect = null;
     console.log("🔄 WaitingQuotes - useEffect ejecutándose");
 
     const initializeData = async () => {
@@ -251,6 +252,31 @@ const WaitingQuotes = () => {
         }
       };
 
+      // Consulta la API y actualiza las cotizaciones en pantalla.
+      // Se usa tanto al volver de otra app como al reconectar el socket.
+      const refreshQuotes = async () => {
+        const currentRequestId = localStorage.getItem("currentRequestId");
+        if (!currentRequestId) return;
+        try {
+          const res = await fetch(`${API_URL}/api/requests/${currentRequestId}/quotes`);
+          if (!res.ok) return;
+          const resData = await res.json();
+          const freshQuotes = (resData.quotes || []).map((q) => ({
+            ...q,
+            location: normalizeQuoteLocation(q.location),
+          }));
+          if (freshQuotes.length > 0) {
+            setQuotesReceived(freshQuotes);
+            showSuccess(
+              `${freshQuotes.length} cotización${freshQuotes.length > 1 ? "es" : ""} disponible${freshQuotes.length > 1 ? "s" : ""}`
+            );
+            console.log(`✅ WaitingQuotes - ${freshQuotes.length} cotizaciones refrescadas`);
+          }
+        } catch (err) {
+          console.warn("⚠️ Error al refrescar cotizaciones:", err.message);
+        }
+      };
+
       // Heartbeat: ping cada 25s para mantener socketId actualizado en el backend
       heartbeatInterval = setInterval(() => {
         if (clientId && socketService.isConnected()) {
@@ -261,11 +287,22 @@ const WaitingQuotes = () => {
         }
       }, 25000);
 
-      // Visibilitychange: cuando el usuario vuelve a la app
+      // Al reconectar el socket: re-registrar cliente y refrescar cotizaciones.
+      // Cubre el caso donde llegaron cotizaciones mientras el socket estaba caído.
+      handleSocketReconnect = () => {
+        console.log("🔄 WaitingQuotes - Socket reconectado, refrescando cotizaciones...");
+        if (clientId) socketService.registerClient(clientId);
+        refreshQuotes();
+      };
+      socketService.onReconnect(handleSocketReconnect);
+
+      // Visibilitychange: cuando el usuario vuelve a la app desde otra app o desbloquea pantalla.
+      // Reconecta el socket Y consulta la API para mostrar cotizaciones que llegaron en background.
       handleVisibilityChange = () => {
         if (document.visibilityState === "visible") {
-          console.log("👁️ WaitingQuotes - App visible, verificando socket...");
+          console.log("👁️ WaitingQuotes - App visible, actualizando cotizaciones...");
           ensureConnected();
+          refreshQuotes();
         }
       };
       document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -350,6 +387,7 @@ const WaitingQuotes = () => {
       isMounted = false;
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       if (handleVisibilityChange) document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (handleSocketReconnect) socketService.offReconnect(handleSocketReconnect);
       socketService.offQuoteReceived();
       socketService.offQuoteCancelled();
       console.log("🔇 Listeners de cotizaciones removidos");
