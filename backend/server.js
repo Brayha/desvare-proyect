@@ -176,6 +176,14 @@ io.on('connection', (socket) => {
         });
         
         console.log(`🚗 Conductor registrado: ${driverId} - Estado: ${isOnline ? '🟢 ACTIVO' : '🔴 OCUPADO'}`);
+
+        // Actualizar driverSocketId en activeServices si hay un servicio activo para este conductor
+        for (const [reqId, service] of activeServices.entries()) {
+          if (service.driverId === driverId) {
+            activeServices.set(reqId, { ...service, driverSocketId: socket.id });
+            console.log(`🔄 activeServices actualizado con nuevo socketId del conductor para servicio ${reqId}`);
+          }
+        }
         
         socket.join('drivers');
         socket.join(`driver:${driverId}`);
@@ -576,18 +584,18 @@ io.on('connection', (socket) => {
     console.log(`❌ Otros conductores: ${data.otherDriverIds?.length || 0}`);
     
     // Guardar servicio activo para tracking (RAM + MongoDB para persistencia)
+    // IMPORTANTE: registrar SIEMPRE aunque el conductor esté offline al momento de aceptar.
+    // Cuando el conductor reconecte y envíe GPS, el backend usará clientId para encontrar al cliente.
     const clientSocketId = connectedClients.get(data.clientId);
     const driverData = connectedDrivers.get(data.acceptedDriverId);
     
-    if (clientSocketId && driverData) {
-      activeServices.set(data.requestId, {
-        clientId: data.clientId,
-        driverId: data.acceptedDriverId,
-        clientSocketId: clientSocketId,
-        driverSocketId: driverData.socketId
-      });
-      console.log(`📍 Servicio ${data.requestId} registrado para tracking en tiempo real (RAM)`);
-    }
+    activeServices.set(data.requestId, {
+      clientId: data.clientId,
+      driverId: data.acceptedDriverId,
+      clientSocketId: clientSocketId || null,
+      driverSocketId: driverData?.socketId || null,
+    });
+    console.log(`📍 Servicio ${data.requestId} registrado para tracking (RAM) - conductor ${driverData ? 'online' : 'offline al aceptar'}`);
 
     // Persistir en MongoDB para sobrevivir reinicios del backend
     try {

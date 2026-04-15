@@ -6,6 +6,7 @@ class SocketService {
   constructor() {
     this.socket = null;
     this._reconnectCallbacks = [];
+    this._pendingLocationUpdate = null; // Última ubicación pendiente de enviar al reconectar
   }
 
   connect() {
@@ -44,13 +45,18 @@ class SocketService {
       console.warn('⚠️ Error de conexión Socket.IO:', error.message);
     });
 
-    // Al reconectar, ejecutar todos los callbacks registrados
-    // (ej: re-registrar conductor, re-suscribirse a salas)
+    // Al reconectar: ejecutar callbacks y enviar ubicación pendiente si la hay
     this.socket.on('reconnect', (attemptNumber) => {
       console.log(`🔄 Socket.IO reconectado (intento ${attemptNumber})`);
       this._reconnectCallbacks.forEach(cb => {
         try { cb(); } catch (e) { console.warn('Error en callback de reconexión:', e); }
       });
+      // Enviar la última ubicación que no pudo enviarse mientras estaba desconectado
+      if (this._pendingLocationUpdate) {
+        console.log('📡 Enviando ubicación pendiente tras reconexión...');
+        this.socket.emit('driver:location-update', this._pendingLocationUpdate);
+        this._pendingLocationUpdate = null;
+      }
     });
 
     return this.socket;
@@ -184,18 +190,21 @@ class SocketService {
   // ========================================
 
   sendLocationUpdate(data) {
+    // Guardar siempre como última ubicación pendiente (útil para reenviar al reconectar)
+    this._pendingLocationUpdate = data;
+
     if (!this.socket) {
-      // Socket fue destruido (Home llamó disconnect al navegar). Recrear.
       console.log('🔄 Socket null en tracking GPS — recreando conexión...');
       this.connect();
-      // No podemos emitir aún; el próximo tick de GPS lo intentará de nuevo.
       return;
     }
     if (this.socket.connected) {
       this.socket.emit('driver:location-update', data);
+      this._pendingLocationUpdate = null; // enviado con éxito
     } else {
       console.log('🔄 Socket desconectado durante tracking — reconectando...');
       this.socket.connect();
+      // _pendingLocationUpdate queda guardado; se enviará en el evento 'reconnect'
     }
   }
 
