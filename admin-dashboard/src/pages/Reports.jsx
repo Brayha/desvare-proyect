@@ -2,15 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { IonPage, IonContent, IonSpinner, IonButton } from '@ionic/react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { reportsAPI, dashboardAPI } from '../services/adminAPI';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { reportsAPI } from '../services/adminAPI';
+import {
+  BarChart, Bar, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, PieChart, Pie, Cell
+} from 'recharts';
 import { DocumentDownload, Calendar } from 'iconsax-react';
 import './Reports.css';
 
+const COLORS = ['#0055FF', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+
+const PERIOD_LABELS = {
+  week: 'Última semana',
+  month: 'Último mes',
+  quarter: 'Último trimestre',
+  year: 'Último año',
+};
+
 const Reports = () => {
-  const [stats, setStats] = useState(null);
+  const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const [dateRange, setDateRange] = useState('month');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadReports();
@@ -19,10 +34,12 @@ const Reports = () => {
   const loadReports = async () => {
     try {
       setIsLoading(true);
-      const response = await dashboardAPI.getStats();
-      setStats(response.data);
-    } catch (error) {
-      console.error('❌ Error cargando reportes:', error);
+      setError(null);
+      const response = await reportsAPI.getRevenue(dateRange);
+      setData(response.data);
+    } catch (err) {
+      console.error('❌ Error cargando reportes:', err);
+      setError('No se pudieron cargar los reportes. Verifica la conexión al servidor.');
     } finally {
       setIsLoading(false);
     }
@@ -33,39 +50,28 @@ const Reports = () => {
       style: 'currency',
       currency: 'COP',
       minimumFractionDigits: 0
-    }).format(value);
+    }).format(value || 0);
   };
 
-  // Datos de ejemplo para gráficos (en producción vendrían del backend)
-  const servicesData = [
-    { name: 'Ene', completados: 45, cancelados: 5 },
-    { name: 'Feb', completados: 52, cancelados: 8 },
-    { name: 'Mar', completados: 61, cancelados: 6 },
-    { name: 'Abr', completados: 70, cancelados: 9 },
-    { name: 'May', completados: 85, cancelados: 7 },
-    { name: 'Jun', completados: 92, cancelados: 10 },
-  ];
-
-  const revenueData = [
-    { name: 'Ene', ingresos: 4500000 },
-    { name: 'Feb', ingresos: 5200000 },
-    { name: 'Mar', ingresos: 6100000 },
-    { name: 'Abr', ingresos: 7000000 },
-    { name: 'May', ingresos: 8500000 },
-    { name: 'Jun', ingresos: 9200000 },
-  ];
-
-  const vehicleCategoryData = [
-    { name: 'Autos', value: 45 },
-    { name: 'Camionetas', value: 30 },
-    { name: 'Camiones', value: 15 },
-    { name: 'Buses', value: 10 },
-  ];
-
-  const COLORS = ['#0055FF', '#10B981', '#F59E0B', '#EF4444'];
-
-  const handleExport = () => {
-    alert('📊 Función de exportar reportes en desarrollo...');
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      const response = await reportsAPI.export(dateRange);
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `desvare-reporte-${dateRange}-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('❌ Error exportando:', err);
+      alert('Error al exportar el reporte. Intenta de nuevo.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (isLoading) {
@@ -85,6 +91,25 @@ const Reports = () => {
     );
   }
 
+  if (error) {
+    return (
+      <IonPage>
+        <Sidebar />
+        <IonContent>
+          <div className="admin-content-wrapper">
+            <Header title="Reportes y Analíticas" />
+            <div className="admin-loading">
+              <p style={{ color: '#EF4444' }}>{error}</p>
+              <IonButton onClick={loadReports}>Reintentar</IonButton>
+            </div>
+          </div>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+  const { chartData = [], vehicleCategoryData = [], topDrivers = [], totals = {} } = data || {};
+
   return (
     <IonPage>
       <Sidebar />
@@ -92,7 +117,7 @@ const Reports = () => {
         <div className="admin-content-wrapper">
           <Header title="Reportes y Analíticas" />
 
-          {/* Filters and Export */}
+          {/* Filtros y exportar */}
           <div className="reports-actions">
             <div className="date-range-selector">
               <Calendar size="20" color="#6B7280" />
@@ -103,130 +128,150 @@ const Reports = () => {
                 <option value="year">Último año</option>
               </select>
             </div>
-            
-            <IonButton onClick={handleExport}>
+
+            <IonButton onClick={handleExport} disabled={isExporting}>
               <DocumentDownload size="20" style={{ marginRight: '8px' }} />
-              Exportar Reporte
+              {isExporting ? 'Exportando...' : 'Exportar CSV'}
             </IonButton>
           </div>
 
-          {/* Summary Cards */}
+          {/* Tarjetas de resumen — datos reales del periodo */}
           <div className="reports-summary">
             <div className="summary-card">
-              <span className="summary-label">Ingresos Totales</span>
-              <span className="summary-value">{formatCurrency(stats?.revenue?.total || 0)}</span>
-              <span className="summary-change positive">+12% vs mes anterior</span>
+              <span className="summary-label">Ingresos — {PERIOD_LABELS[dateRange]}</span>
+              <span className="summary-value">{formatCurrency(totals.ingresos)}</span>
+              <span className="summary-change neutral">10% comisión: {formatCurrency(totals.ganancias)}</span>
             </div>
             <div className="summary-card">
               <span className="summary-label">Servicios Completados</span>
-              <span className="summary-value">{stats?.services?.completed || 0}</span>
-              <span className="summary-change positive">+8% vs mes anterior</span>
+              <span className="summary-value">{totals.completados || 0}</span>
+              <span className="summary-change neutral">{totals.cancelados || 0} cancelados</span>
             </div>
             <div className="summary-card">
-              <span className="summary-label">Nuevos Clientes</span>
-              <span className="summary-value">{stats?.clients?.total || 0}</span>
-              <span className="summary-change positive">+15% vs mes anterior</span>
+              <span className="summary-label">Total Solicitudes</span>
+              <span className="summary-value">
+                {(totals.completados || 0) + (totals.cancelados || 0)}
+              </span>
+              <span className="summary-change neutral">
+                {totals.completados && (totals.completados + totals.cancelados) > 0
+                  ? Math.round((totals.completados / (totals.completados + totals.cancelados)) * 100)
+                  : 0}% tasa de éxito
+              </span>
             </div>
             <div className="summary-card">
-              <span className="summary-label">Conductores Activos</span>
-              <span className="summary-value">{stats?.drivers?.active || 0}</span>
-              <span className="summary-change neutral">=0% vs mes anterior</span>
+              <span className="summary-label">Top Conductor</span>
+              <span className="summary-value">
+                {topDrivers[0]?.name || '—'}
+              </span>
+              <span className="summary-change neutral">
+                {topDrivers[0] ? `${topDrivers[0].servicios} servicios` : 'Sin datos'}
+              </span>
             </div>
           </div>
 
-          {/* Charts Grid */}
+          {/* Gráficos */}
           <div className="charts-grid">
-            {/* Services Chart */}
+
+            {/* Servicios completados vs cancelados por periodo */}
             <div className="chart-card">
-              <h3 className="chart-title">Servicios por Mes</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={servicesData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="completados" fill="#10B981" name="Completados" />
-                  <Bar dataKey="cancelados" fill="#EF4444" name="Cancelados" />
-                </BarChart>
-              </ResponsiveContainer>
+              <h3 className="chart-title">Servicios por Periodo</h3>
+              {chartData.length === 0 ? (
+                <div className="chart-empty">Sin datos para el periodo seleccionado</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="completados" fill="#10B981" name="Completados" />
+                    <Bar dataKey="cancelados" fill="#EF4444" name="Cancelados" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
-            {/* Revenue Chart */}
+            {/* Ingresos por periodo */}
             <div className="chart-card">
-              <h3 className="chart-title">Ingresos por Mes</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="ingresos" 
-                    stroke="#0055FF" 
-                    strokeWidth={3} 
-                    name="Ingresos"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <h3 className="chart-title">Ingresos por Periodo</h3>
+              {chartData.length === 0 ? (
+                <div className="chart-empty">Sin datos para el periodo seleccionado</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} />
+                    <Tooltip formatter={(v) => formatCurrency(v)} />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="ingresos"
+                      stroke="#0055FF"
+                      strokeWidth={3}
+                      name="Ingresos"
+                      dot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
-            {/* Vehicle Categories Chart */}
+            {/* Categorías de vehículos */}
             <div className="chart-card">
               <h3 className="chart-title">Servicios por Categoría de Vehículo</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={vehicleCategoryData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {vehicleCategoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {vehicleCategoryData.length === 0 || vehicleCategoryData[0]?.name === 'Sin datos' ? (
+                <div className="chart-empty">Sin datos de categorías para este periodo</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={vehicleCategoryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={100}
+                      dataKey="value"
+                    >
+                      {vehicleCategoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
-            {/* Driver Performance */}
+            {/* Top conductores reales */}
             <div className="chart-card">
-              <h3 className="chart-title">Top Conductores del Mes</h3>
-              <div className="top-drivers-list">
-                <div className="top-driver-item">
-                  <div className="rank gold">🥇</div>
-                  <div className="driver-info">
-                    <span className="driver-name">Juan Pérez</span>
-                    <span className="driver-services">45 servicios</span>
-                  </div>
-                  <div className="driver-earnings">{formatCurrency(4500000)}</div>
+              <h3 className="chart-title">Top Conductores del Periodo</h3>
+              {topDrivers.length === 0 ? (
+                <div className="chart-empty">Sin servicios completados en este periodo</div>
+              ) : (
+                <div className="top-drivers-list">
+                  {topDrivers.map((driver, index) => {
+                    const medals = ['🥇', '🥈', '🥉'];
+                    const rankClass = ['gold', 'silver', 'bronze'][index] || 'default';
+                    return (
+                      <div key={driver._id || index} className="top-driver-item">
+                        <div className={`rank ${rankClass}`}>
+                          {medals[index] || `#${index + 1}`}
+                        </div>
+                        <div className="driver-info">
+                          <span className="driver-name">{driver.name}</span>
+                          <span className="driver-services">{driver.servicios} servicios</span>
+                        </div>
+                        <div className="driver-earnings">{formatCurrency(driver.ingresos)}</div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="top-driver-item">
-                  <div className="rank silver">🥈</div>
-                  <div className="driver-info">
-                    <span className="driver-name">María García</span>
-                    <span className="driver-services">38 servicios</span>
-                  </div>
-                  <div className="driver-earnings">{formatCurrency(3800000)}</div>
-                </div>
-                <div className="top-driver-item">
-                  <div className="rank bronze">🥉</div>
-                  <div className="driver-info">
-                    <span className="driver-name">Carlos Rodríguez</span>
-                    <span className="driver-services">32 servicios</span>
-                  </div>
-                  <div className="driver-earnings">{formatCurrency(3200000)}</div>
-                </div>
-              </div>
+              )}
             </div>
+
           </div>
         </div>
       </IonContent>
@@ -235,4 +280,3 @@ const Reports = () => {
 };
 
 export default Reports;
-

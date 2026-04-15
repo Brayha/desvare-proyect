@@ -941,5 +941,262 @@ router.get('/services/:id', async (req, res) => {
   }
 });
 
+// ============================================
+// REPORTES Y ANALÍTICAS
+// ============================================
+
+/**
+ * GET /api/admin/reports/revenue
+ * Datos históricos reales agrupados por periodo
+ * Query params: period = week | month | quarter | year
+ */
+router.get('/reports/revenue', async (req, res) => {
+  try {
+    const { period = 'month' } = req.query;
+
+    const now = new Date();
+    let startDate;
+    let groupFormat;
+
+    // Determinar rango de fechas y agrupación según periodo
+    switch (period) {
+      case 'week':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 6);
+        groupFormat = '%Y-%m-%d'; // Agrupado por día
+        break;
+      case 'quarter':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 2);
+        startDate.setDate(1);
+        groupFormat = '%Y-%m'; // Agrupado por mes
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        groupFormat = '%Y-%m'; // Agrupado por mes
+        break;
+      case 'month':
+      default:
+        startDate = new Date(now);
+        startDate.setDate(1);
+        groupFormat = '%Y-%m-%d'; // Agrupado por día
+        break;
+    }
+
+    // Servicios completados agrupados por fecha (para gráfico de ingresos y servicios)
+    const revenueByPeriod = await Request.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: groupFormat, date: '$createdAt', timezone: 'America/Bogota' } },
+          ingresos: { $sum: '$totalAmount' },
+          completados: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id': 1 } }
+    ]);
+
+    // Servicios cancelados agrupados por fecha
+    const cancelledByPeriod = await Request.aggregate([
+      {
+        $match: {
+          status: 'cancelled',
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: groupFormat, date: '$createdAt', timezone: 'America/Bogota' } },
+          cancelados: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id': 1 } }
+    ]);
+
+    // Combinar completados y cancelados en un solo array por fecha
+    const cancelledMap = {};
+    cancelledByPeriod.forEach(d => { cancelledMap[d._id] = d.cancelados; });
+
+    const chartData = revenueByPeriod.map(d => ({
+      name: d._id,
+      ingresos: d.ingresos,
+      completados: d.completados,
+      cancelados: cancelledMap[d._id] || 0
+    }));
+
+    // Categorías de vehículos en servicios completados del periodo
+    const vehicleCategories = await Request.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          createdAt: { $gte: startDate },
+          'vehicleSnapshot.categoryId': { $exists: true }
+        }
+      },
+      {
+        $group: {
+          _id: '$vehicleSnapshot.category',
+          value: { $sum: 1 }
+        }
+      },
+      { $sort: { value: -1 } }
+    ]);
+
+    const vehicleCategoryData = vehicleCategories
+      .filter(c => c._id)
+      .map(c => ({ name: c._id, value: c.value }));
+
+    // Top conductores del periodo
+    const topDrivers = await Request.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          createdAt: { $gte: startDate },
+          assignedDriverId: { $exists: true }
+        }
+      },
+      {
+        $group: {
+          _id: '$assignedDriverId',
+          servicios: { $sum: 1 },
+          ingresos: { $sum: '$totalAmount' }
+        }
+      },
+      { $sort: { servicios: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'driver'
+        }
+      },
+      { $unwind: '$driver' },
+      {
+        $project: {
+          name: '$driver.name',
+          phone: '$driver.phone',
+          servicios: 1,
+          ingresos: 1
+        }
+      }
+    ]);
+
+    // Totales del periodo
+    const periodTotals = await Request.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: null,
+          totalIngresos: {
+            $sum: { $cond: [{ $eq: ['$status', 'completed'] }, '$totalAmount', 0] }
+          },
+          completados: {
+            $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] }
+          },
+          cancelados: {
+            $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] }
+          },
+          total: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const totals = periodTotals[0] || { totalIngresos: 0, completados: 0, cancelados: 0, total: 0 };
+
+    res.json({
+      period,
+      startDate,
+      chartData,
+      vehicleCategoryData: vehicleCategoryData.length > 0 ? vehicleCategoryData : [
+        { name: 'Sin datos', value: 1 }
+      ],
+      topDrivers,
+      totals: {
+        ingresos: totals.totalIngresos,
+        ganancias: Math.round(totals.totalIngresos * 0.10),
+        completados: totals.completados,
+        cancelados: totals.cancelados
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error generando reporte de ingresos:', error);
+    res.status(500).json({ error: 'Error al generar reporte', details: error.message });
+  }
+});
+
+/**
+ * GET /api/admin/reports/export
+ * Exporta los servicios del periodo como JSON descargable (CSV generado en frontend)
+ * Query params: period = week | month | quarter | year
+ */
+router.get('/reports/export', async (req, res) => {
+  try {
+    const { period = 'month' } = req.query;
+
+    const now = new Date();
+    let startDate;
+
+    switch (period) {
+      case 'week':
+        startDate = new Date(now); startDate.setDate(now.getDate() - 6); break;
+      case 'quarter':
+        startDate = new Date(now); startDate.setMonth(now.getMonth() - 2); startDate.setDate(1); break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1); break;
+      default: // month
+        startDate = new Date(now); startDate.setDate(1); break;
+    }
+
+    const services = await Request.find({
+      createdAt: { $gte: startDate }
+    })
+      .populate('clientId', 'name phone email')
+      .populate('assignedDriverId', 'name phone')
+      .select('status totalAmount createdAt completedAt origin destination vehicleSnapshot clientId assignedDriverId')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Construir CSV en el backend
+    const header = 'ID,Fecha,Estado,Cliente,Conductor,Origen,Destino,Vehículo,Monto\n';
+    const rows = services.map(s => {
+      const fecha = new Date(s.createdAt).toLocaleDateString('es-CO');
+      const estadoMap = {
+        completed: 'Completado', cancelled: 'Cancelado',
+        in_progress: 'En curso', pending: 'Pendiente',
+        accepted: 'Aceptado', quoted: 'Cotizado'
+      };
+      return [
+        s._id.toString().slice(-6),
+        fecha,
+        estadoMap[s.status] || s.status,
+        s.clientId?.name || 'N/A',
+        s.assignedDriverId?.name || 'Sin asignar',
+        `"${(s.origin?.address || '').replace(/"/g, "'")}"`,
+        `"${(s.destination?.address || 'Sin destino').replace(/"/g, "'")}"`,
+        `"${s.vehicleSnapshot?.category || ''} ${s.vehicleSnapshot?.brand || ''}"`,
+        s.totalAmount || 0
+      ].join(',');
+    }).join('\n');
+
+    const csv = header + rows;
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="desvare-reporte-${period}-${new Date().toISOString().split('T')[0]}.csv"`);
+    res.send('\uFEFF' + csv); // BOM para que Excel lo abra correctamente
+
+  } catch (error) {
+    console.error('❌ Error exportando reporte:', error);
+    res.status(500).json({ error: 'Error al exportar reporte' });
+  }
+});
+
 module.exports = router;
 

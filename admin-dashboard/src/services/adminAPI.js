@@ -82,8 +82,8 @@ export const servicesAPI = {
 
 // API de reportes
 export const reportsAPI = {
-  getRevenue: (params) => api.get('/api/admin/reports/revenue', { params }),
-  export: (params) => api.get('/api/admin/reports/export', { params, responseType: 'blob' }),
+  getRevenue: (period) => api.get('/api/admin/reports/revenue', { params: { period } }),
+  export: (period) => api.get('/api/admin/reports/export', { params: { period }, responseType: 'blob' }),
 };
 
 export default api;
