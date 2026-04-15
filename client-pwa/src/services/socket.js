@@ -8,12 +8,12 @@ console.log('🔧 SOCKET_URL configurada:', SOCKET_URL);
 class SocketService {
   constructor() {
     this.socket = null;
+    this._reconnectCallbacks = [];
   }
 
   connect() {
     // Si ya existe y está conectado, reutilizarlo
     if (this.socket && this.socket.connected) {
-      console.log('🔄 Socket.IO ya está conectado, reutilizando conexión');
       return this.socket;
     }
 
@@ -27,33 +27,47 @@ class SocketService {
     // Crear nueva conexión
     console.log('🔌 Creando nueva conexión Socket.IO...');
     this.socket = io(SOCKET_URL, {
-      transports: ['polling', 'websocket'], // polling primero: más compatible con iOS Safari y proxies móviles
+      transports: ['polling', 'websocket'],
       autoConnect: true,
       reconnection: true,
-      reconnectionAttempts: Infinity,      // Nunca rendirse
-      reconnectionDelay: 2000,             // 2s entre intentos
-      reconnectionDelayMax: 10000,         // Máximo 10s entre intentos
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
       timeout: 10000,
     });
 
-    // Event listeners
     this.socket.on('connect', () => {
-      console.log('✅ Socket.IO conectado exitosamente');
+      console.log('✅ Socket.IO cliente conectado:', this.socket.id);
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('❌ Socket.IO desconectado:', reason);
+      console.log('❌ Socket.IO cliente desconectado:', reason);
     });
 
     this.socket.on('connect_error', (error) => {
       console.error('❌ Error de conexión Socket.IO:', error.message);
     });
 
-    this.socket.on('error', (error) => {
-      console.error('❌ Error Socket.IO:', error);
+    // Al reconectar: ejecutar callbacks (ej: re-registrar cliente, re-suscribir listeners)
+    this.socket.on('reconnect', (attemptNumber) => {
+      console.log(`🔄 Socket.IO cliente reconectado (intento ${attemptNumber})`);
+      this._reconnectCallbacks.forEach(cb => {
+        try { cb(); } catch (e) { console.warn('Error en callback de reconexión cliente:', e); }
+      });
     });
 
     return this.socket;
+  }
+
+  // Registrar callback que se ejecuta cada vez que el socket reconecta
+  onReconnect(callback) {
+    if (!this._reconnectCallbacks.includes(callback)) {
+      this._reconnectCallbacks.push(callback);
+    }
+  }
+
+  offReconnect(callback) {
+    this._reconnectCallbacks = this._reconnectCallbacks.filter(cb => cb !== callback);
   }
 
   disconnect() {

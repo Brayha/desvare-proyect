@@ -72,23 +72,59 @@ const DriverOnWay = () => {
 
     ensureConnected();
 
+    // Polling REST: fallback cuando el socket no entrega la ubicación.
+    // Se define aquí para poder usarlo también en el visibilitychange y onReconnect.
+    const storedService = JSON.parse(localStorage.getItem("activeService") || "{}");
+    const activeRequestId = storedService.requestId || parsedData?.requestId;
+
+    const pollDriverLocation = async () => {
+      if (!activeRequestId) return;
+      try {
+        const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.location?.lat != null && data.location?.lng != null) {
+          console.log('📍 [Polling] Ubicación del conductor:', data.location);
+          setDriverLocation({ lat: data.location.lat, lng: data.location.lng });
+          setDriverHeading(data.location.heading || 0);
+          setLastLocationSource('polling');
+        }
+      } catch {
+        // Silencioso — no interrumpir la UX si el polling falla
+      }
+    };
+
     // Heartbeat: enviar ping cada 25s para que el backend actualice el socketId
     // Crítico en iOS Safari — el socket puede reconectar con un ID nuevo sin avisar
     const heartbeatInterval = setInterval(() => {
       if (clientId && socketService.isConnected()) {
         socketService.getSocket()?.emit("client:ping", { clientId });
       } else if (!socketService.isConnected()) {
-        console.log("🏓 DriverOnWay - Socket caído, reconectando antes del ping...");
+        console.log("🏓 DriverOnWay - Socket caído, reconectando...");
         ensureConnected();
       }
     }, 25000);
 
-    // Visibilitychange: cuando el usuario vuelve a la app (desbloquea teléfono,
-    // cambia de pestaña, etc.) reconecta y re-registra para recibir ubicaciones
+    // Al reconectar el socket: re-registrar cliente y hacer polling inmediato.
+    // Esto resuelve el caso donde el cliente fue a YouTube/WhatsApp y volvió:
+    // el socket reconecta automáticamente pero el backend necesita el nuevo socketId.
+    const handleSocketReconnect = () => {
+      console.log("🔄 DriverOnWay - Socket reconectado, re-registrando cliente...");
+      if (clientId) {
+        socketService.registerClient(clientId);
+      }
+      // Polling inmediato para mostrar ubicación actual sin esperar 8 segundos
+      pollDriverLocation();
+    };
+    socketService.onReconnect(handleSocketReconnect);
+
+    // Visibilitychange: cuando el usuario vuelve a la app desde otra app o desbloquea pantalla
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        console.log("👁️ DriverOnWay - App visible, verificando socket...");
+        console.log("👁️ DriverOnWay - App visible de nuevo, actualizando...");
         ensureConnected();
+        // Polling inmediato para mostrar ubicación actual sin esperar el próximo ciclo
+        pollDriverLocation();
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -129,31 +165,7 @@ const DriverOnWay = () => {
       setLastLocationSource('socket');
     });
 
-    // POLLING REST: Fallback cuando el socket no entrega la ubicación.
-    // Ocurre principalmente en iOS Safari (socket se cae en background) y
-    // cuando el conductor tiene el teléfono bloqueado.
-    // Consulta trackingData.lastDriverLocation guardado en MongoDB por el backend.
-    const storedService = JSON.parse(localStorage.getItem("activeService") || "{}");
-    const activeRequestId = storedService.requestId || parsedData?.requestId;
-
-    const pollDriverLocation = async () => {
-      if (!activeRequestId) return;
-      try {
-        const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.location?.lat != null && data.location?.lng != null) {
-          console.log('📍 [Polling] Ubicación del conductor:', data.location);
-          setDriverLocation({ lat: data.location.lat, lng: data.location.lng });
-          setDriverHeading(data.location.heading || 0);
-          setLastLocationSource('polling');
-        }
-      } catch (err) {
-        // Silencioso — no interrumpir la UX si el polling falla
-      }
-    };
-
-    // Primera consulta inmediata al montar (muestra la última posición conocida de inmediato)
+    // Primera consulta inmediata al montar (muestra la última posición conocida)
     pollDriverLocation();
     const locationPollInterval = setInterval(pollDriverLocation, LOCATION_POLL_INTERVAL_MS);
 
@@ -162,6 +174,7 @@ const DriverOnWay = () => {
       clearInterval(heartbeatInterval);
       clearInterval(locationPollInterval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      socketService.offReconnect(handleSocketReconnect);
       socketService.offServiceCompleted();
       socketService.offLocationUpdate();
     };
