@@ -163,7 +163,6 @@ io.on('connection', (socket) => {
   // Registro de conductor
   socket.on('driver:register', async (driverId) => {
     try {
-      // Obtener info del conductor desde BD
       const User = require('./models/User');
       const driver = await User.findById(driverId);
       
@@ -172,18 +171,59 @@ io.on('connection', (socket) => {
         
         connectedDrivers.set(driverId, {
           socketId: socket.id,
-          isOnline: isOnline
+          isOnline: isOnline,
+          name: driver.name
         });
         
         console.log(`🚗 Conductor registrado: ${driverId} - Estado: ${isOnline ? '🟢 ACTIVO' : '🔴 OCUPADO'}`);
         
-        socket.join('drivers'); // Unirse a la sala general de conductores
-        socket.join(`driver:${driverId}`); // Unirse a sala personal del conductor
+        socket.join('drivers');
+        socket.join(`driver:${driverId}`);
         
-        // Solo unirse a 'active-drivers' si está activo
         if (isOnline) {
           socket.join('active-drivers');
           console.log(`✅ Conductor ${driverId} unido a sala de conductores activos`);
+        } else if (driver.driverProfile?.currentServiceId) {
+          // Conductor OCUPADO con servicio activo.
+          // Si la app se reinició o llegó por push notification, perdió el evento service:accepted.
+          // Re-enviamos el servicio completo desde MongoDB para que pueda navegar a ActiveService
+          // y reanudar el envío de GPS.
+          try {
+            const Request = require('./models/Request');
+            const activeReq = await Request.findOne({
+              _id: driver.driverProfile.currentServiceId,
+              status: { $in: ['accepted', 'in_progress'] }
+            }).lean();
+
+            if (activeReq) {
+              const originCoords = activeReq.origin?.coordinates;
+              const destCoords = activeReq.destination?.coordinates;
+
+              socket.emit('service:accepted', {
+                requestId: activeReq._id.toString(),
+                driverId: driverId,
+                clientId: activeReq.clientId?.toString(),
+                clientName: activeReq.clientName,
+                clientPhone: activeReq.clientPhone,
+                securityCode: activeReq.securityCode,
+                amount: activeReq.totalAmount,
+                origin: originCoords
+                  ? { lat: originCoords[1], lng: originCoords[0], address: activeReq.origin.address }
+                  : null,
+                destination: destCoords
+                  ? { lat: destCoords[1], lng: destCoords[0], address: activeReq.destination.address }
+                  : null,
+                vehicleSnapshot: activeReq.vehicleSnapshot,
+                serviceDetails: activeReq.serviceDetails,
+                status: activeReq.status,
+                isResume: true
+              });
+
+              console.log(`🔄 Servicio activo ${activeReq._id} re-enviado al conductor ${driverId} (reanudación)`);
+            }
+          } catch (resumeErr) {
+            console.warn(`⚠️ Error reenviando servicio al conductor ${driverId}:`, resumeErr.message);
+          }
         }
       }
     } catch (error) {

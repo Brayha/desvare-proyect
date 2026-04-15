@@ -290,29 +290,40 @@ const Home = () => {
     });
 
     // Escuchar cuando tu cotización es aceptada
+    // También se recibe con isResume:true cuando el conductor reconecta tras push notification
     socketService.onServiceAccepted((data) => {
-      console.log('🎉 ¡Tu cotización fue aceptada!', data);
+      const isResume = data.isResume === true;
+      console.log(isResume ? '🔄 Reanudando servicio activo:' : '🎉 ¡Tu cotización fue aceptada!', data);
       
-      // ✅ NUEVO: Remover la solicitud de la bandeja
-      setRequests((prev) => prev.filter(req => req.requestId?.toString() !== data.requestId?.toString()));
+      // Incluir driverId en los datos guardados (necesario para sendLocationUpdate en ActiveService)
+      const serviceToSave = {
+        ...data,
+        driverId: data.driverId || parsedUser?._id || parsedUser?.id
+      };
       
-      // Guardar datos del servicio activo
-      localStorage.setItem('activeService', JSON.stringify(data));
+      // Remover la solicitud de la bandeja (solo aplica si no es reanudación)
+      if (!isResume) {
+        setRequests((prev) => prev.filter(req => req.requestId?.toString() !== data.requestId?.toString()));
+      }
+      
+      // Guardar datos del servicio activo en localStorage
+      localStorage.setItem('activeService', JSON.stringify(serviceToSave));
 
       // Actualizar estado a OCUPADO
       setIsOnline(false);
       const updatedUser = { ...parsedUser };
-      updatedUser.driverProfile.isOnline = false;
+      if (updatedUser.driverProfile) updatedUser.driverProfile.isOnline = false;
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      // ✅ NUEVO: Navegar a vista de servicio activo
+      // Navegar a vista de servicio activo
       history.push('/active-service');
       
-      // Mostrar notificación
       present({
-        message: `¡Tu cotización fue aceptada! Cliente: ${data.clientName}`,
+        message: isResume
+          ? `Servicio activo reanudado: ${data.clientName}`
+          : `¡Tu cotización fue aceptada! Cliente: ${data.clientName}`,
         duration: 3000,
-        color: 'success',
+        color: isResume ? 'warning' : 'success',
       });
     });
 
