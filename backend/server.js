@@ -553,9 +553,9 @@ io.on('connection', (socket) => {
       
       console.log('📢 Notificando a todos los conductores...');
       
-      // Notificar a TODOS los conductores con información detallada
+      // Notificar a TODOS los conductores (broadcast general para la lista de solicitudes)
       io.to('drivers').emit('request:cancelled', {
-        requestId: requestIdStr, // ✅ String
+        requestId: requestIdStr,
         reason: data.reason,
         customReason: data.customReason || null,
         clientName: data.clientName,
@@ -567,8 +567,25 @@ io.on('connection', (socket) => {
         cancelledAt: new Date(),
         timestamp: new Date()
       });
+
+      // Notificar DIRECTAMENTE al conductor asignado con un evento dedicado.
+      // Esto resuelve el caso donde el conductor está en ActiveService (no Home)
+      // y necesita saber que el cliente canceló para volver al inicio.
+      if (request.assignedDriverId) {
+        const assignedDriverData = connectedDrivers.get(request.assignedDriverId.toString());
+        if (assignedDriverData) {
+          io.to(assignedDriverData.socketId).emit('service:cancelled', {
+            requestId: requestIdStr,
+            reason: data.reason,
+            message: 'El cliente canceló el servicio',
+          });
+          console.log(`📩 Evento service:cancelled enviado directo al conductor ${request.assignedDriverId}`);
+        } else {
+          console.log(`⚠️ Conductor asignado ${request.assignedDriverId} no está conectado al momento de la cancelación`);
+        }
+      }
       
-      console.log('✅ Notificación de cancelación enviada a conductores');
+      console.log('✅ Notificaciones de cancelación enviadas');
       
     } catch (error) {
       console.error('❌ Error al procesar cancelación:', error);

@@ -165,6 +165,44 @@ const ActiveService = () => {
     }
   }, [history, present]);
 
+  // Escuchar cancelación del servicio por el cliente mientras el conductor está en ruta
+  useEffect(() => {
+    if (!serviceData) return;
+
+    const handleServiceCancelled = (data) => {
+      const cancelledId = data?.requestId?.toString();
+      const currentId = serviceData?.requestId?.toString();
+
+      // Ignorar eventos de otros servicios
+      if (cancelledId && currentId && cancelledId !== currentId) return;
+
+      console.log('🚫 El cliente canceló el servicio en curso');
+
+      // Limpiar estado local
+      localStorage.removeItem('activeService');
+
+      present({
+        message: '⚠️ El cliente canceló el servicio',
+        duration: 4000,
+        color: 'warning',
+        position: 'top',
+      });
+
+      setTimeout(() => {
+        history.replace('/home');
+      }, 1500);
+    };
+
+    // Escuchar el evento directo (conductor asignado) Y el broadcast general como fallback
+    socketService.onServiceCancelled(handleServiceCancelled);
+    socketService.onRequestCancelled(handleServiceCancelled);
+
+    return () => {
+      socketService.offServiceCancelled();
+      socketService.offRequestCancelled();
+    };
+  }, [serviceData, history, present]);
+
   // TRACKING GPS EN TIEMPO REAL - Usa BackgroundGeolocation para funcionar
   // incluso cuando el app está en background, pantalla bloqueada o en otra app.
   useEffect(() => {

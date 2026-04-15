@@ -220,6 +220,20 @@ class SocketService {
       this.socket.off('driver:location-update');
     }
   }
+
+  // Evento directo cuando el cliente cancela un servicio que el conductor ya aceptó
+  onServiceCancelled(callback) {
+    if (this.socket) {
+      this.socket.off('service:cancelled');
+      this.socket.on('service:cancelled', callback);
+    }
+  }
+
+  offServiceCancelled() {
+    if (this.socket) {
+      this.socket.off('service:cancelled');
+    }
+  }
 }
 
 export default new SocketService();
