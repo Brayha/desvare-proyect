@@ -450,3 +450,13 @@
   flex-direction: column;
   gap: 5px;
 }
+
+/* Ocultar flechitas de type="number" en inputs OTP */
+.otp-input-box::-webkit-outer-spin-button,
+.otp-input-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.otp-input-box[type=number] {
+  -moz-appearance: textfield;
+}

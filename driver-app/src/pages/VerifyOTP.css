@@ -118,6 +118,16 @@
   outline: none;
 }
 
+/* Ocultar flechitas de type="number" en todos los navegadores */
+.verify-otp-input-box::-webkit-outer-spin-button,
+.verify-otp-input-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.verify-otp-input-box[type=number] {
+  -moz-appearance: textfield;
+}
+
 .verify-otp-input-box::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }

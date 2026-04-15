@@ -132,6 +132,16 @@
   background: transparent !important;
 }
 
+/* Ocultar flechitas de type="number" */
+.amount-input input[type=number]::-webkit-outer-spin-button,
+.amount-input input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.amount-input input[type=number] {
+  -moz-appearance: textfield;
+}
+
 .amount-input input::placeholder {
   color: #cbd5e1;
 }

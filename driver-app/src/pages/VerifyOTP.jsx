@@ -213,13 +213,17 @@ const VerifyOTP = () => {
               <input
                 key={index}
                 ref={(el) => (otpRefs.current[index] = el)}
-                type="tel"
+                type="number"
                 inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={1}
+                min="0"
+                max="9"
+                step="1"
                 className="verify-otp-input-box"
                 value={otp[index] || ''}
-                onChange={(e) => handleOTPChange(index, e.target.value)}
+                onChange={(e) => {
+                  const digit = e.target.value.replace(/\D/g, '').slice(-1);
+                  handleOTPChange(index, digit);
+                }}
                 onKeyDown={(e) => handleOTPKeyDown(index, e)}
                 disabled={isLoading}
                 autoFocus={index === 0}

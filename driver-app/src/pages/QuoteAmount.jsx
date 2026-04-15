@@ -169,13 +169,14 @@ const QuoteAmount = () => {
             <div className="input-wrapper">
               <span className="currency-symbol">$</span>
               <IonInput
-                type="tel"
-                value={displayAmount}
+                type="number"
+                value={amount}
                 onIonInput={handleAmountChange}
                 placeholder="0"
                 className="amount-input"
                 inputmode="numeric"
-                pattern="[0-9]*"
+                min="0"
+                step="1"
               />
             </div>
           </div>
