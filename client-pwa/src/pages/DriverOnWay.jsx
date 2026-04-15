@@ -19,15 +19,23 @@ import "./DriverOnWay.css";
 
 import logo from "../assets/img/Desvare.svg";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
+// Intervalo de polling REST cuando el socket no entrega la ubicación
+// (común en iOS Safari y cuando la app va a background)
+const LOCATION_POLL_INTERVAL_MS = 8000;
+
 const DriverOnWay = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
   const [presentAlert] = useIonAlert();
 
   const [serviceData, setServiceData] = useState(null);
-  const [driverLocation, setDriverLocation] = useState(null); // 🆕 Ubicación en tiempo real del conductor
-  const [driverHeading, setDriverHeading] = useState(0); // 🆕 Dirección del vehículo
+  const [driverLocation, setDriverLocation] = useState(null);
+  const [driverHeading, setDriverHeading] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  // lastLocationSource diferencia si la última ubicación vino por socket o por polling REST
+  const [lastLocationSource, setLastLocationSource] = useState(null);
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -113,21 +121,46 @@ const DriverOnWay = () => {
       }, 1500);
     });
 
-    // 🆕 Escuchar actualizaciones de ubicación del conductor en tiempo real
+    // Escuchar actualizaciones de ubicación del conductor en tiempo real (socket)
     socketService.onLocationUpdate((data) => {
-      console.log('📍 Ubicación del conductor actualizada:', data);
-      
-      setDriverLocation({
-        lat: data.location.lat,
-        lng: data.location.lng
-      });
-      
+      console.log('📍 [Socket] Ubicación del conductor actualizada:', data);
+      setDriverLocation({ lat: data.location.lat, lng: data.location.lng });
       setDriverHeading(data.heading || 0);
+      setLastLocationSource('socket');
     });
+
+    // POLLING REST: Fallback cuando el socket no entrega la ubicación.
+    // Ocurre principalmente en iOS Safari (socket se cae en background) y
+    // cuando el conductor tiene el teléfono bloqueado.
+    // Consulta trackingData.lastDriverLocation guardado en MongoDB por el backend.
+    const storedService = JSON.parse(localStorage.getItem("activeService") || "{}");
+    const activeRequestId = storedService.requestId || parsedData?.requestId;
+
+    const pollDriverLocation = async () => {
+      if (!activeRequestId) return;
+      try {
+        const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.location?.lat != null && data.location?.lng != null) {
+          console.log('📍 [Polling] Ubicación del conductor:', data.location);
+          setDriverLocation({ lat: data.location.lat, lng: data.location.lng });
+          setDriverHeading(data.location.heading || 0);
+          setLastLocationSource('polling');
+        }
+      } catch (err) {
+        // Silencioso — no interrumpir la UX si el polling falla
+      }
+    };
+
+    // Primera consulta inmediata al montar (muestra la última posición conocida de inmediato)
+    pollDriverLocation();
+    const locationPollInterval = setInterval(pollDriverLocation, LOCATION_POLL_INTERVAL_MS);
 
     return () => {
       console.log("🧹 DriverOnWay - Cleanup");
       clearInterval(heartbeatInterval);
+      clearInterval(locationPollInterval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       socketService.offServiceCompleted();
       socketService.offLocationUpdate();

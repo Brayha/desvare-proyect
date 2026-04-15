@@ -649,6 +649,38 @@ router.get('/:id/quotes', async (req, res) => {
   }
 });
 
+// GET /api/requests/:id/location - Última ubicación conocida del conductor (polling REST)
+// Usado por DriverOnWay como fallback cuando el socket no entrega la ubicación (iOS, background)
+router.get('/:id/location', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const request = await Request.findById(id)
+      .select('trackingData.lastDriverLocation trackingData.isActive status')
+      .lean();
+
+    if (!request) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    const loc = request.trackingData?.lastDriverLocation;
+    const hasLocation = loc?.lat != null && loc?.lng != null;
+
+    res.json({
+      requestId: id,
+      status: request.status,
+      trackingActive: request.trackingData?.isActive || false,
+      location: hasLocation
+        ? { lat: loc.lat, lng: loc.lng, heading: loc.heading || 0, speed: loc.speed || 0, updatedAt: loc.updatedAt }
+        : null
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo ubicación del conductor:', error);
+    res.status(500).json({ error: 'Error obteniendo ubicación', details: error.message });
+  }
+});
+
 // GET /api/requests/:id - Obtener una solicitud específica
 router.get('/:id', async (req, res) => {
   try {
