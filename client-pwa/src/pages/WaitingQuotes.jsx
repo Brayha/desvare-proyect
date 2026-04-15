@@ -109,7 +109,7 @@ const WaitingQuotes = () => {
     let handleVisibilityChange = null;
     console.log("🔄 WaitingQuotes - useEffect ejecutándose");
 
-    const initializeData = () => {
+    const initializeData = async () => {
       // ✅ LIMPIAR cotizaciones y estado al montar el componente
       console.log("🧹 Limpiando estado anterior de cotizaciones");
 
@@ -169,7 +169,7 @@ const WaitingQuotes = () => {
       const parsedRouteData = JSON.parse(storedRouteData);
 
       console.log("📋 WaitingQuotes - Datos cargados:", {
-        userId: parsedUser.id, // ✅ Verificar que id existe
+        userId: parsedUser.id,
         userName: parsedUser.name,
         requestId: currentRequestId,
         routeInfo: parsedRouteData.routeInfo,
@@ -179,8 +179,23 @@ const WaitingQuotes = () => {
         setUser(parsedUser);
         setRouteData(parsedRouteData);
         setRequestId(currentRequestId);
-        setRequestSent(true); // La solicitud ya fue enviada en RequestAuth
+        setRequestSent(true);
         setIsLoading(false);
+      }
+
+      // Recuperar cotizaciones ya recibidas (por si se recargó la página)
+      try {
+        const res = await fetch(`${API_URL}/api/requests/${currentRequestId}/quotes`);
+        if (res.ok) {
+          const resData = await res.json();
+          const existingQuotes = resData.quotes || [];
+          if (existingQuotes.length > 0 && isMounted) {
+            console.log(`✅ WaitingQuotes - ${existingQuotes.length} cotizaciones recuperadas de la BD`);
+            setQuotesReceived(existingQuotes);
+          }
+        }
+      } catch (fetchErr) {
+        console.warn('⚠️ No se pudieron recuperar cotizaciones previas:', fetchErr.message);
       }
 
       console.log("✅ WaitingQuotes - Componente listo");
@@ -251,8 +266,15 @@ const WaitingQuotes = () => {
 
         console.log("✅ Cotización válida para el request actual");
 
-        // Agregar cotización a la lista
-        setQuotesReceived((prev) => [...prev, quote]);
+        // Agregar cotización a la lista (evitar duplicados si ya fue cargada desde la BD)
+        setQuotesReceived((prev) => {
+          const alreadyExists = prev.some((q) => q.driverId === quote.driverId);
+          if (alreadyExists) {
+            console.log("ℹ️ Cotización duplicada ignorada (ya cargada desde BD):", quote.driverId);
+            return prev;
+          }
+          return [...prev, quote];
+        });
 
         // ✅ Mostrar notificación visual + sonido + vibración
         showQuoteNotification(quote, {

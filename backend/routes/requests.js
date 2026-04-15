@@ -585,6 +585,64 @@ router.get('/client/:id', async (req, res) => {
   }
 });
 
+// GET /api/requests/:id/quotes - Obtener cotizaciones activas de una solicitud
+// Usado por WaitingQuotes al recargar la página para recuperar cotizaciones ya recibidas
+router.get('/:id/quotes', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const request = await Request.findById(id).lean();
+    if (!request) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    // Solo cotizaciones con status 'pending' (las aceptadas/canceladas no interesan)
+    const pendingQuotes = request.quotes.filter(q => q.status === 'pending');
+
+    // Enriquecer con datos del conductor (foto, rating, servicios)
+    const enrichedQuotes = await Promise.all(
+      pendingQuotes.map(async (quote) => {
+        try {
+          const driver = await User.findById(quote.driverId)
+            .select('driverProfile.documents.selfie driverProfile.rating driverProfile.totalServices')
+            .lean();
+
+          // Convertir location de GeoJSON [lng, lat] al formato { lat, lng } que usa la PWA
+          const location = quote.location?.coordinates
+            ? { lat: quote.location.coordinates[1], lng: quote.location.coordinates[0] }
+            : null;
+
+          return {
+            requestId: id,
+            driverId: quote.driverId.toString(),
+            driverName: quote.driverName,
+            amount: quote.amount,
+            location,
+            driverPhoto: driver?.driverProfile?.documents?.selfie || null,
+            driverRating: driver?.driverProfile?.rating || 5,
+            driverServiceCount: driver?.driverProfile?.totalServices || 0,
+            timestamp: quote.timestamp
+          };
+        } catch (err) {
+          return null;
+        }
+      })
+    );
+
+    const validQuotes = enrichedQuotes.filter(Boolean);
+
+    res.json({
+      requestId: id,
+      status: request.status,
+      quotes: validQuotes
+    });
+
+  } catch (error) {
+    console.error('❌ Error al obtener cotizaciones:', error);
+    res.status(500).json({ error: 'Error al obtener cotizaciones', details: error.message });
+  }
+});
+
 // GET /api/requests/:id - Obtener una solicitud específica
 router.get('/:id', async (req, res) => {
   try {
