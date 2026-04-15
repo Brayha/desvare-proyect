@@ -170,6 +170,17 @@ class SocketService {
     }
   }
 
+  // Notificar al backend que el código fue validado correctamente.
+  // El backend emite service:started al cliente para cambiar su vista.
+  notifyCodeValidated(data) {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('service:code-validated', data);
+      console.log('🔑 Evento service:code-validated enviado al backend');
+    } else {
+      console.warn('⚠️ Socket desconectado al validar código');
+    }
+  }
+
   // ========================================
   // COMPLETAR SERVICIO
   // ========================================

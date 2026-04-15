@@ -177,10 +177,38 @@ const DriverOnWay = () => {
     pollDriverLocation();
     const locationPollInterval = setInterval(pollDriverLocation, LOCATION_POLL_INTERVAL_MS);
 
+    // POLLING DE ESTADO: fallback para service:started y service:completed cuando el socket falla.
+    // Reutiliza el mismo endpoint /location que ya devuelve el campo status.
+    //   in_progress → conductor ingresó el código → mostrar tarjeta "vamos al destino"
+    //   completed   → conductor terminó → redirigir a calificación
+    const pollServiceStatus = async () => {
+      if (!activeRequestId) return;
+      try {
+        const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const status = data.status;
+        if (!status) return;
+        console.log(`🔄 [Polling status] ${status}`);
+        if (status === 'in_progress') {
+          setServiceStarted(true);
+        } else if (status === 'completed') {
+          localStorage.removeItem('activeService');
+          showSuccess('¡Servicio completado!');
+          setTimeout(() => history.replace('/rate-service'), 1000);
+        }
+      } catch {
+        // silencioso
+      }
+    };
+    pollServiceStatus(); // inmediato al montar
+    const statusPollInterval = setInterval(pollServiceStatus, 10000);
+
     return () => {
       console.log("🧹 DriverOnWay - Cleanup");
       clearInterval(heartbeatInterval);
       clearInterval(locationPollInterval);
+      clearInterval(statusPollInterval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       socketService.offReconnect(handleSocketReconnect);
       socketService.offServiceCompleted();

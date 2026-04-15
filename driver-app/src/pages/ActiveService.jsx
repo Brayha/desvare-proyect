@@ -545,6 +545,17 @@ const ActiveService = () => {
                 color: "success",
               });
               console.log("✅ Código validado - Mostrando destino");
+
+              // Notificar al backend → el backend emitirá service:started al cliente
+              // para que la PWA cambie su vista de "esperar código" a "en camino al destino"
+              const userData = localStorage.getItem('user');
+              const driverUser = userData ? JSON.parse(userData) : null;
+              socketService.notifyCodeValidated({
+                requestId: serviceData.requestId,
+                clientId: serviceData.clientId?.toString(),
+                driverName: driverUser?.name || serviceData.driverName || 'Conductor',
+              });
+              console.log('📡 service:code-validated emitido al backend');
             } else {
               present({
                 message: "❌ Código incorrecto. Intenta de nuevo.",
@@ -608,9 +619,10 @@ const ActiveService = () => {
               console.log("✅ Backend confirmó completado:", data);
 
               // 2. Notificar por Socket.IO al cliente
+              // Forzar toString() para que connectedClients.get() funcione correctamente
               socketService.completeService({
                 requestId: serviceData.requestId,
-                clientId: data.request.clientId,
+                clientId: data.request.clientId?.toString(),
                 driverId: user._id,
                 driverName: user.name,
                 completedAt: completedAt,
