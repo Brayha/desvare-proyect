@@ -165,7 +165,31 @@ const ActiveService = () => {
   useEffect(() => {
     let watchId = null;
     let lastSentLocation = null;
-    const MIN_DISTANCE_METERS = 10; // Solo enviar si se movió más de 10 metros
+    const MIN_DISTANCE_METERS = 10;
+
+    // Asegurar socket conectado (puede haber sido destruido por Home al navegar)
+    if (!socketService.isConnected()) {
+      console.log('🔌 ActiveService - Socket no conectado, reconectando...');
+      socketService.connect();
+    }
+
+    // Re-registrar conductor con el backend cuando el socket reconecta.
+    // Necesario para que el backend actualice connectedDrivers con el nuevo socket ID.
+    const userData = localStorage.getItem('user');
+    const driverUser = userData ? JSON.parse(userData) : null;
+    const driverId = serviceData?.driverId || driverUser?._id || driverUser?.id;
+
+    if (driverId) {
+      socketService.registerDriver(driverId);
+    }
+
+    const handleActiveServiceReconnect = () => {
+      console.log('🔄 ActiveService - Socket reconectado, re-registrando conductor...');
+      if (driverId) {
+        socketService.registerDriver(driverId);
+      }
+    };
+    socketService.onReconnect(handleActiveServiceReconnect);
     
     // Función para calcular distancia entre dos puntos (Haversine)
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -286,8 +310,9 @@ const ActiveService = () => {
       startLocationTracking();
     }
     
-    // Cleanup: detener tracking al desmontar
+    // Cleanup: detener tracking y limpiar reconnect handler al desmontar
     return () => {
+      socketService.offReconnect(handleActiveServiceReconnect);
       if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
         console.log('🛑 Tracking GPS detenido');

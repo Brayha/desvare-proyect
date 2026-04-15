@@ -356,6 +356,9 @@ const Home = () => {
     });
 
     return () => {
+      // Solo limpiar listeners — NO desconectar el socket.
+      // El socket es un singleton compartido; desconectarlo aquí mata el GPS
+      // en ActiveService cuando el conductor navega durante un servicio activo.
       socketService.offReconnect(handleDriverReconnect);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       socketService.offRequestReceived();
@@ -363,7 +366,6 @@ const Home = () => {
       socketService.offServiceAccepted();
       socketService.offServiceTaken();
       socketService.offQuoteExpired();
-      socketService.disconnect();
     };
   }, [history, present, presentAlert]);
 

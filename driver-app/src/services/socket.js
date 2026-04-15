@@ -184,11 +184,17 @@ class SocketService {
   // ========================================
 
   sendLocationUpdate(data) {
-    if (this.socket && this.socket.connected) {
+    if (!this.socket) {
+      // Socket fue destruido (Home llamó disconnect al navegar). Recrear.
+      console.log('🔄 Socket null en tracking GPS — recreando conexión...');
+      this.connect();
+      // No podemos emitir aún; el próximo tick de GPS lo intentará de nuevo.
+      return;
+    }
+    if (this.socket.connected) {
       this.socket.emit('driver:location-update', data);
-    } else if (this.socket && !this.socket.connected) {
-      // Socket existe pero desconectado: reconectar (el Background GPS sigue enviando)
-      console.log('🔄 Socket caído durante tracking — reconectando...');
+    } else {
+      console.log('🔄 Socket desconectado durante tracking — reconectando...');
       this.socket.connect();
     }
   }
