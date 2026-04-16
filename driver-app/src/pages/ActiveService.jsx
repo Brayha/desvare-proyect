@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { registerPlugin } from '@capacitor/core';
+import { registerPlugin, Capacitor } from '@capacitor/core';
 
 // Bridge al plugin nativo de background geolocation
 const BackgroundGeolocation = registerPlugin('BackgroundGeolocation');
@@ -58,6 +58,50 @@ const ActiveService = () => {
 
   // ✅ Estado para controlar las 2 fases
   const [codeValidated, setCodeValidated] = useState(false);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // OPTIMIZACIÓN DE BATERÍA - Solo Android (Samsung mata el GPS en pantalla bloqueada)
+  // Se muestra UNA sola vez por dispositivo. El conductor debe eximir la app
+  // para que el Foreground Service de BackgroundGeolocation no sea eliminado.
+  // ─────────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (Capacitor.getPlatform() !== 'android') return;
+    if (localStorage.getItem('batteryOptimizationPrompted') === 'true') return;
+
+    const timer = setTimeout(() => {
+      presentAlert({
+        header: '⚡ Configura el GPS en segundo plano',
+        message:
+          'Para que tu ubicación se envíe aunque tengas la pantalla bloqueada, debes desactivar la optimización de batería para Desvare.\n\n' +
+          '📱 Pasos en Samsung:\n' +
+          '1. Toca "Ir a Configuración" abajo\n' +
+          '2. Selecciona Batería\n' +
+          '3. Cambia a "Sin restricciones"\n' +
+          '4. Vuelve a la app',
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Ir a Configuración',
+            handler: () => {
+              localStorage.setItem('batteryOptimizationPrompted', 'true');
+              // Abre la pantalla de detalle de la app en Configuración de Android.
+              // El conductor toca "Batería" → "Sin restricciones" desde ahí.
+              window.open('app-settings:', '_system');
+            },
+          },
+          {
+            text: 'Ya lo hice',
+            role: 'cancel',
+            handler: () => {
+              localStorage.setItem('batteryOptimizationPrompted', 'true');
+            },
+          },
+        ],
+      });
+    }, 3000); // Espera 3s para que la pantalla del servicio cargue primero
+
+    return () => clearTimeout(timer);
+  }, [presentAlert]);
 
   // 🗺️ Función para abrir navegación en apps externas
   const openNavigation = (destinationCoords, destinationAddress) => {
@@ -755,6 +799,36 @@ const ActiveService = () => {
 
         {/* Contenido de detalles */}
         <div className="detail-content-active-service">
+          {/* Banner GPS activo - solo Android, solo si aún no configuró batería */}
+          {Capacitor.getPlatform() === 'android' && localStorage.getItem('batteryOptimizationPrompted') !== 'true' && (
+            <div
+              className="battery-warning-banner"
+              onClick={() => {
+                presentAlert({
+                  header: '⚡ GPS en segundo plano',
+                  message:
+                    'Para que tu ubicación se envíe con la pantalla bloqueada:\n\n' +
+                    '1. Toca "Ir a Configuración"\n' +
+                    '2. Selecciona Batería\n' +
+                    '3. Cambia a "Sin restricciones"',
+                  backdropDismiss: false,
+                  buttons: [
+                    {
+                      text: 'Ir a Configuración',
+                      handler: () => {
+                        localStorage.setItem('batteryOptimizationPrompted', 'true');
+                        window.open('app-settings:', '_system');
+                      },
+                    },
+                    { text: 'Ya lo hice', role: 'cancel', handler: () => localStorage.setItem('batteryOptimizationPrompted', 'true') },
+                  ],
+                });
+              }}
+            >
+              ⚡ Toca aquí para activar GPS con pantalla bloqueada
+            </div>
+          )}
+
           <div className="request-detail-content-active-service">
             <h2 className="type-title">Servicio Activo</h2>
             <div className="detail-content">
