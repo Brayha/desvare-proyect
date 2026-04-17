@@ -42,6 +42,15 @@
             android:exported="true"
             android:foregroundServiceType="location" />
 
+        <!-- Servicio nativo Java para GPS persistente aunque la pantalla esté bloqueada.
+             foregroundServiceType="location" es obligatorio en Android 10+ para que un
+             Foreground Service pueda acceder a la ubicación en segundo plano. -->
+        <service
+            android:name=".LocationTrackingService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
     </application>
 
     <!-- Permissions -->

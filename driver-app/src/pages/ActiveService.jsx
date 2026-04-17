@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { registerPlugin } from '@capacitor/core';
 
-// Bridge al plugin nativo de background geolocation
+// Bridge al plugin nativo de background geolocation (plugin Capacitor Community)
 const BackgroundGeolocation = registerPlugin('BackgroundGeolocation');
+
+// Bridge al servicio nativo Java de tracking GPS (LocationTrackingPlugin.java)
+// Este servicio corre 100% en nativo, sin depender del WebView ni JavaScript.
+// Es inmune a Samsung Device Care / Doze aunque la pantalla esté bloqueada.
+const LocationTracking = registerPlugin('LocationTracking');
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -315,6 +320,31 @@ const ActiveService = () => {
     sendPositionNow(); // Envío inmediato al montar
     state.intervalId = setInterval(sendPositionNow, 15000); // Cada 15 segundos
 
+    // ESTRATEGIA 3 - Servicio nativo Java (LocationTrackingService.java)
+    // Inmune a Samsung Device Care / Doze: corre sin WebView, aunque la pantalla
+    // esté bloqueada o el usuario lleve 30 minutos en otra app.
+    // Envía GPS directamente al backend via HTTP cada 10 segundos (independiente
+    // del socket). El backend persiste la ubicación y emite el evento al cliente.
+    const startNativeTracking = async () => {
+      try {
+        const userData = localStorage.getItem('user');
+        const driverUser = userData ? JSON.parse(userData) : null;
+        const token = localStorage.getItem('token') || '';
+
+        await LocationTracking.startTracking({
+          requestId: serviceData.requestId,
+          driverId:  driverId || driverUser?._id || driverUser?.id || '',
+          apiUrl:    API_URL,
+          token,
+        });
+        console.log('🛰️ [NATIVO] LocationTrackingService iniciado (GPS nativo activo)');
+      } catch (err) {
+        // El servicio nativo no está disponible en web/iOS; solo falla silenciosamente
+        console.warn('⚠️ LocationTracking nativo no disponible:', err?.message || err);
+      }
+    };
+    startNativeTracking();
+
     return () => {
       socketService.offReconnect(handleReconnect);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -326,6 +356,9 @@ const ActiveService = () => {
         clearInterval(state.intervalId);
         console.log('🛑 Intervalo GPS detenido');
       }
+      // Detener el servicio nativo Java al salir de la vista
+      LocationTracking.stopTracking().catch(() => {});
+      console.log('🛑 LocationTrackingService nativo detenido');
     };
   }, [serviceData]);
 

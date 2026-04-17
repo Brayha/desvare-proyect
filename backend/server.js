@@ -63,6 +63,7 @@ const vehicleRoutes = require('./routes/vehicles');
 const driverRoutes = require('./routes/drivers');
 const citiesRoutes = require('./routes/cities');
 const adminRoutes = require('./routes/admin');
+const trackingRoutes = require('./routes/tracking');
 
 // Importar middleware de expiración
 const { startExpirationChecker } = require('./middleware/requestExpiration');
@@ -74,6 +75,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/cities', citiesRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/tracking', trackingRoutes);
 
 // Proxy para Google Places API (evitar CORS en frontend)
 app.get('/api/google-places-proxy', async (req, res) => {

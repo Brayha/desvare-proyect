@@ -15,6 +15,9 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // Registrar plugins ANTES de super.onCreate() (requisito de Capacitor)
+        registerPlugin(LocationTrackingPlugin.class);
+
         super.onCreate(savedInstanceState);
 
         // CRÍTICO: Habilitar debugging de WebView para Chrome DevTools
