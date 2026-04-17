@@ -21,7 +21,7 @@ import {
   IonSpinner,
 } from '@ionic/react';
 import { Geolocation } from '@capacitor/geolocation';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { requestAPI } from '../services/api';
 import socketService from '../services/socket';
 import { useDriverLocation } from '../hooks/useDriverLocation';
@@ -30,8 +30,12 @@ import ServiceHeader from '../components/ServiceHeader';
 import RequestCard from '../components/RequestCard';
 import LocationBanner from '../components/LocationBanner';
 import LocationPermissionModal from '../components/LocationPermissionModal';
+import BatteryPermissionModal from '../components/BatteryPermissionModal';
 import CancellationDetailModal from '../components/CancellationDetailModal';
 import './Home.css';
+
+// Plugin nativo para consultar y solicitar la exención de batería
+const LocationTracking = registerPlugin('LocationTracking');
 
 // ============================================
 // API URL Configuration
@@ -57,6 +61,8 @@ const Home = () => {
   const [cancellationData, setCancellationData] = useState(null);
   // Estado para banner de notificaciones denegadas
   const [notifDenied, setNotifDenied] = useState(false);
+  // Estado para modal de permiso de batería
+  const [showBatteryModal, setShowBatteryModal] = useState(false);
 
   // Hook de geolocalización del conductor
   const { 
@@ -377,6 +383,52 @@ const Home = () => {
       setShowLocationModal(true);
     }
   }, [locationError]);
+
+  // Verificar si la app está exenta de optimización de batería.
+  // Solo en Android nativo. Si no lo está, mostrar el modal explicativo.
+  // Se reintenta cada vez que se abre la app; si el usuario ya lo concedió,
+  // el check devuelve isIgnoring: true y no muestra nada.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const checkBattery = async () => {
+      try {
+        // Si el usuario ya descartó el modal hoy, no volver a molestar
+        const dismissedAt = localStorage.getItem('batteryModalDismissedAt');
+        if (dismissedAt) {
+          const hoursAgo = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60);
+          if (hoursAgo < 24) return;
+        }
+
+        const { isIgnoring } = await LocationTracking.checkBatteryOptimization();
+        if (!isIgnoring) {
+          // Pequeño retraso para no saturar al usuario con múltiples modales al iniciar
+          setTimeout(() => setShowBatteryModal(true), 1500);
+        }
+      } catch (err) {
+        // El plugin no está disponible en esta plataforma (web/iOS): ignorar
+        console.warn('⚠️ checkBatteryOptimization no disponible:', err?.message);
+      }
+    };
+
+    checkBattery();
+  }, []);
+
+  // Activar el permiso de batería: cierra el modal y abre el diálogo nativo de Android
+  const handleRequestBatteryPermission = async () => {
+    setShowBatteryModal(false);
+    try {
+      await LocationTracking.requestBatteryOptimization();
+    } catch (err) {
+      console.warn('⚠️ requestBatteryOptimization no disponible:', err?.message);
+    }
+  };
+
+  // Si el conductor descarta el modal, guardamos la hora para no volver a mostrarlo en 24 h
+  const handleDismissBatteryModal = () => {
+    setShowBatteryModal(false);
+    localStorage.setItem('batteryModalDismissedAt', Date.now().toString());
+  };
 
   // Solicitar permiso de notificaciones desde el banner
   const handleRequestNotifPermission = async () => {
@@ -802,6 +854,13 @@ const Home = () => {
           isOpen={showLocationModal}
           onDismiss={handleDismissLocationModal}
           onRequestPermission={handleRequestLocationFromModal}
+        />
+
+        {/* Modal de permisos de batería (rendimiento en segundo plano) */}
+        <BatteryPermissionModal
+          isOpen={showBatteryModal}
+          onDismiss={handleDismissBatteryModal}
+          onRequestPermission={handleRequestBatteryPermission}
         />
 
         {/* Modal de detalle de cancelación */}
