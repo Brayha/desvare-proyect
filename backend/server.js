@@ -491,9 +491,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Cliente cancela solicitud
+  // Cancelación de solicitud (puede ser iniciada por el cliente o el conductor)
   socket.on('request:cancel', async (data) => {
-    console.log('🚫 Solicitud cancelada por cliente:', data.requestId);
+    const cancelledBy = data.cancelledBy === 'driver' ? 'conductor' : 'cliente';
+    console.log(`🚫 Solicitud cancelada por ${cancelledBy}:`, data.requestId);
     console.log('📝 Razón:', data.reason, data.customReason || '');
     
     try {
@@ -506,6 +507,7 @@ io.on('connection', (socket) => {
         {
           status: 'cancelled',
           cancelledAt: new Date(),
+          cancelledBy: data.cancelledBy || 'client',
           cancellationReason: data.reason,
           cancellationCustomReason: data.customReason || null,
           updatedAt: new Date(),
@@ -559,6 +561,11 @@ io.on('connection', (socket) => {
       
       console.log('📢 Notificando a todos los conductores...');
       
+      const isCancelledByDriver = data.cancelledBy === 'driver';
+      const cancelMessage = isCancelledByDriver
+        ? 'Servicio cancelado por el conductor'
+        : 'Servicio cancelado por el cliente';
+
       // Notificar a TODOS los conductores (broadcast general para la lista de solicitudes)
       io.to('drivers').emit('request:cancelled', {
         requestId: requestIdStr,
@@ -569,15 +576,30 @@ io.on('connection', (socket) => {
         origin: data.origin,
         destination: data.destination,
         problem: data.problem,
-        message: 'Servicio cancelado por el cliente',
+        cancelledBy: data.cancelledBy || 'client',
+        message: cancelMessage,
         cancelledAt: new Date(),
         timestamp: new Date()
       });
 
-      // Notificar DIRECTAMENTE al conductor asignado con un evento dedicado.
+      // Notificar al CLIENTE cuando el conductor cancela el servicio
+      if (isCancelledByDriver && request.clientId) {
+        const clientSocketId = connectedClients.get(request.clientId.toString());
+        if (clientSocketId) {
+          io.to(clientSocketId).emit('service:cancelled', {
+            requestId: requestIdStr,
+            cancelledBy: 'driver',
+            reason: data.reason,
+            message: 'El conductor canceló el servicio',
+          });
+          console.log(`📩 Evento service:cancelled enviado al cliente ${request.clientId}`);
+        }
+      }
+
+      // Notificar DIRECTAMENTE al conductor asignado cuando cancela el CLIENTE.
       // Esto resuelve el caso donde el conductor está en ActiveService (no Home)
       // y necesita saber que el cliente canceló para volver al inicio.
-      if (request.assignedDriverId) {
+      if (!isCancelledByDriver && request.assignedDriverId) {
         const assignedDriverData = connectedDrivers.get(request.assignedDriverId.toString());
         if (assignedDriverData) {
           io.to(assignedDriverData.socketId).emit('service:cancelled', {

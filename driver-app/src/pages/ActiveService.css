@@ -527,3 +527,94 @@
   color: #374151;
 }
 
+/* ============================================
+   SECCIÓN DE CANCELACIÓN DE EMERGENCIA
+   ============================================ */
+
+.as-cancel-section {
+  margin-top: 8px;
+  padding: 0 4px 8px;
+}
+
+/* Separador visual con texto centrado */
+.as-cancel-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.as-cancel-divider::before,
+.as-cancel-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #f3f4f6;
+}
+
+.as-cancel-divider-text {
+  font-size: 11px;
+  color: #d1d5db;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+/* Botón de cancelar: sutil, no alarmante, pero claramente destructivo */
+.as-cancel-service-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  background: #fff5f5;
+  border: 1px dashed #fca5a5;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.as-cancel-service-btn:active {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+.as-cancel-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.as-cancel-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.as-cancel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.as-cancel-sub {
+  font-size: 12px;
+  color: #f87171;
+}
+
+/* Botón "Cancelar servicio" dentro del IonAlert → color rojo */
+.alert-button-danger {
+  color: #dc2626 !important;
+  font-weight: 600 !important;
+}
+

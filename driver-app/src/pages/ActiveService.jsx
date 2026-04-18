@@ -600,6 +600,98 @@ const ActiveService = () => {
     });
   };
 
+  const handleCancelService = () => {
+    presentAlert({
+      header: '¿Cancelar el servicio?',
+      message: 'Esta acción no se puede deshacer. El cliente será notificado.',
+      inputs: [
+        {
+          type: 'radio',
+          label: 'No puedo llegar a tiempo',
+          value: 'No puedo llegar a tiempo',
+        },
+        {
+          type: 'radio',
+          label: 'Problema con mi vehículo',
+          value: 'Problema con mi vehículo',
+        },
+        {
+          type: 'radio',
+          label: 'El cliente no está disponible',
+          value: 'El cliente no está disponible',
+        },
+        {
+          type: 'radio',
+          label: 'Error en la solicitud',
+          value: 'Error en la solicitud',
+        },
+        {
+          type: 'radio',
+          label: 'Otro motivo',
+          value: 'Otro motivo',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Volver',
+          role: 'cancel',
+        },
+        {
+          text: 'Cancelar servicio',
+          cssClass: 'alert-button-danger',
+          handler: async (reason) => {
+            if (!reason) {
+              present({ message: 'Selecciona un motivo para cancelar', duration: 2000, color: 'warning' });
+              return false;
+            }
+
+            try {
+              const userData = localStorage.getItem('user');
+              const user = userData ? JSON.parse(userData) : null;
+
+              // 1. Detener GPS nativo
+              LocationTracking.stopTracking().catch(() => {});
+
+              // 2. Notificar al backend via socket
+              const cancelled = socketService.cancelService({
+                requestId: serviceData.requestId,
+                reason,
+                clientId: serviceData.clientId?.toString(),
+                clientName: serviceData.clientName,
+                driverId: user?._id,
+                driverName: user?.name,
+              });
+
+              // 3. Si el socket no está disponible, usar REST como fallback
+              if (!cancelled) {
+                await fetch(`${API_URL}/api/requests/${serviceData.requestId}/cancel-by-driver`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ driverId: user?._id, reason }),
+                }).catch(() => {});
+              }
+
+              // 4. Limpiar localStorage y estado del conductor
+              localStorage.removeItem('activeService');
+              if (user) {
+                const updatedUser = { ...user };
+                updatedUser.driverProfile.isOnline = true;
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+              }
+
+              present({ message: 'Servicio cancelado. Ahora estás disponible.', duration: 3000, color: 'warning' });
+
+              setTimeout(() => history.replace('/home'), 500);
+            } catch (err) {
+              console.error('❌ Error cancelando servicio:', err);
+              present({ message: 'Error al cancelar. Inténtalo de nuevo.', duration: 3000, color: 'danger' });
+            }
+          },
+        },
+      ],
+    });
+  };
+
   const handleCompleteService = () => {
     presentAlert({
       header: "✅ Completar Servicio",
@@ -1119,6 +1211,24 @@ const ActiveService = () => {
                     {completing ? "⏳ Completando..." : "Completar Servicio"}
                   </button>
                 )}
+
+                {/* Sección de cancelación de emergencia */}
+                <div className="as-cancel-section">
+                  <div className="as-cancel-divider">
+                    <span className="as-cancel-divider-text">¿Necesitas cancelar?</span>
+                  </div>
+                  <button
+                    className="as-cancel-service-btn"
+                    onClick={handleCancelService}
+                  >
+                    <span className="as-cancel-icon">✕</span>
+                    <div className="as-cancel-text">
+                      <span className="as-cancel-title">Cancelar servicio</span>
+                      <span className="as-cancel-sub">Solo en caso de emergencia</span>
+                    </div>
+                  </button>
+                </div>
+
               </div>
             </div>
           </div>

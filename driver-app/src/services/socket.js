@@ -232,6 +232,18 @@ class SocketService {
     }
   }
 
+  // El conductor cancela un servicio en curso (por emergencia o imposibilidad de continuar)
+  cancelService(data) {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('request:cancel', { ...data, cancelledBy: 'driver' });
+      console.log('🚫 Evento request:cancel (conductor) enviado al backend');
+      return true;
+    } else {
+      console.warn('⚠️ Socket desconectado al intentar cancelar servicio');
+      return false;
+    }
+  }
+
   // Evento directo cuando el cliente cancela un servicio que el conductor ya aceptó
   onServiceCancelled(callback) {
     if (this.socket) {
