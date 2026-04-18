@@ -16,10 +16,16 @@ const Splash = () => {
     // Timer para la animación del splash
     const timer = setTimeout(() => {
       if (token && user) {
-        // Usuario ya autenticado, ir a Home
         const userData = JSON.parse(user);
         if (userData.userType === 'driver') {
-          history.replace('/home');
+          // Si había un servicio activo en curso cuando se cerró la app,
+          // volver directo a él en lugar de ir a Home
+          const activeService = localStorage.getItem('activeService');
+          if (activeService) {
+            history.replace('/active-service');
+          } else {
+            history.replace('/home');
+          }
         } else {
           // No es conductor, limpiar y ir a login
           localStorage.clear();
