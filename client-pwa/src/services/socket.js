@@ -192,6 +192,25 @@ class SocketService {
   }
 
   // ========================================
+  // CANCELACIÓN POR EL CONDUCTOR
+  // ========================================
+
+  // El conductor canceló el servicio en curso → el cliente debe ser notificado
+  onServiceCancelled(callback) {
+    if (this.socket) {
+      this.socket.off('service:cancelled');
+      this.socket.on('service:cancelled', callback);
+      console.log('👂 Listener de servicio cancelado por conductor registrado');
+    }
+  }
+
+  offServiceCancelled() {
+    if (this.socket) {
+      this.socket.off('service:cancelled');
+    }
+  }
+
+  // ========================================
   // COMPLETAR SERVICIO
   // ========================================
   

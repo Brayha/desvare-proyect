@@ -173,6 +173,39 @@ const DriverOnWay = () => {
       showSuccess('¡Tu vehículo ya está en la grúa! Vamos al destino 🚛');
     });
 
+    // El conductor canceló el servicio: informar al cliente y redirigir
+    socketService.onServiceCancelled((data) => {
+      console.log('🚫 El conductor canceló el servicio:', data);
+
+      // Limpiar servicio activo (conservar requestData y vehicleData para prellenar)
+      localStorage.removeItem('activeService');
+      localStorage.removeItem('currentRequestId');
+
+      const reason = data.reason || 'Sin motivo especificado';
+
+      presentAlert({
+        header: '😔 Servicio cancelado',
+        message: `El conductor canceló el servicio.\n\nMotivo: "${reason}"\n\nTe llevaremos de vuelta para que puedas solicitar un nuevo servicio con tus datos guardados.`,
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Solicitar nuevo servicio',
+            handler: () => {
+              // requestData y vehicleData siguen en localStorage → RequestService los cargará
+              history.replace('/tabs/desvare');
+            },
+          },
+          {
+            text: 'Ir al inicio',
+            role: 'cancel',
+            handler: () => {
+              history.replace('/home');
+            },
+          },
+        ],
+      });
+    });
+
     // Primera consulta inmediata al montar (muestra la última posición conocida)
     pollDriverLocation();
     const locationPollInterval = setInterval(pollDriverLocation, LOCATION_POLL_INTERVAL_MS);
@@ -196,6 +229,26 @@ const DriverOnWay = () => {
           localStorage.removeItem('activeService');
           showSuccess('¡Servicio completado!');
           setTimeout(() => history.replace('/rate-service'), 1000);
+        } else if (status === 'cancelled') {
+          // Fallback para cuando el socket no llegó (iOS background / red inestable)
+          localStorage.removeItem('activeService');
+          localStorage.removeItem('currentRequestId');
+          presentAlert({
+            header: '😔 Servicio cancelado',
+            message: 'El conductor canceló el servicio. Te llevaremos de vuelta para que puedas solicitar uno nuevo.',
+            backdropDismiss: false,
+            buttons: [
+              {
+                text: 'Solicitar nuevo servicio',
+                handler: () => history.replace('/tabs/desvare'),
+              },
+              {
+                text: 'Ir al inicio',
+                role: 'cancel',
+                handler: () => history.replace('/home'),
+              },
+            ],
+          });
         }
       } catch {
         // silencioso
@@ -213,6 +266,7 @@ const DriverOnWay = () => {
       socketService.offReconnect(handleSocketReconnect);
       socketService.offServiceCompleted();
       socketService.offServiceStarted();
+      socketService.offServiceCancelled();
       socketService.offLocationUpdate();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
