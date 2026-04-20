@@ -144,6 +144,169 @@ router.post('/login', async (req, res) => {
 // ENDPOINTS OTP PARA CLIENTS
 // ============================================
 
+// POST /api/auth/check-phone - Verificar si un teléfono ya está registrado
+router.post('/check-phone', async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ error: 'Teléfono es requerido' });
+    }
+
+    const cleanPhone = phone.replace(/\s/g, '');
+    const user = await User.findOne({ phone: cleanPhone, userType: 'client' });
+
+    if (user) {
+      res.json({
+        exists: true,
+        userId: user._id,
+        name: user.name,
+        hasPIN: !!user.clientPin,
+      });
+    } else {
+      res.json({ exists: false });
+    }
+  } catch (error) {
+    console.error('❌ Error en check-phone:', error);
+    res.status(500).json({ error: 'Error al verificar teléfono', details: error.message });
+  }
+});
+
+// POST /api/auth/login-pin - Iniciar sesión con clave de 4 dígitos
+router.post('/login-pin', async (req, res) => {
+  try {
+    const { userId, pin } = req.body;
+
+    if (!userId || !pin) {
+      return res.status(400).json({ error: 'userId y pin son requeridos' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const isValid = await user.compareClientPin(pin);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Clave incorrecta. Inténtalo de nuevo.' });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, phone: user.phone, userType: user.userType },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    console.log(`✅ Login con PIN exitoso para: ${user.phone}`);
+
+    res.json({
+      message: 'Login exitoso',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        userType: user.userType,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error en login-pin:', error);
+    res.status(500).json({ error: 'Error al iniciar sesión', details: error.message });
+  }
+});
+
+// POST /api/auth/set-pin - Guardar o actualizar clave de 4 dígitos (post-OTP)
+router.post('/set-pin', async (req, res) => {
+  try {
+    const { userId, pin } = req.body;
+
+    if (!userId || !pin || String(pin).length !== 4 || !/^\d{4}$/.test(pin)) {
+      return res.status(400).json({ error: 'userId y pin de exactamente 4 dígitos son requeridos' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    await user.setClientPin(pin);
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, phone: user.phone, userType: user.userType },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    console.log(`✅ PIN guardado para: ${user.phone}`);
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        userType: user.userType,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error en set-pin:', error);
+    res.status(500).json({ error: 'Error al guardar clave', details: error.message });
+  }
+});
+
+// POST /api/auth/complete-registration - Completar registro: nombre, email y PIN
+router.post('/complete-registration', async (req, res) => {
+  try {
+    const { userId, name, email, pin } = req.body;
+
+    if (!userId || !name || !name.trim()) {
+      return res.status(400).json({ error: 'userId y nombre son requeridos' });
+    }
+    if (!pin || String(pin).length !== 4 || !/^\d{4}$/.test(pin)) {
+      return res.status(400).json({ error: 'pin de exactamente 4 dígitos es requerido' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    user.name = name.trim();
+    if (email && email.trim()) {
+      user.email = email.toLowerCase().trim();
+    }
+    await user.setClientPin(pin);
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, phone: user.phone, userType: user.userType },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    console.log(`✅ Registro completado para: ${user.phone} (${user.name})`);
+
+    res.json({
+      message: 'Registro completado',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        userType: user.userType,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error en complete-registration:', error);
+    res.status(500).json({ error: 'Error al completar registro', details: error.message });
+  }
+});
+
 // POST /api/auth/register-otp - Registrar cliente con teléfono (Paso 1)
 router.post('/register-otp', async (req, res) => {
   try {
@@ -151,10 +314,10 @@ router.post('/register-otp', async (req, res) => {
     
     console.log('📱 Registro OTP - Datos recibidos:', { name, phone, email });
     
-    // Validar campos requeridos
-    if (!name || !phone) {
+    // Solo el teléfono es requerido (name es opcional en el nuevo flujo)
+    if (!phone) {
       return res.status(400).json({ 
-        error: 'Nombre y teléfono son requeridos' 
+        error: 'Teléfono es requerido' 
       });
     }
     
@@ -174,9 +337,9 @@ router.post('/register-otp', async (req, res) => {
       });
     }
     
-    // Crear nuevo usuario (sin verificar aún)
+    // Crear nuevo usuario pendiente (nombre se actualiza en complete-registration)
     const user = new User({
-      name,
+      name: name || `Usuario_${cleanPhone.slice(-4)}`,
       phone: cleanPhone,
       email: email || undefined,
       userType: 'client',

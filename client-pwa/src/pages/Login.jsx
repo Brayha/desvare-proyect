@@ -1,92 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IonText, useIonLoading } from '@ionic/react';
-import { AuthLayout } from '../layouts/AuthLayout';
-import { Button } from '../components/Button/Button';
-import { Input } from '../components/Input/Input';
-import { Card } from '../components/Card/Card';
-import { authAPI } from '../services/api';
-import { useToast } from '../hooks/useToast';
-import storage from '../services/storage';
+import { IonPage, IonContent } from '@ionic/react';
+import AuthModal from '../components/AuthModal/AuthModal';
+import mapBg from '../assets/img/map-home-responsive.webp';
+import logo from '../assets/img/Desvare.svg';
+import './Login.css';
 
+/**
+ * Página de autenticación standalone.
+ * Muestra el nuevo modal unificado (teléfono → PIN) sobre un fondo del mapa.
+ * Reemplaza el antiguo flujo de email + contraseña.
+ */
 const Login = () => {
   const history = useHistory();
-  const { showSuccess, showWarning, showError } = useToast();
-  const [presentLoading, dismissLoading] = useIonLoading();
-  
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    if (!email || !password) {
-      showWarning('Por favor completa todos los campos');
+  // Redirigir si ya hay sesión activa
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      history.replace('/tabs/desvare');
       return;
     }
+    // Abrir modal inmediatamente
+    const t = setTimeout(() => setIsModalOpen(true), 80);
+    return () => clearTimeout(t);
+  }, [history]);
 
-    await presentLoading('Iniciando sesión...');
+  const handleSuccess = () => {
+    // Después del login exitoso: ir a la app principal
+    history.replace('/tabs/desvare');
+  };
 
-    try {
-      const response = await authAPI.login({
-        email,
-        password,
-        userType: 'client',
-      });
-
-      storage.setSession(response.data.token, response.data.user);
-
-      await dismissLoading();
-      showSuccess('¡Bienvenido!');
-      history.push('/home');
-    } catch (error) {
-      await dismissLoading();
-      showError(error.response?.data?.error || 'Error al iniciar sesión');
-    }
+  const handleDismiss = () => {
+    setIsModalOpen(false);
+    // Si cierra el modal sin autenticarse, volver al home
+    setTimeout(() => history.replace('/home'), 250);
   };
 
   return (
-    <AuthLayout title="Desvare - Cliente">
-      <Card title="Iniciar Sesión">
-        <form onSubmit={handleLogin}>
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onIonInput={(e) => setEmail(e.detail.value)}
-            placeholder="tu@email.com"
-            required
-          />
-
-          <Input
-            label="Contraseña"
-            type="password"
-            value={password}
-            onIonInput={(e) => setPassword(e.detail.value)}
-            placeholder="••••••••"
-            required
-          />
-
-          <Button 
-            expand="block" 
-            type="submit" 
-            size="large"
-            className="mt-md"
-          >
-            Iniciar Sesión
-          </Button>
-
-          <div className="text-center mt-md">
-            <IonText>
-              ¿No tienes cuenta?{' '}
-              <a onClick={() => history.push('/register')}>
-                Regístrate aquí
-              </a>
-            </IonText>
+    <IonPage>
+      <IonContent fullscreen>
+        {/* Fondo del mapa (decorativo) */}
+        <div className="login-bg">
+          <img src={mapBg} alt="" className="login-bg__img" />
+          <div className="login-bg__overlay" />
+          <div className="login-bg__logo-wrap">
+            <img src={logo} alt="Desvare" className="login-bg__logo" />
           </div>
-        </form>
-      </Card>
-    </AuthLayout>
+        </div>
+
+        {/* Modal de autenticación unificado */}
+        <AuthModal
+          isOpen={isModalOpen}
+          onDismiss={handleDismiss}
+          onSuccess={handleSuccess}
+        />
+      </IonContent>
+    </IonPage>
   );
 };
 

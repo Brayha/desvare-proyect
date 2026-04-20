@@ -1,5 +1,5 @@
 /* ======================================
-   AUTH MODAL MODERNO (Sheet Modal)
+   AUTH MODAL — Shell
    ====================================== */
 
 .auth-modal-modern {
@@ -24,7 +24,7 @@
 .auth-modal-content {
   --background: white;
   --padding-top: 0;
-  --padding-bottom: 32px;
+  --padding-bottom: 40px;
   --padding-start: 24px;
   --padding-end: 24px;
 }
@@ -32,100 +32,118 @@
 /* ======================================
    LOGO
    ====================================== */
-.auth-logo-container {
+.am-logo-container {
   display: flex;
   justify-content: center;
-  margin: 48px 0 32px;
+  margin: 40px 0 24px;
 }
 
-.auth-logo {
-  width: 120px;
+.am-logo {
+  width: 110px;
   height: auto;
 }
 
 /* ======================================
-   SEGMENT (Registrarme / Ingresar)
+   INDICADOR DE PROGRESO
    ====================================== */
-.auth-segment {
+.am-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
   margin-bottom: 24px;
-  --background: #F3F4F6;
-  border-radius: 15px;
-  padding: 4px;
 }
 
-.auth-segment ion-segment-button {
-  --indicator-color: white;
-  --indicator-height: 100%;
-  --indicator-box-shadow: none;
-  --indicator-border-radius: 15px;
-  --color: #6B7280;
-  --color-checked: #223D62;
-  min-height: 40px;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0;
+.am-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #E5E7EB;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.auth-segment ion-segment-button::part(indicator-background) {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
-}
-
-.auth-segment ion-segment-button::part(native) {
-  padding: 8px 16px;
-}
-
-.auth-segment ion-segment-button ion-label {
-  margin: 0;
+.am-progress-dot--active {
+  background: #0055FF;
+  transform: scale(1.15);
 }
 
 /* ======================================
    FORMULARIO
    ====================================== */
-.auth-form-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1F2937;
-  margin-bottom: 24px;
-  text-align: left;
-}
-
-.auth-form-content {
+.am-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: am-fade-in 0.2s ease;
+}
+
+@keyframes am-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.am-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.am-desc {
+  font-size: 14px;
+  color: #6B7280;
+  margin: -4px 0 0;
+  line-height: 1.5;
+}
+
+.am-greeting {
+  font-size: 15px;
+  color: #0055FF;
+  font-weight: 600;
+  margin: 0 0 -4px;
 }
 
 /* ======================================
-   INPUTS PERSONALIZADOS
+   ICONO CENTRADO (OTP, PIN)
    ====================================== */
-.auth-input-group {
-  position: relative;
+.am-icon-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+/* ======================================
+   INPUTS DE TEXTO
+   ====================================== */
+.am-input-group {
   display: flex;
   align-items: center;
   background: #F9FAFB;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
-  border: 1px solid #E5E7EB;
-  transition: all 0.2s ease;
+  border: 1.5px solid #E5E7EB;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.auth-input-group:focus-within {
+.am-input-group:focus-within {
   border-color: #0055FF;
   background: #EFF6FF;
   box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
 }
 
-.auth-input-icon {
+.am-input-group--error {
+  border-color: #EF4444 !important;
+  background: #FFF5F5 !important;
+}
+
+.am-input-icon {
   display: flex;
   align-items: center;
   margin-right: 12px;
   flex-shrink: 0;
 }
 
-.auth-input {
+.am-input {
   flex: 1;
   background: transparent;
   border: none;
@@ -134,208 +152,237 @@
   font-weight: 500;
   color: #1F2937;
   width: 100%;
+  font-family: inherit;
 }
 
-.auth-input::placeholder {
+.am-input::placeholder {
   color: #9CA3AF;
   font-weight: 400;
 }
 
-.auth-input:disabled {
+.am-input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* ======================================
-   TÉRMINOS Y CONDICIONES
+   MENSAJES DE ERROR
    ====================================== */
-.auth-terms {
-  font-size: 11px;
-  line-height: 1.5;
-  color: #6B7280;
-  text-align: left;
-  margin: 8px 0 16px;
+.am-error {
+  font-size: 13px;
+  color: #EF4444;
+  margin: -4px 0 0;
+  font-weight: 500;
 }
 
-.auth-terms a {
+.am-error--center {
+  text-align: center;
+}
+
+/* ======================================
+   CAJAS OTP (6 dígitos)
+   ====================================== */
+.am-otp-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+.am-otp-box {
+  width: 46px;
+  height: 56px;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1F2937;
+  background: #F9FAFB;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  -moz-appearance: textfield;
+}
+
+.am-otp-box::-webkit-outer-spin-button,
+.am-otp-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.am-otp-box:focus {
+  border-color: #0055FF;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.12);
+}
+
+.am-otp-box:not(:placeholder-shown) {
+  border-color: #0055FF;
+  background: #EFF6FF;
+}
+
+.am-otp-box:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   CAJAS PIN (4 dígitos)
+   ====================================== */
+.am-pin-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 8px 0;
+}
+
+.am-pin-box {
+  width: 64px;
+  height: 64px;
+  border: 2.5px solid #E5E7EB;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 28px;
+  color: #1F2937;
+  background: #F9FAFB;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s, transform 0.1s;
+  cursor: text;
+  /* Ocultar caracteres de contraseña con letra grande */
+  letter-spacing: 2px;
+}
+
+.am-pin-box::-webkit-outer-spin-button,
+.am-pin-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.am-pin-box:focus {
+  border-color: #0055FF;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.12);
+  transform: scale(1.05);
+}
+
+.am-pin-box--filled {
+  border-color: #0055FF;
+  background: #EFF6FF;
+}
+
+.am-pin-box:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   REENVÍO OTP
+   ====================================== */
+.am-resend {
+  display: flex;
+  justify-content: center;
+  min-height: 32px;
+  align-items: center;
+}
+
+.am-resend-text {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin: 0;
+  text-align: center;
+}
+
+.am-resend-text strong {
   color: #0055FF;
-  text-decoration: underline;
-  font-weight: 500;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ======================================
    BOTONES
    ====================================== */
-.auth-submit-button {
+.am-btn-primary {
   width: 100%;
   padding: 16px;
   background: #0055FF;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  font-family: inherit;
+  min-height: 52px;
 }
 
-.auth-submit-button:hover:not(:disabled) {
+.am-btn-primary:hover:not(:disabled) {
   background: #0044CC;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 85, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 85, 255, 0.3);
 }
 
-.auth-submit-button:active:not(:disabled) {
+.am-btn-primary:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.auth-submit-button:disabled {
-  opacity: 0.5;
+.am-btn-primary:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-.auth-secondary-button {
-  width: 100%;
-  padding: 12px;
+/* Botón secundario tipo link */
+.am-btn-link {
   background: transparent;
-  color: #6B7280;
   border: none;
+  color: #0055FF;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  text-decoration: underline;
-  transition: all 0.2s ease;
+  text-align: center;
+  padding: 8px;
+  font-family: inherit;
+  transition: opacity 0.2s;
 }
 
-.auth-secondary-button:hover:not(:disabled) {
-  color: #1F2937;
+.am-btn-link:hover:not(:disabled) { opacity: 0.75; }
+.am-btn-link:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Botón terciario (← volver, cambiar número) */
+.am-btn-ghost {
+  background: transparent;
+  border: none;
+  color: #9CA3AF;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  padding: 6px;
+  font-family: inherit;
+  transition: color 0.2s;
 }
 
-.auth-secondary-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.am-btn-ghost:hover:not(:disabled) { color: #6B7280; }
+.am-btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ======================================
-   OTP PASO 2
+   TÉRMINOS Y CONDICIONES
    ====================================== */
-.otp-icon-container {
-  display: flex;
-  justify-content: center;
-  margin: 0;
-}
-
-.otp-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1F2937;
+.am-terms {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #9CA3AF;
   text-align: center;
   margin: 0;
 }
 
-.otp-description {
-  font-size: 14px;
-  color: #6B7280;
-  text-align: center;
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* Input único OTP */
-.otp-single-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-
-.otp-single-input {
-  width: 100%;
-  height: 64px;
-  border: 2px solid #E5E7EB;
-  border-radius: 16px;
-  text-align: center;
-  font-size: 28px;
-  font-weight: 700;
-  color: #1F2937;
-  background: #F9FAFB;
-  letter-spacing: 10px;
-  outline: none;
-  transition: all 0.2s ease;
-  font-family: 'Courier New', monospace;
-}
-
-.otp-single-input::placeholder {
-  color: #D1D5DB;
-  letter-spacing: 8px;
-}
-
-.otp-single-input:focus {
-  border-color: #0055FF;
-  background: #EFF6FF;
-  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
-}
-
-.otp-single-input.otp-single-complete {
-  border-color: #10B981;
-  background: #ECFDF5;
-}
-
-.otp-single-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.otp-error {
-  display: block;
-  text-align: center;
-  margin-bottom: 16px;
-  font-size: 12px;
-}
-
-/* Reenvío de código */
-.otp-resend-container {
-  display: flex;
-  justify-content: center;
-  margin: 4px 0;
-  min-height: 28px;
-}
-
-.otp-resend-countdown {
-  font-size: 13px;
-  color: #6B7280;
-  text-align: center;
-  margin: 0;
-}
-
-.otp-resend-countdown strong {
+.am-terms a {
   color: #0055FF;
-}
-
-.otp-resend-btn {
-  background: none;
-  border: none;
-  color: #0055FF;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.otp-resend-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.otp-resend-spinner {
-  width: 14px;
-  height: 14px;
+  text-decoration: underline;
+  font-weight: 500;
 }
 
 /* ======================================
@@ -347,116 +394,24 @@
     --padding-end: 16px;
   }
 
-  .auth-logo {
-    width: 100px;
-  }
+  .am-logo { width: 96px; }
+  .am-title { font-size: 20px; }
 
-  .auth-form-title {
-    font-size: 18px;
-  }
-
-  .otp-single-input {
+  .am-pin-box {
+    width: 56px;
     height: 56px;
     font-size: 24px;
-    letter-spacing: 8px;
+    border-radius: 14px;
   }
-}
 
-/* ======================================
-   COMPATIBILIDAD CON ESTILOS LEGACY
-   ====================================== */
+  .am-pin-boxes { gap: 12px; }
 
-/* AuthModal Styles (legacy) */
-.auth-modal {
-  --width: 100%;
-  --height: 100%;
-  --border-radius: 0;
-}
-
-@media (min-width: 768px) {
-  .auth-modal {
-    --width: 500px;
-    --height: auto;
-    --max-height: 80vh;
-    --border-radius: 12px;
+  .am-otp-box {
+    width: 40px;
+    height: 50px;
+    font-size: 20px;
+    border-radius: 10px;
   }
-}
 
-.auth-modal ion-header {
-  box-shadow: var(--ion-box-shadow);
-}
-
-.auth-modal ion-toolbar {
-  --background: var(--ion-color-light);
-}
-
-.auth-modal ion-content {
-  --background: var(--ion-background-color);
-}
-
-/* Segmento de autenticación (legacy) */
-.auth-segment {
-  margin: 16px 0 24px;
-}
-
-/* Formulario (legacy) */
-.auth-form {
-  padding: 16px 0;
-}
-
-.auth-subtitle {
-  display: block;
-  margin-bottom: 16px;
-  font-size: 14px;
-  text-align: center;
-}
-
-.custom-input-item {
-  --background: var(--ion-color-light);
-  --padding-start: 16px;
-  --inner-padding-end: 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.auth-button {
-  margin-top: 24px;
-  --border-radius: 8px;
-  font-weight: 600;
-}
-
-/* OTP Form (legacy) */
-.otp-form {
-  padding: 16px 0;
-  text-align: center;
-}
-
-.otp-subtitle {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.otp-hint {
-  display: block;
-  margin-bottom: 24px;
-  font-size: 12px;
-}
-
-
-.auth-form-content-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-/* Ocultar flechitas de type="number" en inputs OTP */
-.otp-input-box::-webkit-outer-spin-button,
-.otp-input-box::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.otp-input-box[type=number] {
-  -moz-appearance: textfield;
+  .am-otp-boxes { gap: 7px; }
 }

@@ -1,0 +1,44 @@
+/* ======================================
+   PÁGINA DE LOGIN — Fondo
+   ====================================== */
+
+.login-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0d1b2a;
+}
+
+.login-bg__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.45) blur(2px);
+  transform: scale(1.05);
+}
+
+.login-bg__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 30, 80, 0.5) 60%,
+    rgba(0, 30, 80, 0.7) 100%
+  );
+}
+
+.login-bg__logo-wrap {
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.login-bg__logo {
+  width: 130px;
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+}

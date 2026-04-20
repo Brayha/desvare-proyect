@@ -524,7 +524,7 @@ const Home = () => {
                 <div className="lp-footer__col">
                   <p className="lp-footer__col-title">Cuenta</p>
                   <button className="lp-footer__link" onClick={() => history.push("/login")}>Iniciar sesión</button>
-                  <button className="lp-footer__link" onClick={() => history.push("/register")}>Registrarse</button>
+                  <button className="lp-footer__link" onClick={() => history.push("/login")}>Registrarse</button>
                 </div>
               </nav>
             </div>

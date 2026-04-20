@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema({
     code: String,
     expiresAt: Date
   },
+
+  // Clave de 4 dígitos para clientes (hash bcrypt)
+  clientPin: {
+    type: String,
+    default: null
+  },
   
   // Para DRIVERS - Email (opcional, usado para notificaciones)
   email: {
@@ -261,6 +267,19 @@ userSchema.methods.verifyOTP = function(code) {
 userSchema.methods.clearOTP = function() {
   this.otp = undefined;
   this.phoneVerified = true;
+};
+
+// ========================================
+// MÉTODOS PARA PIN DE CLIENTES
+// ========================================
+userSchema.methods.setClientPin = async function(pin) {
+  const salt = await require('bcryptjs').genSalt(10);
+  this.clientPin = await require('bcryptjs').hash(pin, salt);
+};
+
+userSchema.methods.compareClientPin = async function(pin) {
+  if (!this.clientPin) return false;
+  return require('bcryptjs').compare(pin, this.clientPin);
 };
 
 // ========================================

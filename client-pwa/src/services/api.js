@@ -31,11 +31,17 @@ export const authAPI = {
   // Autenticación tradicional (para drivers)
   register: (data) => api.post('/api/auth/register', data),
   login: (data) => api.post('/api/auth/login', data),
-  
+
   // Autenticación OTP (para clients)
   registerOTP: (data) => api.post('/api/auth/register-otp', data),
   loginOTP: (data) => api.post('/api/auth/login-otp', data),
   verifyOTP: (data) => api.post('/api/auth/verify-otp', data),
+
+  // Nuevo flujo unificado teléfono → PIN
+  checkPhone: (data) => api.post('/api/auth/check-phone', data),
+  loginPin: (data) => api.post('/api/auth/login-pin', data),
+  setPin: (data) => api.post('/api/auth/set-pin', data),
+  completeRegistration: (data) => api.post('/api/auth/complete-registration', data),
 };
 
 // API de solicitudes
