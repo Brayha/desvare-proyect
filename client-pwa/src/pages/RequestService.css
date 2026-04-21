@@ -460,6 +460,10 @@
   flex: 1;
 }
 
+.add-vehicle-button-blue {
+  width: 100% !important;
+}
+
 .stat-item-confirmation ion-text {
   overflow: hidden;
   color: #9ca3af;

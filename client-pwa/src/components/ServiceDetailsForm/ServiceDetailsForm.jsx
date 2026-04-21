@@ -102,7 +102,6 @@ const ServiceDetailsForm = ({
             onIonInput={(e) => handleChange("problem", e.detail.value)}
             placeholder="Ej: Se descompuso la batería del carro"
             rows={4}
-            maxlength={500}
           />
         </IonItem>
         <div className="service-field-footer">
