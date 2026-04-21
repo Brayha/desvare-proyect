@@ -469,3 +469,25 @@ ion-select::part(container) {
   }
 }
 
+.submit-error-box {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.submit-error-text {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.retry-upload-button {
+  --background: #0055FF;
+  --border-radius: 10px;
+  margin-top: 8px;
+}
+

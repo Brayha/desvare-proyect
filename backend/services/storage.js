@@ -118,17 +118,20 @@ const uploadMultipleDocuments = async (documents, userId) => {
   try {
     const uploadPromises = documents.map(doc =>
       uploadDriverDocument(doc.file, userId, doc.documentType)
-        .then(url => ({ [doc.documentType]: url }))
+        .then(url => ({ type: doc.documentType, url, success: true }))
         .catch(error => {
           console.error(`Error subiendo ${doc.documentType}:`, error);
-          return { [doc.documentType]: null, error: error.message };
+          return { type: doc.documentType, url: null, success: false, errorMsg: error.message };
         })
     );
 
     const results = await Promise.all(uploadPromises);
-    
-    // Combinar resultados en un solo objeto
-    return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+    // Combinar resultados en un solo objeto limpio (sin clave 'error' suelta)
+    return results.reduce((acc, curr) => {
+      acc[curr.type] = curr.success ? curr.url : null;
+      return acc;
+    }, {});
 
   } catch (error) {
     console.error('❌ Error subiendo múltiples documentos:', error);

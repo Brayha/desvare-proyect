@@ -303,3 +303,31 @@
   }
 }
 
+/* Input de texto para nombre y email */
+.verify-otp-text-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+}
+
+.verify-otp-text-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.verify-otp-text-input:focus {
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.verify-otp-text-input:disabled {
+  opacity: 0.6;
+}
+

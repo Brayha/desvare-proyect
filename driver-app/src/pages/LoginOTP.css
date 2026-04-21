@@ -145,3 +145,101 @@
     justify-content: center;
   }
 }
+
+/* ======================================
+   NUEVO FLUJO UNIFICADO
+   ====================================== */
+
+.driver-auth-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  width: 100%;
+  background: #0055FF;
+  padding: 14px 16px;
+  border-radius: 14px;
+}
+
+.driver-auth-back {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.driver-auth-logo {
+  height: 28px;
+}
+
+/* Cajas de PIN de 4 dígitos */
+.driver-pin-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.driver-pin-box {
+  width: 64px;
+  height: 64px;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0055FF;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-text-security: disc;
+}
+
+.driver-pin-box:focus {
+  border-color: #0055FF;
+  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.15);
+}
+
+.driver-pin-box:disabled {
+  background: #f9fafb;
+  opacity: 0.6;
+}
+
+.driver-pin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* Input de texto genérico */
+.driver-text-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #111827;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+}
+
+.driver-text-input:focus {
+  border-color: #0055FF;
+  box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+}
+
+.driver-text-input:disabled {
+  background: #f9fafb;
+  opacity: 0.7;
+}

@@ -113,6 +113,9 @@ const CompleteRegistration = () => {
 
   // Estados de error
   const [errors, setErrors] = useState({});
+  // Estado de reintento de documentos (si Paso A pasó pero B falló)
+  const [uploadFailed, setUploadFailed] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Función para cargar ciudades fallback
   const setFallbackCities = () => {
@@ -364,30 +367,27 @@ const CompleteRegistration = () => {
   const handleSubmit = async () => {
     console.log("📝 Enviando registro completo...");
     setIsLoading(true);
+    setSubmitError('');
+    setUploadFailed(false);
 
     try {
-      // Obtener userId del usuario guardado
       const userStr = localStorage.getItem("user");
       if (!userStr) {
-        alert(
-          "Error: No se encontró la sesión. Por favor inicia sesión de nuevo."
-        );
         history.replace("/login");
         return;
       }
 
       const user = JSON.parse(userStr);
-      const userId = user._id; // ✅ Cambiado de user.id a user._id para consistencia con backend
+      const userId = user._id;
 
       console.log("👤 Usuario ID:", userId);
 
-      // Paso A: Enviar datos básicos + datos de grúa
+      // Paso A: Datos básicos + grúa
       const towTruckData = {
         truckType,
         licensePlate: truckPlate,
       };
 
-      // Si seleccionó marca/modelo del catálogo
       if (truckBrand && truckBrand.id !== "OTHER") {
         towTruckData.baseBrandId = truckBrand.id;
         towTruckData.baseBrand = truckBrand.name;
@@ -396,8 +396,6 @@ const CompleteRegistration = () => {
         towTruckData.baseModelId = truckModel.id;
         towTruckData.baseModel = truckModel.name;
       }
-
-      // Si seleccionó "Otro" en marca/modelo
       if (truckBrand?.id === "OTHER" && customBrand) {
         towTruckData.customBrand = customBrand;
       }
@@ -405,93 +403,96 @@ const CompleteRegistration = () => {
         towTruckData.customModel = customModel;
       }
 
-      console.log("🚚 Datos de grúa a enviar:", towTruckData);
-
       await authAPI.registerDriverComplete({
         userId,
         entityType,
         city,
         address,
-        towTruck: towTruckData, // 🆕 Incluir datos de la grúa
+        towTruck: towTruckData,
       });
 
       console.log("✅ Datos básicos guardados");
 
       // Paso B: Subir documentos (convertir a base64)
-      console.log("📤 Enviando documentos...");
+      await uploadDocuments(userId);
 
-      const documents = [];
+    } catch (error) {
+      console.error("❌ Error en registro (Paso A):", error);
+      setSubmitError("Error al guardar tus datos. Verifica tu conexión e intenta de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      if (cedulaFront) {
-        const base64 = await fileToBase64(cedulaFront);
-        documents.push({ file: base64, documentType: "cedula-front" });
-      }
-      if (cedulaBack) {
-        const base64 = await fileToBase64(cedulaBack);
-        documents.push({ file: base64, documentType: "cedula-back" });
-      }
-      if (selfie) {
-        const base64 = await fileToBase64(selfie);
-        documents.push({ file: base64, documentType: "selfie" });
-      }
-      if (licenciaTransitoFront) {
-        const base64 = await fileToBase64(licenciaTransitoFront);
-        documents.push({ file: base64, documentType: "licencia-front" });
-      }
-      if (licenciaTransitoBack) {
-        const base64 = await fileToBase64(licenciaTransitoBack);
-        documents.push({ file: base64, documentType: "licencia-back" });
-      }
-      if (soat) {
-        const base64 = await fileToBase64(soat);
-        documents.push({ file: base64, documentType: "soat" });
-      }
-      if (tarjetaPropiedadFront) {
-        const base64 = await fileToBase64(tarjetaPropiedadFront);
-        documents.push({ file: base64, documentType: "tarjeta-front" });
-      }
-      if (tarjetaPropiedadBack) {
-        const base64 = await fileToBase64(tarjetaPropiedadBack);
-        documents.push({ file: base64, documentType: "tarjeta-back" });
-      }
-      if (seguroTodoRiesgo) {
-        const base64 = await fileToBase64(seguroTodoRiesgo);
-        documents.push({ file: base64, documentType: "seguro" });
-      }
-      if (towTruckPhoto) {
-        const base64 = await fileToBase64(towTruckPhoto);
-        documents.push({ file: base64, documentType: "grua-photo" });
-      }
+  const uploadDocuments = async (userId) => {
+    console.log("📤 Preparando documentos para subir...");
 
-      console.log(`📎 Subiendo ${documents.length} documentos...`);
+    const documents = [];
+    const fileMap = [
+      { file: cedulaFront, type: "cedula-front" },
+      { file: cedulaBack, type: "cedula-back" },
+      { file: selfie, type: "selfie" },
+      { file: licenciaTransitoFront, type: "licencia-front" },
+      { file: licenciaTransitoBack, type: "licencia-back" },
+      { file: soat, type: "soat" },
+      { file: tarjetaPropiedadFront, type: "tarjeta-front" },
+      { file: tarjetaPropiedadBack, type: "tarjeta-back" },
+      { file: seguroTodoRiesgo, type: "seguro" },
+      { file: towTruckPhoto, type: "grua-photo" },
+    ];
 
-      await authAPI.uploadDriverDocuments({
-        userId,
-        documents,
-      });
+    for (const { file, type } of fileMap) {
+      if (file) {
+        const base64 = await fileToBase64(file);
+        documents.push({ file: base64, documentType: type });
+      }
+    }
 
+    console.log(`📎 Subiendo ${documents.length} documentos...`);
+
+    try {
+      await authAPI.uploadDriverDocuments({ userId, documents });
       console.log("✅ Documentos subidos");
-
-      // Paso C: Enviar capacidades
-      const selectedCapabilities = Object.keys(vehicleCapabilities).filter(
-        (key) => vehicleCapabilities[key]
+    } catch (uploadError) {
+      console.error("❌ Error subiendo documentos:", uploadError);
+      // Los datos básicos ya se guardaron (Paso A fue exitoso).
+      // Permitir reintento sin repetir el Paso A.
+      setUploadFailed(true);
+      setSubmitError(
+        "Tus datos se guardaron pero hubo un problema al subir las fotos. " +
+        "Por favor intenta subirlas de nuevo."
       );
+      setIsLoading(false);
+      return;
+    }
 
+    // Paso C: Capacidades
+    const selectedCapabilities = Object.keys(vehicleCapabilities).filter(
+      (key) => vehicleCapabilities[key]
+    );
+
+    try {
       await authAPI.setDriverCapabilities({
         userId,
         vehicleCapabilities: selectedCapabilities,
       });
-
       console.log("✅ Capacidades guardadas");
-
-      // Navegar a vista "En Revisión"
-      history.replace("/under-review");
-    } catch (error) {
-      console.error("❌ Error en registro completo:", error);
-      alert("Error al enviar el registro. Intenta de nuevo.");
-    } finally {
-      setIsLoading(false);
+    } catch (capError) {
+      console.error("❌ Error guardando capacidades:", capError);
     }
+
+    history.replace("/under-review");
+  };
+
+  const handleRetryUpload = async () => {
+    setIsLoading(true);
+    setSubmitError('');
+    setUploadFailed(false);
+    const userStr = localStorage.getItem("user");
+    if (!userStr) { history.replace("/login"); return; }
+    const userId = JSON.parse(userStr)._id;
+    await uploadDocuments(userId);
+    setIsLoading(false);
   };
 
   const handleFileChange = (setter) => async (e) => {
@@ -852,31 +853,50 @@ const CompleteRegistration = () => {
           {/* Step Content */}
           {renderStepContent()}
 
-          {/* Navigation Buttons */}
-          <div className="navigation-buttons">
-            <IonButton
-              fill="outline"
-              className="nav-button back-button"
-              onClick={handleBack}
-              disabled={isLoading}
-            >
-              {currentStep === 1 ? "Cancelar" : "Atrás"}
-            </IonButton>
-
-            <IonButton
-              className="nav-button next-button"
-              onClick={handleNext}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <IonSpinner name="crescent" />
-              ) : currentStep === totalSteps ? (
-                "Finalizar"
-              ) : (
-                "Siguiente"
+          {/* Error general y reintento de documentos */}
+          {submitError && (
+            <div className="submit-error-box">
+              <p className="submit-error-text">{submitError}</p>
+              {uploadFailed && (
+                <IonButton
+                  expand="block"
+                  className="retry-upload-button"
+                  onClick={handleRetryUpload}
+                  disabled={isLoading}
+                >
+                  {isLoading ? <IonSpinner name="crescent" /> : "Reintentar subir fotos"}
+                </IonButton>
               )}
-            </IonButton>
-          </div>
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          {!uploadFailed && (
+            <div className="navigation-buttons">
+              <IonButton
+                fill="outline"
+                className="nav-button back-button"
+                onClick={handleBack}
+                disabled={isLoading}
+              >
+                {currentStep === 1 ? "Cancelar" : "Atrás"}
+              </IonButton>
+
+              <IonButton
+                className="nav-button next-button"
+                onClick={handleNext}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <IonSpinner name="crescent" />
+                ) : currentStep === totalSteps ? (
+                  "Finalizar"
+                ) : (
+                  "Siguiente"
+                )}
+              </IonButton>
+            </div>
+          )}
         </div>
       </IonContent>
     </IonPage>

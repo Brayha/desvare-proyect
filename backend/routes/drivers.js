@@ -40,55 +40,40 @@ const upload = multer({
  */
 router.post('/register-initial', async (req, res) => {
   try {
-    const { name, phone, email } = req.body;
+    const { phone } = req.body;
 
-    console.log('📱 Registro inicial conductor - Datos recibidos:', { name, phone, email });
+    console.log('📱 Registro inicial conductor - Teléfono:', phone);
 
-    // Validar campos requeridos
-    if (!name || !phone) {
-      return res.status(400).json({
-        error: 'Nombre y teléfono son requeridos'
-      });
+    if (!phone) {
+      return res.status(400).json({ error: 'Teléfono es requerido' });
     }
 
-    // Limpiar número de teléfono
     const cleanPhone = phone.replace(/\s/g, '');
 
     // Verificar si ya existe un conductor con este teléfono
-    // ✅ NUEVO: Ahora solo verificamos si ya es conductor, no si el teléfono existe
-    // Esto permite que un cliente también pueda registrarse como conductor
-    const existingDriver = await User.findOne({ 
-      phone: cleanPhone, 
-      userType: 'driver' 
-    });
+    const existingDriver = await User.findOne({ phone: cleanPhone, userType: 'driver' });
     if (existingDriver) {
       return res.status(400).json({
         error: 'Ya tienes una cuenta de conductor con este teléfono'
       });
     }
 
-    // Crear nuevo conductor
+    // Crear conductor con nombre placeholder — se completará tras verificar OTP
+    const placeholderName = `Conductor_${cleanPhone.slice(-4)}`;
     const driver = new User({
-      name,
+      name: placeholderName,
       phone: cleanPhone,
-      email: email || undefined,
       userType: 'driver',
       phoneVerified: false,
-      driverProfile: {
-        status: 'pending_documents'
-      }
+      driverProfile: { status: 'pending_documents' }
     });
 
     // Enviar OTP usando Twilio Verify
     const smsResult = await sendOTP(cleanPhone);
-    
+
     if (smsResult.success) {
       console.log(`✅ OTP enviado a ${cleanPhone} vía Twilio Verify`);
-      console.log(`   Verification SID: ${smsResult.sid}`);
-      console.log(`   Status: ${smsResult.status}`);
-      console.log(`   Channel: ${smsResult.channel}`);
     } else if (smsResult.devMode) {
-      // Modo desarrollo: generar OTP local
       console.warn('⚠️ Modo desarrollo: generando OTP local');
       const otpCode = driver.generateOTP();
       console.log(`📱 OTP de desarrollo para ${cleanPhone}: ${otpCode}`);
@@ -99,12 +84,12 @@ router.post('/register-initial', async (req, res) => {
         details: smsResult.error
       });
     }
-    
+
     await driver.save();
     console.log('⏰ OTP expira en 10 minutos');
 
     res.json({
-      message: 'Conductor registrado. Verifica tu teléfono con el OTP.',
+      message: 'OTP enviado. Verifica tu teléfono.',
       userId: driver._id
     });
 
@@ -114,6 +99,163 @@ router.post('/register-initial', async (req, res) => {
       error: 'Error al registrar conductor',
       details: error.message
     });
+  }
+});
+
+// ============================================
+// COMPLETAR REGISTRO INICIAL (nombre + email + PIN)
+// ============================================
+
+/**
+ * POST /api/drivers/complete-initial-registration
+ * Actualiza el nombre y email del conductor tras verificar OTP.
+ * El PIN se guarda aparte con /set-driver-pin.
+ */
+router.post('/complete-initial-registration', async (req, res) => {
+  try {
+    const { userId, name, email } = req.body;
+
+    if (!userId || !name) {
+      return res.status(400).json({ error: 'userId y name son requeridos' });
+    }
+
+    const driver = await User.findById(userId);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    driver.name = name.trim();
+    if (email) driver.email = email.trim();
+
+    await driver.save();
+
+    console.log(`✅ Registro inicial completado para conductor ${userId} — nombre: ${name}`);
+
+    res.json({ message: 'Datos actualizados exitosamente' });
+  } catch (error) {
+    console.error('❌ Error en complete-initial-registration:', error);
+    res.status(500).json({ error: 'Error al guardar datos', details: error.message });
+  }
+});
+
+// ============================================
+// NUEVO FLUJO UNIFICADO: VERIFICAR TELÉFONO
+// ============================================
+
+/**
+ * POST /api/drivers/check-phone
+ * Verifica si un teléfono ya está registrado como conductor
+ * Responde: { exists, userId, name, hasPIN, status }
+ */
+router.post('/check-phone', async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ error: 'Teléfono requerido' });
+
+    const cleanPhone = phone.replace(/\s/g, '');
+    const driver = await User.findOne({ phone: cleanPhone, userType: 'driver' });
+
+    if (!driver) {
+      return res.json({ exists: false });
+    }
+
+    res.json({
+      exists: true,
+      userId: driver._id,
+      name: driver.name,
+      hasPIN: !!driver.driverPin,
+      status: driver.driverProfile?.status || 'pending_documents',
+    });
+  } catch (error) {
+    console.error('❌ Error en check-phone (driver):', error);
+    res.status(500).json({ error: 'Error al verificar teléfono', details: error.message });
+  }
+});
+
+// ============================================
+// NUEVO FLUJO: LOGIN CON PIN
+// ============================================
+
+/**
+ * POST /api/drivers/login-pin
+ * Autentica a un conductor existente con su PIN de 4 dígitos
+ */
+router.post('/login-pin', async (req, res) => {
+  try {
+    const { userId, pin } = req.body;
+    if (!userId || !pin) return res.status(400).json({ error: 'userId y pin son requeridos' });
+
+    const driver = await User.findById(userId);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    const isValid = await driver.compareDriverPin(pin);
+    if (!isValid) {
+      return res.status(401).json({ error: 'PIN incorrecto' });
+    }
+
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { id: driver._id, userType: 'driver' },
+      process.env.JWT_SECRET || 'desvare-secret-key-2024',
+      { expiresIn: '30d' }
+    );
+
+    console.log(`✅ Login con PIN exitoso para conductor ${driver._id}`);
+
+    res.json({
+      message: 'Login exitoso',
+      token,
+      user: {
+        _id: driver._id,
+        name: driver.name,
+        phone: driver.phone,
+        email: driver.email,
+        userType: driver.userType,
+        driverProfile: {
+          status: driver.driverProfile.status,
+          entityType: driver.driverProfile.entityType,
+          city: driver.driverProfile.city,
+          isOnline: driver.driverProfile.isOnline,
+          rating: driver.driverProfile.rating,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error en login-pin (driver):', error);
+    res.status(500).json({ error: 'Error al iniciar sesión', details: error.message });
+  }
+});
+
+// ============================================
+// NUEVO FLUJO: GUARDAR PIN DEL CONDUCTOR
+// ============================================
+
+/**
+ * POST /api/drivers/set-driver-pin
+ * Crea o actualiza el PIN de 4 dígitos del conductor
+ * Se usa después de verificar OTP (registro nuevo o recuperación)
+ */
+router.post('/set-driver-pin', async (req, res) => {
+  try {
+    const { userId, pin } = req.body;
+    if (!userId || !pin) return res.status(400).json({ error: 'userId y pin son requeridos' });
+    if (!/^\d{4}$/.test(pin)) return res.status(400).json({ error: 'El PIN debe ser de 4 dígitos numéricos' });
+
+    const driver = await User.findById(userId);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    await driver.setDriverPin(pin);
+    await driver.save();
+
+    console.log(`✅ PIN configurado para conductor ${userId}`);
+    res.json({ message: 'PIN configurado exitosamente' });
+  } catch (error) {
+    console.error('❌ Error en set-driver-pin:', error);
+    res.status(500).json({ error: 'Error al configurar PIN', details: error.message });
   }
 });
 
@@ -503,6 +645,12 @@ router.post('/set-capabilities', async (req, res) => {
         ...driver.driverProfile.specificCapabilities,
         ...specificCapabilities
       };
+    }
+
+    // Verificar si la documentación está completa (docs + capacidades)
+    if (driver.isDocumentationComplete()) {
+      driver.driverProfile.status = 'pending_review';
+      console.log(`✅ Documentación completa para conductor ${userId} - Cambiando a pending_review`);
     }
 
     await driver.save();

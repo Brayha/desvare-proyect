@@ -25,16 +25,22 @@ api.interceptors.request.use(
 
 // API de autenticación de conductores
 export const authAPI = {
-  // Registro inicial con OTP
+  // Nuevo flujo unificado teléfono → PIN
+  checkPhone: (data) => api.post('/api/drivers/check-phone', data),
+  loginDriverPin: (data) => api.post('/api/drivers/login-pin', data),
+  setDriverPin: (data) => api.post('/api/drivers/set-driver-pin', data),
+
+  // Registro inicial con OTP (solo teléfono — nombre/email se completan tras verificar OTP)
   registerDriverInitial: (data) => api.post('/api/drivers/register-initial', data),
+  completeInitialRegistration: (data) => api.post('/api/drivers/complete-initial-registration', data),
   verifyDriverOTP: (data) => api.post('/api/drivers/verify-otp', data),
   
-  // Login con OTP (para conductores existentes)
+  // Login con OTP (usado para recuperación de PIN y conductores sin PIN)
   loginDriverOTP: (data) => api.post('/api/drivers/login-otp', data),
   
   // Registro completo
   registerDriverComplete: (data) => api.post('/api/drivers/register-complete', data),
-  uploadDriverDocuments: (data) => api.post('/api/drivers/upload-documents', data), // Ahora envía JSON con base64
+  uploadDriverDocuments: (data) => api.post('/api/drivers/upload-documents', data),
   setDriverCapabilities: (data) => api.post('/api/drivers/set-capabilities', data),
   
   // Estado del conductor

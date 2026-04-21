@@ -35,6 +35,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+
+  // Clave de 4 dígitos para conductores (hash bcrypt)
+  driverPin: {
+    type: String,
+    default: null
+  },
   
   // Para DRIVERS - Email (opcional, usado para notificaciones)
   email: {
@@ -280,6 +286,19 @@ userSchema.methods.setClientPin = async function(pin) {
 userSchema.methods.compareClientPin = async function(pin) {
   if (!this.clientPin) return false;
   return require('bcryptjs').compare(pin, this.clientPin);
+};
+
+// ========================================
+// MÉTODOS PARA PIN DE CONDUCTORES
+// ========================================
+userSchema.methods.setDriverPin = async function(pin) {
+  const salt = await require('bcryptjs').genSalt(10);
+  this.driverPin = await require('bcryptjs').hash(pin, salt);
+};
+
+userSchema.methods.compareDriverPin = async function(pin) {
+  if (!this.driverPin) return false;
+  return require('bcryptjs').compare(pin, this.driverPin);
 };
 
 // ========================================
