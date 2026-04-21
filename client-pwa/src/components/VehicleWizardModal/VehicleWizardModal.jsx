@@ -100,11 +100,15 @@ const VehicleWizardModal = ({
   const currentStepInfo = STEPS[currentStep];
 
   // Funciones de carga - NO usar useCallback para evitar loops infinitos
+  // Categorías que no aplican para clientes (son vehículos de conductores)
+  const HIDDEN_CLIENT_CATEGORIES = ['GRUA_LIVIANA', 'GRUA_PESADA'];
+
   const loadCategories = async () => {
     try {
       setIsLoading(true);
       const response = await vehicleAPI.getCategories();
-      const categoriesData = response.data?.data || [];
+      const categoriesData = (response.data?.data || [])
+        .filter(cat => !HIDDEN_CLIENT_CATEGORIES.includes(cat.id));
       setCategories(categoriesData);
       console.log('✅ Categorías cargadas:', categoriesData.length);
     } catch (error) {
@@ -691,11 +695,29 @@ const VehicleWizardModal = ({
 
       case 'category':
         return (
-          <VehicleCategorySelector
-            categories={categories}
-            onSelect={handleSelectCategory}
-            selectedCategory={vehicleData.category}
-          />
+          <div className="wizard-category-wrapper">
+            <VehicleCategorySelector
+              categories={categories}
+              onSelect={handleSelectCategory}
+              selectedCategory={vehicleData.category}
+            />
+            {!userId && (
+              <div className="wizard-login-prompt">
+                <p className="wizard-login-prompt-text">
+                  ¿Ya registraste un vehículo antes?
+                </p>
+                <button
+                  className="wizard-login-prompt-btn"
+                  onClick={() => {
+                    console.log('🔐 Usuario quiere iniciar sesión → Abriendo modal de auth');
+                    setShowAuthModal(true);
+                  }}
+                >
+                  Iniciar sesión con mi cuenta
+                </button>
+              </div>
+            )}
+          </div>
         );
 
       case 'brand':
@@ -787,24 +809,9 @@ const VehicleWizardModal = ({
           </IonButtons>
           <IonTitle>{currentStepInfo.title}</IonTitle>
           <IonButtons slot="end">
-            {/* Botón "Ya tienes cuenta" si no está logueado */}
-            {!userId && currentStep === 0 ? (
-              <IonButton 
-                onClick={() => {
-                  console.log('🔐 Usuario quiere iniciar sesión → Abriendo modal de auth');
-                  setShowAuthModal(true);
-                }}
-                size="small"
-              >
-                <IonText style={{ fontSize: '13px', whiteSpace: 'nowrap' }}>
-                  ¿Ya tienes cuenta?
-                </IonText>
-              </IonButton>
-            ) : (
-              <IonText color="medium" style={{ fontSize: '14px', marginRight: '12px' }}>
-                {currentStep + 1}/{totalSteps}
-              </IonText>
-            )}
+            <IonText color="medium" style={{ fontSize: '14px', marginRight: '12px' }}>
+              {currentStep + 1}/{totalSteps}
+            </IonText>
           </IonButtons>
         </IonToolbar>
         <IonProgressBar value={progress / 100} color="primary" />

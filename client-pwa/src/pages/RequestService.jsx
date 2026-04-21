@@ -608,7 +608,17 @@ const RequestService = () => {
                 )}
 
                 {/* Botón de agregar vehículo - Solo si NO hay vehículo */}
-                {!vehicleData && (
+
+                <Button
+                  variant="primary"
+                  size="large"
+                  fullWidth
+                  onClick={handleOpenVehicleWizard}
+                >
+                  Agrega tu vehículo
+                </Button>
+
+                {/* {!vehicleData && (
                   <div
                     className="search-button"
                     onClick={handleOpenVehicleWizard}
@@ -622,7 +632,7 @@ const RequestService = () => {
                       <IonIcon icon={add} />
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* Card vehículo agregado - Solo si hay vehículo */}
                 {vehicleData?.vehicleSnapshot && (
