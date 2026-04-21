@@ -40,7 +40,11 @@ import logo from "../assets/img/Desvare.svg";
 const RequestService = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
-  const { user: currentUser, isLoggedIn, setShowNotificationPrompt } = useAuth();
+  const {
+    user: currentUser,
+    isLoggedIn,
+    setShowNotificationPrompt,
+  } = useAuth();
 
   // Geolocalización
   const {
@@ -90,7 +94,7 @@ const RequestService = () => {
       getAddressFromCoordinates(newOrigin.lng, newOrigin.lat).then(
         (address) => {
           setOrigin((prev) => ({ ...prev, address }));
-        }
+        },
       );
 
       showSuccess("✅ Ubicación obtenida correctamente");
@@ -108,65 +112,69 @@ const RequestService = () => {
 
   // ✅ Cargar datos previos del localStorage (cuando cliente cancela búsqueda)
   useEffect(() => {
-    const savedRequestData = localStorage.getItem('requestData');
-    const currentRequestId = localStorage.getItem('currentRequestId');
-    
+    const savedRequestData = localStorage.getItem("requestData");
+    const currentRequestId = localStorage.getItem("currentRequestId");
+
     if (savedRequestData) {
       try {
         const parsed = JSON.parse(savedRequestData);
-        console.log('🔄 Cargando datos previos desde localStorage:', parsed);
-        
+        console.log("🔄 Cargando datos previos desde localStorage:", parsed);
+
         // Cargar origen previo
         if (parsed.origin && !origin) {
           setOrigin({
             lat: parsed.origin.lat,
             lng: parsed.origin.lng,
-            address: parsed.origin.address
+            address: parsed.origin.address,
           });
-          console.log('✅ Origen cargado:', parsed.origin.address);
+          console.log("✅ Origen cargado:", parsed.origin.address);
         }
-        
+
         // Cargar destino previo
         if (parsed.destination && !destination) {
           setDestination({
             lat: parsed.destination.lat,
             lng: parsed.destination.lng,
-            address: parsed.destination.address
+            address: parsed.destination.address,
           });
-          console.log('✅ Destino cargado:', parsed.destination.address);
+          console.log("✅ Destino cargado:", parsed.destination.address);
         }
-        
+
         // Cargar información de ruta previa
         if (parsed.routeInfo && !routeInfo) {
           setRouteInfo(parsed.routeInfo);
-          console.log('✅ Ruta cargada:', parsed.routeInfo);
+          console.log("✅ Ruta cargada:", parsed.routeInfo);
         }
-        
+
         // Cargar vehículo previo (estructura completa)
         if (parsed.vehicleSnapshot && parsed.serviceDetails && !vehicleData) {
           setVehicleData({
             vehicleId: parsed.vehicleId, // Puede ser undefined si no existe
             vehicleSnapshot: parsed.vehicleSnapshot,
-            serviceDetails: parsed.serviceDetails
+            serviceDetails: parsed.serviceDetails,
           });
-          console.log('✅ Vehículo cargado:', {
+          console.log("✅ Vehículo cargado:", {
             vehicleId: parsed.vehicleId,
             marca: parsed.vehicleSnapshot.brand.name,
             modelo: parsed.vehicleSnapshot.model.name,
             placa: parsed.vehicleSnapshot.licensePlate,
-            problema: parsed.serviceDetails.problem
+            problema: parsed.serviceDetails.problem,
           });
         }
-        
+
         // ✅ Limpiar currentRequestId antiguo para evitar conflictos
         if (currentRequestId) {
-          localStorage.removeItem('currentRequestId');
-          console.log('🗑️ RequestId antiguo eliminado (usuario canceló búsqueda)');
+          localStorage.removeItem("currentRequestId");
+          console.log(
+            "🗑️ RequestId antiguo eliminado (usuario canceló búsqueda)",
+          );
         }
-        
-        showSuccess('📋 Datos previos cargados. Puedes editarlos y buscar nuevamente.');
+
+        showSuccess(
+          "📋 Datos previos cargados. Puedes editarlos y buscar nuevamente.",
+        );
       } catch (error) {
-        console.error('❌ Error al cargar datos previos:', error);
+        console.error("❌ Error al cargar datos previos:", error);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -368,7 +376,7 @@ const RequestService = () => {
           vehicleId: vehicleData.vehicleId,
           vehicleSnapshot: vehicleData.vehicleSnapshot,
           serviceDetails: vehicleData.serviceDetails,
-        })
+        }),
       );
 
       console.log("📡 Enviando evento Socket.IO a conductores...");
@@ -462,7 +470,7 @@ const RequestService = () => {
         vehicleId: vehicleData.vehicleId,
         vehicleSnapshot: vehicleData.vehicleSnapshot,
         serviceDetails: vehicleData.serviceDetails,
-      })
+      }),
     );
 
     // Guardar vehicleData por separado (para que RequestAuth pueda leerlo - compatibilidad)
@@ -608,16 +616,17 @@ const RequestService = () => {
                 )}
 
                 {/* Botón de agregar vehículo - Solo si NO hay vehículo */}
-
-                <Button
-                  variant="primary"
-                  size="large"
-                  fullWidth
-                  className="add-vehicle-button-blue"
-                  onClick={handleOpenVehicleWizard}
-                >
-                  Agrega tu vehículo
-                </Button>
+                {!vehicleData?.vehicleSnapshot && (
+                  <Button
+                    variant="primary"
+                    size="large"
+                    fullWidth
+                    className="add-vehicle-button-blue"
+                    onClick={handleOpenVehicleWizard}
+                  >
+                    Agrega tu vehículo
+                  </Button>
+                )}
 
                 {/* {!vehicleData && (
                   <div
@@ -645,7 +654,7 @@ const RequestService = () => {
                       <div className="vehicle-added-card-content-image-container">
                         <img
                           src={getVehicleImageFromVehicle(
-                            vehicleData.vehicleSnapshot
+                            vehicleData.vehicleSnapshot,
                           )}
                           alt={
                             vehicleData.vehicleSnapshot.category?.name ||
@@ -668,7 +677,6 @@ const RequestService = () => {
                         </div>
                         <Refresh size="20" color="#9CA3AF" variant="Linear" />
                       </div>
-
                     </div>
                     <div className="problem-card">
                       <h4>Problema</h4>
@@ -683,6 +691,7 @@ const RequestService = () => {
                     variant="primary"
                     size="large"
                     fullWidth
+                    className="add-vehicle-button-blue"
                     onClick={handleConfirmRoute}
                     disabled={!routeInfo || isSendingRequest}
                     loading={isSendingRequest}

@@ -104,17 +104,6 @@ const ServiceDetailsForm = ({
             rows={4}
           />
         </IonItem>
-        <div className="service-field-footer">
-          {errors.problem ? (
-            <IonText color="danger" className="service-error">
-              <p>{errors.problem}</p>
-            </IonText>
-          ) : (
-            <IonText className="service-helper">
-              <p>{data?.problem?.length || 0}/500 caracteres</p>
-            </IonText>
-          )}
-        </div>
       </div>
 
       {/* Sótano - Para MOTOS, AUTOS y CAMIONETAS */}

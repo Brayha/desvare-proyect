@@ -433,10 +433,6 @@ const VehicleWizardModal = ({
           break;
         }
         case 'service':
-          if (!serviceDetails.problem || serviceDetails.problem.trim().length < 10) {
-            showWarning('Describe el problema con más detalle (mín. 10 caracteres)');
-            return;
-          }
           // Validar sótano si aplica
           if (serviceDetails.basement?.isInBasement && !serviceDetails.basement?.level) {
             showWarning('Indica el nivel del sótano');
@@ -458,10 +454,6 @@ const VehicleWizardModal = ({
           // No validar aquí, el avance es automático al seleccionar
           break;
         case 'service':
-          if (!serviceDetails.problem || serviceDetails.problem.trim().length < 10) {
-            showWarning('Describe el problema con más detalle (mín. 10 caracteres)');
-            return;
-          }
           // Validar sótano si aplica
           if (serviceDetails.basement?.isInBasement && !serviceDetails.basement?.level) {
             showWarning('Indica el nivel del sótano');
