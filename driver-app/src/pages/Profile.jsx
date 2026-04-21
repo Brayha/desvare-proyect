@@ -51,6 +51,13 @@ const Profile = () => {
 
       if (response.ok) {
         setProfile(data.driver);
+      } else if (response.status === 404 || response.status === 401) {
+        // El usuario ya no existe en el backend o el token es inválido
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('hasSeenLocationModal');
+        socketService.disconnect();
+        history.replace('/login');
       } else {
         console.error("Error al cargar perfil:", data);
       }
