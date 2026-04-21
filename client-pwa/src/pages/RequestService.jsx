@@ -613,6 +613,7 @@ const RequestService = () => {
                   variant="primary"
                   size="large"
                   fullWidth
+                  className="add-vehicle-button-blue"
                   onClick={handleOpenVehicleWizard}
                 >
                   Agrega tu vehículo
