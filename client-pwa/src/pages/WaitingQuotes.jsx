@@ -478,28 +478,51 @@ const WaitingQuotes = () => {
   // 🧪 FIN EXPERIMENT-QUOTES
   // ============================================
 
-  // Interceptar el botón nativo "atrás" de Android para mostrar confirmación
+  // ─── Interceptar navegación "atrás" en todos los dispositivos ────────────────
+  // Cubre:
+  //   • Android APK  → botón/gesto nativo (ionBackButton)
+  //   • PWA Chrome/Firefox (Android + desktop) → botón ← del navegador (popstate)
+  //   • PWA Safari iOS → gesto swipe desde el borde + botón ← del navegador (popstate)
   useEffect(() => {
-    const handler = (ev) => {
-      ev.detail.register(10, () => {
-        presentAlert({
-          mode: 'ios',
-          header: '¿Cancelar búsqueda?',
-          message: 'Si regresas, tu solicitud será cancelada y los conductores dejarán de ver tu pedido.',
-          buttons: [
-            { text: 'Quedarme', role: 'cancel' },
-            {
-              text: 'Cancelar solicitud',
-              cssClass: 'alert-button-danger',
-              handler: handleCancelRequest,
-            },
-          ],
-        });
+    // Función compartida que muestra el diálogo de confirmación
+    const showCancelConfirm = () => {
+      presentAlert({
+        mode: 'ios',
+        header: '¿Cancelar búsqueda?',
+        message:
+          'Si regresas, tu solicitud será cancelada y los conductores dejarán de ver tu pedido.',
+        buttons: [
+          { text: 'Quedarme', role: 'cancel' },
+          {
+            text: 'Cancelar solicitud',
+            cssClass: 'alert-button-danger',
+            handler: handleCancelRequest,
+          },
+        ],
       });
     };
 
-    document.addEventListener('ionBackButton', handler);
-    return () => document.removeEventListener('ionBackButton', handler);
+    // 1) Android APK / Capacitor — botón o gesto nativo de retroceso
+    const ionHandler = (ev) => {
+      ev.detail.register(10, showCancelConfirm);
+    };
+    document.addEventListener('ionBackButton', ionHandler);
+
+    // 2) PWA en navegador (Chrome, Safari, Firefox) — botón ← del browser o swipe iOS
+    // Empujamos un estado "ficticio" para que el navegador tenga algo que deshacer,
+    // de modo que el popstate dispare en vez de salir de la página.
+    window.history.pushState({ waitingQuotes: true }, '');
+    const popstateHandler = () => {
+      // Volver a empujar el estado para "bloquear" la navegación nuevamente
+      window.history.pushState({ waitingQuotes: true }, '');
+      showCancelConfirm();
+    };
+    window.addEventListener('popstate', popstateHandler);
+
+    return () => {
+      document.removeEventListener('ionBackButton', ionHandler);
+      window.removeEventListener('popstate', popstateHandler);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presentAlert]);
 
