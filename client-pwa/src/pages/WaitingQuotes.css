@@ -416,3 +416,9 @@
 .info-card {
   animation: fadeIn 0.4s ease-out;
 }
+
+/* Botón rojo en el alert de cancelación */
+.alert-button-danger {
+  color: #ef4444 !important;
+  font-weight: 600 !important;
+}

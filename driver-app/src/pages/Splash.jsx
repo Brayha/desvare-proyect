@@ -44,21 +44,35 @@ const Splash = () => {
               return hasSeenOnboarding ? '/login' : '/onboarding';
             }
             const data = await response.json();
-            const status = data.driver?.status || userData.driverProfile?.status;
+            const newStatus = data.driver?.status;
+            const prevStatus = userData.driverProfile?.status;
+
+            // Sincronizar el status en localStorage para que la próxima apertura sea correcta
+            if (newStatus && newStatus !== prevStatus) {
+              const updatedUser = { ...userData };
+              if (updatedUser.driverProfile) updatedUser.driverProfile.status = newStatus;
+              localStorage.setItem('user', JSON.stringify(updatedUser));
+            }
+
+            // Si el conductor acaba de ser aprobado (transición a approved),
+            // limpiar permissionsConfigured para forzar siempre el flujo de permisos
+            if (prevStatus !== 'approved' && newStatus === 'approved') {
+              localStorage.removeItem('permissionsConfigured');
+            }
 
             // Enrutar según el estado actual del conductor (igual que navigateAfterAuth)
-            if (status === 'pending_documents') return '/complete-registration';
-            if (status === 'pending_review') return '/under-review';
-            if (status === 'rejected') return '/rejected';
-            if (status === 'approved') {
+            if (newStatus === 'pending_documents') return '/complete-registration';
+            if (newStatus === 'pending_review') return '/under-review';
+            if (newStatus === 'rejected') return '/rejected';
+            if (newStatus === 'approved') {
               // Si hay un servicio activo en curso, volver a él directamente
               const activeService = localStorage.getItem('activeService');
               if (activeService) return '/active-service';
-              // Si ya configuró permisos, ir a Home; si no, mostrar pantalla de permisos
+              // Si ya pasó por los permisos (flag seteado en PermissionsSetup), ir a Home
               const permissionsConfigured = localStorage.getItem('permissionsConfigured');
               return permissionsConfigured ? '/home' : '/permissions';
             }
-            // Status desconocido: ir a permisos (conductor nuevo aprobado sin flujo completo)
+            // Status desconocido: ir a permisos
             return '/permissions';
           } catch {
             // Error de red (sin conexión): usar status del localStorage para no bloquear al conductor

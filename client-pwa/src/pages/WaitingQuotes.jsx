@@ -478,6 +478,31 @@ const WaitingQuotes = () => {
   // 🧪 FIN EXPERIMENT-QUOTES
   // ============================================
 
+  // Interceptar el botón nativo "atrás" de Android para mostrar confirmación
+  useEffect(() => {
+    const handler = (ev) => {
+      ev.detail.register(10, () => {
+        presentAlert({
+          mode: 'ios',
+          header: '¿Cancelar búsqueda?',
+          message: 'Si regresas, tu solicitud será cancelada y los conductores dejarán de ver tu pedido.',
+          buttons: [
+            { text: 'Quedarme', role: 'cancel' },
+            {
+              text: 'Cancelar solicitud',
+              cssClass: 'alert-button-danger',
+              handler: handleCancelRequest,
+            },
+          ],
+        });
+      });
+    };
+
+    document.addEventListener('ionBackButton', handler);
+    return () => document.removeEventListener('ionBackButton', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presentAlert]);
+
   const handleCancelRequest = () => {
     console.log("🚫 Cancelando solicitud...");
 
