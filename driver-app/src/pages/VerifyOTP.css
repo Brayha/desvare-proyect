@@ -307,27 +307,29 @@
 .verify-otp-text-input {
   width: 100%;
   padding: 14px 16px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid #e5e7eb;
   border-radius: 12px;
   font-size: 16px;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.12);
+  color: #111827;
+  background: #ffffff;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
   margin-bottom: 16px;
+  font-family: var(--font-family, inherit);
 }
 
 .verify-otp-text-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: #9ca3af;
 }
 
 .verify-otp-text-input:focus {
-  border-color: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  border-color: var(--desvare-primary, #0066ff);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
 }
 
 .verify-otp-text-input:disabled {
   opacity: 0.6;
+  background: #f3f4f6;
 }
 

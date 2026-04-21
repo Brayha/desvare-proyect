@@ -36,20 +36,39 @@ const Splash = () => {
 
         if (userData.userType === 'driver') {
           try {
-            // Verificar que el conductor sigue existiendo en el backend
+            // Verificar que el conductor sigue existiendo en el backend y obtener su status actual
             const response = await fetch(`${API_URL}/api/drivers/profile/${userData._id}`);
             if (response.status === 404 || response.status === 401) {
               // Sesión fantasma: el usuario fue eliminado o el token es inválido
               clearSession();
               return hasSeenOnboarding ? '/login' : '/onboarding';
             }
-            // Sesión válida → ir a Home o al servicio activo
-            const activeService = localStorage.getItem('activeService');
-            return activeService ? '/active-service' : '/home';
+            const data = await response.json();
+            const status = data.driver?.status || userData.driverProfile?.status;
+
+            // Enrutar según el estado actual del conductor (igual que navigateAfterAuth)
+            if (status === 'pending_documents') return '/complete-registration';
+            if (status === 'pending_review') return '/under-review';
+            if (status === 'rejected') return '/rejected';
+            if (status === 'approved') {
+              // Si hay un servicio activo en curso, volver a él directamente
+              const activeService = localStorage.getItem('activeService');
+              if (activeService) return '/active-service';
+              // Si ya configuró permisos, ir a Home; si no, mostrar pantalla de permisos
+              const permissionsConfigured = localStorage.getItem('permissionsConfigured');
+              return permissionsConfigured ? '/home' : '/permissions';
+            }
+            // Status desconocido: ir a permisos (conductor nuevo aprobado sin flujo completo)
+            return '/permissions';
           } catch {
-            // Error de red (sin conexión): confiar en localStorage y dejar entrar
+            // Error de red (sin conexión): usar status del localStorage para no bloquear al conductor
+            const status = userData.driverProfile?.status;
+            if (status === 'pending_documents') return '/complete-registration';
+            if (status === 'pending_review') return '/under-review';
+            if (status === 'rejected') return '/rejected';
             const activeService = localStorage.getItem('activeService');
-            return activeService ? '/active-service' : '/home';
+            if (activeService) return '/active-service';
+            return '/home';
           }
         } else {
           // No es conductor

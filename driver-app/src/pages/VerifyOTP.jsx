@@ -295,7 +295,7 @@ const VerifyOTP = () => {
         <IonContent className="verify-otp-content">
           <div className="verify-otp-container">
             <button className="verify-otp-back" onClick={handleBack} disabled={isLoading}>
-              <ArrowLeft size="24" color="white" />
+              <ArrowLeft size="24" color="#374151" />
             </button>
             <div className="verify-otp-icon">
               <Lock size="64" color="white" variant="Bulk" />
@@ -339,7 +339,7 @@ const VerifyOTP = () => {
         <IonContent className="verify-otp-content">
           <div className="verify-otp-container">
             <button className="verify-otp-back" onClick={handleBack} disabled={isLoading}>
-              <ArrowLeft size="24" color="white" />
+              <ArrowLeft size="24" color="#374151" />
             </button>
             <div className="verify-otp-icon">
               <Lock size="64" color="white" variant="Bulk" />
@@ -391,7 +391,7 @@ const VerifyOTP = () => {
         <IonContent className="verify-otp-content">
           <div className="verify-otp-container">
             <button className="verify-otp-back" onClick={handleBack} disabled={isLoading}>
-              <ArrowLeft size="24" color="white" />
+              <ArrowLeft size="24" color="#374151" />
             </button>
             <div className="verify-otp-icon">
               <Lock size="64" color="white" variant="Bulk" />
@@ -427,7 +427,7 @@ const VerifyOTP = () => {
         <IonContent className="verify-otp-content">
           <div className="verify-otp-container">
             <button className="verify-otp-back" onClick={handleBack} disabled={isLoading}>
-              <ArrowLeft size="24" color="white" />
+              <ArrowLeft size="24" color="#374151" />
             </button>
             <div className="verify-otp-icon">
               <Lock size="64" color="white" variant="Bulk" />
