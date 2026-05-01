@@ -68,6 +68,11 @@ router.post('/register-initial', async (req, res) => {
       driverProfile: { status: 'pending_documents' }
     });
 
+    // Guardar ANTES de enviar el OTP para evitar el caso donde el SMS llega
+    // pero el save falla (el usuario ve error aunque recibió el código).
+    await driver.save();
+    console.log(`✅ Conductor placeholder guardado: ${driver._id}`);
+
     // Enviar OTP usando Twilio Verify
     const smsResult = await sendOTP(cleanPhone);
 
@@ -76,8 +81,11 @@ router.post('/register-initial', async (req, res) => {
     } else if (smsResult.devMode) {
       console.warn('⚠️ Modo desarrollo: generando OTP local');
       const otpCode = driver.generateOTP();
+      await driver.save();
       console.log(`📱 OTP de desarrollo para ${cleanPhone}: ${otpCode}`);
     } else {
+      // OTP falló: eliminar el placeholder para que el usuario pueda reintentar
+      await User.deleteOne({ _id: driver._id });
       console.error(`❌ Error enviando OTP: ${smsResult.error}`);
       return res.status(500).json({
         error: 'Error al enviar código de verificación',
@@ -85,7 +93,6 @@ router.post('/register-initial', async (req, res) => {
       });
     }
 
-    await driver.save();
     console.log('⏰ OTP expira en 10 minutos');
 
     res.json({

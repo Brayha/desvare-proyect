@@ -115,21 +115,20 @@ const PermissionsSetup = () => {
       const perms = await checkBasePermissions();
 
       if (perms.location && perms.notifications) {
-        // Si es Android, verificar si la batería ya está exenta también
+        // Si es Android, verificar también si la batería ya está exenta
         if (isAndroid) {
           try {
             const { isIgnoring } = await LocationTracking.checkBatteryOptimization();
             if (!isIgnoring) {
-              // Loc + notif OK pero batería pendiente → ir al slide de batería (slide 2)
-              // Avanzar directo al último slide usando slideNext x2
-              localStorage.setItem('permissionsConfigured', 'true');
-              history.replace('/home');
+              // Loc + notif OK pero batería pendiente → dejar que muestre los slides
+              // (el usuario llega al slide de batería al avanzar normalmente)
               return;
             }
           } catch {
-            // Plugin no disponible: ignorar y continuar a Home
+            // Plugin no disponible: asumir que todo está bien y pasar a Home
           }
         }
+        // Todos los permisos necesarios están concedidos → ir a Home directamente
         localStorage.setItem('permissionsConfigured', 'true');
         history.replace('/home');
       }

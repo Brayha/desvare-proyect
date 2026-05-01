@@ -123,8 +123,32 @@ mongoose.connect(process.env.MONGODB_URI, {
   serverSelectionTimeoutMS: 30000, // 30 segundos para seleccionar servidor
   socketTimeoutMS: 45000, // 45 segundos para operaciones de socket
 })
-  .then(() => {
+  .then(async () => {
     console.log('✅ Conectado a MongoDB Atlas');
+
+    // ─── Limpiar índice obsoleto phone_1 ───────────────────────────────────
+    // El esquema original tenía unique:true en el campo phone (índice simple).
+    // Ahora usamos un índice compuesto { phone, userType } para permitir que
+    // el mismo número se registre como cliente Y como conductor.
+    // MongoDB no elimina índices viejos automáticamente, hay que hacerlo manual.
+    try {
+      const User = require('./models/User');
+      const indexes = await User.collection.indexes();
+      const obsoleteIndex = indexes.find(
+        (idx) => idx.name === 'phone_1' && idx.unique === true
+      );
+      if (obsoleteIndex) {
+        await User.collection.dropIndex('phone_1');
+        console.log('✅ Índice obsoleto phone_1 eliminado — mismo teléfono puede ser cliente y conductor');
+      }
+      // Asegurar que el índice compuesto correcto existe
+      await User.syncIndexes();
+      console.log('✅ Índices de usuarios sincronizados correctamente');
+    } catch (indexErr) {
+      console.warn('⚠️ No se pudo limpiar índice phone_1 (puede que ya no exista):', indexErr.message);
+    }
+    // ───────────────────────────────────────────────────────────────────────
+
     // Iniciar verificador de expiración cada 30 minutos
     startExpirationChecker(30);
   })
