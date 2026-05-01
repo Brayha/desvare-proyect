@@ -1,128 +1,139 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IonPage, IonContent, IonButton } from '@ionic/react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination } from 'swiper/modules';
-import { ArrowRight2 } from 'iconsax-react';
+import { IonPage, IonContent } from '@ionic/react';
 
-// Importar imágenes SVG del onboarding
-import onboarding1 from '../assets/img/onboarding-1.svg';
-import onboarding2 from '../assets/img/onboarding-2.svg';
-import onboarding3 from '../assets/img/onboarding-3.svg';
-import onboarding4 from '../assets/img/onboarding-4.svg';
+import isotipoSvg from '../assets/img/onboarding/isotipo.svg';
+import slide1 from '../assets/img/onboarding/slide-1.png';
+import slide2 from '../assets/img/onboarding/slide-2.png';
+import slide3 from '../assets/img/onboarding/slide-3.png';
+import slide4 from '../assets/img/onboarding/slide-4.png';
 
-// Swiper styles
-import 'swiper/css';
-import 'swiper/css/pagination';
 import './Onboarding.css';
+
+const SLIDE_DURATION = 5000;
+
+const SLIDES = [
+  {
+    image: slide1,
+    title: 'Recibe servicios de grúa en tu zona',
+    subtitle: 'Recibe solicitudes en tiempo real y decide a cuáles quieres cotizar.',
+  },
+  {
+    image: slide2,
+    title: 'Tú pones el precio',
+    subtitle: 'Revisa los detalles del servicio y envía tu cotización del rescate.',
+  },
+  {
+    image: slide3,
+    title: 'Servicio confirmado, cliente asignado',
+    subtitle: 'Cuando el cliente acepta tu cotización, te mostramos la ubicación exacta y los datos de contacto.',
+  },
+  {
+    image: slide4,
+    title: 'Construye tu reputación',
+    subtitle: 'Al finalizar el servicio, el cliente te califica. Un buen puntaje te da más visibilidad y más solicitudes.',
+  },
+];
 
 const Onboarding = () => {
   const history = useHistory();
-  const [swiper, setSwiper] = useState(null);
-  const [isLastSlide, setIsLastSlide] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [imgKey, setImgKey] = useState(0);
+  const timerRef = useRef(null);
+  const isLast = currentIndex === SLIDES.length - 1;
 
-  const slides = [
-    {
-      id: 1,
-      title: 'Recibe servicios de grúa en tu zona',
-      subtitle: 'Recibe solicitudes en tiempo real y decide a cuáles quieres cotizar.',
-      image: onboarding1,
-      color: '#0066FF'
-    },
-    {
-      id: 2,
-      title: 'Tú pones el precio',
-      subtitle: 'Revisa los detalles del servicio y envía tu cotización del rescate.',
-      image: onboarding2,
-      color: '#00C853'
-    },
-    {
-      id: 3,
-      title: 'Servicio confirmado, cliente asignado',
-      subtitle: 'Cuando el cliente acepta tu cotización, te mostramos la ubicación exacta y los datos de contacto.',
-      image: onboarding3,
-      color: '#FF6B00'
-    },
-    {
-      id: 4,
-      title: 'Construye tu reputación',
-      subtitle: 'Al finalizar el servicio, el cliente te califica, un buen puntaje te da más visibilidad y más solicitudes.',
-      image: onboarding4,
-      color: '#9C27B0'
-    }
-  ];
-
-  const handleSlideChange = (swiper) => {
-    setIsLastSlide(swiper.isEnd);
-  };
-
-  const handleNext = () => {
-    if (isLastSlide) {
-      // Marcar que ya vio el onboarding
-      localStorage.setItem('hasSeenOnboarding', 'true');
-      history.replace('/login');
-    } else if (swiper) {
-      swiper.slideNext();
-    }
-  };
-
-  const handleSkip = () => {
+  const finishOnboarding = useCallback(() => {
     localStorage.setItem('hasSeenOnboarding', 'true');
     history.replace('/login');
+  }, [history]);
+
+  const advanceTo = useCallback((nextIndex) => {
+    if (nextIndex >= SLIDES.length) {
+      finishOnboarding();
+      return;
+    }
+    if (nextIndex < 0) return;
+    clearTimeout(timerRef.current);
+    setCurrentIndex(nextIndex);
+    setImgKey((k) => k + 1);
+  }, [finishOnboarding]);
+
+  // Auto-avance (se pausa en el último slide para que el usuario vea el botón)
+  useEffect(() => {
+    if (isLast) return;
+    timerRef.current = setTimeout(() => advanceTo(currentIndex + 1), SLIDE_DURATION);
+    return () => clearTimeout(timerRef.current);
+  }, [currentIndex, isLast, advanceTo]);
+
+  const handleTap = (e) => {
+    const x = e.clientX;
+    const half = window.innerWidth / 2;
+    if (x < half) {
+      advanceTo(currentIndex - 1);
+    } else {
+      advanceTo(currentIndex + 1);
+    }
   };
+
+  const handleIngresar = (e) => {
+    e.stopPropagation();
+    finishOnboarding();
+  };
+
+  const slide = SLIDES[currentIndex];
 
   return (
     <IonPage>
-      <IonContent className="onboarding-content">
-        {/* Botón Skip */}
-        {!isLastSlide && (
-          <div className="onboarding-skip">
-            <button className="skip-button" onClick={handleSkip}>
-              Omitir
-            </button>
+      <IonContent className="stories-content" scrollY={false}>
+        <div className="stories-container" onClick={handleTap}>
+
+          {/* Imagen de fondo con fade al cambiar */}
+          <img
+            key={imgKey}
+            src={slide.image}
+            alt={slide.title}
+            className="stories-bg"
+          />
+
+          {/* Degradado oscuro */}
+          <div className="stories-overlay" />
+
+          {/* Parte superior: barras + isotipo */}
+          <div className="stories-top">
+            <div className="stories-bars">
+              {SLIDES.map((_, i) => (
+                <div key={i} className="stories-bar-track">
+                  <div
+                    className={`stories-bar-fill ${
+                      i < currentIndex
+                        ? 'stories-bar-done'
+                        : i === currentIndex
+                        ? 'stories-bar-active'
+                        : ''
+                    }`}
+                    style={
+                      i === currentIndex
+                        ? { animationDuration: `${SLIDE_DURATION}ms` }
+                        : {}
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+            <img src={isotipoSvg} alt="Desvare" className="stories-isotipo" />
           </div>
-        )}
 
-        {/* Swiper */}
-        <Swiper
-          modules={[Pagination]}
-          pagination={{
-            clickable: true,
-            dynamicBullets: false,
-          }}
-          onSwiper={setSwiper}
-          onSlideChange={handleSlideChange}
-          className="onboarding-swiper"
-        >
-          {slides.map((slide) => (
-            <SwiperSlide key={slide.id}>
-              <div className="slide-content">
-                {/* Imagen SVG */}
-                <div
-                  className="slide-image"
-                >
-                  <img src={slide.image} alt={slide.title} className="slide-svg" />
-                </div>
+          {/* Parte inferior: texto + botón */}
+          <div className="stories-bottom">
+            <h1 className="stories-title">{slide.title}</h1>
+            <p className="stories-subtitle">{slide.subtitle}</p>
+            {isLast && (
+              <button className="stories-cta" onClick={handleIngresar}>
+                Ingresar
+              </button>
+            )}
+          </div>
 
-                {/* Texto */}
-                <div className="slide-text">
-                  <h1 className="slide-title">{slide.title}</h1>
-                  <p className="slide-subtitle">{slide.subtitle}</p>
-                </div>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        {/* Botón de acción */}
-        <div className="onboarding-footer">
-          <button
-            expand="block"
-            className="onboarding-button"
-            onClick={handleNext}
-          >
-            {isLastSlide ? 'Comenzar' : 'Siguiente'}
-          </button>
         </div>
       </IonContent>
     </IonPage>
@@ -130,4 +141,3 @@ const Onboarding = () => {
 };
 
 export default Onboarding;
-

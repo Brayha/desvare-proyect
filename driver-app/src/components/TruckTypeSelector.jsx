@@ -4,35 +4,50 @@ import { Truck } from 'iconsax-react';
 import './TruckTypeSelector.css';
 
 /**
- * Componente para seleccionar el tipo de grúa (Liviana o Pesada)
+ * Componente para seleccionar el tipo de grúa
+ * 3 categorías basadas en el mercado colombiano:
+ *  - GRUA_MOTO:    furgones y pickups pequeños para motos
+ *  - GRUA_LIVIANA: camiones medianos para autos y camionetas
+ *  - GRUA_PESADA:  camiones grandes para camiones, buses y tractomulas
  */
 const TruckTypeSelector = ({ selectedType, onSelect, error }) => {
   const truckTypes = [
     {
+      id: 'GRUA_MOTO',
+      name: 'Grúa para Moto',
+      icon: '🛵',
+      description: 'Furgones o pickups pequeños adaptados para transportar motos',
+      examples: 'Ej: Suzuki Carry, Kia Bongo, Hyundai H100 Porter, DFSK, Chevrolet N300',
+      canPickup: 'Carga: Motos y ciclomotores',
+      badge: 'Liviana',
+    },
+    {
       id: 'GRUA_LIVIANA',
       name: 'Grúa Liviana',
       icon: '🚙',
-      description: 'Camionetas, pickups y vehículos pequeños modificados',
-      examples: 'Ej: Toyota Hilux, Chevrolet D-MAX, Nissan Frontier',
-      canPickup: 'Puede cargar: Motos, Autos pequeños'
+      description: 'Camiones medianos con planchón o gancho para autos y camionetas',
+      examples: 'Ej: Chevrolet NPR, Isuzu NQR, Hino 300, Mitsubishi Canter, Foton Aumark',
+      canPickup: 'Carga: Autos y camionetas',
+      badge: 'Mediana',
     },
     {
       id: 'GRUA_PESADA',
       name: 'Grúa Pesada',
       icon: '🚚',
-      description: 'Camiones, cabezotes y vehículos de carga modificados',
-      examples: 'Ej: Chevrolet NPR, Hino, Mitsubishi Canter, Isuzu',
-      canPickup: 'Puede cargar: Autos, Camionetas, Camiones, Buses'
-    }
+      description: 'Camiones grandes o cabezotes para recuperación de vehículos pesados',
+      examples: 'Ej: Hino 500/700, Volvo FH, Kenworth T440, Mercedes-Benz Actros, Scania',
+      canPickup: 'Carga: Camiones, buses y tractomulas',
+      badge: 'Pesada',
+    },
   ];
 
   return (
     <div className="truck-type-selector">
       <div className="selector-header">
-        <Truck size="32" color="#667eea" variant="Bold" />
+        <Truck size="32" color="#0055ff" variant="Bold" />
         <IonText>
           <h2>¿Qué tipo de grúa tienes?</h2>
-          <p>Selecciona el tipo de vehículo base de tu grúa</p>
+          <p>Selecciona según el vehículo base que usas para trabajar</p>
         </IonText>
       </div>
 
@@ -45,7 +60,10 @@ const TruckTypeSelector = ({ selectedType, onSelect, error }) => {
           >
             <div className="truck-type-icon">{type.icon}</div>
             <div className="truck-type-content">
-              <h3>{type.name}</h3>
+              <div className="truck-type-name-row">
+                <h3>{type.name}</h3>
+                <span className="truck-type-badge">{type.badge}</span>
+              </div>
               <p className="truck-type-description">{type.description}</p>
               <p className="truck-type-examples">{type.examples}</p>
               <p className="truck-type-capacity">{type.canPickup}</p>
@@ -67,4 +85,3 @@ const TruckTypeSelector = ({ selectedType, onSelect, error }) => {
 };
 
 export default TruckTypeSelector;
-

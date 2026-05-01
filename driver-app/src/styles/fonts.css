@@ -1,50 +1,44 @@
 /**
  * Fuentes Gilroy - Tipografía principal de Desvare
- * Pesos disponibles: Light (300), Regular (400), Medium (500), Bold (700), Heavy (900)
- * 
- * Uso:
- * font-family: 'Gilroy', sans-serif;
- * font-weight: 300 | 400 | 500 | 700 | 900;
- * 
- * Nota: Las rutas usan /shared/ que Vite resuelve desde la raíz del proyecto
+ * Archivos ubicados en /public/fonts/ para ser servidos directamente
  */
 
 @font-face {
   font-family: 'Gilroy';
   font-style: normal;
-  font-weight: 300; /* Light */
-  src: url('/shared/src/gilroy-bold-webfont/Gilroy-Light.woff') format('woff');
-  font-display: swap; /* Mejora el rendimiento - muestra fallback mientras carga */
-}
-
-@font-face {
-  font-family: 'Gilroy';
-  font-style: normal;
-  font-weight: 400; /* Regular */
-  src: url('/shared/src/gilroy-bold-webfont/Gilroy-Regular.woff') format('woff');
+  font-weight: 300;
+  src: url('/fonts/Gilroy-Light.woff') format('woff');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Gilroy';
   font-style: normal;
-  font-weight: 500; /* Medium */
-  src: url('/shared/src/gilroy-bold-webfont/Gilroy-Medium.woff') format('woff');
+  font-weight: 400;
+  src: url('/fonts/Gilroy-Regular.woff') format('woff');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Gilroy';
   font-style: normal;
-  font-weight: 700; /* Bold */
-  src: url('/shared/src/gilroy-bold-webfont/Gilroy-Bold.woff') format('woff');
+  font-weight: 500;
+  src: url('/fonts/Gilroy-Medium.woff') format('woff');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Gilroy';
   font-style: normal;
-  font-weight: 900; /* Heavy/Black */
-  src: url('/shared/src/gilroy-bold-webfont/Gilroy-Heavy.woff') format('woff');
+  font-weight: 700;
+  src: url('/fonts/Gilroy-Bold.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gilroy';
+  font-style: normal;
+  font-weight: 900;
+  src: url('/fonts/Gilroy-Heavy.woff') format('woff');
   font-display: swap;
 }

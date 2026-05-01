@@ -12,4 +12,5 @@ export default defineConfig({
     host: '0.0.0.0', // Permite acceso desde red local
     port: 5175,
   },
+  assetsInclude: ['**/*.woff', '**/*.woff2'],
 })

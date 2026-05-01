@@ -1,157 +1,41 @@
 /* ============================================
-   ONBOARDING
+   ONBOARDING — Estilo Stories
    ============================================ */
 
-.onboarding-content {
-  --background: #ffffff;
+.stories-content {
+  --background: #000;
+  --overflow: hidden;
 }
 
-/* Skip Button */
-.onboarding-skip {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 10;
-}
-
-.skip-button {
-  background: transparent;
-  border: none;
-  color: #666;
-  font-size: 16px;
-  font-weight: 500;
-  padding: 8px 16px;
+/* ─── Contenedor principal ─── */
+.stories-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #000;
   cursor: pointer;
-  transition: all 0.3s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.skip-button:active {
-  transform: scale(0.95);
-  color: #0066ff;
-}
-
-/* Swiper Container */
-.onboarding-swiper {
-  height: calc(100vh - 120px);
-  padding: 60px 0 0 0;
-}
-
-/* Pagination personalizada - Posicionada arriba */
-.onboarding-swiper .swiper-pagination {
-  top: 30px !important;
-  bottom: auto !important;
-}
-
-.onboarding-swiper .swiper-pagination-bullet {
-  width: 8px;
-  height: 8px;
-  background: #d1d5db;
-  opacity: 1;
-  margin: 0 6px;
-  transition: all 0.3s ease;
-}
-
-.onboarding-swiper .swiper-pagination-bullet-active {
-  width: 24px;
-  border-radius: 4px;
-  background: #0066ff;
-}
-
-/* ============================================
-   SLIDE CONTENT
-   ============================================ */
-
-.slide-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 32px;
-  height: 100%;
-  gap: 48px;
-}
-
-/* Image */
-.slide-image {
-  width: 80%;
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeInScale 0.6s ease-out;
-  padding: 20px;
-}
-
-.slide-svg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  animation: bounce 2s ease-in-out infinite;
-}
-
-/* Text */
-.slide-text {
-  text-align: center;
-  max-width: 400px;
-  animation: fadeInUp 0.6s ease-out 0.2s both;
-}
-
-.slide-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 16px 0;
-  line-height: 1.2;
-}
-
-.slide-subtitle {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--desvare-secondary);
-  margin: 0;
-  line-height: 1.6;
-}
-
-/* ============================================
-   FOOTER
-   ============================================ */
-
-.onboarding-footer {
+/* ─── Imagen de fondo ─── */
+.stories-bg {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 24px 32px 32px;
-  background: white;
-  z-index: 5;
-}
-
-.onboarding-button {
-  border-radius: 15px;
-  border: 1px solid rgba(34, 61, 98, 0.2);
-  background: var(--desvare-primary);
-  display: flex;
-  padding: 15px;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  align-self: stretch;
-  color: white;
-  font-size: 16px;
-  font-weight: 700;
-  text-transform: none;
-  letter-spacing: 0;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  animation: storiesFade 0.45s ease-in-out;
 }
 
-/* ============================================
-   ANIMACIONES
-   ============================================ */
-
-@keyframes fadeInScale {
+@keyframes storiesFade {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(1.04);
   }
   to {
     opacity: 1;
@@ -159,68 +43,129 @@
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ─── Degradado oscuro ─── */
+.stories-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0) 22%,
+    rgba(0, 0, 0, 0) 48%,
+    rgba(0, 0, 0, 0.55) 68%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
+  pointer-events: none;
 }
 
-@keyframes bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+/* ─── Parte superior ─── */
+.stories-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: max(52px, calc(env(safe-area-inset-top) + 16px)) 16px 0;
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-
-@media (max-width: 375px) {
-  .slide-image {
-    width: 160px;
-    height: 160px;
-  }
-
-  .slide-svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .slide-title {
-    font-size: 24px;
-  }
-
-  .slide-subtitle {
-    font-size: 15px;
-  }
-
-  .onboarding-footer {
-    padding: 20px 24px 24px;
-  }
+/* Barras de progreso */
+.stories-bars {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 16px;
 }
 
+.stories-bar-track {
+  flex: 1;
+  height: 2.5px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stories-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #fff;
+  border-radius: 2px;
+}
+
+.stories-bar-done {
+  width: 100%;
+}
+
+.stories-bar-active {
+  animation: barProgress linear forwards;
+}
+
+@keyframes barProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* Isotipo */
+.stories-isotipo {
+  height: 26px;
+  width: auto;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+/* ─── Parte inferior ─── */
+.stories-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 24px max(48px, calc(env(safe-area-inset-bottom) + 32px));
+  z-index: 10;
+}
+
+.stories-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 10px;
+  line-height: 1.25;
+}
+
+.stories-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0 0 24px;
+  line-height: 1.65;
+}
+
+/* Botón "Ingresar" — solo último slide */
+.stories-cta {
+  display: block;
+  width: 100%;
+  height: 52px;
+  background: #fff;
+  color: #111827;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: opacity 0.18s;
+  animation: storiesFade 0.35s ease-out;
+}
+
+.stories-cta:active {
+  opacity: 0.82;
+}
+
+/* ─── Responsive ─── */
 @media (max-height: 667px) {
-  .slide-content {
-    gap: 32px;
-    padding: 20px 32px;
+  .stories-title {
+    font-size: 22px;
   }
 
-  .slide-image {
-    width: 160px;
-    height: 160px;
-  }
-
-  .slide-svg {
-    width: 100%;
-    height: 100%;
+  .stories-subtitle {
+    font-size: 13px;
   }
 }

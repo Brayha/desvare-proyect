@@ -69,11 +69,29 @@
   gap: 6px;
 }
 
+.truck-type-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .truck-type-content h3 {
   font-size: 18px;
   font-weight: 700;
   color: #1f2937;
   margin: 0;
+}
+
+.truck-type-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--desvare-primary);
+  background: rgba(0, 85, 255, 0.08);
+  border: 1px solid rgba(0, 85, 255, 0.2);
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
 }
 
 .truck-type-description {
@@ -104,7 +122,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #667eea;
+  background: var(--desvare-primary);
   color: white;
   display: flex;
   align-items: center;

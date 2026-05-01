@@ -93,12 +93,12 @@
     {
       "id": "GRUA_LIVIANA",
       "name": "Grúa Liviana",
-      "descripcion": "Camionetas, pickups y vehículos pequeños modificados como grúas",
+      "descripcion": "Planchones y ganchos para autos, camionetas y vehículos medianos",
       "icon": "🚙",
-      "order": 6,
+      "order": 7,
       "canPickup": [
-        "MOTOS",
-        "AUTOS"
+        "AUTOS",
+        "CAMIONETAS"
       ]
     },
     {
@@ -106,12 +106,22 @@
       "name": "Grúa Pesada",
       "descripcion": "Camiones, cabezotes y vehículos de carga modificados como grúas",
       "icon": "🚚",
-      "order": 7,
+      "order": 8,
       "canPickup": [
         "AUTOS",
         "CAMIONETAS",
         "CAMIONES",
         "BUSES"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO",
+      "name": "Grúa para Moto",
+      "descripcion": "Vehículos pequeños y furgones adaptados para transportar motos",
+      "icon": "🛵",
+      "order": 6,
+      "canPickup": [
+        "MOTOS"
       ]
     }
   ],
@@ -1517,6 +1527,174 @@
       ],
       "country": "Corea del Sur",
       "logo_url": null
+    },
+    {
+      "id": "GRUA_MOTO_SUZUKI",
+      "name": "Suzuki",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_KIA",
+      "name": "Kia",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_HYUNDAI",
+      "name": "Hyundai",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_JMC",
+      "name": "JMC",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_DFSK",
+      "name": "DFSK",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_RENAULT",
+      "name": "Renault",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_CHEVROLET",
+      "name": "Chevrolet",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_JAC",
+      "name": "JAC",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_TOYOTA",
+      "name": "Toyota",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_NISSAN",
+      "name": "Nissan",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_FORD",
+      "name": "Ford",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_MAZDA",
+      "name": "Mazda",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_MITSUBISHI",
+      "name": "Mitsubishi",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_MOTO_GREAT_WALL",
+      "name": "Great Wall",
+      "categories": [
+        "GRUA_MOTO"
+      ]
+    },
+    {
+      "id": "GRUA_PESADA_MAN",
+      "name": "MAN",
+      "categories": [
+        "GRUA_PESADA"
+      ]
+    },
+    {
+      "id": "GRUA_PESADA_UD_TRUCKS",
+      "name": "UD Trucks",
+      "categories": [
+        "GRUA_PESADA"
+      ]
+    },
+    {
+      "id": "GRUA_PESADA_MACK",
+      "name": "Mack",
+      "categories": [
+        "GRUA_PESADA"
+      ]
+    },
+    {
+      "id": "GRUA_PESADA_TATA",
+      "name": "Tata",
+      "categories": [
+        "GRUA_PESADA"
+      ]
+    },
+    {
+      "id": "GRUA_PESADA_JMC",
+      "name": "JMC",
+      "categories": [
+        "GRUA_PESADA"
+      ]
+    },
+    {
+      "id": "GRUA_PESADA_DAF",
+      "name": "DAF",
+      "categories": [
+        "GRUA_PESADA"
+      ]
+    },
+    {
+      "id": "GRUA_LIVIANA_HINO",
+      "name": "Hino",
+      "categories": [
+        "GRUA_LIVIANA"
+      ]
+    },
+    {
+      "id": "GRUA_LIVIANA_FOTON",
+      "name": "Foton",
+      "categories": [
+        "GRUA_LIVIANA"
+      ]
+    },
+    {
+      "id": "GRUA_LIVIANA_HYUNDAI",
+      "name": "Hyundai",
+      "categories": [
+        "GRUA_LIVIANA"
+      ]
+    },
+    {
+      "id": "GRUA_LIVIANA_DONGFENG",
+      "name": "Dongfeng",
+      "categories": [
+        "GRUA_LIVIANA"
+      ]
     }
   ],
   "models": {
@@ -9745,6 +9923,26 @@
         "brandId": "GRUA_LIVIANA_CHEVROLET",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GRUA_LIVIANA_CHEVROLET_NPR",
+        "name": "NPR"
+      },
+      {
+        "id": "GRUA_LIVIANA_CHEVROLET_NPR_HD",
+        "name": "NPR HD"
+      },
+      {
+        "id": "GRUA_LIVIANA_CHEVROLET_NQR",
+        "name": "NQR"
+      },
+      {
+        "id": "GRUA_LIVIANA_CHEVROLET_NKR",
+        "name": "NKR"
+      },
+      {
+        "id": "GRUA_LIVIANA_CHEVROLET_NHR",
+        "name": "NHR"
       }
     ],
     "GRUA_LIVIANA_TOYOTA": [
@@ -9899,6 +10097,18 @@
         "brandId": "GRUA_LIVIANA_MITSUBISHI",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GRUA_LIVIANA_MITSUBISHI_CANTER",
+        "name": "Canter"
+      },
+      {
+        "id": "GRUA_LIVIANA_MITSUBISHI_FE",
+        "name": "Fuso FE"
+      },
+      {
+        "id": "GRUA_LIVIANA_MITSUBISHI_FM",
+        "name": "Fuso FM"
       }
     ],
     "GRUA_LIVIANA_ISUZU": [
@@ -9917,6 +10127,22 @@
         "brandId": "GRUA_LIVIANA_ISUZU",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GRUA_LIVIANA_ISUZU_NPR",
+        "name": "NPR"
+      },
+      {
+        "id": "GRUA_LIVIANA_ISUZU_NQR",
+        "name": "NQR"
+      },
+      {
+        "id": "GRUA_LIVIANA_ISUZU_ELF",
+        "name": "ELF"
+      },
+      {
+        "id": "GRUA_LIVIANA_ISUZU_NKR",
+        "name": "NKR"
       }
     ],
     "GRUA_LIVIANA_GREAT_WALL": [
@@ -9969,6 +10195,22 @@
         "brandId": "GRUA_LIVIANA_JAC",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GRUA_LIVIANA_JAC_N75",
+        "name": "N75"
+      },
+      {
+        "id": "GRUA_LIVIANA_JAC_N85",
+        "name": "N85"
+      },
+      {
+        "id": "GRUA_LIVIANA_JAC_HFC1061",
+        "name": "HFC1061"
+      },
+      {
+        "id": "GRUA_LIVIANA_JAC_HFC1048",
+        "name": "HFC1048"
       }
     ],
     "GRUA_PESADA_CHEVROLET": [
@@ -10027,6 +10269,10 @@
         "brandId": "GRUA_PESADA_CHEVROLET",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GRUA_PESADA_CHEVROLET_FVZ",
+        "name": "FVZ"
       }
     ],
     "GRUA_PESADA_HINO": [
@@ -10085,6 +10331,14 @@
         "brandId": "GRUA_PESADA_HINO",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GRUA_PESADA_HINO_XZU",
+        "name": "XZU Series"
+      },
+      {
+        "id": "GRUA_PESADA_HINO_500_FC_LWB",
+        "name": "Serie 500 FC (largo)"
       }
     ],
     "GRUA_PESADA_MITSUBISHI": [
@@ -10235,6 +10489,14 @@
         "brandId": "GRUA_PESADA_FOTON",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GRUA_PESADA_FOTON_TORNADO",
+        "name": "Tornado"
+      },
+      {
+        "id": "GRUA_PESADA_FOTON_BJ1099",
+        "name": "BJ1099"
       }
     ],
     "GRUA_PESADA_JAC": [
@@ -10613,6 +10875,378 @@
         "brandId": "GRUA_PESADA_HYUNDAI",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      }
+    ],
+    "GRUA_MOTO_SUZUKI": [
+      {
+        "id": "GRUA_MOTO_SUZUKI_CARRY_13",
+        "name": "Carry 1.3"
+      },
+      {
+        "id": "GRUA_MOTO_SUZUKI_SUPER_CARRY",
+        "name": "Super Carry"
+      },
+      {
+        "id": "GRUA_MOTO_SUZUKI_APV_CARGO",
+        "name": "APV Cargo"
+      },
+      {
+        "id": "GRUA_MOTO_SUZUKI_CARRY_800",
+        "name": "Carry 800cc"
+      }
+    ],
+    "GRUA_MOTO_KIA": [
+      {
+        "id": "GRUA_MOTO_KIA_BONGO_K2700",
+        "name": "Bongo K2700"
+      },
+      {
+        "id": "GRUA_MOTO_KIA_BONGO_K3000S",
+        "name": "Bongo K3000S"
+      },
+      {
+        "id": "GRUA_MOTO_KIA_K2500",
+        "name": "K2500"
+      },
+      {
+        "id": "GRUA_MOTO_KIA_FRONTIER_K4000S",
+        "name": "Frontier K4000S"
+      }
+    ],
+    "GRUA_MOTO_HYUNDAI": [
+      {
+        "id": "GRUA_MOTO_HYUNDAI_H100_PORTER",
+        "name": "H100 Porter"
+      },
+      {
+        "id": "GRUA_MOTO_HYUNDAI_PORTER_II",
+        "name": "Porter II"
+      },
+      {
+        "id": "GRUA_MOTO_HYUNDAI_H1_CARGO",
+        "name": "H1 Cargo"
+      },
+      {
+        "id": "GRUA_MOTO_HYUNDAI_HD35",
+        "name": "HD35"
+      }
+    ],
+    "GRUA_MOTO_JMC": [
+      {
+        "id": "GRUA_MOTO_JMC_VIGUS_20",
+        "name": "Vigus 2.0"
+      },
+      {
+        "id": "GRUA_MOTO_JMC_VIGUS_PRO",
+        "name": "Vigus Pro"
+      },
+      {
+        "id": "GRUA_MOTO_JMC_CONQUER",
+        "name": "Conquer"
+      },
+      {
+        "id": "GRUA_MOTO_JMC_TRANSIT",
+        "name": "Transit"
+      }
+    ],
+    "GRUA_MOTO_DFSK": [
+      {
+        "id": "GRUA_MOTO_DFSK_C35",
+        "name": "C35"
+      },
+      {
+        "id": "GRUA_MOTO_DFSK_C37",
+        "name": "C37"
+      },
+      {
+        "id": "GRUA_MOTO_DFSK_K01H",
+        "name": "K01H"
+      },
+      {
+        "id": "GRUA_MOTO_DFSK_K01S",
+        "name": "K01S"
+      },
+      {
+        "id": "GRUA_MOTO_DFSK_EC35",
+        "name": "EC35"
+      }
+    ],
+    "GRUA_MOTO_RENAULT": [
+      {
+        "id": "GRUA_MOTO_RENAULT_MASTER",
+        "name": "Master Cargo"
+      },
+      {
+        "id": "GRUA_MOTO_RENAULT_TRAFIC",
+        "name": "Trafic"
+      },
+      {
+        "id": "GRUA_MOTO_RENAULT_KANGOO",
+        "name": "Kangoo Express"
+      }
+    ],
+    "GRUA_MOTO_CHEVROLET": [
+      {
+        "id": "GRUA_MOTO_CHEVROLET_N300",
+        "name": "N300"
+      },
+      {
+        "id": "GRUA_MOTO_CHEVROLET_N400",
+        "name": "N400"
+      },
+      {
+        "id": "GRUA_MOTO_CHEVROLET_DMAX",
+        "name": "LUV D-MAX"
+      },
+      {
+        "id": "GRUA_MOTO_CHEVROLET_COLORADO",
+        "name": "Colorado"
+      },
+      {
+        "id": "GRUA_MOTO_CHEVROLET_MONTANA",
+        "name": "Montana"
+      }
+    ],
+    "GRUA_MOTO_JAC": [
+      {
+        "id": "GRUA_MOTO_JAC_X200",
+        "name": "X200"
+      },
+      {
+        "id": "GRUA_MOTO_JAC_T6",
+        "name": "T6"
+      },
+      {
+        "id": "GRUA_MOTO_JAC_T8",
+        "name": "T8"
+      },
+      {
+        "id": "GRUA_MOTO_JAC_HFC1041",
+        "name": "HFC1041"
+      }
+    ],
+    "GRUA_MOTO_TOYOTA": [
+      {
+        "id": "GRUA_MOTO_TOYOTA_HILUX",
+        "name": "Hilux"
+      },
+      {
+        "id": "GRUA_MOTO_TOYOTA_HIACE_CARGO",
+        "name": "Hiace Cargo"
+      }
+    ],
+    "GRUA_MOTO_NISSAN": [
+      {
+        "id": "GRUA_MOTO_NISSAN_FRONTIER_NP300",
+        "name": "Frontier NP300"
+      },
+      {
+        "id": "GRUA_MOTO_NISSAN_URVAN_CARGO",
+        "name": "Urvan Cargo"
+      }
+    ],
+    "GRUA_MOTO_FORD": [
+      {
+        "id": "GRUA_MOTO_FORD_RANGER",
+        "name": "Ranger"
+      },
+      {
+        "id": "GRUA_MOTO_FORD_TRANSIT_CARGO",
+        "name": "Transit Cargo"
+      }
+    ],
+    "GRUA_MOTO_MAZDA": [
+      {
+        "id": "GRUA_MOTO_MAZDA_BT50",
+        "name": "BT-50"
+      },
+      {
+        "id": "GRUA_MOTO_MAZDA_B2500",
+        "name": "B2500"
+      }
+    ],
+    "GRUA_MOTO_MITSUBISHI": [
+      {
+        "id": "GRUA_MOTO_MITSUBISHI_L200",
+        "name": "L200"
+      },
+      {
+        "id": "GRUA_MOTO_MITSUBISHI_CANTER_35",
+        "name": "Canter 3.5T"
+      }
+    ],
+    "GRUA_MOTO_GREAT_WALL": [
+      {
+        "id": "GRUA_MOTO_GREAT_WALL_WINGLE5",
+        "name": "Wingle 5"
+      },
+      {
+        "id": "GRUA_MOTO_GREAT_WALL_WINGLE7",
+        "name": "Wingle 7"
+      },
+      {
+        "id": "GRUA_MOTO_GREAT_WALL_POER",
+        "name": "Poer"
+      }
+    ],
+    "GRUA_PESADA_MAN": [
+      {
+        "id": "GRUA_PESADA_MAN_TGL",
+        "name": "TGL"
+      },
+      {
+        "id": "GRUA_PESADA_MAN_TGM",
+        "name": "TGM"
+      },
+      {
+        "id": "GRUA_PESADA_MAN_TGS",
+        "name": "TGS"
+      },
+      {
+        "id": "GRUA_PESADA_MAN_TGX",
+        "name": "TGX"
+      }
+    ],
+    "GRUA_PESADA_UD_TRUCKS": [
+      {
+        "id": "GRUA_PESADA_UD_CRONER",
+        "name": "Croner"
+      },
+      {
+        "id": "GRUA_PESADA_UD_QUON",
+        "name": "Quon"
+      },
+      {
+        "id": "GRUA_PESADA_UD_CONDOR",
+        "name": "Condor"
+      }
+    ],
+    "GRUA_PESADA_MACK": [
+      {
+        "id": "GRUA_PESADA_MACK_GRANITE",
+        "name": "Granite"
+      },
+      {
+        "id": "GRUA_PESADA_MACK_ANTHEM",
+        "name": "Anthem"
+      },
+      {
+        "id": "GRUA_PESADA_MACK_PINNACLE",
+        "name": "Pinnacle"
+      }
+    ],
+    "GRUA_PESADA_TATA": [
+      {
+        "id": "GRUA_PESADA_TATA_ULTRA_814",
+        "name": "Ultra 814"
+      },
+      {
+        "id": "GRUA_PESADA_TATA_LPT_1613",
+        "name": "LPT 1613"
+      },
+      {
+        "id": "GRUA_PESADA_TATA_LPT_1618",
+        "name": "LPT 1618"
+      },
+      {
+        "id": "GRUA_PESADA_TATA_PRIMA_4928",
+        "name": "Prima 4928"
+      }
+    ],
+    "GRUA_PESADA_JMC": [
+      {
+        "id": "GRUA_PESADA_JMC_N800",
+        "name": "N800"
+      },
+      {
+        "id": "GRUA_PESADA_JMC_N900",
+        "name": "N900"
+      },
+      {
+        "id": "GRUA_PESADA_JMC_CARRYING",
+        "name": "Carrying"
+      }
+    ],
+    "GRUA_PESADA_DAF": [
+      {
+        "id": "GRUA_PESADA_DAF_LF",
+        "name": "LF"
+      },
+      {
+        "id": "GRUA_PESADA_DAF_CF",
+        "name": "CF"
+      },
+      {
+        "id": "GRUA_PESADA_DAF_XF",
+        "name": "XF"
+      }
+    ],
+    "GRUA_LIVIANA_HINO": [
+      {
+        "id": "GRUA_LIVIANA_HINO_300_XZU",
+        "name": "Serie 300 (XZU)"
+      },
+      {
+        "id": "GRUA_LIVIANA_HINO_300_FC",
+        "name": "Serie 300 (FC)"
+      },
+      {
+        "id": "GRUA_LIVIANA_HINO_195",
+        "name": "Hino 195"
+      },
+      {
+        "id": "GRUA_LIVIANA_HINO_268",
+        "name": "Hino 268"
+      }
+    ],
+    "GRUA_LIVIANA_FOTON": [
+      {
+        "id": "GRUA_LIVIANA_FOTON_AUMARK",
+        "name": "Aumark"
+      },
+      {
+        "id": "GRUA_LIVIANA_FOTON_TORNADO",
+        "name": "Tornado"
+      },
+      {
+        "id": "GRUA_LIVIANA_FOTON_OLLIN",
+        "name": "Ollin"
+      },
+      {
+        "id": "GRUA_LIVIANA_FOTON_BJ1049",
+        "name": "BJ1049"
+      }
+    ],
+    "GRUA_LIVIANA_HYUNDAI": [
+      {
+        "id": "GRUA_LIVIANA_HYUNDAI_HD65",
+        "name": "HD65"
+      },
+      {
+        "id": "GRUA_LIVIANA_HYUNDAI_HD72",
+        "name": "HD72"
+      },
+      {
+        "id": "GRUA_LIVIANA_HYUNDAI_HD78",
+        "name": "HD78"
+      },
+      {
+        "id": "GRUA_LIVIANA_HYUNDAI_MIGHTY",
+        "name": "Mighty"
+      }
+    ],
+    "GRUA_LIVIANA_DONGFENG": [
+      {
+        "id": "GRUA_LIVIANA_DONGFENG_CAPTAIN",
+        "name": "Captain"
+      },
+      {
+        "id": "GRUA_LIVIANA_DONGFENG_EQ1061",
+        "name": "EQ1061"
+      },
+      {
+        "id": "GRUA_LIVIANA_DONGFENG_EQ1108",
+        "name": "EQ1108"
       }
     ]
   }

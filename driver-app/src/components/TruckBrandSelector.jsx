@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { IonText, IonSearchbar, IonSpinner, IonInput } from '@ionic/react';
-import { SearchNormal1, Car } from 'iconsax-react';
 import './TruckBrandSelector.css';
 
 /**
@@ -13,11 +12,14 @@ const TruckBrandSelector = ({
   customBrand,
   onSelect, 
   onCustomBrandChange,
+  onAutoAdvance,
   isLoading,
   error 
 }) => {
   const [searchText, setSearchText] = useState('');
-  const [showOtherInput, setShowOtherInput] = useState(false);
+
+  // Se deriva del prop para no perder el estado al re-montar entre pasos
+  const showOtherInput = selectedBrand?.id === 'OTHER';
 
   // Filtrar marcas según búsqueda
   const filteredBrands = brands.filter(brand =>
@@ -25,15 +27,14 @@ const TruckBrandSelector = ({
   );
 
   const handleBrandSelect = (brand) => {
-    setShowOtherInput(false);
     onSelect(brand);
-    if (onCustomBrandChange) {
-      onCustomBrandChange(''); // Limpiar custom brand si se selecciona del catálogo
-    }
+    if (onCustomBrandChange) onCustomBrandChange('');
+    // Avanzar automáticamente después de un pequeño delay visual
+    if (onAutoAdvance) setTimeout(onAutoAdvance, 300);
   };
 
   const handleOtherSelect = () => {
-    setShowOtherInput(true);
+    // "Otro" NO avanza: el usuario debe escribir la marca primero
     onSelect({ id: 'OTHER', name: 'Otro' });
   };
 
@@ -105,7 +106,7 @@ const TruckBrandSelector = ({
           </div>
 
           {/* Input para marca personalizada */}
-          {showOtherInput && selectedBrand?.id === 'OTHER' && (
+          {showOtherInput && (
             <div className="custom-brand-input">
               <IonText>
                 <label>Escribe la marca de tu vehículo:</label>

@@ -1,6 +1,12 @@
 /* Importar tema local (incluye fuentes Gilroy y variables) */
 @import './styles/theme.css';
 
+/* Bloquear escala de texto del WebView — ignora fuente grande del sistema */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 :root {
   font-family: var(--font-family);
   line-height: 1.5;

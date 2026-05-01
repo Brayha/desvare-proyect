@@ -347,6 +347,11 @@
   --border-radius: 12px;
 }
 
+/* En pasos de fotos (2-8) el botón Atrás ocupa solo la mitad izquierda */
+.back-button--full {
+  max-width: 50%;
+}
+
 .next-button {
   --background: #0055FF;
   --background-hover: #0044CC;

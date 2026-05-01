@@ -1,0 +1,306 @@
+/* =============================================
+   PHOTO UPLOAD STEP
+   Componente de carga progresiva de fotos
+   ============================================= */
+
+.pus-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
+  padding-bottom: 8px;
+}
+
+/* ─────────────────────────────────────────────
+   IMAGEN HERO — se encoge según el estado
+───────────────────────────────────────────── */
+.pus-hero {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.35s ease;
+}
+
+/* Estado 0: ninguna foto — imagen grande */
+.pus-hero--stage0 {
+  max-height: 36vh;
+}
+
+/* Estado 1: primera foto cargada — imagen mediana */
+.pus-hero--stage1 {
+  max-height: 20vh;
+}
+
+/* Estado 2: todas las fotos — imagen pequeña */
+.pus-hero--stage2 {
+  max-height: 13vh;
+}
+
+.pus-hero-img {
+  width: auto;
+  height: 100%;
+  max-height: inherit;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─────────────────────────────────────────────
+   ENCABEZADO
+───────────────────────────────────────────── */
+.pus-header {
+  text-align: center;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.pus-header--compact {
+  margin-top: -4px;
+}
+
+.pus-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  transition: font-size 0.3s ease;
+}
+
+.pus-header--compact .pus-title {
+  font-size: 18px;
+}
+
+.pus-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.pus-optional-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 10px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 99px;
+}
+
+/* ─────────────────────────────────────────────
+   ZONAS DE CARGA
+───────────────────────────────────────────── */
+.pus-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Modo grilla — dos previews lado a lado */
+.pus-zones--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Zona 2 aparece con animación */
+.pus-zone-appear {
+  animation: pusSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pusSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   ZONA INDIVIDUAL
+───────────────────────────────────────────── */
+.pus-zone {
+  position: relative;
+  background: white;
+  border: 2px dashed #d1d5db;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease,
+              box-shadow 0.2s ease;
+  min-height: 90px;
+}
+
+.pus-zone:hover {
+  border-color: #0055ff;
+  background: #eff6ff;
+}
+
+.pus-zone--uploaded {
+  border-color: #10b981;
+  border-style: solid;
+  background: #ecfdf5;
+}
+
+.pus-zone--error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+/* Modo compacto (en grilla cuando allDone) */
+.pus-zone--compact {
+  min-height: 110px;
+}
+
+/* Input invisible superpuesto */
+.pus-zone-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* ─── Zona vacía ─── */
+.pus-zone-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 16px;
+  pointer-events: none;
+}
+
+.pus-zone-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: #f3f4f6;
+  border-radius: 50%;
+}
+
+.pus-zone-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* ─── Preview de foto cargada ─── */
+.pus-zone-preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* El input está encima del preview para permitir retomar la foto */
+.pus-zone--uploaded .pus-zone-input {
+  z-index: 2;
+}
+
+.pus-preview-img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px 12px 0 0;
+  animation: pusFadeIn 0.35s ease both;
+}
+
+.pus-zone--compact .pus-preview-img {
+  height: 90px;
+}
+
+@keyframes pusFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.pus-preview-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #ecfdf5;
+}
+
+.pus-preview-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #065f46;
+  flex: 1;
+}
+
+/* Error dentro de zona */
+.pus-zone-error {
+  display: block;
+  font-size: 11px;
+  color: #ef4444;
+  font-weight: 500;
+  padding: 4px 10px 6px;
+  text-align: center;
+}
+
+/* ─────────────────────────────────────────────
+   BOTÓN CONTINUAR
+───────────────────────────────────────────── */
+.pus-continue-appear {
+  width: 100%;
+  animation: pusSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.pus-continue-btn {
+  width: 100%;
+  height: 54px;
+  background: #0055ff;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 85, 255, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  font-family: var(--font-family, inherit);
+  letter-spacing: 0;
+}
+
+.pus-continue-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(0, 85, 255, 0.25);
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE — pantallas pequeñas
+───────────────────────────────────────────── */
+@media (max-height: 680px) {
+  .pus-hero--stage0 { max-height: 28vh; }
+  .pus-hero--stage1 { max-height: 16vh; }
+  .pus-hero--stage2 { max-height: 10vh; }
+
+  .pus-title { font-size: 20px; }
+  .pus-header--compact .pus-title { font-size: 16px; }
+  .pus-preview-img { height: 100px; }
+  .pus-zone--compact .pus-preview-img { height: 75px; }
+}
+
+@media (max-height: 580px) {
+  .pus-hero--stage0 { max-height: 22vh; }
+  .pus-hero--stage1 { max-height: 12vh; }
+  .pus-hero--stage2 { max-height: 8vh; }
+}

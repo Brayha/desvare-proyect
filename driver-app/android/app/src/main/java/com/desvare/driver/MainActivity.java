@@ -1,11 +1,21 @@
 package com.desvare.driver;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+
+    @Override
+    public Resources getResources() {
+        Resources res = super.getResources();
+        Configuration config = new Configuration(res.getConfiguration());
+        config.fontScale = 1.0f; // Ignora fuente grande del sistema Android
+        return createConfigurationContext(config).getResources();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

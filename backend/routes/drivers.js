@@ -469,19 +469,22 @@ router.post('/register-complete', async (req, res) => {
         year: towTruck.year || null,
       };
 
-      // Si tiene marca/modelo de catálogo
-      if (towTruck.baseBrandId && towTruck.baseModelId) {
+      // Marca — catálogo o personalizada (independientes entre sí)
+      if (towTruck.baseBrandId) {
         driver.driverProfile.towTruck.baseBrandId = towTruck.baseBrandId;
-        driver.driverProfile.towTruck.baseModelId = towTruck.baseModelId;
-        driver.driverProfile.towTruck.baseBrand = towTruck.baseBrand;
-        driver.driverProfile.towTruck.baseModel = towTruck.baseModel;
-        console.log(`   ✅ Marca/Modelo: ${towTruck.baseBrand} ${towTruck.baseModel}`);
+        driver.driverProfile.towTruck.baseBrand   = towTruck.baseBrand || null;
+        console.log(`   ✅ Marca catálogo: ${towTruck.baseBrand}`);
       }
-
-      // Si tiene marca/modelo personalizado ("Otro")
       if (towTruck.customBrand) {
         driver.driverProfile.towTruck.customBrand = towTruck.customBrand;
         console.log(`   ✅ Marca personalizada: ${towTruck.customBrand}`);
+      }
+
+      // Modelo — catálogo o personalizado (independientes entre sí)
+      if (towTruck.baseModelId) {
+        driver.driverProfile.towTruck.baseModelId = towTruck.baseModelId;
+        driver.driverProfile.towTruck.baseModel   = towTruck.baseModel || null;
+        console.log(`   ✅ Modelo catálogo: ${towTruck.baseModel}`);
       }
       if (towTruck.customModel) {
         driver.driverProfile.towTruck.customModel = towTruck.customModel;

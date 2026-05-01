@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { IonText, IonSearchbar, IonSpinner, IonInput } from '@ionic/react';
-import { Setting3 } from 'iconsax-react';
 import './TruckModelSelector.css';
 
 /**
@@ -14,11 +13,14 @@ const TruckModelSelector = ({
   brandName,
   onSelect, 
   onCustomModelChange,
+  onAutoAdvance,
   isLoading,
   error 
 }) => {
   const [searchText, setSearchText] = useState('');
-  const [showOtherInput, setShowOtherInput] = useState(false);
+
+  // Se deriva del prop para no perder el estado al re-montar entre pasos
+  const showOtherInput = selectedModel?.id === 'OTHER';
 
   // Filtrar modelos según búsqueda
   const filteredModels = models.filter(model =>
@@ -26,15 +28,14 @@ const TruckModelSelector = ({
   );
 
   const handleModelSelect = (model) => {
-    setShowOtherInput(false);
     onSelect(model);
-    if (onCustomModelChange) {
-      onCustomModelChange(''); // Limpiar custom model si se selecciona del catálogo
-    }
+    if (onCustomModelChange) onCustomModelChange('');
+    // Avanzar automáticamente después de un pequeño delay visual
+    if (onAutoAdvance) setTimeout(onAutoAdvance, 300);
   };
 
   const handleOtherSelect = () => {
-    setShowOtherInput(true);
+    // "Otro" NO avanza: el usuario debe escribir el modelo primero
     onSelect({ id: 'OTHER', name: 'Otro' });
   };
 
@@ -106,7 +107,7 @@ const TruckModelSelector = ({
           </div>
 
           {/* Input para modelo personalizado */}
-          {showOtherInput && selectedModel?.id === 'OTHER' && (
+          {showOtherInput && (
             <div className="custom-model-input">
               <IonText>
                 <label>Escribe el modelo de tu vehículo:</label>

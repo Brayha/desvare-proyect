@@ -132,7 +132,7 @@ const userSchema = new mongoose.Schema({
       // Tipo de grúa (Liviana o Pesada)
       truckType: {
         type: String,
-        enum: ['GRUA_LIVIANA', 'GRUA_PESADA'],
+        enum: ['GRUA_MOTO', 'GRUA_LIVIANA', 'GRUA_PESADA'],
         required: false // Se completa en el registro
       },
       

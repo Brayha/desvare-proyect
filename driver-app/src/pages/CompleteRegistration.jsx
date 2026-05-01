@@ -27,6 +27,7 @@ import TruckTypeSelector from "../components/TruckTypeSelector";
 import TruckBrandSelector from "../components/TruckBrandSelector";
 import TruckModelSelector from "../components/TruckModelSelector";
 import TruckPlateInput from "../components/TruckPlateInput";
+import PhotoUploadStep from "../components/PhotoUploadStep/PhotoUploadStep";
 import idCardImage from "../assets/img/id-card.png";
 import selfieImage from "../assets/img/selfie.png";
 import licenseImage from "../assets/img/license.png";
@@ -56,6 +57,21 @@ import "./CompleteRegistration.css";
  * Nota: Se eliminó la selección de tipo de entidad (Natural/Jurídica) para simplificar el MVP.
  * Por defecto todos los conductores se registran como Persona Natural.
  */
+
+// Capacidades permitidas por tipo de grúa (según canPickup del catálogo)
+const CAPABILITIES_BY_TRUCK_TYPE = {
+  GRUA_MOTO:    ['MOTOS'],
+  GRUA_LIVIANA: ['AUTOS', 'CAMIONETAS'],
+  GRUA_PESADA:  ['AUTOS', 'CAMIONETAS', 'CAMIONES', 'BUSES'],
+};
+
+const CAPABILITY_LABELS = {
+  MOTOS:     'Motos',
+  AUTOS:     'Autos / Carros',
+  CAMIONETAS:'Camionetas y SUVs',
+  CAMIONES:  'Camiones de carga',
+  BUSES:     'Buses y busetas',
+};
 
 const CompleteRegistration = () => {
   const history = useHistory();
@@ -111,6 +127,9 @@ const CompleteRegistration = () => {
     BUSES: false,
   });
 
+  // Control para saber si los documentos ya se subieron exitosamente
+  const [documentsUploaded, setDocumentsUploaded] = useState(false);
+
   // Estados de error
   const [errors, setErrors] = useState({});
   // Estado de reintento de documentos (si Paso A pasó pero B falló)
@@ -134,10 +153,11 @@ const CompleteRegistration = () => {
     setCities(fallbackCities);
   };
 
-  // 🆕 Función para cargar marcas de grúas según el tipo
+  // Función para cargar marcas de grúas según el tipo
   const loadTruckBrands = async (type) => {
     try {
       setIsLoading(true);
+      setErrors({});
       console.log("🔄 Cargando marcas para:", type);
       const response = await vehicleAPI.getBrands(type);
       const brandsData = response.data?.data || [];
@@ -146,16 +166,17 @@ const CompleteRegistration = () => {
     } catch (error) {
       console.error("❌ Error cargando marcas de grúas:", error);
       setTruckBrands([]);
-      alert("Error al cargar marcas. Intenta de nuevo.");
+      setErrors({ truckBrand: "Error al cargar las marcas. Vuelve al paso anterior y selecciona el tipo de grúa de nuevo." });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 🆕 Función para cargar modelos de grúas según la marca
+  // Función para cargar modelos de grúas según la marca
   const loadTruckModels = async (brandId, type) => {
     try {
       setIsLoading(true);
+      setErrors({});
       console.log("🔄 Cargando modelos para marca:", brandId);
       const response = await vehicleAPI.getModels(brandId, type);
       const modelsData = response.data?.data || [];
@@ -164,7 +185,7 @@ const CompleteRegistration = () => {
     } catch (error) {
       console.error("❌ Error cargando modelos de grúas:", error);
       setTruckModels([]);
-      alert("Error al cargar modelos. Intenta de nuevo.");
+      setErrors({ truckModel: "Error al cargar los modelos. Vuelve al paso anterior y selecciona la marca de nuevo." });
     } finally {
       setIsLoading(false);
     }
@@ -199,20 +220,22 @@ const CompleteRegistration = () => {
     loadCities();
   }, []);
 
-  // 🆕 Cargar marcas cuando se seleccione el tipo de grúa
+  // Cargar marcas cuando se seleccione el tipo de grúa y limpiar selecciones dependientes
   useEffect(() => {
     if (truckType) {
       console.log("🚚 Tipo de grúa seleccionado:", truckType);
       loadTruckBrands(truckType);
-      // Reset marca y modelo al cambiar tipo
+      // Reset completo al cambiar tipo (incluyendo lista de modelos)
       setTruckBrand(null);
       setTruckModel(null);
+      setTruckModels([]);
       setCustomBrand("");
       setCustomModel("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [truckType]);
 
-  // 🆕 Cargar modelos cuando se seleccione la marca
+  // Cargar modelos cuando se seleccione la marca
   useEffect(() => {
     if (truckBrand && truckBrand.id !== "OTHER" && truckType) {
       console.log("🚚 Marca seleccionada:", truckBrand.name);
@@ -222,7 +245,7 @@ const CompleteRegistration = () => {
       setCustomModel("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [truckBrand]);
+  }, [truckBrand, truckType]);
 
   const totalSteps = 13; // 🆕 Aumentado de 8 a 13 pasos para mejor UX (documentos separados)
   const progress = currentStep / totalSteps;
@@ -355,6 +378,14 @@ const CompleteRegistration = () => {
     }
   };
 
+  // Avance automático al seleccionar un ítem del catálogo (marca o modelo)
+  const handleAutoAdvance = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep((prev) => prev + 1);
+      setErrors({});
+    }
+  };
+
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -453,6 +484,7 @@ const CompleteRegistration = () => {
     try {
       await authAPI.uploadDriverDocuments({ userId, documents });
       console.log("✅ Documentos subidos");
+      setDocumentsUploaded(true);
     } catch (uploadError) {
       console.error("❌ Error subiendo documentos:", uploadError);
       // Los datos básicos ya se guardaron (Paso A fue exitoso).
@@ -479,6 +511,13 @@ const CompleteRegistration = () => {
       console.log("✅ Capacidades guardadas");
     } catch (capError) {
       console.error("❌ Error guardando capacidades:", capError);
+      setSubmitError(
+        "Tus fotos se subieron correctamente pero hubo un error al guardar las capacidades. " +
+        "Por favor intenta de nuevo."
+      );
+      setUploadFailed(true);
+      setIsLoading(false);
+      return;
     }
 
     history.replace("/under-review");
@@ -489,8 +528,33 @@ const CompleteRegistration = () => {
     setSubmitError('');
     setUploadFailed(false);
     const userStr = localStorage.getItem("user");
-    if (!userStr) { history.replace("/login"); return; }
+    if (!userStr) {
+      setIsLoading(false);
+      history.replace("/login");
+      return;
+    }
     const userId = JSON.parse(userStr)._id;
+
+    if (documentsUploaded) {
+      // Las fotos ya subieron — solo reintenta las capacidades
+      const selectedCapabilities = Object.keys(vehicleCapabilities).filter(
+        (key) => vehicleCapabilities[key]
+      );
+      try {
+        await authAPI.setDriverCapabilities({ userId, vehicleCapabilities: selectedCapabilities });
+        history.replace("/under-review");
+      } catch (capError) {
+        console.error("❌ Error guardando capacidades (reintento):", capError);
+        setSubmitError(
+          "Sigue habiendo un problema al guardar las capacidades. Verifica tu conexión e intenta de nuevo."
+        );
+        setUploadFailed(true);
+      }
+      setIsLoading(false);
+      return;
+    }
+
+    // Fotos aún no subidas — proceso completo
     await uploadDocuments(userId);
     setIsLoading(false);
   };
@@ -585,156 +649,103 @@ const CompleteRegistration = () => {
       // Paso 2: Cédula (Frente y Atrás)
       case 2:
         return (
-          <div className="step-content">
-            <img src={idCardImage} alt="Cédula" className="step-image" />
-            <h2 className="step-title">Fotos de tu cedula</h2>
-            <p className="step-description">
-              Necesitamos que le tomes foto a tu cedula por delante y por detras
-            </p>
-
-            <FileUpload
-              label="Cédula (Frente)"
-              file={cedulaFront}
-              onChange={handleFileChange(setCedulaFront)}
-              error={errors.cedulaFront}
-            />
-
-            <FileUpload
-              label="Cédula (Atrás)"
-              file={cedulaBack}
-              onChange={handleFileChange(setCedulaBack)}
-              error={errors.cedulaBack}
-            />
-          </div>
+          <PhotoUploadStep
+            image={idCardImage}
+            title="Fotos de tu cédula"
+            description="Necesitamos que le tomes foto a tu cédula por delante y por detrás"
+            photos={[
+              { label: 'Foto de frente', file: cedulaFront, onChange: handleFileChange(setCedulaFront), error: errors.cedulaFront },
+              { label: 'Foto por detrás', file: cedulaBack,  onChange: handleFileChange(setCedulaBack),  error: errors.cedulaBack  },
+            ]}
+            onComplete={handleAutoAdvance}
+          />
         );
 
       // Paso 3: Selfie
       case 3:
         return (
-          <div className="step-content">
-            <img src={selfieImage} alt="Selfie" className="step-image" />
-            <h2 className="step-title">Una selfie 😉</h2>
-            <p className="step-description">
-              Tomate una buena foto que veran tus clientes
-            </p>
-
-            <FileUpload
-              label="Selfie tuya"
-              file={selfie}
-              onChange={handleFileChange(setSelfie)}
-              error={errors.selfie}
-            />
-          </div>
+          <PhotoUploadStep
+            image={selfieImage}
+            title="Una selfie 😉"
+            description="Tómate una buena foto que verán tus clientes"
+            photos={[
+              { label: 'Selfie tuya', file: selfie, onChange: handleFileChange(setSelfie), error: errors.selfie },
+            ]}
+            onComplete={handleAutoAdvance}
+          />
         );
 
       // Paso 4: Licencia de Tránsito (Frente y Atrás)
       case 4:
         return (
-          <div className="step-content">
-            <img src={licenseImage} alt="Selfie" className="step-image" />
-            <h2 className="step-title">Licencia de transito</h2>
-            <p className="step-description">
-              Necesitamos que le tomes foto a tu licencia de tránsito por
-              delante y por detras
-            </p>
-
-            <FileUpload
-              label="Licencia de Tránsito (Frente)"
-              file={licenciaTransitoFront}
-              onChange={handleFileChange(setLicenciaTransitoFront)}
-              error={errors.licenciaTransitoFront}
-            />
-
-            <FileUpload
-              label="Licencia de Tránsito (Atrás)"
-              file={licenciaTransitoBack}
-              onChange={handleFileChange(setLicenciaTransitoBack)}
-              error={errors.licenciaTransitoBack}
-            />
-          </div>
+          <PhotoUploadStep
+            image={licenseImage}
+            title="Licencia de tránsito"
+            description="Necesitamos que le tomes foto a tu licencia de tránsito por delante y por detrás"
+            photos={[
+              { label: 'Foto de frente', file: licenciaTransitoFront, onChange: handleFileChange(setLicenciaTransitoFront), error: errors.licenciaTransitoFront },
+              { label: 'Foto por detrás', file: licenciaTransitoBack,  onChange: handleFileChange(setLicenciaTransitoBack),  error: errors.licenciaTransitoBack  },
+            ]}
+            onComplete={handleAutoAdvance}
+          />
         );
 
       // Paso 5: SOAT
       case 5:
         return (
-          <div className="step-content">
-            <img src={soatImage} alt="SOAT" className="step-image" />
-            <h2 className="step-title">Seguro SOAT</h2>
-            <p className="step-description">
-            Por nuestra seguridad y la del cliente, necesitamos saber si estas al día con el soat.
-            </p>
-
-            <FileUpload
-              label="SOAT"
-              file={soat}
-              onChange={handleFileChange(setSoat)}
-              error={errors.soat}
-            />
-          </div>
+          <PhotoUploadStep
+            image={soatImage}
+            title="Seguro SOAT"
+            description="Por nuestra seguridad y la del cliente, necesitamos ver que estás al día con el SOAT"
+            photos={[
+              { label: 'Foto del SOAT', file: soat, onChange: handleFileChange(setSoat), error: errors.soat },
+            ]}
+            onComplete={handleAutoAdvance}
+          />
         );
 
       // Paso 6: Tarjeta de Propiedad (Frente y Atrás)
       case 6:
         return (
-          <div className="step-content">
-            <img src={propertyImage} alt="Property" className="step-image" />
-            <h2 className="step-title">Tarjeta de propiedad de la grua que usarás</h2>
-            <p className="step-description">
-            Necesitamos saber de quien es el grúa que recogera el vehiculo del cliente
-            </p>
-
-            <FileUpload
-              label="Tarjeta de Propiedad (Frente)"
-              file={tarjetaPropiedadFront}
-              onChange={handleFileChange(setTarjetaPropiedadFront)}
-              error={errors.tarjetaPropiedadFront}
-            />
-
-            <FileUpload
-              label="Tarjeta de Propiedad (Atrás)"
-              file={tarjetaPropiedadBack}
-              onChange={handleFileChange(setTarjetaPropiedadBack)}
-              error={errors.tarjetaPropiedadBack}
-            />
-          </div>
+          <PhotoUploadStep
+            image={propertyImage}
+            title="Tarjeta de propiedad"
+            description="Necesitamos saber de quién es la grúa que recogerá el vehículo del cliente"
+            photos={[
+              { label: 'Foto de frente', file: tarjetaPropiedadFront, onChange: handleFileChange(setTarjetaPropiedadFront), error: errors.tarjetaPropiedadFront },
+              { label: 'Foto por detrás', file: tarjetaPropiedadBack,  onChange: handleFileChange(setTarjetaPropiedadBack),  error: errors.tarjetaPropiedadBack  },
+            ]}
+            onComplete={handleAutoAdvance}
+          />
         );
 
       // Paso 7: Seguro Todo Riesgo (Opcional)
       case 7:
         return (
-          <div className="step-content">
-            <img src={securityImage} alt="Security" className="step-image" />
-            <h2 className="step-title">Seguro todo riesgo</h2>
-            <p className="step-description">
-              <strong>Opcional.</strong> Esto nos ayudara con los clientes con sus vehiculos en los patios de movilidad
-            </p>
-
-            <FileUpload
-              label="Seguro Todo Riesgo (Opcional)"
-              file={seguroTodoRiesgo}
-              onChange={handleFileChange(setSeguroTodoRiesgo)}
-              error={errors.seguroTodoRiesgo}
-            />
-          </div>
+          <PhotoUploadStep
+            image={securityImage}
+            title="Seguro todo riesgo"
+            description="Esto nos ayudará con los clientes cuyos vehículos están en patios de movilidad"
+            photos={[
+              { label: 'Foto del seguro', file: seguroTodoRiesgo, onChange: handleFileChange(setSeguroTodoRiesgo), error: errors.seguroTodoRiesgo },
+            ]}
+            isOptional
+            onComplete={handleAutoAdvance}
+          />
         );
 
       // Paso 8: Foto de la Grúa
       case 8:
         return (
-          <div className="step-content">
-            <img src={truckImage} alt="Truck" className="step-image" />
-            <h2 className="step-title">Foto de tu Grúa</h2>
-            <p className="step-description">
-              Sube una foto clara de tu grúa completa.
-            </p>
-
-            <FileUpload
-              label="Foto de tu grúa"
-              file={towTruckPhoto}
-              onChange={handleFileChange(setTowTruckPhoto)}
-              error={errors.towTruckPhoto}
-            />
-          </div>
+          <PhotoUploadStep
+            image={truckImage}
+            title="Foto de tu grúa"
+            description="Sube una foto clara de tu grúa completa"
+            photos={[
+              { label: 'Foto de la grúa', file: towTruckPhoto, onChange: handleFileChange(setTowTruckPhoto), error: errors.towTruckPhoto },
+            ]}
+            onComplete={handleAutoAdvance}
+          />
         );
 
       // Paso 9: Tipo de grúa
@@ -747,7 +758,7 @@ const CompleteRegistration = () => {
           />
         );
 
-      // 🆕 Paso 10: Marca del vehículo base
+      // Paso 10: Marca del vehículo base
       case 10:
         return (
           <TruckBrandSelector
@@ -756,12 +767,13 @@ const CompleteRegistration = () => {
             customBrand={customBrand}
             onSelect={setTruckBrand}
             onCustomBrandChange={setCustomBrand}
+            onAutoAdvance={handleAutoAdvance}
             isLoading={isLoading}
             error={errors.truckBrand || errors.customBrand}
           />
         );
 
-      // 🆕 Paso 11: Modelo del vehículo base
+      // Paso 11: Modelo del vehículo base
       case 11:
         return (
           <TruckModelSelector
@@ -773,6 +785,7 @@ const CompleteRegistration = () => {
             }
             onSelect={setTruckModel}
             onCustomModelChange={setCustomModel}
+            onAutoAdvance={handleAutoAdvance}
             isLoading={isLoading}
             error={errors.truckModel || errors.customModel}
           />
@@ -790,6 +803,7 @@ const CompleteRegistration = () => {
 
       // Paso 13: Capacidades
       case 13: {
+        const allowedCapabilities = CAPABILITIES_BY_TRUCK_TYPE[truckType] || Object.keys(vehicleCapabilities);
         return (
           <div className="step-content">
             <div className="step-icon">
@@ -801,7 +815,7 @@ const CompleteRegistration = () => {
             </p>
 
             <div className="capabilities-grid">
-              {Object.keys(vehicleCapabilities).map((key) => (
+              {allowedCapabilities.map((key) => (
                 <button
                   key={key}
                   className={`capability-option ${
@@ -817,7 +831,9 @@ const CompleteRegistration = () => {
                   <div className="capability-checkbox">
                     {vehicleCapabilities[key] && "✓"}
                   </div>
-                  <span className="capability-label">{key}</span>
+                  <span className="capability-label">
+                    {CAPABILITY_LABELS[key] || key}
+                  </span>
                 </button>
               ))}
             </div>
@@ -871,32 +887,38 @@ const CompleteRegistration = () => {
           )}
 
           {/* Navigation Buttons */}
-          {!uploadFailed && (
-            <div className="navigation-buttons">
-              <IonButton
-                fill="outline"
-                className="nav-button back-button"
-                onClick={handleBack}
-                disabled={isLoading}
-              >
-                {currentStep === 1 ? "Cancelar" : "Atrás"}
-              </IonButton>
+          {/* En pasos 2-8 (fotos) el componente PhotoUploadStep maneja el Siguiente interno */}
+          {!uploadFailed && (() => {
+            const isPhotoStep = currentStep >= 2 && currentStep <= 8;
+            return (
+              <div className="navigation-buttons">
+                <IonButton
+                  fill="outline"
+                  className={`nav-button back-button ${isPhotoStep ? 'back-button--full' : ''}`}
+                  onClick={handleBack}
+                  disabled={isLoading}
+                >
+                  {currentStep === 1 ? "Cancelar" : "Atrás"}
+                </IonButton>
 
-              <IonButton
-                className="nav-button next-button"
-                onClick={handleNext}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <IonSpinner name="crescent" />
-                ) : currentStep === totalSteps ? (
-                  "Finalizar"
-                ) : (
-                  "Siguiente"
+                {!isPhotoStep && (
+                  <IonButton
+                    className="nav-button next-button"
+                    onClick={handleNext}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <IonSpinner name="crescent" />
+                    ) : currentStep === totalSteps ? (
+                      "Finalizar"
+                    ) : (
+                      "Siguiente"
+                    )}
+                  </IonButton>
                 )}
-              </IonButton>
-            </div>
-          )}
+              </div>
+            );
+          })()}
         </div>
       </IonContent>
     </IonPage>

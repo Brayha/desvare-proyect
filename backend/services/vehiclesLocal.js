@@ -82,10 +82,12 @@ class VehiclesLocalService {
   getModels(brandId, categoryId = null) {
     const models = this.data.models[brandId] || [];
 
-    // Filtrar por categoría si se especifica
+    // Filtrar por categoría si se especifica.
+    // Si el modelo no tiene campo 'category' (modelos nuevos sin metadatos extra),
+    // se incluye igualmente ya que el brandId ya implica la categoría.
     if (categoryId) {
       return models
-        .filter(model => model.category === categoryId)
+        .filter(model => !model.category || model.category === categoryId)
         .map(({ id, name }) => ({ id, name }))
         .sort((a, b) => a.name.localeCompare(b.name));
     }
