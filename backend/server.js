@@ -126,26 +126,28 @@ mongoose.connect(process.env.MONGODB_URI, {
   .then(async () => {
     console.log('✅ Conectado a MongoDB Atlas');
 
-    // ─── Limpiar índice obsoleto phone_1 ───────────────────────────────────
-    // El esquema original tenía unique:true en el campo phone (índice simple).
-    // Ahora usamos un índice compuesto { phone, userType } para permitir que
-    // el mismo número se registre como cliente Y como conductor.
-    // MongoDB no elimina índices viejos automáticamente, hay que hacerlo manual.
+    // ─── Limpiar índices obsoletos ─────────────────────────────────────────
+    // Índices únicos simples que existían en el esquema original y que ahora
+    // causan conflictos (mismo teléfono cliente+conductor, email null, etc.).
+    // MongoDB no los elimina automáticamente al cambiar el esquema.
     try {
       const User = require('./models/User');
       const indexes = await User.collection.indexes();
-      const obsoleteIndex = indexes.find(
-        (idx) => idx.name === 'phone_1' && idx.unique === true
-      );
-      if (obsoleteIndex) {
-        await User.collection.dropIndex('phone_1');
-        console.log('✅ Índice obsoleto phone_1 eliminado — mismo teléfono puede ser cliente y conductor');
+
+      const OBSOLETE_INDEXES = ['phone_1', 'email_1'];
+      for (const indexName of OBSOLETE_INDEXES) {
+        const found = indexes.find((idx) => idx.name === indexName);
+        if (found) {
+          await User.collection.dropIndex(indexName);
+          console.log(`✅ Índice obsoleto "${indexName}" eliminado`);
+        }
       }
-      // Asegurar que el índice compuesto correcto existe
+
+      // Asegurar que el índice compuesto correcto { phone, userType } existe
       await User.syncIndexes();
       console.log('✅ Índices de usuarios sincronizados correctamente');
     } catch (indexErr) {
-      console.warn('⚠️ No se pudo limpiar índice phone_1 (puede que ya no exista):', indexErr.message);
+      console.warn('⚠️ Error al limpiar índices obsoletos:', indexErr.message);
     }
     // ───────────────────────────────────────────────────────────────────────
 

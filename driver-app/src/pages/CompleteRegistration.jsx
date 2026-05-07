@@ -247,7 +247,7 @@ const CompleteRegistration = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [truckBrand, truckType]);
 
-  const totalSteps = 13; // 🆕 Aumentado de 8 a 13 pasos para mejor UX (documentos separados)
+  const totalSteps = 14; // Paso 2 = pantalla introductoria de documentos + 13 pasos originales
   const progress = currentStep / totalSteps;
 
   const validateStep = () => {
@@ -260,21 +260,25 @@ const CompleteRegistration = () => {
         if (!address) newErrors.address = "Ingresa tu dirección";
         break;
 
-      // Paso 2: Cédula (Frente y Atrás)
+      // Paso 2: Intro documentos — sin validación, solo lectura
       case 2:
+        break;
+
+      // Paso 3: Cédula (Frente y Atrás)
+      case 3:
         if (!cedulaFront)
           newErrors.cedulaFront = "Sube la foto frontal de tu cédula";
         if (!cedulaBack)
           newErrors.cedulaBack = "Sube la foto trasera de tu cédula";
         break;
 
-      // Paso 3: Selfie
-      case 3:
+      // Paso 4: Selfie
+      case 4:
         if (!selfie) newErrors.selfie = "Sube una selfie tuya";
         break;
 
-      // Paso 4: Licencia de Tránsito (Frente y Atrás)
-      case 4:
+      // Paso 5: Licencia de Tránsito (Frente y Atrás)
+      case 5:
         if (!licenciaTransitoFront)
           newErrors.licenciaTransitoFront =
             "Sube la licencia de tránsito (frente)";
@@ -283,13 +287,13 @@ const CompleteRegistration = () => {
             "Sube la licencia de tránsito (atrás)";
         break;
 
-      // Paso 5: SOAT
-      case 5:
+      // Paso 6: SOAT
+      case 6:
         if (!soat) newErrors.soat = "Sube el SOAT";
         break;
 
-      // Paso 6: Tarjeta de Propiedad (Frente y Atrás)
-      case 6:
+      // Paso 7: Tarjeta de Propiedad (Frente y Atrás)
+      case 7:
         if (!tarjetaPropiedadFront)
           newErrors.tarjetaPropiedadFront =
             "Sube la tarjeta de propiedad (frente)";
@@ -298,26 +302,25 @@ const CompleteRegistration = () => {
             "Sube la tarjeta de propiedad (atrás)";
         break;
 
-      // Paso 7: Seguro Todo Riesgo (Opcional)
-      case 7:
-        // Opcional, no hay validación requerida
+      // Paso 8: Seguro Todo Riesgo (Opcional)
+      case 8:
         break;
 
-      // Paso 8: Foto de la Grúa
-      case 8:
+      // Paso 9: Foto de la Grúa
+      case 9:
         if (!towTruckPhoto)
           newErrors.towTruckPhoto = "Sube una foto de tu grúa";
         break;
 
-      // Paso 9: Tipo de grúa
-      case 9:
+      // Paso 10: Tipo de grúa
+      case 10:
         if (!truckType) {
           newErrors.truckType = "Selecciona el tipo de grúa";
         }
         break;
 
-      // Paso 10: Marca del vehículo
-      case 10:
+      // Paso 11: Marca del vehículo
+      case 11:
         if (!truckBrand) {
           newErrors.truckBrand = "Selecciona la marca del vehículo";
         } else if (truckBrand.id === "OTHER" && !customBrand.trim()) {
@@ -325,8 +328,8 @@ const CompleteRegistration = () => {
         }
         break;
 
-      // Paso 11: Modelo del vehículo
-      case 11:
+      // Paso 12: Modelo del vehículo
+      case 12:
         if (!truckModel) {
           newErrors.truckModel = "Selecciona el modelo del vehículo";
         } else if (truckModel.id === "OTHER" && !customModel.trim()) {
@@ -334,12 +337,11 @@ const CompleteRegistration = () => {
         }
         break;
 
-      // Paso 12: Placa de la grúa
-      case 12: {
+      // Paso 13: Placa de la grúa
+      case 13: {
         if (!truckPlate || truckPlate.length < 6) {
           newErrors.truckPlate = "Ingresa una placa válida (6 caracteres)";
         }
-        // Validar formato colombiano básico: 3 letras + 3 números/letras
         const plateRegex = /^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$/;
         if (truckPlate && !plateRegex.test(truckPlate)) {
           newErrors.truckPlate = "Formato inválido. Usa ABC123 o ABC12D";
@@ -347,8 +349,8 @@ const CompleteRegistration = () => {
         break;
       }
 
-      // Paso 13: Capacidades
-      case 13: {
+      // Paso 14: Capacidades
+      case 14: {
         const hasCapability = Object.values(vehicleCapabilities).some((v) => v);
         if (!hasCapability) {
           newErrors.capabilities =
@@ -646,13 +648,49 @@ const CompleteRegistration = () => {
           </div>
         );
 
-      // Paso 2: Cédula (Frente y Atrás)
+      // Paso 2: Intro — lista de documentos que se van a pedir
       case 2:
+        return (
+          <div className="step-content docs-intro">
+            <div className="step-icon">
+              <DocumentText size="48" color="#0055FF" variant="Bulk" />
+            </div>
+            <div className="step-title-container">
+              <h2 className="step-title">Ten estos documentos listos</h2>
+              <p className="step-description">
+                A continuación te pediremos fotos de los siguientes documentos. Tenlos a la mano o en tu galería.
+              </p>
+            </div>
+            <div className="docs-intro-list">
+              {[
+                { emoji: '🪪', label: 'Cédula de ciudadanía', detail: 'Frente y reverso' },
+                { emoji: '🤳', label: 'Selfie tuya',           detail: '1 foto' },
+                { emoji: '📋', label: 'Licencia de tránsito', detail: 'Frente y reverso' },
+                { emoji: '🛡️', label: 'SOAT vigente',          detail: '1 foto' },
+                { emoji: '📄', label: 'Tarjeta de propiedad', detail: 'Frente y reverso' },
+                { emoji: '🔒', label: 'Seguro todo riesgo',   detail: '1 foto · Opcional' },
+                { emoji: '🚛', label: 'Foto de tu grúa',      detail: '1 foto' },
+              ].map((doc, i) => (
+                <div key={i} className="docs-intro-item">
+                  <span className="docs-intro-emoji">{doc.emoji}</span>
+                  <div className="docs-intro-info">
+                    <span className="docs-intro-label">{doc.label}</span>
+                    <span className="docs-intro-detail">{doc.detail}</span>
+                  </div>
+                  <span className="docs-intro-check">✓</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Paso 3: Cédula (Frente y Atrás)
+      case 3:
         return (
           <PhotoUploadStep
             image={idCardImage}
             title="Fotos de tu cédula"
-            description="Necesitamos que le tomes foto a tu cédula por delante y por detrás"
+            description="Toma foto a tu cédula por delante y por detrás"
             photos={[
               { label: 'Foto de frente', file: cedulaFront, onChange: handleFileChange(setCedulaFront), error: errors.cedulaFront },
               { label: 'Foto por detrás', file: cedulaBack,  onChange: handleFileChange(setCedulaBack),  error: errors.cedulaBack  },
@@ -661,8 +699,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 3: Selfie
-      case 3:
+      // Paso 4: Selfie
+      case 4:
         return (
           <PhotoUploadStep
             image={selfieImage}
@@ -675,13 +713,13 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 4: Licencia de Tránsito (Frente y Atrás)
-      case 4:
+      // Paso 5: Licencia de Tránsito (Frente y Atrás)
+      case 5:
         return (
           <PhotoUploadStep
             image={licenseImage}
             title="Licencia de tránsito"
-            description="Necesitamos que le tomes foto a tu licencia de tránsito por delante y por detrás"
+            description="Toma foto a tu licencia de tránsito por delante y por detrás"
             photos={[
               { label: 'Foto de frente', file: licenciaTransitoFront, onChange: handleFileChange(setLicenciaTransitoFront), error: errors.licenciaTransitoFront },
               { label: 'Foto por detrás', file: licenciaTransitoBack,  onChange: handleFileChange(setLicenciaTransitoBack),  error: errors.licenciaTransitoBack  },
@@ -690,13 +728,13 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 5: SOAT
-      case 5:
+      // Paso 6: SOAT
+      case 6:
         return (
           <PhotoUploadStep
             image={soatImage}
             title="Seguro SOAT"
-            description="Por nuestra seguridad y la del cliente, necesitamos ver que estás al día con el SOAT"
+            description="Necesitamos ver que estás al día con el SOAT"
             photos={[
               { label: 'Foto del SOAT', file: soat, onChange: handleFileChange(setSoat), error: errors.soat },
             ]}
@@ -704,13 +742,13 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 6: Tarjeta de Propiedad (Frente y Atrás)
-      case 6:
+      // Paso 7: Tarjeta de Propiedad (Frente y Atrás)
+      case 7:
         return (
           <PhotoUploadStep
             image={propertyImage}
             title="Tarjeta de propiedad"
-            description="Necesitamos saber de quién es la grúa que recogerá el vehículo del cliente"
+            description="Necesitamos saber de quién es la grúa"
             photos={[
               { label: 'Foto de frente', file: tarjetaPropiedadFront, onChange: handleFileChange(setTarjetaPropiedadFront), error: errors.tarjetaPropiedadFront },
               { label: 'Foto por detrás', file: tarjetaPropiedadBack,  onChange: handleFileChange(setTarjetaPropiedadBack),  error: errors.tarjetaPropiedadBack  },
@@ -719,13 +757,13 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 7: Seguro Todo Riesgo (Opcional)
-      case 7:
+      // Paso 8: Seguro Todo Riesgo (Opcional)
+      case 8:
         return (
           <PhotoUploadStep
             image={securityImage}
             title="Seguro todo riesgo"
-            description="Esto nos ayudará con los clientes cuyos vehículos están en patios de movilidad"
+            description="Ayuda a clientes con vehículos en patios de movilidad"
             photos={[
               { label: 'Foto del seguro', file: seguroTodoRiesgo, onChange: handleFileChange(setSeguroTodoRiesgo), error: errors.seguroTodoRiesgo },
             ]}
@@ -734,8 +772,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 8: Foto de la Grúa
-      case 8:
+      // Paso 9: Foto de la Grúa
+      case 9:
         return (
           <PhotoUploadStep
             image={truckImage}
@@ -748,8 +786,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 9: Tipo de grúa
-      case 9:
+      // Paso 10: Tipo de grúa
+      case 10:
         return (
           <TruckTypeSelector
             selectedType={truckType}
@@ -758,8 +796,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 10: Marca del vehículo base
-      case 10:
+      // Paso 11: Marca del vehículo base
+      case 11:
         return (
           <TruckBrandSelector
             brands={truckBrands}
@@ -773,8 +811,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 11: Modelo del vehículo base
-      case 11:
+      // Paso 12: Modelo del vehículo base
+      case 12:
         return (
           <TruckModelSelector
             models={truckModels}
@@ -791,8 +829,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // 🆕 Paso 12: Placa de la grúa
-      case 12:
+      // Paso 13: Placa de la grúa
+      case 13:
         return (
           <TruckPlateInput
             plate={truckPlate}
@@ -801,8 +839,8 @@ const CompleteRegistration = () => {
           />
         );
 
-      // Paso 13: Capacidades
-      case 13: {
+      // Paso 14: Capacidades
+      case 14: {
         const allowedCapabilities = CAPABILITIES_BY_TRUCK_TYPE[truckType] || Object.keys(vehicleCapabilities);
         return (
           <div className="step-content">
@@ -887,35 +925,36 @@ const CompleteRegistration = () => {
           )}
 
           {/* Navigation Buttons */}
-          {/* En pasos 2-8 (fotos) el componente PhotoUploadStep maneja el Siguiente interno */}
+          {/* En pasos 3-9 (fotos) PhotoUploadStep maneja el avance; sin botones — swipe para volver */}
           {!uploadFailed && (() => {
-            const isPhotoStep = currentStep >= 2 && currentStep <= 8;
+            const isPhotoStep = currentStep >= 3 && currentStep <= 9;
+            if (isPhotoStep) return null; // Sin botones en pasos de fotos
             return (
               <div className="navigation-buttons">
                 <IonButton
                   fill="outline"
-                  className={`nav-button back-button ${isPhotoStep ? 'back-button--full' : ''}`}
+                  className="nav-button back-button"
                   onClick={handleBack}
                   disabled={isLoading}
                 >
                   {currentStep === 1 ? "Cancelar" : "Atrás"}
                 </IonButton>
 
-                {!isPhotoStep && (
-                  <IonButton
-                    className="nav-button next-button"
-                    onClick={handleNext}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <IonSpinner name="crescent" />
-                    ) : currentStep === totalSteps ? (
-                      "Finalizar"
-                    ) : (
-                      "Siguiente"
-                    )}
-                  </IonButton>
-                )}
+                <IonButton
+                  className="nav-button next-button"
+                  onClick={handleNext}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <IonSpinner name="crescent" />
+                  ) : currentStep === totalSteps ? (
+                    "Finalizar"
+                  ) : currentStep === 2 ? (
+                    "¡Los tengo listos!"
+                  ) : (
+                    "Siguiente"
+                  )}
+                </IonButton>
               </div>
             );
           })()}

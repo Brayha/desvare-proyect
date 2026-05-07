@@ -474,6 +474,63 @@ ion-select::part(container) {
   }
 }
 
+/* ======================================
+   PANTALLA INTRODUCTORIA DE DOCUMENTOS
+   ====================================== */
+.docs-intro {
+  gap: 0;
+}
+
+.docs-intro-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.docs-intro-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 13px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.docs-intro-emoji {
+  font-size: 22px;
+  min-width: 28px;
+  text-align: center;
+}
+
+.docs-intro-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.docs-intro-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.docs-intro-detail {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.docs-intro-check {
+  font-size: 16px;
+  color: #0055ff;
+  font-weight: 700;
+}
+
 .submit-error-box {
   background-color: #fef2f2;
   border: 1px solid #fca5a5;

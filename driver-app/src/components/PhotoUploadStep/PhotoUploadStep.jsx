@@ -27,8 +27,8 @@ const PhotoUploadStep = ({
   // 0 = grande, 1 = mediana, 2 = pequeña
   const imageStage = Math.min(uploadedCount, 2);
 
-  // Modo grilla (dos previews lado a lado) cuando ambas están listas
-  const gridMode = allDone && totalPhotos === 2;
+  // Modo grilla: lado a lado en cuanto la segunda zona aparece (primera foto cargada)
+  const gridMode = photos[0].file != null && totalPhotos === 2;
 
   return (
     <div className="pus-container">
