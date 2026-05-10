@@ -10,7 +10,7 @@ import './TruckTypeSelector.css';
  *  - GRUA_LIVIANA: camiones medianos para autos y camionetas
  *  - GRUA_PESADA:  camiones grandes para camiones, buses y tractomulas
  */
-const TruckTypeSelector = ({ selectedType, onSelect, error }) => {
+const TruckTypeSelector = ({ selectedType, onSelect, onAutoAdvance, error }) => {
   const truckTypes = [
     {
       id: 'GRUA_MOTO',
@@ -56,7 +56,10 @@ const TruckTypeSelector = ({ selectedType, onSelect, error }) => {
           <div
             key={type.id}
             className={`truck-type-card ${selectedType === type.id ? 'selected' : ''}`}
-            onClick={() => onSelect(type.id)}
+            onClick={() => {
+              onSelect(type.id);
+              if (onAutoAdvance) setTimeout(onAutoAdvance, 200);
+            }}
           >
             <div className="truck-type-icon">{type.icon}</div>
             <div className="truck-type-content">

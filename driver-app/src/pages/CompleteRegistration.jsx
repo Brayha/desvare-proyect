@@ -581,54 +581,61 @@ const CompleteRegistration = () => {
   };
 
   /**
-   * Comprime la imagen a máximo 1200px en su lado mayor y la convierte a JPEG al 75%.
-   * Reduce el payload de ~5MB por foto a ~200-400KB, evitando timeouts y errores de memoria.
-   * Si el canvas falla (entorno sin soporte), cae al FileReader original.
+   * Comprime la imagen a máximo 1200px usando FileReader (compatible con Capacitor/Android WebView).
+   * URL.createObjectURL no es confiable en WebView de Capacitor, por eso leemos con FileReader primero.
+   * Si el canvas falla, devuelve el DataURL original sin comprimir.
    */
   const compressAndConvertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
-      const objectUrl = URL.createObjectURL(file);
-      const img = new Image();
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
 
-      img.onload = () => {
-        URL.revokeObjectURL(objectUrl);
+      reader.onerror = () => reject(new Error(`FileReader falló para: ${file.name}`));
+
+      reader.onload = (e) => {
+        const originalDataUrl = e.target.result;
         try {
-          const MAX_DIM = 1200;
-          let { width, height } = img;
-          if (width > MAX_DIM || height > MAX_DIM) {
-            if (width >= height) {
-              height = Math.round((height * MAX_DIM) / width);
-              width = MAX_DIM;
-            } else {
-              width = Math.round((width * MAX_DIM) / height);
-              height = MAX_DIM;
+          const img = new Image();
+
+          img.onerror = () => {
+            // La imagen no se pudo cargar desde el DataURL → devolver sin comprimir
+            console.warn(`⚠️ No se pudo cargar imagen para comprimir, usando original: ${file.name}`);
+            resolve(originalDataUrl);
+          };
+
+          img.onload = () => {
+            try {
+              const MAX_DIM = 1200;
+              let { width, height } = img;
+              if (width > MAX_DIM || height > MAX_DIM) {
+                if (width >= height) {
+                  height = Math.round((height * MAX_DIM) / width);
+                  width = MAX_DIM;
+                } else {
+                  width = Math.round((width * MAX_DIM) / height);
+                  height = MAX_DIM;
+                }
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressed = canvas.toDataURL('image/jpeg', 0.75);
+              console.log(`✅ Comprimida: ${file.name} (${Math.round(compressed.length / 1024)}KB)`);
+              resolve(compressed);
+            } catch {
+              // Canvas no disponible o falló → usar original
+              console.warn(`⚠️ Canvas falló, usando original: ${file.name}`);
+              resolve(originalDataUrl);
             }
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.75));
+          };
+
+          img.src = originalDataUrl;
         } catch {
-          // Canvas no disponible → FileReader como fallback
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
+          resolve(originalDataUrl);
         }
       };
-
-      img.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
-        // Imagen no cargó en el elemento img → FileReader como fallback
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-      };
-
-      img.src = objectUrl;
     });
   };
 
@@ -846,6 +853,7 @@ const CompleteRegistration = () => {
           <TruckTypeSelector
             selectedType={truckType}
             onSelect={setTruckType}
+            onAutoAdvance={handleNext}
             error={errors.truckType}
           />
         );
