@@ -30,6 +30,40 @@
   margin-bottom: 24px;
 }
 
+/* Variante para pasos con botón ← (10-12) */
+.step-indicator--with-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.step-indicator--with-back span {
+  flex: 1;
+  text-align: center;
+}
+
+/* Botón icono ← discreto en esquina izquierda */
+.step-back-icon {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s;
+}
+
+.step-back-icon:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
 /* ======================================
    STEP CONTENT
    ====================================== */

@@ -20,6 +20,7 @@ import {
   Camera,
   Truck,
   Map,
+  ArrowLeft,
 } from "iconsax-react";
 import { authAPI, citiesAPI, vehicleAPI } from "../services/api";
 import { Input } from "../components/Input/Input";
@@ -460,37 +461,48 @@ const CompleteRegistration = () => {
   const uploadDocuments = async (userId) => {
     console.log("📤 Preparando documentos para subir...");
 
-    const documents = [];
     const fileMap = [
-      { file: cedulaFront, type: "cedula-front" },
-      { file: cedulaBack, type: "cedula-back" },
-      { file: selfie, type: "selfie" },
-      { file: licenciaTransitoFront, type: "licencia-front" },
-      { file: licenciaTransitoBack, type: "licencia-back" },
-      { file: soat, type: "soat" },
+      { file: cedulaFront,           type: "cedula-front"  },
+      { file: cedulaBack,            type: "cedula-back"   },
+      { file: selfie,                type: "selfie"        },
+      { file: licenciaTransitoFront, type: "licencia-front"},
+      { file: licenciaTransitoBack,  type: "licencia-back" },
+      { file: soat,                  type: "soat"          },
       { file: tarjetaPropiedadFront, type: "tarjeta-front" },
-      { file: tarjetaPropiedadBack, type: "tarjeta-back" },
-      { file: seguroTodoRiesgo, type: "seguro" },
-      { file: towTruckPhoto, type: "grua-photo" },
+      { file: tarjetaPropiedadBack,  type: "tarjeta-back"  },
+      { file: seguroTodoRiesgo,      type: "seguro"        },
+      { file: towTruckPhoto,         type: "grua-photo"    },
     ];
 
-    for (const { file, type } of fileMap) {
-      if (file) {
-        const base64 = await fileToBase64(file);
-        documents.push({ file: base64, documentType: type });
+    // ── Paso B-1: Comprimir y convertir a base64 ────────────────────────────
+    let documents = [];
+    try {
+      for (const { file, type } of fileMap) {
+        if (file) {
+          console.log(`🗜️ Comprimiendo ${type}...`);
+          const base64 = await compressAndConvertToBase64(file);
+          documents.push({ file: base64, documentType: type });
+        }
       }
+      console.log(`📎 ${documents.length} documentos listos para subir`);
+    } catch (compressError) {
+      console.error("❌ Error al procesar imágenes:", compressError);
+      setUploadFailed(true);
+      setSubmitError(
+        "Hubo un problema al preparar las fotos. " +
+        "Verifica que los archivos no estén dañados e intenta de nuevo."
+      );
+      setIsLoading(false);
+      return;
     }
 
-    console.log(`📎 Subiendo ${documents.length} documentos...`);
-
+    // ── Paso B-2: Enviar al servidor ────────────────────────────────────────
     try {
       await authAPI.uploadDriverDocuments({ userId, documents });
       console.log("✅ Documentos subidos");
       setDocumentsUploaded(true);
     } catch (uploadError) {
       console.error("❌ Error subiendo documentos:", uploadError);
-      // Los datos básicos ya se guardaron (Paso A fue exitoso).
-      // Permitir reintento sin repetir el Paso A.
       setUploadFailed(true);
       setSubmitError(
         "Tus datos se guardaron pero hubo un problema al subir las fotos. " +
@@ -500,7 +512,7 @@ const CompleteRegistration = () => {
       return;
     }
 
-    // Paso C: Capacidades
+    // ── Paso C: Guardar capacidades ─────────────────────────────────────────
     const selectedCapabilities = Object.keys(vehicleCapabilities).filter(
       (key) => vehicleCapabilities[key]
     );
@@ -568,13 +580,55 @@ const CompleteRegistration = () => {
     }
   };
 
-  // Función para convertir archivo a base64
-  const fileToBase64 = (file) => {
+  /**
+   * Comprime la imagen a máximo 1200px en su lado mayor y la convierte a JPEG al 75%.
+   * Reduce el payload de ~5MB por foto a ~200-400KB, evitando timeouts y errores de memoria.
+   * Si el canvas falla (entorno sin soporte), cae al FileReader original.
+   */
+  const compressAndConvertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        try {
+          const MAX_DIM = 1200;
+          let { width, height } = img;
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width >= height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.75));
+        } catch {
+          // Canvas no disponible → FileReader como fallback
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        // Imagen no cargó en el elemento img → FileReader como fallback
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+      };
+
+      img.src = objectUrl;
     });
   };
 
@@ -898,7 +952,17 @@ const CompleteRegistration = () => {
 
         <div className="complete-registration-container">
           {/* Step Indicator */}
-          <div className="step-indicator">
+          <div className={`step-indicator${currentStep >= 10 && currentStep <= 12 ? ' step-indicator--with-back' : ''}`}>
+            {currentStep >= 10 && currentStep <= 12 && (
+              <button
+                className="step-back-icon"
+                onClick={handleBack}
+                disabled={isLoading}
+                aria-label="Volver"
+              >
+                <ArrowLeft size={22} color="#374151" />
+              </button>
+            )}
             <span>
               Paso {currentStep} de {totalSteps}
             </span>
@@ -925,10 +989,17 @@ const CompleteRegistration = () => {
           )}
 
           {/* Navigation Buttons */}
-          {/* En pasos 3-9 (fotos) PhotoUploadStep maneja el avance; sin botones — swipe para volver */}
+          {/* Pasos 3-9 (fotos): sin botones, PhotoUploadStep controla el avance */}
+          {/* Pasos 10-12 (selectores con auto-advance): solo ← icono arriba    */}
+          {/* Resto de pasos: botones Atrás + Siguiente/Finalizar normales       */}
           {!uploadFailed && (() => {
-            const isPhotoStep = currentStep >= 3 && currentStep <= 9;
-            if (isPhotoStep) return null; // Sin botones en pasos de fotos
+            const isPhotoStep    = currentStep >= 3  && currentStep <= 9;
+            const isSelectorStep = currentStep >= 10 && currentStep <= 12;
+
+            if (isPhotoStep) return null;
+
+            if (isSelectorStep) return null; // el ← se renderiza en el step-indicator
+
             return (
               <div className="navigation-buttons">
                 <IonButton
