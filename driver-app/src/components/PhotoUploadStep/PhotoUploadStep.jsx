@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Camera, TickCircle } from 'iconsax-react';
 import './PhotoUploadStep.css';
 
@@ -88,20 +88,13 @@ const PhotoUploadStep = ({
 /* ─────────────────────────────────────────────
    Zona individual de carga / preview
 ───────────────────────────────────────────── */
+/**
+ * file ahora es un DataURL (string base64) en lugar de un File object.
+ * Se convierte en handleFileChange al momento de seleccionar, lo que evita
+ * que Android WebView invalide la referencia al archivo al desmontar el componente.
+ */
 const PhotoZone = ({ label, file, onChange, error, compact }) => {
   const inputRef = useRef(null);
-
-  // Crear object URL una sola vez por archivo y revocarla al desmontar
-  const objectUrl = useMemo(() => {
-    if (!file) return null;
-    return URL.createObjectURL(file);
-  }, [file]);
-
-  useEffect(() => {
-    return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [objectUrl]);
 
   return (
     <div
@@ -120,9 +113,9 @@ const PhotoZone = ({ label, file, onChange, error, compact }) => {
       />
 
       {file ? (
-        /* Preview de la foto cargada */
+        /* Preview usando el DataURL directamente como src */
         <div className="pus-zone-preview" onClick={() => inputRef.current?.click()}>
-          <img src={objectUrl} alt={label} className="pus-preview-img" />
+          <img src={file} alt={label} className="pus-preview-img" />
           <div className="pus-preview-footer">
             <TickCircle size="18" color="#10B981" variant="Bold" />
             <span className="pus-preview-label">{label}</span>

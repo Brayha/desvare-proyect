@@ -461,6 +461,7 @@ const CompleteRegistration = () => {
   const uploadDocuments = async (userId) => {
     console.log("📤 Preparando documentos para subir...");
 
+    // Las fotos ya están en DataURL (se comprimen al seleccionar), solo mapear.
     const fileMap = [
       { file: cedulaFront,           type: "cedula-front"  },
       { file: cedulaBack,            type: "cedula-back"   },
@@ -474,29 +475,13 @@ const CompleteRegistration = () => {
       { file: towTruckPhoto,         type: "grua-photo"    },
     ];
 
-    // ── Paso B-1: Comprimir y convertir a base64 ────────────────────────────
-    let documents = [];
-    try {
-      for (const { file, type } of fileMap) {
-        if (file) {
-          console.log(`🗜️ Comprimiendo ${type}...`);
-          const base64 = await compressAndConvertToBase64(file);
-          documents.push({ file: base64, documentType: type });
-        }
-      }
-      console.log(`📎 ${documents.length} documentos listos para subir`);
-    } catch (compressError) {
-      console.error("❌ Error al procesar imágenes:", compressError);
-      setUploadFailed(true);
-      setSubmitError(
-        "Hubo un problema al preparar las fotos. " +
-        "Verifica que los archivos no estén dañados e intenta de nuevo."
-      );
-      setIsLoading(false);
-      return;
-    }
+    const documents = fileMap
+      .filter(({ file }) => file != null)
+      .map(({ file, type }) => ({ file, documentType: type }));
 
-    // ── Paso B-2: Enviar al servidor ────────────────────────────────────────
+    console.log(`📎 ${documents.length} documentos listos para subir`);
+
+    // ── Paso B: Enviar al servidor ───────────────────────────────────────────
     try {
       await authAPI.uploadDriverDocuments({ userId, documents });
       console.log("✅ Documentos subidos");
@@ -573,70 +558,64 @@ const CompleteRegistration = () => {
     setIsLoading(false);
   };
 
-  const handleFileChange = (setter) => async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setter(file);
-    }
-  };
-
   /**
-   * Comprime la imagen a máximo 1200px usando FileReader (compatible con Capacitor/Android WebView).
-   * URL.createObjectURL no es confiable en WebView de Capacitor, por eso leemos con FileReader primero.
-   * Si el canvas falla, devuelve el DataURL original sin comprimir.
+   * Convierte y comprime la imagen inmediatamente al seleccionarla.
+   * Almacenar DataURL en lugar de File object evita que Android WebView invalide
+   * la referencia al archivo cuando el componente se desmonta al cambiar de paso.
    */
-  const compressAndConvertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
+  const handleFileChange = (setter) => (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-      reader.onerror = () => reject(new Error(`FileReader falló para: ${file.name}`));
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
 
-      reader.onload = (e) => {
-        const originalDataUrl = e.target.result;
-        try {
-          const img = new Image();
+    reader.onerror = () => {
+      console.error(`❌ FileReader falló leyendo: ${file.name}`);
+    };
 
-          img.onerror = () => {
-            // La imagen no se pudo cargar desde el DataURL → devolver sin comprimir
-            console.warn(`⚠️ No se pudo cargar imagen para comprimir, usando original: ${file.name}`);
-            resolve(originalDataUrl);
-          };
+    reader.onload = (evt) => {
+      const originalDataUrl = evt.target.result;
+      try {
+        const img = new Image();
 
-          img.onload = () => {
-            try {
-              const MAX_DIM = 1200;
-              let { width, height } = img;
-              if (width > MAX_DIM || height > MAX_DIM) {
-                if (width >= height) {
-                  height = Math.round((height * MAX_DIM) / width);
-                  width = MAX_DIM;
-                } else {
-                  width = Math.round((width * MAX_DIM) / height);
-                  height = MAX_DIM;
-                }
+        img.onerror = () => {
+          console.warn(`⚠️ Imagen no cargó para comprimir, guardando original: ${file.name}`);
+          setter(originalDataUrl);
+        };
+
+        img.onload = () => {
+          try {
+            const MAX_DIM = 1200;
+            let { width, height } = img;
+            if (width > MAX_DIM || height > MAX_DIM) {
+              if (width >= height) {
+                height = Math.round((height * MAX_DIM) / width);
+                width = MAX_DIM;
+              } else {
+                width = Math.round((width * MAX_DIM) / height);
+                height = MAX_DIM;
               }
-              const canvas = document.createElement('canvas');
-              canvas.width = width;
-              canvas.height = height;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, width, height);
-              const compressed = canvas.toDataURL('image/jpeg', 0.75);
-              console.log(`✅ Comprimida: ${file.name} (${Math.round(compressed.length / 1024)}KB)`);
-              resolve(compressed);
-            } catch {
-              // Canvas no disponible o falló → usar original
-              console.warn(`⚠️ Canvas falló, usando original: ${file.name}`);
-              resolve(originalDataUrl);
             }
-          };
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.75);
+            console.log(`✅ Foto lista: ${Math.round(compressed.length / 1024)}KB (${file.name})`);
+            setter(compressed);
+          } catch {
+            console.warn(`⚠️ Canvas falló, guardando original: ${file.name}`);
+            setter(originalDataUrl);
+          }
+        };
 
-          img.src = originalDataUrl;
-        } catch {
-          resolve(originalDataUrl);
-        }
-      };
-    });
+        img.src = originalDataUrl;
+      } catch {
+        setter(originalDataUrl);
+      }
+    };
   };
 
   const renderStepContent = () => {
