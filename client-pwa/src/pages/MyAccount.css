@@ -271,8 +271,32 @@
 
 .auth-logo-profile {
   display: flex;
+  align-items: center;
   justify-content: center;
+  position: relative;
   margin: 0 auto;
+  width: 100%;
+}
+
+/* Botón ← para volver al mapa */
+.my-account-back-btn {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s;
+}
+
+.my-account-back-btn:active {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .options-profile {

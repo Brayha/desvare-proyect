@@ -832,7 +832,7 @@ const CompleteRegistration = () => {
           <TruckTypeSelector
             selectedType={truckType}
             onSelect={setTruckType}
-            onAutoAdvance={handleNext}
+            onAutoAdvance={handleAutoAdvance}
             error={errors.truckType}
           />
         );

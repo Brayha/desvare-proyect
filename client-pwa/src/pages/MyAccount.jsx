@@ -6,6 +6,8 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
+  IonButtons,
+  IonBackButton,
   IonIcon,
   IonText,
   IonAvatar,
@@ -180,6 +182,9 @@ Mi consulta es: `;
       <IonPage>
         <IonHeader>
           <IonToolbar>
+            <IonButtons slot="start">
+              <IonBackButton defaultHref="/tabs/desvare" text="Volver" />
+            </IonButtons>
             <IonTitle>Mi cuenta</IonTitle>
           </IonToolbar>
         </IonHeader>
@@ -213,6 +218,15 @@ Mi consulta es: `;
       <IonContent className="my-account-page">
         <div className="my-account-content">
           <div className="auth-logo-profile">
+            <button
+              className="my-account-back-btn"
+              onClick={() => history.replace("/tabs/desvare")}
+              aria-label="Volver al mapa"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z" fill="#374151"/>
+              </svg>
+            </button>
             <img src={logo} alt="Desvare" className="auth-logo" />
           </div>
 
