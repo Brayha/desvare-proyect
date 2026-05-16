@@ -10,7 +10,10 @@
 .fullscreen-map {
   display: flex;
   width: 100%;
-  height: 100%;
+  /* --real-vh se calcula en App.jsx con visualViewport para obtener la altura
+     real del navegador móvil (descuenta la barra de direcciones cuando está visible).
+     Fallback a 100vh para escritorio donde no hay barra de direcciones dinámica. */
+  height: var(--real-vh, 100vh);
   flex-direction: column;
   align-items: flex-start;
   gap: -40px;
