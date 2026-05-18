@@ -12,27 +12,27 @@
   gap: 16px;
 }
 
-.selector-header h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0;
-}
+.selector-brands-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  height: 100%;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid var(--desvare-medium);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.24);
+} 
 
-.selector-header p {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 4px 0 0 0;
-}
 
 .brand-searchbar {
   --background: white;
   --border-radius: 12px;
   --box-shadow: none;
-  --icon-color: var(--desvare-primary);
-  border: 1px solid var(--desvare-medium);
+  --icon-color: var(--desvare-dark);
+  border: 0px;
   padding: 0;
   border-radius: 12px;
+  font-weight: 500;
 }
 
 .loading-container {
@@ -47,10 +47,9 @@
 .brands-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0px;
   overflow-y: auto;
   flex: 1;
-  padding-bottom: 20px;
 }
 
 .brand-item {
@@ -58,9 +57,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  padding: 20px;
+  border-top: 1px solid var(--desvare-medium);
+  border-radius: 0px;
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -78,17 +77,29 @@
 }
 
 .brand-item-other {
-  border-style: dashed;
-  border-color: #9ca3af;
+  background-color:var(--desvare-medium);
+  padding: 10px;
 }
 
 .brand-item-other:hover {
-  border-color: var(--desvare-primary);
-  border-style: solid;
+  border: none;
 }
 
 .brand-content {
   flex: 1;
+}
+
+.brand-content-add {
+  width: 100%;
+  height: auto;
+  background-color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid var(--desvare-medium);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
 }
 
 .brand-name {
@@ -141,7 +152,6 @@
   padding: 16px;
   background: #f9fafb;
   border-radius: 12px;
-  border: 2px dashed var(--desvare-primary);
   animation: slideDown 0.3s ease;
 }
 
@@ -175,6 +185,31 @@
 .error-message {
   margin-top: -8px;
   padding: 0 4px;
+}
+
+/* Botón confirmar marca personalizada */
+.custom-brand-confirm-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--desvare-primary, #0066FF);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.custom-brand-confirm-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.custom-brand-confirm-btn:not(:disabled):active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 /* Responsive */

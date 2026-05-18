@@ -21,6 +21,12 @@ export const initializePushNotifications = async (driverId) => {
     return false;
   }
 
+  // En modo DEV (navegador) FCM no está disponible — se omite sin errores
+  if (import.meta.env.VITE_DEV_MODE === 'true') {
+    console.log('🔧 [DEV_MODE] Push notifications omitidas — no disponibles en navegador web');
+    return false;
+  }
+
   try {
     console.log('🔔 Inicializando push notifications para conductor:', driverId);
 

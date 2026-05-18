@@ -517,11 +517,9 @@ const Home = () => {
 
   // Abrir detalle de solicitud o detalle de cotización
   const handleQuote = (request) => {
-    // Verificar si ya cotizó esta solicitud (desde el backend)
-    const user = JSON.parse(localStorage.getItem('user'));
-    
-    // Validar que user existe y tiene _id
-    if (!user || !user._id) {
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+
+    if (!currentUser || !currentUser._id) {
       console.error('❌ Error: user no está definido o no tiene _id');
       present({
         message: '⚠️ Error: Usuario no cargado. Intenta de nuevo.',
@@ -530,17 +528,23 @@ const Home = () => {
       });
       return;
     }
-    
-    const myQuote = request.quotes?.find(q => q.driverId === user._id);
-    
+
+    const myQuote = request.quotes?.find(q => q.driverId === currentUser._id);
+
     if (myQuote) {
-      // Ya cotizó, navegar al detalle de la cotización
       history.push(`/quote-detail/${request.requestId}`);
     } else {
-      // No ha cotizado, navegar a ver el detalle de la solicitud
+      // Guardar en localStorage como respaldo: Ionic puede perder location.state
+      // en ciertos ciclos del lifecycle (re-mount, hot-reload, push notification resume)
+      localStorage.setItem('pendingRequestDetail', JSON.stringify(request));
+      if (driverLocation) {
+        localStorage.setItem('pendingDriverLocation', JSON.stringify(driverLocation));
+      } else {
+        localStorage.removeItem('pendingDriverLocation');
+      }
       history.push('/request-detail', {
         request: request,
-        driverLocation: driverLocation
+        driverLocation: driverLocation,
       });
     }
   };
@@ -683,13 +687,12 @@ const Home = () => {
         {/* Banner de notificaciones denegadas */}
         {notifDenied && (
           <div className="location-banner location-banner-error">
-            <span style={{ fontSize: 28, flexShrink: 0 }}>🔕</span>
+            <span style={{ fontSize: 24, flexShrink: 0 }}>🔕</span>
             <div className="location-text">
               <span className="location-title">Notificaciones desactivadas</span>
               <span className="location-subtitle">No recibirás avisos de nuevos servicios</span>
             </div>
             <button className="location-action-btn" onClick={handleRequestNotifPermission}>
-              <span style={{ fontSize: 16 }}>🔔</span>
               <span>Activar</span>
             </button>
           </div>
@@ -728,20 +731,21 @@ const Home = () => {
             </IonText>
           </div>
         ) : (
-          requests.map((request) => {
-            // Buscar si este conductor ya cotizó esta solicitud (desde el backend)
-            const user = JSON.parse(localStorage.getItem('user'));
-            const myQuote = request.quotes?.find(q => q.driverId === user._id);
-            
-            return (
-              <RequestCard 
-                key={request.requestId} 
-                request={request} 
-                onQuote={handleQuote}
-                myQuote={myQuote}
-              />
-            );
-          })
+          (() => {
+            // Leer user una sola vez fuera del map, no N veces por cada solicitud
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            return requests.map((request) => {
+              const myQuote = request.quotes?.find(q => q.driverId === currentUser?._id);
+              return (
+                <RequestCard
+                  key={request.requestId}
+                  request={request}
+                  onQuote={handleQuote}
+                  myQuote={myQuote}
+                />
+              );
+            });
+          })()
         )}
 
         {/* Modal de cotización */}

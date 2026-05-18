@@ -20,7 +20,35 @@
 .location-section-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 24px;
+}
+
+/* Ícono de ubicación en la tarjeta (origen/destino) */
+.rc-location-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #e5e7eb;
+  position: relative;
+  z-index: 1;
+}
+
+/* Línea punteada que conecta origen con destino */
+.rc-location-icon-with-line::after {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 28px;
+  border-left: 2px dashed #CBD5E1;
+  z-index: 0;
 }
 
 .card-service-header {
@@ -95,7 +123,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 4px;
+  padding: 0px;
   background: #f5f5f5;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
@@ -130,7 +158,6 @@
   justify-content: center;
   align-items: flex-start;
   flex: 1 0 0;
-  border-right: 1px solid #e5e7eb;
 }
 
 .vehicle-brand {
@@ -219,7 +246,7 @@
 
 .location-label {
   display: block;
-  font-size: 12px;
+  font-size: 10px;
   margin-bottom: 2px;
 }
 

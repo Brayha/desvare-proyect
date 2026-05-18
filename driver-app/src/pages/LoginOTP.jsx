@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonSpinner, IonText } from '@ionic/react';
 import { authAPI } from '../services/api';
 import { PhoneInput } from '../components/PhoneInput/PhoneInput';
-import DesvareLogoWhite from '../assets/img/Desvare-white.svg';
+import DesvareLogoWhite from '../assets/img/Desvare.svg';
 import './LoginOTP.css';
 
 /**

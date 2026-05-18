@@ -44,9 +44,11 @@ const TruckModelSelector = ({
       <div className="selector-header">
         <IonText>
           <h2>Modelo del vehículo</h2>
-          <p>Selecciona el modelo de {brandName || 'tu vehículo'}</p>
+          <p>Selecciona el modelo de <span className='brand-selected'>{brandName || 'tu vehículo'}</span> </p>
         </IonText>
       </div>
+      
+      <div className="selector-models-container">
 
       {/* Buscador */}
       <IonSearchbar
@@ -85,15 +87,12 @@ const TruckModelSelector = ({
 
             {/* Opción "Otro" */}
             <div
-              className={`model-item model-item-other ${selectedModel?.id === 'OTHER' ? 'selected' : ''}`}
+              className={` model-item-other ${selectedModel?.id === 'OTHER' ? 'selected' : ''}`}
               onClick={handleOtherSelect}
             >
-              <div className="model-content">
-                <span className="model-name">✏️ Otro (Escribir modelo)</span>
+              <div className="model-content-add">
+                <span className="model-name">✏️ Otro modelo (Escribir modelo)</span>
               </div>
-              {selectedModel?.id === 'OTHER' && (
-                <div className="model-check">✓</div>
-              )}
             </div>
 
             {filteredModels.length === 0 && searchText && (
@@ -118,12 +117,20 @@ const TruckModelSelector = ({
                 placeholder="Ej: NPR 4.5, FRR, etc."
                 className="custom-input"
                 clearInput
+                autoFocus
               />
+              <button
+                className="custom-model-confirm-btn"
+                onClick={onAutoAdvance}
+                disabled={!customModel || !customModel.trim()}
+              >
+                Confirmar modelo →
+              </button>
             </div>
           )}
         </>
       )}
-
+      </div>
       {error && (
         <IonText color="danger" className="error-message">
           <small>{error}</small>

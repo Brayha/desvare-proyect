@@ -1,28 +1,39 @@
 .truck-type-selector {
-  padding: 20px;
+  padding: 0px;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.selector-header {
+.selector-header-truck-type {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 0px;
   margin-bottom: 8px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  img {
+    width: 60%;
+    object-fit: contain;
+    margin-bottom: 16px;
+  }
 }
 
-.selector-header h2 {
+.selector-header-truck-type h2 {
   font-size: 22px;
   font-weight: 700;
   color: #1f2937;
   margin: 0;
 }
 
-.selector-header p {
+.selector-header-truck-type p {
   font-size: 14px;
   color: #6b7280;
   margin: 4px 0 0 0;
+  font-weight: 500;
 }
 
 .truck-type-options {
@@ -34,9 +45,9 @@
 .truck-type-card {
   position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
-  padding: 20px;
+  padding: 4px 12px 4px 4px;
   border: 2px solid #e5e7eb;
   border-radius: 16px;
   background: white;
@@ -99,6 +110,7 @@
   color: #4b5563;
   margin: 0;
   line-height: 1.4;
+  font-weight: 500;
 }
 
 .truck-type-examples {
@@ -152,7 +164,7 @@
 /* Responsive */
 @media (max-width: 480px) {
   .truck-type-selector {
-    padding: 16px;
+    padding: 0px;
   }
 
   .truck-type-icon {

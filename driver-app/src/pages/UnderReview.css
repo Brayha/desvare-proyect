@@ -3,14 +3,14 @@
    ====================================== */
 
 .under-review-content {
-  --background: linear-gradient(135deg, #223D62 0%, #0055FF 100%);
+  --background: white;
 }
 
 .under-review-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px 24px;
+  padding: 16px;
   min-height: 100%;
   text-align: center;
 }
@@ -36,9 +36,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 140px;
-  height: 140px;
-  background: rgba(255, 255, 255, 0.15);
+  width: 60px;
+  height: 60px;
+  background: rgba(8, 255, 29, 0.15);
   border-radius: 50%;
   margin-bottom: 32px;
   backdrop-filter: blur(10px);
@@ -60,16 +60,16 @@
    TÍTULOS
    ====================================== */
 .under-review-title {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 700;
-  color: white;
-  margin: 0 0 12px 0;
+  color: var(--desvare-secondary);
+  margin: 0;
 }
 
 .under-review-subtitle {
   font-size: 20px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  color: var(--desvare-secondary);
   margin: 0 0 32px 0;
 }
 
@@ -77,25 +77,26 @@
    CARD
    ====================================== */
 .under-review-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: white;
   border-radius: 16px;
   padding: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   width: 100%;
   max-width: 400px;
+  border: 1px solid var(--desvare-medium);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 .under-review-description {
   font-size: 16px;
-  color: white;
+  color: var(--desvare-secondary);
   line-height: 1.6;
   margin: 0;
 }
 
 .under-review-description strong {
   font-weight: 700;
-  color: #FDE047;
+  color: var(--desvare-primary);
 }
 
 /* ======================================
@@ -104,24 +105,26 @@
 .review-checklist {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0px;
   width: 100%;
   max-width: 400px;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
+  border: 1px solid var(--desvare-medium);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 .checklist-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
   border-radius: 12px;
+  border-top: 1px solid var(--desvare-medium);
   padding: 16px;
-  color: white;
+  color: var(--desvare-secondary);
   font-size: 16px;
   font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* ======================================
@@ -133,24 +136,26 @@
   border: 1px solid rgba(253, 224, 71, 0.4);
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 0px;
   width: 100%;
-  max-width: 400px;
+  box-shadow: 0 0 10px 0 rgba(253, 224, 71, 0.2);
+
 }
 
 .under-review-notice p {
   font-size: 14px;
-  color: #FEF3C7;
+  color: #554400;
   line-height: 1.5;
   margin: 0;
+  text-align: left;
 }
 
 /* ======================================
    BOTÓN
    ====================================== */
 .logout-button {
-  --border-color: rgba(255, 255, 255, 0.3);
-  --color: white;
+  --border-color: rgba(255, 79, 79, 0.5);
+  --color: red;
   --border-radius: 12px;
   font-weight: 600;
   font-size: 16px;

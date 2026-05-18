@@ -15,6 +15,14 @@
   border-radius: 16px;
 }
 
+.verify-otp-title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
 /* ======================================
    BOTÓN VOLVER
    ====================================== */
@@ -56,9 +64,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 120px;
-  background: var(--desvare-primary);
+  width: 80px;
+  height: 80px;
+  background: white;
+  border: 1px solid #CADCFF;
   border-radius: 50%;
   margin-top: 80px;
   margin-bottom: 32px;
@@ -99,23 +108,23 @@
 .verify-otp-inputs {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin: 24px auto;
+  gap: 10px;
+  margin: 28px auto;
 }
 
 .verify-otp-input-box {
   width: 100%;
   height: 64px;
-  border: 2px solid #e5e7eb;
-  border-radius: 16px;
+  border: none;
+  border-radius: 14px;
   text-align: center;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--desvare-secondary);
-  background: #ffffff;
-  transition: all 0.2s ease;
+  background: #F0F2F5;
+  transition: all 0.15s ease;
   outline: none;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  caret-color: var(--desvare-primary);
 }
 
 /* Ocultar flechitas de type="number" en todos los navegadores */
@@ -128,25 +137,71 @@
   -moz-appearance: textfield;
 }
 
-.verify-otp-input-box::placeholder {
-  color: #9ca3af;
-}
-
 .verify-otp-input-box:focus {
-  border-color: var(--desvare-primary);
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
-  transform: scale(1.05);
+  background: #E8EEFF;
+  color: var(--desvare-primary);
+  transform: scale(1.06);
 }
 
 .verify-otp-input-box:not(:placeholder-shown) {
-  border-color: var(--desvare-primary);
-  background: #ffffff;
+  background: #E8EEFF;
+  color: var(--desvare-primary);
 }
 
 .verify-otp-input-box:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ======================================
+   OTP INPUT ÚNICO CON DÍGITOS VISUALES
+   ====================================== */
+.otp-single-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 28px auto;
+  cursor: text;
+}
+
+.otp-hidden-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  top: 0;
+  left: 0;
+}
+
+.otp-digits-row {
+  display: flex;
+  gap: 10px;
+}
+
+.otp-digit {
+  width: 46px;
+  height: 64px;
+  background: #F0F2F5;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--desvare-secondary);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.otp-digit.filled {
+  background: #E8EEFF;
+  color: var(--desvare-primary);
+}
+
+.otp-digit.active {
+  background: #E8EEFF;
+  box-shadow: 0 0 0 2.5px var(--desvare-primary);
 }
 
 /* ======================================

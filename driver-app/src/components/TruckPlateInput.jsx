@@ -1,22 +1,23 @@
-import React from 'react';
-import { IonText } from '@ionic/react';
-import { DocumentText } from 'iconsax-react';
-import { Input } from './Input/Input';
-import './TruckPlateInput.css';
+import React from "react";
+import { IonText } from "@ionic/react";
+import { DocumentText } from "iconsax-react";
+import { Input } from "./Input/Input";
+import "./TruckPlateInput.css";
 
 /**
  * Componente para ingresar la placa de la grúa
  */
-const TruckPlateInput = ({ 
-  plate, 
-  onPlateChange, 
-  plateError
-}) => {
-  // Formatear placa automáticamente (mayúsculas, sin espacios)
+const TruckPlateInput = ({ plate, onPlateChange, plateError }) => {
+  // Extrae solo alfanuméricos, uppercase, máx 6 chars — guarda SIN guion
   const handlePlateChange = (value) => {
-    const formatted = value.toUpperCase().replace(/\s/g, '');
-    onPlateChange(formatted);
+    const raw = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 6);
+    onPlateChange(raw);
   };
+
+  // Muestra CON guion: "ABC-123" (el guion se inserta solo después del 3er char)
+  const displayValue = plate.length > 3
+    ? `${plate.slice(0, 3)}-${plate.slice(3)}`
+    : plate;
 
   return (
     <div className="truck-plate-input">
@@ -34,32 +35,32 @@ const TruckPlateInput = ({
           </IonText>
           <Input
             type="text"
-            placeholder="ABC123 o ABC12D"
-            value={plate}
+            placeholder="ABC-123"
+            value={displayValue}
             onChange={handlePlateChange}
             error={plateError}
-            maxLength={6}
+            maxLength={7}
             className="plate-input"
           />
           <IonText color="medium" className="input-hint">
-            <small>Formato colombiano: 3 letras + 3 números o 3 letras + 2 números + 1 letra</small>
+              Formato colombiano: 3 letras + 3 números o 3 letras + 2 números +
+              1 letra
           </IonText>
         </div>
-      </div>
-
-      {/* Información adicional */}
-      <div className="info-card">
-        <div className="info-icon">ℹ️</div>
-        <IonText>
-          <p className="info-text">
-            <strong>Importante:</strong> Asegúrate de que la placa coincida con los documentos de tu vehículo. 
-            Esta información será verificada durante el proceso de aprobación.
-          </p>
-        </IonText>
+        {/* Información adicional */}
+        <div className="info-card">
+          <div className="info-icon">⚠️</div>
+          <IonText>
+            <p className="info-text">
+              <strong>Importante:</strong> Asegúrate de que la placa coincida
+              con los documentos de tu vehículo. Esta información será
+              verificada durante el proceso de aprobación.
+            </p>
+          </IonText>
+        </div>
       </div>
     </div>
   );
 };
 
 export default TruckPlateInput;
-

@@ -23,6 +23,7 @@
   color: var(--desvare-secondary);
   text-align: left;
   margin-bottom: 16px;
+  margin: 5px 0;
 }
 
 .login-otp-subtitle {
@@ -153,12 +154,11 @@
 .driver-auth-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   margin-bottom: 32px;
   width: 100%;
-  background: #0055FF;
-  padding: 14px 16px;
-  border-radius: 14px;
+  padding: 0;
 }
 
 .driver-auth-back {

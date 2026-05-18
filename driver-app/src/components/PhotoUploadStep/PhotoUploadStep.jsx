@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
-import { Camera, TickCircle } from 'iconsax-react';
-import './PhotoUploadStep.css';
+import React, { useRef } from "react";
+import { Camera, TickCircle } from "iconsax-react";
+import "./PhotoUploadStep.css";
 
 /**
  * Componente de carga de fotos con 3 estados progresivos:
@@ -15,7 +15,7 @@ const PhotoUploadStep = ({
   image,
   title,
   description,
-  photos,       // Array de { label, file, onChange, error }
+  photos, // Array de { label, file, onChange, error }
   isOptional,
   onComplete,
 }) => {
@@ -32,52 +32,56 @@ const PhotoUploadStep = ({
 
   return (
     <div className="pus-container">
-      {/* Imagen ilustrativa — se encoge progresivamente */}
-      <div className={`pus-hero pus-hero--stage${imageStage}`}>
-        <img src={image} alt="" className="pus-hero-img" />
-      </div>
+      <div className="pus-container-inner">
+        {/* Imagen ilustrativa — se encoge progresivamente */}
+        <div className={`pus-hero pus-hero--stage${imageStage}`}>
+          <img src={image} alt="" className="pus-hero-img" />
+        </div>
 
-      {/* Encabezado */}
-      <div className={`pus-header ${uploadedCount > 0 ? 'pus-header--compact' : ''}`}>
-        <h2 className="pus-title">{title}</h2>
-        {uploadedCount === 0 && (
-          <p className="pus-description">{description}</p>
-        )}
-        {isOptional && uploadedCount === 0 && (
-          <span className="pus-optional-badge">Opcional</span>
-        )}
-      </div>
+        {/* Encabezado */}
+        <div
+          className={`pus-header ${uploadedCount > 0 ? "pus-header--compact" : ""}`}
+        >
+          <h2 className="pus-title">{title}</h2>
+          {uploadedCount === 0 && (
+            <p className="pus-description">{description}</p>
+          )}
+          {isOptional && uploadedCount === 0 && (
+            <span className="pus-optional-badge">Opcional</span>
+          )}
+        </div>
 
-      {/* Zonas de carga */}
-      <div className={`pus-zones ${gridMode ? 'pus-zones--grid' : ''}`}>
-        {/* Zona 1 — siempre visible */}
-        <PhotoZone
-          label={photos[0].label}
-          file={photos[0].file}
-          onChange={photos[0].onChange}
-          error={photos[0].error}
-          compact={gridMode}
-        />
+        {/* Zonas de carga */}
+        <div className={`pus-zones ${gridMode ? "pus-zones--grid" : ""}`}>
+          {/* Zona 1 — siempre visible */}
+          <PhotoZone
+            label={photos[0].label}
+            file={photos[0].file}
+            onChange={photos[0].onChange}
+            error={photos[0].error}
+            compact={gridMode}
+          />
 
-        {/* Zona 2 — aparece con animación después de cargar la primera */}
-        {totalPhotos > 1 && photos[0].file && (
-          <div className="pus-zone-appear">
-            <PhotoZone
-              label={photos[1].label}
-              file={photos[1].file}
-              onChange={photos[1].onChange}
-              error={photos[1].error}
-              compact={gridMode}
-            />
-          </div>
-        )}
+          {/* Zona 2 — aparece con animación después de cargar la primera */}
+          {totalPhotos > 1 && photos[0].file && (
+            <div className="pus-zone-appear">
+              <PhotoZone
+                label={photos[1].label}
+                file={photos[1].file}
+                onChange={photos[1].onChange}
+                error={photos[1].error}
+                compact={gridMode}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Botón Siguiente — aparece con animación cuando todo está listo */}
       {showContinue && (
         <div className="pus-continue-appear">
           <button className="pus-continue-btn" onClick={onComplete}>
-            {isOptional && uploadedCount === 0 ? 'Omitir' : 'Siguiente'}
+            {isOptional && uploadedCount === 0 ? "Omitir" : "Siguiente"}
           </button>
         </div>
       )}
@@ -99,9 +103,9 @@ const PhotoZone = ({ label, file, onChange, error, compact }) => {
   return (
     <div
       className={`pus-zone
-        ${file ? 'pus-zone--uploaded' : ''}
-        ${error ? 'pus-zone--error' : ''}
-        ${compact ? 'pus-zone--compact' : ''}
+        ${file ? "pus-zone--uploaded" : ""}
+        ${error ? "pus-zone--error" : ""}
+        ${compact ? "pus-zone--compact" : ""}
       `}
     >
       <input
@@ -114,7 +118,10 @@ const PhotoZone = ({ label, file, onChange, error, compact }) => {
 
       {file ? (
         /* Preview usando el DataURL directamente como src */
-        <div className="pus-zone-preview" onClick={() => inputRef.current?.click()}>
+        <div
+          className="pus-zone-preview"
+          onClick={() => inputRef.current?.click()}
+        >
           <img src={file} alt={label} className="pus-preview-img" />
           <div className="pus-preview-footer">
             <TickCircle size="18" color="#10B981" variant="Bold" />

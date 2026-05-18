@@ -3,11 +3,10 @@
 }
 
 .quote-content {
-  padding: 30px 20px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 500px;
+  gap: 10px;
   margin: 0 auto;
 }
 
@@ -25,25 +24,32 @@
 /* Monto grande - Display */
 .amount-display {
   text-align: center;
-  padding: 30px 20px;
+  padding: 10px;
   background: transparent;
-  margin-bottom: 10px;
+  margin-top: 100px;
 }
 
 .amount-text {
-  font-size: 56px;
+  font-size: 48px;
   font-weight: 700;
-  color: #1e293b;
+  color: green;
   display: block;
   line-height: 1;
+}
+
+.text-description {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ion-color-medium);
+  margin: 0;
 }
 
 /* Card de Input */
 .amount-input-card {
   background: white;
   padding: 24px;
-  border-radius: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -65,8 +71,9 @@
 .input-subtitle {
   font-size: 14px;
   line-height: 1.5;
-  color: #64748b;
+  color: var(--ion-color-medium);
   display: block;
+  font-weight: 500;
 }
 
 /* Input wrapper con símbolo de peso */
@@ -107,7 +114,7 @@
   --background: transparent;
   --box-shadow: none;
   --highlight-height: 0;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 600;
   color: #1e293b;
   flex: 1;
@@ -190,11 +197,11 @@
   }
 
   .input-subtitle {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .amount-input {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .currency-symbol {

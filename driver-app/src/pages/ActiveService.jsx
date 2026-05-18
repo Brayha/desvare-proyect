@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { registerPlugin } from '@capacitor/core';
+import { registerPlugin } from "@capacitor/core";
 
 // Bridge al plugin nativo de background geolocation (plugin Capacitor Community)
-const BackgroundGeolocation = registerPlugin('BackgroundGeolocation');
+const BackgroundGeolocation = registerPlugin("BackgroundGeolocation");
 
 // Bridge al servicio nativo Java de tracking GPS (LocationTrackingPlugin.java)
 // Este servicio corre 100% en nativo, sin depender del WebView ni JavaScript.
 // Es inmune a Samsung Device Care / Doze aunque la pantalla esté bloqueada.
-const LocationTracking = registerPlugin('LocationTracking');
+const LocationTracking = registerPlugin("LocationTracking");
 import { useHistory } from "react-router-dom";
 import {
   IonPage,
@@ -40,7 +40,7 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 // ============================================
 // API URL Configuration
 // ============================================
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const ActiveService = () => {
   const history = useHistory();
@@ -181,20 +181,20 @@ const ActiveService = () => {
       // Ignorar eventos de otros servicios
       if (cancelledId && currentId && cancelledId !== currentId) return;
 
-      console.log('🚫 El cliente canceló el servicio en curso');
+      console.log("🚫 El cliente canceló el servicio en curso");
 
       // Limpiar estado local
-      localStorage.removeItem('activeService');
+      localStorage.removeItem("activeService");
 
       present({
-        message: '⚠️ El cliente canceló el servicio',
+        message: "⚠️ El cliente canceló el servicio",
         duration: 4000,
-        color: 'warning',
-        position: 'top',
+        color: "warning",
+        position: "top",
       });
 
       setTimeout(() => {
-        history.replace('/home');
+        history.replace("/home");
       }, 1500);
     };
 
@@ -213,7 +213,7 @@ const ActiveService = () => {
   useEffect(() => {
     if (!serviceData || !serviceData.requestId) return;
 
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem("user");
     const driverUser = userData ? JSON.parse(userData) : null;
     const driverId = serviceData.driverId || driverUser?._id || driverUser?.id;
 
@@ -237,7 +237,7 @@ const ActiveService = () => {
 
     // Cuando el socket reconecta: re-registrar y reenviar última ubicación conocida
     const handleReconnect = () => {
-      console.log('🔄 ActiveService - Socket reconectado, re-registrando...');
+      console.log("🔄 ActiveService - Socket reconectado, re-registrando...");
       if (driverId) {
         socketService.registerDriver(driverId);
       }
@@ -248,60 +248,78 @@ const ActiveService = () => {
           driverId,
           ...state.lastLocation,
         });
-        console.log('📡 Última ubicación reenviada tras reconexión:', state.lastLocation.location);
+        console.log(
+          "📡 Última ubicación reenviada tras reconexión:",
+          state.lastLocation.location,
+        );
       }
     };
     socketService.onReconnect(handleReconnect);
 
     // Cuando la app vuelve a primer plano: reconectar socket y registrar conductor
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log('👀 App volvió al primer plano - verificando conexión...');
+      if (document.visibilityState === "visible") {
+        console.log("👀 App volvió al primer plano - verificando conexión...");
         ensureSocketReady();
       }
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // Función central para obtener posición y enviarla (usada por ambas estrategias)
     const sendCurrentPosition = (pos) => {
       const payload = {
         requestId: serviceData.requestId,
         driverId,
-        location: { lat: pos.latitude ?? pos.coords?.latitude, lng: pos.longitude ?? pos.coords?.longitude },
+        location: {
+          lat: pos.latitude ?? pos.coords?.latitude,
+          lng: pos.longitude ?? pos.coords?.longitude,
+        },
         heading: pos.bearing ?? pos.coords?.heading ?? 0,
         speed: pos.speed ?? pos.coords?.speed ?? 0,
         accuracy: pos.accuracy ?? pos.coords?.accuracy ?? 0,
       };
       state.lastLocation = payload;
       socketService.sendLocationUpdate(payload);
-      console.log('📍 GPS enviado:', payload.location, `±${(payload.accuracy || 0).toFixed(0)}m`);
+      console.log(
+        "📍 GPS enviado:",
+        payload.location,
+        `±${(payload.accuracy || 0).toFixed(0)}m`,
+      );
     };
 
     // ESTRATEGIA 1 - BackgroundGeolocation (foreground service de Android)
     // Mantiene el tracking activo cuando la pantalla está bloqueada o el usuario
     // está en otra app. distanceFilter: 0 para no filtrar posiciones estáticas.
     const startBgTracking = async () => {
-      console.log('🛰️ Iniciando BackgroundGeolocation...');
+      console.log("🛰️ Iniciando BackgroundGeolocation...");
       try {
         state.watcherId = await BackgroundGeolocation.addWatcher(
           {
-            backgroundMessage: 'El conductor está en camino. El tracking GPS está activo.',
-            backgroundTitle: 'Desvare - Servicio en progreso',
+            backgroundMessage:
+              "El conductor está en camino. El tracking GPS está activo.",
+            backgroundTitle: "Desvare - Servicio en progreso",
             requestPermissions: true,
-            stale: true,       // Permitir posición cacheada para respuesta inmediata
+            stale: true, // Permitir posición cacheada para respuesta inmediata
             distanceFilter: 0, // Sin filtro: reportar cualquier actualización de GPS
           },
           (location, error) => {
             if (error) {
-              console.warn('⚠️ BackgroundGeolocation error:', error.code, error.message);
+              console.warn(
+                "⚠️ BackgroundGeolocation error:",
+                error.code,
+                error.message,
+              );
               return;
             }
             sendCurrentPosition(location);
-          }
+          },
         );
-        console.log('✅ BackgroundGeolocation activo, watcher:', state.watcherId);
+        console.log(
+          "✅ BackgroundGeolocation activo, watcher:",
+          state.watcherId,
+        );
       } catch (err) {
-        console.error('❌ BackgroundGeolocation falló:', err);
+        console.error("❌ BackgroundGeolocation falló:", err);
       }
     };
 
@@ -311,8 +329,8 @@ const ActiveService = () => {
     const sendPositionNow = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => sendCurrentPosition(pos.coords),
-        (err) => console.warn('⚠️ GPS puntual error:', err.message),
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
+        (err) => console.warn("⚠️ GPS puntual error:", err.message),
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 },
       );
     };
 
@@ -327,38 +345,43 @@ const ActiveService = () => {
     // del socket). El backend persiste la ubicación y emite el evento al cliente.
     const startNativeTracking = async () => {
       try {
-        const userData = localStorage.getItem('user');
+        const userData = localStorage.getItem("user");
         const driverUser = userData ? JSON.parse(userData) : null;
-        const token = localStorage.getItem('token') || '';
+        const token = localStorage.getItem("token") || "";
 
         await LocationTracking.startTracking({
           requestId: serviceData.requestId,
-          driverId:  driverId || driverUser?._id || driverUser?.id || '',
-          apiUrl:    API_URL,
+          driverId: driverId || driverUser?._id || driverUser?.id || "",
+          apiUrl: API_URL,
           token,
         });
-        console.log('🛰️ [NATIVO] LocationTrackingService iniciado (GPS nativo activo)');
+        console.log(
+          "🛰️ [NATIVO] LocationTrackingService iniciado (GPS nativo activo)",
+        );
       } catch (err) {
         // El servicio nativo no está disponible en web/iOS; solo falla silenciosamente
-        console.warn('⚠️ LocationTracking nativo no disponible:', err?.message || err);
+        console.warn(
+          "⚠️ LocationTracking nativo no disponible:",
+          err?.message || err,
+        );
       }
     };
     startNativeTracking();
 
     return () => {
       socketService.offReconnect(handleReconnect);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (state.watcherId !== null) {
         BackgroundGeolocation.removeWatcher({ id: state.watcherId });
-        console.log('🛑 BackgroundGeolocation detenido');
+        console.log("🛑 BackgroundGeolocation detenido");
       }
       if (state.intervalId !== null) {
         clearInterval(state.intervalId);
-        console.log('🛑 Intervalo GPS detenido');
+        console.log("🛑 Intervalo GPS detenido");
       }
       // Detener el servicio nativo Java al salir de la vista
       LocationTracking.stopTracking().catch(() => {});
-      console.log('🛑 LocationTrackingService nativo detenido');
+      console.log("🛑 LocationTrackingService nativo detenido");
     };
   }, [serviceData]);
 
@@ -577,14 +600,15 @@ const ActiveService = () => {
 
               // Notificar al backend → el backend emitirá service:started al cliente
               // para que la PWA cambie su vista de "esperar código" a "en camino al destino"
-              const userData = localStorage.getItem('user');
+              const userData = localStorage.getItem("user");
               const driverUser = userData ? JSON.parse(userData) : null;
               socketService.notifyCodeValidated({
                 requestId: serviceData.requestId,
                 clientId: serviceData.clientId?.toString(),
-                driverName: driverUser?.name || serviceData.driverName || 'Conductor',
+                driverName:
+                  driverUser?.name || serviceData.driverName || "Conductor",
               });
-              console.log('📡 service:code-validated emitido al backend');
+              console.log("📡 service:code-validated emitido al backend");
             } else {
               present({
                 message: "❌ Código incorrecto. Intenta de nuevo.",
@@ -602,51 +626,55 @@ const ActiveService = () => {
 
   const handleCancelService = () => {
     presentAlert({
-      header: '¿Cancelar el servicio?',
-      message: 'Esta acción no se puede deshacer. El cliente será notificado.',
+      header: "¿Cancelar el servicio?",
+      message: "Esta acción no se puede deshacer. El cliente será notificado.",
       inputs: [
         {
-          type: 'radio',
-          label: 'No puedo llegar a tiempo',
-          value: 'No puedo llegar a tiempo',
+          type: "radio",
+          label: "No puedo llegar a tiempo",
+          value: "No puedo llegar a tiempo",
         },
         {
-          type: 'radio',
-          label: 'Problema con mi vehículo',
-          value: 'Problema con mi vehículo',
+          type: "radio",
+          label: "Problema con mi vehículo",
+          value: "Problema con mi vehículo",
         },
         {
-          type: 'radio',
-          label: 'El cliente no está disponible',
-          value: 'El cliente no está disponible',
+          type: "radio",
+          label: "El cliente no está disponible",
+          value: "El cliente no está disponible",
         },
         {
-          type: 'radio',
-          label: 'Error en la solicitud',
-          value: 'Error en la solicitud',
+          type: "radio",
+          label: "Error en la solicitud",
+          value: "Error en la solicitud",
         },
         {
-          type: 'radio',
-          label: 'Otro motivo',
-          value: 'Otro motivo',
+          type: "radio",
+          label: "Otro motivo",
+          value: "Otro motivo",
         },
       ],
       buttons: [
         {
-          text: 'Volver',
-          role: 'cancel',
+          text: "Volver",
+          role: "cancel",
         },
         {
-          text: 'Cancelar servicio',
-          cssClass: 'alert-button-danger',
+          text: "Cancelar servicio",
+          cssClass: "alert-button-danger",
           handler: async (reason) => {
             if (!reason) {
-              present({ message: 'Selecciona un motivo para cancelar', duration: 2000, color: 'warning' });
+              present({
+                message: "Selecciona un motivo para cancelar",
+                duration: 2000,
+                color: "warning",
+              });
               return false;
             }
 
             try {
-              const userData = localStorage.getItem('user');
+              const userData = localStorage.getItem("user");
               const user = userData ? JSON.parse(userData) : null;
 
               // 1. Detener GPS nativo
@@ -664,27 +692,38 @@ const ActiveService = () => {
 
               // 3. Si el socket no está disponible, usar REST como fallback
               if (!cancelled) {
-                await fetch(`${API_URL}/api/requests/${serviceData.requestId}/cancel-by-driver`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ driverId: user?._id, reason }),
-                }).catch(() => {});
+                await fetch(
+                  `${API_URL}/api/requests/${serviceData.requestId}/cancel-by-driver`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ driverId: user?._id, reason }),
+                  },
+                ).catch(() => {});
               }
 
               // 4. Limpiar localStorage y estado del conductor
-              localStorage.removeItem('activeService');
+              localStorage.removeItem("activeService");
               if (user) {
                 const updatedUser = { ...user };
                 updatedUser.driverProfile.isOnline = true;
-                localStorage.setItem('user', JSON.stringify(updatedUser));
+                localStorage.setItem("user", JSON.stringify(updatedUser));
               }
 
-              present({ message: 'Servicio cancelado. Ahora estás disponible.', duration: 3000, color: 'warning' });
+              present({
+                message: "Servicio cancelado. Ahora estás disponible.",
+                duration: 3000,
+                color: "warning",
+              });
 
-              setTimeout(() => history.replace('/home'), 500);
+              setTimeout(() => history.replace("/home"), 500);
             } catch (err) {
-              console.error('❌ Error cancelando servicio:', err);
-              present({ message: 'Error al cancelar. Inténtalo de nuevo.', duration: 3000, color: 'danger' });
+              console.error("❌ Error cancelando servicio:", err);
+              present({
+                message: "Error al cancelar. Inténtalo de nuevo.",
+                duration: 3000,
+                color: "danger",
+              });
             }
           },
         },
@@ -857,7 +896,7 @@ const ActiveService = () => {
   }
 
   return (
-    <IonPage>
+    <IonContent>
       <div className="request-detail-page">
         {/* Mapa */}
         <div className="map-section">
@@ -880,361 +919,315 @@ const ActiveService = () => {
 
         {/* Contenido de detalles */}
         <div className="detail-content-active-service">
-          <div className="request-detail-content-active-service">
-            <h2 className="type-title">Servicio Activo</h2>
-            <div className="detail-content">
-              <div className="request-detail-content">
-                {/* Monto Acordado Destacado */}
-                <div
-                  style={{
-                    width: "100%",
-                    background: "white",
-                    padding: "10px",
-                    borderRadius: "10px",
-                    textAlign: "center",
-                    border: "1px solid #E5E7EB",
-                  }}
-                >
-                  <IonText
-                    style={{
-                      color: "#9CA3AF",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      display: "block",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    Monto Acordado
-                  </IonText>
-                  <IonText
-                    style={{
-                      color: "#9CA3AF",
-                      fontSize: "24px",
-                      fontWeight: "bold",
-                      display: "block",
-                      margin: "0",
-                    }}
-                  >
-                    {formatAmount(serviceData.amount)}
-                  </IonText>
-                </div>
+          <div className="card-active-service-container">
+            <h2 className="quote-title-send-quote">Servicio aceptado</h2>
+            {/* Cliente */}
+            <div className="card-client-info-active-service">
+              <div className="person-icon">
+                <UserTick size="24" variant="Bulk" color="gray" />
+              </div>
+              <div className="location-text">
+                <IonText color="medium" className="location-label">
+                  {serviceData.clientName}
+                </IonText>
+                {/* <IonText className="location-address">
+                  {serviceData.clientPhone}
+                </IonText> */}
+              </div>
+              {/* Botones de Acción */}
+              <button
+                className="call-button-active-service"
+                onClick={handleCall}
+              >
+                <Call size="24" variant="Bulk" color="green" />
+              </button>
+            </div>
 
-                {/* Cliente */}
+            <div className="amount-card">
+              <p className="amount-card-label">Monto negociado:</p>
+              <h3 className="amount-card-amount">
+                {formatAmount(serviceData.amount)}
+              </h3>
+            </div>
+          </div>
+
+
+          <div className="card-active-service-container">
+            <h2 className="quote-title-send-quote">Ruta del servicio</h2>
+
+            {/* FASE 1: Punto de Recogida — conductor va hacia el cliente */}
+            {!codeValidated && (
+              <>
                 <div className="location-section">
-                  <div className="person-icon">
-                    <UserTick size="24" variant="Bulk" color="#9CA3AF" />
+                  <div className="location-icon">
+                    <Location size="24" variant="Bulk" color="#0055FF" />
                   </div>
                   <div className="location-text">
                     <IonText color="medium" className="location-label">
-                      {serviceData.clientName}
+                      Punto de Recogida
                     </IonText>
                     <IonText className="location-address">
-                      {serviceData.clientPhone}
+                      {serviceData.origin.address}
                     </IonText>
                   </div>
-                  {/* Botones de Acción */}
-                  <button className="call-button" onClick={handleCall}>
-                    <Call size="24" variant="Bulk" color="#9CA3AF" />
-                  </button>
                 </div>
+                <button
+                  className="go-to-navigation-button"
+                  onClick={() =>
+                    openNavigation(serviceData.origin, serviceData.origin.address)
+                  }
+                >
+                  Abrir ruta al cliente
+                </button>
+              </>
+            )}
 
-                {/* Vehículo */}
-                {serviceData.vehicle && (
-                  <div className="vehicle-problem-card-confirmed">
-                    <div className="vehicle-info-confirmed">
-                      <div className="vehicle-icon-confirmed">
-                        <img
-                          src={getVehicleIcon(
-                            serviceData.vehicle.icon ||
-                              serviceData.vehicle.category?.id ||
-                              "🚗",
-                          )}
-                          alt={
-                            typeof serviceData.vehicle.category === "object"
-                              ? serviceData.vehicle.category?.name
-                              : serviceData.vehicle.category || "Vehículo"
-                          }
-                          className="vehicle-svg-icon"
-                        />
-                      </div>
-                      <div className="vehicle-details-confirmed">
-                        <h3 className="vehicle-brand-confirmed">
-                          {typeof serviceData.vehicle.brand === "object"
-                            ? serviceData.vehicle.brand?.name
-                            : serviceData.vehicle.brand || "N/A"}
-                        </h3>
-                        <p className="vehicle-model-confirmed">
-                          {typeof serviceData.vehicle.model === "object"
-                            ? serviceData.vehicle.model?.id
-                            : serviceData.vehicle.model || "N/A"}
-                        </p>
-                      </div>
-                      <p className="vehicle-plate-confirmed">
-                        {serviceData.vehicle.licensePlate}
+            {/* FASE 2: Destino Final — conductor lleva el vehículo al destino */}
+            {codeValidated && serviceData.destination && (
+              <>
+                <div className="location-section">
+                  <div className="location-icon-destination">
+                    <Location size="24" variant="Bold" color="#eb445a" />
+                  </div>
+                  <div className="location-text">
+                    <IonText color="medium" className="location-label">
+                      Destino Final
+                    </IonText>
+                    <IonText className="location-address">
+                      {serviceData.destination.address}
+                    </IonText>
+                  </div>
+                </div>
+                <button
+                  className="go-to-navigation-button"
+                  onClick={() =>
+                    openNavigation(
+                      serviceData.destination,
+                      serviceData.destination.address,
+                    )
+                  }
+                >
+                  Abrir ruta al destino
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className={`card-active-service-container ${codeValidated ? 'code-validated-card' : ''}`}>
+            {!codeValidated ? (
+              <>
+                <h2 className="quote-title-send-quote">
+                  🔒 Código de Seguridad Requerido
+                </h2>
+                <p className="quote-description-send-quote">
+                  Solicita al cliente el código de 4 dígitos en el punto de recogida
+                  para ver el destino
+                </p>
+                <button
+                  className="unlock-code-button"
+                  onClick={handleVerifySecurityCode}
+                >
+                  🔐 Validar Código
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="code-validated-header">
+                  <div className="code-validated-icon">✅</div>
+                  <div>
+                    <h2 className="quote-title-send-quote" style={{ margin: 0 }}>
+                      Código Verificado
+                    </h2>
+                    <p className="quote-description-send-quote" style={{ margin: 0 }}>
+                      El cliente confirmó la recogida del vehículo
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="send-quote-button"
+                  onClick={handleCompleteService}
+                  disabled={completing}
+                  style={{ background: '#0055ff', width: '100%' }}
+                >
+                  {completing ? '⏳ Completando...' : 'Completar Servicio'}
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="card-active-service-container">
+            <h2 className="quote-title-send-quote">Vehículo varado</h2>
+            {/* Vehículo */}
+            {serviceData.vehicle && (
+              <div className="vehicle-problem-card-confirmed">
+                <div className="vehicle-info-confirmed">
+                  <div className="centered-content">
+                    <div className="vehicle-icon-confirmed">
+                      <img
+                        src={getVehicleIcon(
+                          serviceData.vehicle.icon ||
+                            serviceData.vehicle.category?.id ||
+                            "🚗",
+                        )}
+                        alt={
+                          typeof serviceData.vehicle.category === "object"
+                            ? serviceData.vehicle.category?.name
+                            : serviceData.vehicle.category || "Vehículo"
+                        }
+                        className="vehicle-svg-icon"
+                      />
+                    </div>
+                    <div className="vehicle-details-confirmed">
+                      <h3 className="vehicle-brand-confirmed">
+                        {typeof serviceData.vehicle.brand === "object"
+                          ? serviceData.vehicle.brand?.name
+                          : serviceData.vehicle.brand || "N/A"}
+                      </h3>
+                      <p className="vehicle-model-confirmed">
+                        {typeof serviceData.vehicle.model === "object"
+                          ? serviceData.vehicle.model?.id
+                          : serviceData.vehicle.model || "N/A"}
                       </p>
                     </div>
-
-                    {serviceData.problem && (
-                      <div className="problem-section">
-                        <IonText color="medium" className="section-label">
-                          Problema reportado
-                        </IonText>
-                        <IonText className="problem-text">
-                          {serviceData.problem}
-                        </IonText>
-                      </div>
-                    )}
-
-                    {/* Datos adicionales del vehículo */}
-                    {(serviceData.vehicle.isArmored ||
-                      serviceData.serviceDetails?.basement?.isInBasement ||
-                      serviceData.vehicle.truckData ||
-                      serviceData.vehicle.busData) && (
-                      <div className="vehicle-additional-badge-active-service">
-                        {/* Blindado (Autos y Camionetas) */}
-                        {serviceData.vehicle.isArmored && (
-                          <div className="detail-badge">🛡️ Blindado</div>
-                        )}
-
-                        {/* Sótano (del serviceDetails actual) */}
-                        {serviceData.serviceDetails?.basement?.isInBasement && (
-                          <div className="detail-badge">
-                            🏢 Sótano nivel{" "}
-                            {serviceData.serviceDetails.basement.level}
-                          </div>
-                        )}
-
-                        {/* Datos específicos de CAMIONES */}
-                        {serviceData.vehicle.truckData && (
-                          <>
-                            {serviceData.vehicle.truckData.trailerType && (
-                              <div className="detail-badge">
-                                🚛{" "}
-                                {serviceData.vehicle.truckData.trailerType
-                                  .replace("_", " ")
-                                  .replace(/\b\w/g, (l) => l.toUpperCase())}
-                              </div>
-                            )}
-                            {serviceData.vehicle.truckData.axleType && (
-                              <div className="detail-badge">
-                                🛞{" "}
-                                {serviceData.vehicle.truckData.axleType ===
-                                "sencilla"
-                                  ? "Llanta Sencilla"
-                                  : "Llanta Doble"}
-                              </div>
-                            )}
-                            {serviceData.vehicle.truckData.length && (
-                              <div className="detail-badge">
-                                📏 Largo: {serviceData.vehicle.truckData.length}{" "}
-                                m
-                              </div>
-                            )}
-                            {serviceData.vehicle.truckData.height && (
-                              <div className="detail-badge">
-                                📐 Alto: {serviceData.vehicle.truckData.height}{" "}
-                                m
-                              </div>
-                            )}
-                            {serviceData.vehicle.truckData.tonnage && (
-                              <div className="detail-badge">
-                                ⚖️ {serviceData.vehicle.truckData.tonnage} ton
-                              </div>
-                            )}
-                            {serviceData.serviceDetails?.truckCurrentState
-                              ?.isLoaded && (
-                              <div className="detail-badge">
-                                📦 Cargado:{" "}
-                                {
-                                  serviceData.serviceDetails.truckCurrentState
-                                    .currentWeight
-                                }{" "}
-                                ton
-                              </div>
-                            )}
-                          </>
-                        )}
-
-                        {/* Datos específicos de BUSES */}
-                        {serviceData.vehicle.busData && (
-                          <>
-                            {serviceData.vehicle.busData.passengerCapacity && (
-                              <div className="detail-badge">
-                                👥{" "}
-                                {serviceData.vehicle.busData.passengerCapacity}{" "}
-                                pasajeros
-                              </div>
-                            )}
-                            {serviceData.vehicle.busData.axleType && (
-                              <div className="detail-badge">
-                                🛞{" "}
-                                {serviceData.vehicle.busData.axleType ===
-                                "sencilla"
-                                  ? "Llanta Sencilla"
-                                  : "Llanta Doble"}
-                              </div>
-                            )}
-                            {serviceData.vehicle.busData.length && (
-                              <div className="detail-badge">
-                                📏 Largo: {serviceData.vehicle.busData.length} m
-                              </div>
-                            )}
-                            {serviceData.vehicle.busData.height && (
-                              <div className="detail-badge">
-                                📐 Alto: {serviceData.vehicle.busData.height} m
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
                   </div>
-                )}
-
-                {/* FASE 1: Punto de Recogida (Origen) */}
-                {!codeValidated && (
-                  <div className="location-section">
-                    <div className="location-icon">
-                      <Location size="24" variant="Bulk" color="#0055FF" />
-                    </div>
-                    <div className="location-text">
-                      <IonText color="medium" className="location-label">
-                        Punto de Recogida
-                      </IonText>
-                      <IonText className="location-address">
-                        {serviceData.origin.address}
-                      </IonText>
-                      <button
-                        className="go-to-navigation-button"
-                        onClick={() =>
-                          openNavigation(
-                            serviceData.origin,
-                            serviceData.origin.address,
-                          )
-                        }
-                      >
-                        <Routing size="24" variant="Bulk" color="#9CA3AF" />
-                        Abrir ruta
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* FASE 2: Destino Final (solo después de validar código) */}
-                {codeValidated && serviceData.destination && (
-                  <div className="location-section">
-                    <div className="location-icon-destination">
-                      <Location size="24" variant="Bold" color="#eb445a" />
-                    </div>
-                    <div className="location-text">
-                      <IonText color="medium" className="location-label">
-                        🔴 Destino Final
-                      </IonText>
-                      <IonText className="location-address">
-                        {serviceData.destination.address}
-                      </IonText>
-                      <button
-                        className="go-to-navigation-button"
-                        onClick={() =>
-                          openNavigation(
-                            serviceData.destination,
-                            serviceData.destination.address,
-                          )
-                        }
-                      >
-                        <Routing size="24" variant="Bulk" color="#9CA3AF" />
-                        Navegar al destino
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* FASE 1: Código de Seguridad Pendiente */}
-                {!codeValidated && (
-                  <div
-                    style={{
-                      width: "100%",
-                      background:
-                        "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
-                      padding: "25px",
-                      borderRadius: "15px",
-                      textAlign: "center",
-                      boxShadow: "0 4px 10px rgba(243, 156, 18, 0.3)",
-                    }}
-                  >
-                    <IonText
-                      style={{
-                        color: "white",
-                        fontSize: "16px",
-                        fontWeight: "700",
-                        display: "block",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      🔒 Código de Seguridad Requerido
-                    </IonText>
-                    <IonText
-                      style={{
-                        color: "white",
-                        fontSize: "14px",
-                        display: "block",
-                        marginBottom: "15px",
-                        opacity: 0.9,
-                      }}
-                    >
-                      Solicita al cliente el código de 4 dígitos en el punto de
-                      recogida para ver el destino
-                    </IonText>
-                    <button
-                      className="send-quote-button"
-                      style={{
-                        background: "white",
-                        color: "#f39c12",
-                        marginBottom: 0,
-                      }}
-                      onClick={handleVerifySecurityCode}
-                    >
-                      🔐 Validar Código
-                    </button>
-                  </div>
-                )}
-
-                
-
-                {codeValidated && (
-                  <button
-                    className="send-quote-button"
-                    onClick={handleCompleteService}
-                    disabled={completing}
-                    style={{ background: "#0055ff" }}
-                  >
-                    {completing ? "⏳ Completando..." : "Completar Servicio"}
-                  </button>
-                )}
-
-                {/* Sección de cancelación de emergencia */}
-                <div className="as-cancel-section">
-                  <div className="as-cancel-divider">
-                    <span className="as-cancel-divider-text">¿Necesitas cancelar?</span>
-                  </div>
-                  <button
-                    className="as-cancel-service-btn"
-                    onClick={handleCancelService}
-                  >
-                    <span className="as-cancel-icon">✕</span>
-                    <div className="as-cancel-text">
-                      <span className="as-cancel-title">Cancelar servicio</span>
-                      <span className="as-cancel-sub">Solo en caso de emergencia</span>
-                    </div>
-                  </button>
+                  <p className="vehicle-plate-confirmed">
+                    {serviceData.vehicle.licensePlate}
+                  </p>
                 </div>
 
+                {serviceData.problem && (
+                  <div className="problem-section">
+                    <IonText color="medium" className="section-label">
+                      Problema reportado
+                    </IonText>
+                    <IonText className="problem-text">
+                      {serviceData.problem}
+                    </IonText>
+                  </div>
+                )}
+
+                {/* Datos adicionales del vehículo */}
+                {(serviceData.vehicle.isArmored ||
+                  serviceData.serviceDetails?.basement?.isInBasement ||
+                  serviceData.vehicle.truckData ||
+                  serviceData.vehicle.busData) && (
+                  <div className="vehicle-additional-badge-active-service">
+                    {/* Blindado (Autos y Camionetas) */}
+                    {serviceData.vehicle.isArmored && (
+                      <div className="detail-badge">🛡️ Blindado</div>
+                    )}
+
+                    {/* Sótano (del serviceDetails actual) */}
+                    {serviceData.serviceDetails?.basement?.isInBasement && (
+                      <div className="detail-badge">
+                        🏢 Sótano nivel{" "}
+                        {serviceData.serviceDetails.basement.level}
+                      </div>
+                    )}
+
+                    {/* Datos específicos de CAMIONES */}
+                    {serviceData.vehicle.truckData && (
+                      <>
+                        {serviceData.vehicle.truckData.trailerType && (
+                          <div className="detail-badge">
+                            🚛{" "}
+                            {serviceData.vehicle.truckData.trailerType
+                              .replace("_", " ")
+                              .replace(/\b\w/g, (l) => l.toUpperCase())}
+                          </div>
+                        )}
+                        {serviceData.vehicle.truckData.axleType && (
+                          <div className="detail-badge">
+                            🛞{" "}
+                            {serviceData.vehicle.truckData.axleType ===
+                            "sencilla"
+                              ? "Llanta Sencilla"
+                              : "Llanta Doble"}
+                          </div>
+                        )}
+                        {serviceData.vehicle.truckData.length && (
+                          <div className="detail-badge">
+                            📏 Largo: {serviceData.vehicle.truckData.length} m
+                          </div>
+                        )}
+                        {serviceData.vehicle.truckData.height && (
+                          <div className="detail-badge">
+                            📐 Alto: {serviceData.vehicle.truckData.height} m
+                          </div>
+                        )}
+                        {serviceData.vehicle.truckData.tonnage && (
+                          <div className="detail-badge">
+                            ⚖️ {serviceData.vehicle.truckData.tonnage} ton
+                          </div>
+                        )}
+                        {serviceData.serviceDetails?.truckCurrentState
+                          ?.isLoaded && (
+                          <div className="detail-badge">
+                            📦 Cargado:{" "}
+                            {
+                              serviceData.serviceDetails.truckCurrentState
+                                .currentWeight
+                            }{" "}
+                            ton
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Datos específicos de BUSES */}
+                    {serviceData.vehicle.busData && (
+                      <>
+                        {serviceData.vehicle.busData.passengerCapacity && (
+                          <div className="detail-badge">
+                            👥 {serviceData.vehicle.busData.passengerCapacity}{" "}
+                            pasajeros
+                          </div>
+                        )}
+                        {serviceData.vehicle.busData.axleType && (
+                          <div className="detail-badge">
+                            🛞{" "}
+                            {serviceData.vehicle.busData.axleType === "sencilla"
+                              ? "Llanta Sencilla"
+                              : "Llanta Doble"}
+                          </div>
+                        )}
+                        {serviceData.vehicle.busData.length && (
+                          <div className="detail-badge">
+                            📏 Largo: {serviceData.vehicle.busData.length} m
+                          </div>
+                        )}
+                        {serviceData.vehicle.busData.height && (
+                          <div className="detail-badge">
+                            📐 Alto: {serviceData.vehicle.busData.height} m
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
+
+          {/* Cancelar solo disponible antes de recoger el vehículo */}
+          {!codeValidated && (
+            <div className="as-cancel-section">
+              <div className="as-cancel-divider">
+                <span className="as-cancel-divider-text">
+                  Cancelar servicio por emergencia
+                </span>
+              </div>
+              <button
+                className="as-cancel-service-btn"
+                onClick={handleCancelService}
+              >
+                <div className="as-cancel-text">Cancelar servicio</div>
+              </button>
+            </div>
+          )}
         </div>
       </div>
-    </IonPage>
+    </IonContent>
   );
 };
 

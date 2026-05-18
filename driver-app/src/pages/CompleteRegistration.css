@@ -3,12 +3,12 @@
    ====================================== */
 
 .complete-registration-content {
-  --background: #F7F7F7;
+  --background: white;
 }
 
 .registration-progress {
   --progress-background: #0055FF;
-  --background: #F7F7F7;
+  --background: white;
   height: 4px;
 }
 

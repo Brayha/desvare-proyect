@@ -28,14 +28,13 @@ const LocationBanner = ({ loading, error, location, onRequestPermission }) => {
   if (error) {
     return (
       <div className="location-banner location-banner-error">
-        <IonIcon icon={alertCircleOutline} className="location-icon" />
+        <span style={{ fontSize: 24, flexShrink: 0 }}>📍</span>
         <div className="location-text">
           <span className="location-title">Ubicación no disponible</span>
           <span className="location-subtitle">Sin GPS no puedes recibir solicitudes</span>
         </div>
         {onRequestPermission && (
           <button className="location-action-btn" onClick={onRequestPermission}>
-            <IonIcon icon={settingsOutline} />
             <span>Activar</span>
           </button>
         )}

@@ -93,10 +93,12 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
         <div className="location-section-wrapper">
           {/* Origen */}
           <div className="location-section">
-            <Location size="24" variant="Bulk" color="#0055FF" />
+            <div className="rc-location-icon rc-location-icon-with-line">
+              <Location size="20" variant="Bold" color="#0055FF" />
+            </div>
             <div className="location-text">
               <IonText color="medium" className="location-label">
-                Origen aproximado
+                Origen
               </IonText>
               <IonText className="location-address">
                 {request.origin.address}
@@ -106,7 +108,9 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
 
           {/* Destino */}
           <div className="location-section">
-            <Location size="24" variant="Bulk" color="#FF5500" />
+            <div className="rc-location-icon">
+              <Location size="20" variant="Bold" color="#FF5500" />
+            </div>
             <div className="location-text">
               <IonText color="medium" className="location-label">
                 Destino
@@ -136,25 +140,25 @@ const RequestCard = ({ request, onQuote, myQuote }) => {
                 {request.vehicle?.model || "N/A"}
               </h3>
             </div>
-            <div className="distance-info-service-card">
+            {/* <div className="distance-info-service-card">
               <p className="distance-service-card">
                {request.durationMin || "N/A"} Min
               </p>
               <p className="distance-km-service-card">
                 {request.distanceKm || "N/A"} km
               </p>
-            </div>
+            </div> */}
           </div>
 
           {/* Problema */}
-          <div className="problem-section">
+          {/* <div className="problem-section">
             <IonText color="medium" className="section-label">
               Problema
             </IonText>
             <IonText className="problem-text">
               {request.problem || "Sin descripción"}
             </IonText>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

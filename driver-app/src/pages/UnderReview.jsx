@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent, IonButton, IonToast } from '@ionic/react';
-import { Clock, SecurityUser, TickCircle } from 'iconsax-react';
+import { Clock, SecurityUser, TickCircle, Check } from 'iconsax-react';
 import { io } from 'socket.io-client';
-import DesvareLogoWhite from '../assets/img/Desvare-white.svg';
+import DesvareLogoWhite from '../assets/img/Desvare.svg';
 import './UnderReview.css';
 
 /**
@@ -100,7 +100,7 @@ const UnderReview = () => {
 
           {/* Ícono principal */}
           <div className="under-review-icon">
-            <Clock size="80" color="white" variant="Bulk" />
+            <TickCircle size="32" color="green" variant="Bulk" />
           </div>
 
           {/* Título */}
@@ -136,7 +136,7 @@ const UnderReview = () => {
           {/* Mensaje de notificación */}
           <div className="under-review-notice">
             <p>
-              📱 Te notificaremos cuando tu perfil sea aprobado y puedas empezar a recibir servicios.
+              🔔 Te notificaremos cuando tu perfil sea aprobado y puedas empezar a recibir servicios.
             </p>
           </div>
 

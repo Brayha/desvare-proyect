@@ -5,13 +5,23 @@
 
 .pus-container {
   display: flex;
+width: 100%;
+height: 100%;
+flex-direction: column;
+justify-content: space-between;
+align-items: center;
+flex-shrink: 0;
+gap: 24px;
+}
+
+.pus-container-inner {
+  display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  height: 100%;
   gap: 16px;
-  padding-bottom: 8px;
 }
-
 /* ─────────────────────────────────────────────
    IMAGEN HERO — se encoge según el estado
 ───────────────────────────────────────────── */
@@ -104,7 +114,7 @@
 /* Modo grilla — dos previews lado a lado */
 .pus-zones--grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
@@ -157,7 +167,7 @@
 
 /* Modo compacto (en grilla cuando allDone) */
 .pus-zone--compact {
-  min-height: 110px;
+  min-height: 180px;
 }
 
 /* Input invisible superpuesto */
@@ -223,7 +233,7 @@
 }
 
 .pus-zone--compact .pus-preview-img {
-  height: 90px;
+  height: 180px;
 }
 
 @keyframes pusFadeIn {
@@ -296,7 +306,7 @@
   .pus-title { font-size: 20px; }
   .pus-header--compact .pus-title { font-size: 16px; }
   .pus-preview-img { height: 100px; }
-  .pus-zone--compact .pus-preview-img { height: 75px; }
+  .pus-zone--compact .pus-preview-img { height: 180px; }
 }
 
 @media (max-height: 580px) {

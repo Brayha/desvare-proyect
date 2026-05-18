@@ -9,6 +9,9 @@ import {
   IonButton,
   IonButtons,
   IonBackButton,
+  IonFab,
+  IonFabButton,
+  IonIcon,
   IonText,
   IonInput,
   IonSpinner,
@@ -16,6 +19,7 @@ import {
 } from '@ionic/react';
 import { requestAPI } from '../services/api';
 import './QuoteAmount.css';
+import { arrowBack } from 'ionicons/icons';
 
 const QuoteAmount = () => {
   const history = useHistory();
@@ -130,29 +134,22 @@ const QuoteAmount = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonBackButton defaultHref="/request-detail" text="" />
-          </IonButtons>
-          <IonTitle>Cotiza el servicio</IonTitle>
-        </IonToolbar>
-      </IonHeader>
 
       <IonContent className="quote-amount-page">
+        <IonFab slot="fixed" vertical="top" horizontal="start">
+          <IonFabButton color="light" onClick={() => history.goBack()}>
+            <IonIcon icon={arrowBack} />
+          </IonFabButton>
+        </IonFab>
         <div className="quote-content">
           {/* Texto descriptivo */}
-          <div className="description-text">
-            <IonText color="medium">
-              Este será el valor que tu cliente verá
-            </IonText>
-          </div>
 
           {/* Monto grande - Display */}
           <div className="amount-display">
             <IonText className="amount-text">
               {formatAmount(amount)}
             </IonText>
+            <p className="text-description">Este será el valor que tu cliente verá</p>
           </div>
 
           {/* Card de Input */}
@@ -169,14 +166,12 @@ const QuoteAmount = () => {
             <div className="input-wrapper">
               <span className="currency-symbol">$</span>
               <IonInput
-                type="number"
-                value={amount}
+                type="text"
+                value={displayAmount}
                 onIonInput={handleAmountChange}
                 placeholder="0"
                 className="amount-input"
                 inputmode="numeric"
-                min="0"
-                step="1"
               />
             </div>
           </div>

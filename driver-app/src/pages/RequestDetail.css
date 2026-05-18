@@ -1,6 +1,12 @@
 .request-detail-page {
   background: #f7f7f7;
+  padding: 10px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   overflow: auto;
+  padding-bottom: 32px;
 }
 
 .request-detail-container {
@@ -12,60 +18,42 @@
 /* Sección del mapa */
 .map-section {
   width: 100%;
-  height: 600px;
-  position: relative;
+  height: 460px;
   z-index: 1;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24);
 }
 
 /* Contenido de detalles */
 .detail-content-request-detail {
-  padding: 10px;
-  margin-top: -40px; /* Superponer ligeramente sobre el mapa */
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-}
-
-.request-detail-content-request-detail {
-  background: var(--ion-color-primary);
-  padding: 2px;
-  overflow: auto;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.type-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: white;
-  margin: 0;
-  text-align: center;
-  margin: 5px;
-  width: auto;
-}
-
-.card-request-detail {
-  background: white;
-  padding: 10px;
-  overflow: auto;
-  border-radius: 20px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.quote-title {
+.card-request-detail-request-detail {
+  background: white;
+  padding: 16px;
+  overflow: auto;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24);
+}
+
+.quote-title-request-detail {
   font-size: 18px;
   font-weight: 700;
   color: var(--ion-color-dark);
   margin: 0;
   text-align: left;
-  margin: 10px 0 0 10px;
+  margin: 0;
   width: auto;
 }
+
 .pending-quote-title {
   font-size: 16px;
   font-weight: 700;
@@ -84,20 +72,6 @@
   margin: 0px 0 5px 0;
 }
 
-.pending-quote-container {
-  border-radius: 20px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
-  display: flex;
-  padding: 15px;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  align-self: stretch;
-}
-
 /* Card de ubicación del usuario (conductor) */
 .user-location-card {
   display: flex;
@@ -110,6 +84,8 @@
   width: 40px;
   height: 40px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .user-avatar img {
@@ -117,25 +93,41 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--ion-color-primary);
+  border: 2px solid #CBD5E1;
+}
+
+/* Línea punteada desde el avatar hacia el ícono de origen */
+.user-avatar-with-line {
+  position: relative;
+}
+
+.user-avatar-with-line::after {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  border-left: 2px dashed #CBD5E1;
 }
 
 .user-info {
   flex: 1;
 }
 
-.user-name h3 {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0;
-  color: var(--ion-color-dark);
-}
-
 .user-address p {
   font-size: 14px;
   font-weight: 500;
-  color: var(--ion-color-medium);
+  color: var(--ion-color-dark);
   margin: 0;
+}
+
+/* Wrapper que agrupa origen y destino con la línea de conexión */
+.route-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
 /* Secciones de ubicación (Origen y Destino) */
@@ -150,21 +142,47 @@
 .location-icon {
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(56, 128, 255, 0.1);
+  background: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
   border-radius: 50px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Línea punteada entre el ícono de origen y el de destino */
+.location-icon-with-line {
+  position: relative;
+}
+
+.location-icon-with-line::after {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 40px;
+  border-left: 2px dashed #CBD5E1;
 }
 
 .location-icon-destination {
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(235, 68, 90, 0.1);
+  background: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
   border-radius: 50px;
+  position: relative;
+  z-index: 1;
 }
 
 .location-section svg {
@@ -177,7 +195,7 @@
 }
 
 .location-label {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 700;
   margin: 0;
   color: var(--ion-color-dark);
@@ -186,8 +204,15 @@
 .location-address {
   font-size: 14px;
   font-weight: 500;
-  color: var(--ion-color-medium);
+  color: var(--ion-color-dark);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .location-hint {
@@ -202,29 +227,26 @@
 }
 
 /* Card de Vehículo y Problema */
-.vehicle-problem-card {
+.vehicle-problem-card-request-detail {
   display: flex;
-  padding: 5px;
+  padding: 0px;
   flex-direction: column;
   align-items: flex-start;
-  gap: 5px;
+  gap: 16px;
   align-self: stretch;
   width: 100%;
-  border-radius: 20px;
-  border: 1px solid #e5e7eb;
-  background: #f7f7f7;
 }
 
 .vehicle-info-request-detail {
   display: flex;
   padding: 0 10px;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
   align-self: stretch;
   border-radius: 15px;
   border: 1px solid #e5e7eb;
   background: #fff;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
 .vehicle-icon-request-detail {
@@ -243,7 +265,6 @@
   justify-content: center;
   align-items: flex-start;
   flex: 1 0 0;
-  border-right: 1px solid #E5E7EB;
 }
 
 .vehicle-brand-request-detail {
@@ -296,7 +317,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 5px;
   width: 100%;
 }
 
@@ -316,26 +336,28 @@
 }
 
 /* Sección de Problema */
-.problem-section {
+.problem-section-request-detail {
   display: flex;
   flex-direction: column;
   gap: 0px;
   padding: 5px;
 }
 
-.problem-section .section-label {
-  font-size: 13px;
+.problem-section-request-detail .section-label-request-detail {
+  font-size: 12px;
   font-weight: 600;
   color: var(--ion-color-medium);
   margin: 0;
   display: block;
+  margin: 0;
 }
 
-.problem-section .problem-text {
-  font-size: 15px;
+.problem-section-request-detail .problem-text-request-detail {
+  font-size: 16px;
   line-height: 1.5;
   color: var(--ion-color-dark);
   display: block;
+  margin: 0;
 }
 
 /* Botón de enviar cotización */

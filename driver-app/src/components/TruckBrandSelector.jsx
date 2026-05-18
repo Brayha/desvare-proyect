@@ -46,12 +46,13 @@ const TruckBrandSelector = ({
           <p>Selecciona la marca de la grúa que usarás para recoger los vehículos de los clientes</p>
         </IonText>
       </div>
-
+      
+      <div className="selector-brands-container">
       {/* Buscador */}
       <IonSearchbar
         value={searchText}
         onIonInput={(e) => setSearchText(e.detail.value)}
-        placeholder="Buscar marca..."
+        placeholder="Filtrar marcas..."
         className="brand-searchbar"
         animated
       />
@@ -84,15 +85,12 @@ const TruckBrandSelector = ({
 
             {/* Opción "Otro" */}
             <div
-              className={`brand-item brand-item-other ${selectedBrand?.id === 'OTHER' ? 'selected' : ''}`}
+              className={`brand-item-other ${selectedBrand?.id === 'OTHER' ? 'brand-item-other-selected' : ''}`}
               onClick={handleOtherSelect}
             >
-              <div className="brand-content">
-                <span className="brand-name">✏️ Otro (Escribir marca)</span>
+              <div className="brand-content-add">
+                <span className="brand-name">✏️ Otra marca (Escribir marca)</span>
               </div>
-              {selectedBrand?.id === 'OTHER' && (
-                <div className="brand-check">✓</div>
-              )}
             </div>
 
             {filteredBrands.length === 0 && searchText && (
@@ -117,11 +115,20 @@ const TruckBrandSelector = ({
                 placeholder="Ej: JAC, Dongfeng, etc."
                 className="custom-input"
                 clearInput
+                autoFocus
               />
+              <button
+                className="custom-brand-confirm-btn"
+                onClick={onAutoAdvance}
+                disabled={!customBrand || !customBrand.trim()}
+              >
+                Confirmar marca →
+              </button>
             </div>
           )}
         </>
       )}
+      </div>
 
       {error && (
         <IonText color="danger" className="error-message">

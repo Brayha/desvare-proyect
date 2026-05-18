@@ -45,13 +45,10 @@ const PhoneInput = ({
           <Call size="24" color={error ? '#EF4444' : '#9CA3AF'} />
         </div>
         <input
-          type="number"
+          type="tel"
           inputMode="numeric"
-          min="0"
-          max="9999999999"
-          step="1"
-          placeholder="0000000000"
-          value={value}
+          placeholder="000 000 00 00"
+          value={formatPhone(value)}
           onChange={handleInput}
           disabled={disabled}
           className="modern-phone-input-field"

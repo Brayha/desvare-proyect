@@ -177,6 +177,13 @@ const PermissionsSetup = () => {
   };
 
   const handleNotificationsPermission = async () => {
+    // En modo DEV (navegador) FCM no está disponible — avanzar directo sin llamada nativa
+    if (import.meta.env.VITE_DEV_MODE === 'true') {
+      console.log('🔧 [DEV_MODE] Permiso de notificaciones omitido — no disponible en navegador web');
+      setTimeout(() => goToHome(), 400);
+      return;
+    }
+
     setLoading(true);
     try {
       const check = await PushNotifications.checkPermissions();
