@@ -1001,6 +1001,11 @@ router.post('/:id/rate', async (req, res) => {
       });
     }
     
+    // Capturar ANTES de guardar si este servicio ya tenía calificación previa.
+    // El check posterior a request.save() siempre encontraría rating !== null
+    // porque acabamos de asignarlo, haciendo que totalServices nunca incremente.
+    const isFirstRating = !request.rating?.ratedAt;
+
     // Actualizar calificación
     request.rating = {
       stars: stars,
@@ -1044,8 +1049,8 @@ router.post('/:id/rate', async (req, res) => {
           // 2. Actualizar rating promedio
           driver.driverProfile.rating = Math.round(newAverage * 10) / 10; // Redondear a 1 decimal
           
-          // 3. Incrementar totalServices (solo si es la primera calificación de este servicio)
-          if (!request.rating || !request.rating.ratedAt) {
+          // 3. Incrementar totalServices solo en la primera calificación del servicio
+          if (isFirstRating) {
             driver.driverProfile.totalServices = (driver.driverProfile.totalServices || 0) + 1;
           }
           

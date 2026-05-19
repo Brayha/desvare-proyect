@@ -152,9 +152,12 @@ const DriverOnWay = () => {
       // Limpiar servicio activo
       localStorage.removeItem('activeService');
       
-      // Redirigir a la pantalla de calificación después de 1.5 segundos
+      // window.location.replace desmonta DriverOnWay completamente (incluye los
+      // setInterval de polling). Con history.replace el componente queda vivo y
+      // el polling volvería a detectar "completed" redirigiendo al cliente de vuelta
+      // a /rate-service después de haber calificado.
       setTimeout(() => {
-        history.replace('/rate-service');
+        window.location.replace('/rate-service');
       }, 1500);
     });
 
@@ -239,7 +242,7 @@ const DriverOnWay = () => {
           localStorage.setItem('completedService', JSON.stringify(completedServiceData));
           localStorage.removeItem('activeService');
           showSuccess('¡Servicio completado!');
-          setTimeout(() => history.replace('/rate-service'), 1000);
+          setTimeout(() => window.location.replace('/rate-service'), 1000);
         } else if (status === 'cancelled') {
           // Fallback para cuando el socket no llegó (iOS background / red inestable)
           localStorage.removeItem('activeService');
