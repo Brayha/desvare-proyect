@@ -84,6 +84,10 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
   const lastShowDestinationRef = useRef(showDestination);
   const lastRequestRef = useRef(null);
   
+  // true solo después de que el mapa disparó onLoad (estilo cargado, canvas listo).
+  // Ningún Marker/Source debe renderizarse antes o Mapbox lanzará "appendChild on undefined".
+  const [mapReady, setMapReady] = useState(false);
+
   // Estados para controlar la animación secuencial
   const [showDriver, setShowDriver] = useState(false);
   const [showOrigin, setShowOrigin] = useState(false);
@@ -146,6 +150,10 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
     lastRouteCalcLocRef.current = { lat: driverLocation.lat, lng: driverLocation.lng };
     lastShowDestinationRef.current = showDestination;
     lastRequestRef.current = request;
+
+    // IDs de todos los setTimeout de animación — se cancelan en el cleanup
+    // para evitar que disparen sobre un mapa que Ionic ya está desmontando
+    const timeoutIds = [];
 
     const calculateRoutes = async () => {
     setIsCalculatingRoute(true);
@@ -234,19 +242,15 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
       }
       
       // Ajustar zoom para mostrar todas las coordenadas relevantes
-      setTimeout(() => {
+      timeoutIds.push(setTimeout(() => {
         if (mapRef.current) {
-          // Incluir solo coordenadas relevantes según el estado
           const allCoordinates = [
             [driverLocation.lng, driverLocation.lat],
             [originCoords.lng, originCoords.lat]
           ];
-          
-          // Solo agregar destino si debe mostrarse
           if (hasDestination && showDestination && destCoords) {
             allCoordinates.push([destCoords.lng, destCoords.lat]);
           }
-          
           const bounds = calculateBounds(allCoordinates);
           if (bounds) {
             mapRef.current.fitBounds(bounds, {
@@ -255,40 +259,34 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
             });
           }
         }
-      }, 500);
+      }, 500));
       
-      // 🎬 ANIMACIÓN SECUENCIAL
-      // Paso 1: Mostrar conductor (inmediato después de cargar)
-      setTimeout(() => {
+      // 🎬 ANIMACIÓN SECUENCIAL — los IDs se guardan para cancelarlos al desmontar
+      timeoutIds.push(setTimeout(() => {
         setShowDriver(true);
         console.log('🎬 Paso 1: Conductor visible');
-      }, 600);
+      }, 600));
       
-      // Paso 2: Mostrar origen
-      setTimeout(() => {
+      timeoutIds.push(setTimeout(() => {
         setShowOrigin(true);
         console.log('🎬 Paso 2: Origen visible');
-      }, 1200);
+      }, 1200));
       
-      // Paso 3: Trazar ruta conductor → origen
-      setTimeout(() => {
+      timeoutIds.push(setTimeout(() => {
         setShowDriverRoute(true);
         console.log('🎬 Paso 3: Ruta Conductor → Origen trazada');
-      }, 1800);
+      }, 1800));
       
-      // ✅ Solo mostrar destino si existe Y showDestination prop es true
       if (hasDestination && showDestination) {
-        // Paso 4: Mostrar marcador de destino
-        setTimeout(() => {
+        timeoutIds.push(setTimeout(() => {
           setShowDestinationMarker(true);
           console.log('🎬 Paso 4: Destino visible');
-        }, 2400);
+        }, 2400));
         
-        // Paso 5: Trazar ruta origen → destino
-        setTimeout(() => {
+        timeoutIds.push(setTimeout(() => {
           setShowDestinationRoute(true);
           console.log('🎬 Paso 5: Ruta Origen → Destino trazada');
-        }, 3000);
+        }, 3000));
       } else {
         console.log('⏭️ Saltando pasos 4 y 5 (sin destino)');
       }
@@ -301,6 +299,12 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
     };
 
     calculateRoutes();
+
+    // Cancelar todos los timers pendientes si el componente se desmonta
+    // antes de que terminen (evita appendChild sobre un Map ya destruido por Ionic)
+    return () => {
+      timeoutIds.forEach(clearTimeout);
+    };
   }, [request, driverLocation, showDestination]);
 
   if (!MAPBOX_TOKEN) {
@@ -330,12 +334,15 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
         ref={mapRef}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
+        onLoad={() => setMapReady(true)}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
       >
-        {/* Marcador del Conductor - Aparece primero */}
-        {showDriver && (
+        {/* Nada se renderiza hasta que mapReady=true (onLoad disparó).
+            Esto evita "appendChild on undefined" cuando el canvas aún no existe. */}
+
+        {mapReady && showDriver && (
           <Marker 
             longitude={driverLocation.lng} 
             latitude={driverLocation.lat}
@@ -353,8 +360,7 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
           </Marker>
         )}
 
-        {/* Marcador de Origen - Aparece segundo */}
-        {showOrigin && (
+        {mapReady && showOrigin && (
           <Marker 
             longitude={request.origin.coordinates?.[0] || request.origin.lng} 
             latitude={request.origin.coordinates?.[1] || request.origin.lat}
@@ -366,8 +372,7 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
           </Marker>
         )}
 
-        {/* Marcador de Destino - Aparece cuarto (solo si existe destino) */}
-        {showDestinationMarker && request.destination && (
+        {mapReady && showDestinationMarker && request.destination && (
           <Marker 
             longitude={request.destination.coordinates?.[0] || request.destination.lng} 
             latitude={request.destination.coordinates?.[1] || request.destination.lat}
@@ -379,15 +384,13 @@ const RequestDetailMap = ({ request, driverLocation, driverPhoto, showDestinatio
           </Marker>
         )}
 
-        {/* Ruta Conductor → Origen - Se traza tercero */}
-        {showDriverRoute && driverToOriginRoute && (
+        {mapReady && showDriverRoute && driverToOriginRoute && (
           <Source id="driver-to-origin-route" type="geojson" data={driverToOriginRoute}>
             <Layer {...driverToOriginLayerStyle} />
           </Source>
         )}
         
-        {/* Ruta Origen → Destino - Se traza quinto */}
-        {showDestinationRoute && originToDestinationRoute && (
+        {mapReady && showDestinationRoute && originToDestinationRoute && (
           <Source id="origin-to-destination-route" type="geojson" data={originToDestinationRoute}>
             <Layer {...originToDestinationLayerStyle} />
           </Source>

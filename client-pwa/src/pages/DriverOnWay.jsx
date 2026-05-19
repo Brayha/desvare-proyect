@@ -226,6 +226,17 @@ const DriverOnWay = () => {
         if (status === 'in_progress') {
           setServiceStarted(true);
         } else if (status === 'completed') {
+          // Guardar datos para RatingService (igual que el handler de socket).
+          // Sin esto, RatingService redirige a /home por no encontrar completedService.
+          const completedServiceData = {
+            requestId: activeRequestId,
+            driver: parsedData?.driver,
+            amount: parsedData?.amount,
+            origin: parsedData?.origin,
+            destination: parsedData?.destination,
+            completedAt: new Date().toISOString(),
+          };
+          localStorage.setItem('completedService', JSON.stringify(completedServiceData));
           localStorage.removeItem('activeService');
           showSuccess('¡Servicio completado!');
           setTimeout(() => history.replace('/rate-service'), 1000);

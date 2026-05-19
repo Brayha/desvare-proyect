@@ -17,10 +17,13 @@ import {
   IonBadge,
   useIonAlert,
   useIonToast,
+  useIonViewWillLeave,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { arrowBack } from "ionicons/icons";
 import { Location } from "iconsax-react";
 import { requestAPI } from "../services/api";
+import socketService from "../services/socket";
 import RequestDetailMap from "../components/RequestDetailMap";
 import "./QuoteDetail.css"; // ✅ Reutilizar el mismo CSS
 
@@ -50,6 +53,11 @@ const QuoteDetail = () => {
   const [timeElapsed, setTimeElapsed] = useState("");
   const [cancelling, setCancelling] = useState(false);
 
+  // Desmontar mapa antes de la animación de salida de Ionic
+  const [showMap, setShowMap] = useState(true);
+  useIonViewWillLeave(() => setShowMap(false));
+  useIonViewWillEnter(() => setShowMap(true));
+
   // ✅ NUEVO: Estados para compatibilidad con RequestDetailMap
   const [driverPhoto, setDriverPhoto] = useState(
     "https://ionicframework.com/docs/img/demos/avatar.svg",
@@ -60,6 +68,105 @@ const QuoteDetail = () => {
     lat: 4.6097,
     lng: -74.0817,
   });
+
+  // Escuchar eventos de socket que afectan al estado de esta cotización mientras
+  // el conductor espera respuesta aquí (puede no estar en Home).
+  useEffect(() => {
+    // 1. El cliente ACEPTÓ mi cotización → ir a ActiveService
+    socketService.onServiceAccepted((data) => {
+      console.log('🎉 [QuoteDetail] Cotización aceptada por el cliente:', data);
+
+      const parsedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const serviceToSave = {
+        ...data,
+        driverId: data.driverId || parsedUser?._id || parsedUser?.id,
+      };
+
+      localStorage.setItem('activeService', JSON.stringify(serviceToSave));
+      localStorage.removeItem('lastQuotedRequest');
+
+      // Marcar conductor como OCUPADO (consistente con Home.onServiceAccepted)
+      const updatedUser = { ...parsedUser };
+      if (updatedUser.driverProfile) updatedUser.driverProfile.isOnline = false;
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      present({
+        message: `¡Tu cotización fue aceptada! Cliente: ${data.clientName}`,
+        duration: 3000,
+        color: 'success',
+      });
+
+      setTimeout(() => {
+        window.location.replace('/active-service');
+      }, 400);
+    });
+
+    // 2. El CLIENTE CANCELÓ la búsqueda (antes de aceptar a nadie)
+    socketService.onRequestCancelled((data) => {
+      console.log('🚫 [QuoteDetail] Solicitud cancelada por el cliente:', data);
+
+      // Solo reaccionar si es la solicitud que estamos viendo
+      if (data.requestId?.toString() !== requestId?.toString()) return;
+
+      localStorage.removeItem('lastQuotedRequest');
+
+      present({
+        message: 'El cliente canceló la búsqueda',
+        duration: 3000,
+        color: 'warning',
+      });
+
+      setTimeout(() => {
+        window.location.replace('/home');
+      }, 400);
+    });
+
+    // 3. Otro conductor fue seleccionado (service:taken) — ya no hay nada que esperar
+    socketService.onServiceTaken((data) => {
+      console.log('⚠️ [QuoteDetail] Servicio tomado por otro conductor:', data);
+
+      if (data.requestId?.toString() !== requestId?.toString()) return;
+
+      localStorage.removeItem('lastQuotedRequest');
+
+      present({
+        message: 'El cliente eligió a otro conductor',
+        duration: 3000,
+        color: 'medium',
+      });
+
+      setTimeout(() => {
+        window.location.replace('/home');
+      }, 400);
+    });
+
+    // 4. La cotización expiró (backend emite quote:expired al conductor afectado)
+    socketService.onQuoteExpired((data) => {
+      console.log('⏰ [QuoteDetail] Cotización expirada:', data);
+
+      if (data.requestId?.toString() !== requestId?.toString()) return;
+
+      localStorage.removeItem('lastQuotedRequest');
+
+      present({
+        message: 'La cotización expiró sin respuesta del cliente',
+        duration: 3000,
+        color: 'medium',
+      });
+
+      setTimeout(() => {
+        window.location.replace('/home');
+      }, 400);
+    });
+
+    return () => {
+      socketService.offServiceAccepted();
+      socketService.offRequestCancelled();
+      socketService.offServiceTaken();
+      socketService.offQuoteExpired();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestId]);
 
   useEffect(() => {
     // ⚡ Cargar datos críticos primero (bloquea UI)
@@ -337,14 +444,13 @@ const QuoteDetail = () => {
         color: "success",
       });
 
-      // Remover de localStorage si existe
-      const quotedRequests = JSON.parse(
-        localStorage.getItem("quotedRequests") || "[]",
-      );
-      const updated = quotedRequests.filter((r) => r.requestId !== requestId);
-      localStorage.setItem("quotedRequests", JSON.stringify(updated));
+      // Limpiar lastQuotedRequest del localStorage para que no reaparezca en Home
+      localStorage.removeItem('lastQuotedRequest');
 
-      history.replace("/home");
+      // window.location.replace limpia el stack de Ionic completamente
+      setTimeout(() => {
+        window.location.replace("/home");
+      }, 400);
     } catch (error) {
       console.error("Error al cancelar:", error);
       present({
@@ -438,6 +544,7 @@ const QuoteDetail = () => {
   }
 
   return (
+    <IonPage>
     <IonContent>
       <IonFab slot="fixed" vertical="top" horizontal="start">
         <IonFabButton color="light" onClick={() => history.goBack()}>
@@ -446,13 +553,16 @@ const QuoteDetail = () => {
       </IonFab>
 
       <div className="request-detail-page">
-        {/* Mapa */}
+        {/* Mapa — se desmonta antes de la animación de salida para evitar
+            que Mapbox haga appendChild en un contenedor inválido */}
         <div className="map-section">
-          <RequestDetailMap
-            request={request}
-            driverLocation={driverLocation}
-            driverPhoto={driverPhoto}
-          />
+          {showMap && (
+            <RequestDetailMap
+              request={request}
+              driverLocation={driverLocation}
+              driverPhoto={driverPhoto}
+            />
+          )}
         </div>
 
         {/* Contenido de detalles */}
@@ -731,6 +841,7 @@ const QuoteDetail = () => {
         </div>
       </div>
     </IonContent>
+    </IonPage>
   );
 };
 

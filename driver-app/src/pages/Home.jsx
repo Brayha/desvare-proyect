@@ -4,15 +4,6 @@ import {
   IonContent,
   IonPage,
   IonText,
-  IonButton,
-  IonModal,
-  IonInput,
-  IonLabel,
-  IonItem,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
   useIonToast,
   useIonAlert,
   useIonViewWillEnter,
@@ -46,9 +37,6 @@ const Home = () => {
   const [user, setUser] = useState(null);
   const [requests, setRequests] = useState([]);
   const [isOnline, setIsOnline] = useState(false);
-  const [showQuoteModal, setShowQuoteModal] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState(null);
-  const [quoteAmount, setQuoteAmount] = useState('');
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [loadingRequests, setLoadingRequests] = useState(true);
   
@@ -236,12 +224,20 @@ const Home = () => {
         console.log('📊 Requests después de filtrar:', filtered.map(r => r.requestId));
         return filtered;
       });
-      
-      // Cerrar modal de cotización si estaba abierto
-      if (selectedRequest && selectedRequest.requestId?.toString() === data.requestId?.toString()) {
-        console.log('🔒 Cerrando modal de cotización');
-        setShowQuoteModal(false);
-        setSelectedRequest(null);
+
+      // Limpiar lastQuotedRequest si corresponde a la solicitud cancelada.
+      // Sin esto, loadRequests la reinyecta aunque el backend ya la filtró.
+      try {
+        const lastQuotedRaw = localStorage.getItem('lastQuotedRequest');
+        if (lastQuotedRaw) {
+          const lastQuoted = JSON.parse(lastQuotedRaw);
+          if (lastQuoted.requestId?.toString() === data.requestId?.toString()) {
+            localStorage.removeItem('lastQuotedRequest');
+            console.log('🗑️ lastQuotedRequest limpiado por cancelación del cliente');
+          }
+        }
+      } catch (_) {
+        localStorage.removeItem('lastQuotedRequest');
       }
       
       // ✅ VERIFICAR si es el servicio ACTIVO (aceptado)
@@ -309,15 +305,15 @@ const Home = () => {
       // Guardar datos del servicio activo en localStorage
       localStorage.setItem('activeService', JSON.stringify(serviceToSave));
 
+      // Limpiar la cotización guardada: ya no corresponde mostrarla en Home
+      localStorage.removeItem('lastQuotedRequest');
+
       // Actualizar estado a OCUPADO
       setIsOnline(false);
       const updatedUser = { ...parsedUser };
       if (updatedUser.driverProfile) updatedUser.driverProfile.isOnline = false;
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      // Navegar a vista de servicio activo
-      history.push('/active-service');
-      
       present({
         message: isResume
           ? `Servicio activo reanudado: ${data.clientName}`
@@ -325,14 +321,21 @@ const Home = () => {
         duration: 3000,
         color: isResume ? 'warning' : 'success',
       });
+
+      // window.location.replace limpia el stack de Ionic: evita que Home/RequestDetail
+      // queden apilados debajo de ActiveService y reaparezcan al volver atrás
+      setTimeout(() => {
+        window.location.replace('/active-service');
+      }, 400);
     });
 
     // Escuchar cuando otro conductor tomó el servicio
     socketService.onServiceTaken((data) => {
       console.log('❌ Servicio tomado por otro conductor:', data.requestId);
       
-      // Remover de la lista
-      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      setRequests((prev) => prev.filter(
+        req => req.requestId?.toString() !== data.requestId?.toString()
+      ));
       
       present({
         message: 'Este servicio ya fue tomado por otro conductor',
@@ -345,9 +348,21 @@ const Home = () => {
     socketService.onQuoteExpired((data) => {
       console.log('⏰ Cotización expirada:', data);
       
-      // Remover de la lista de requests
-      setRequests((prev) => prev.filter(req => req.requestId !== data.requestId));
+      setRequests((prev) => prev.filter(
+        req => req.requestId?.toString() !== data.requestId?.toString()
+      ));
       
+      // Limpiar lastQuotedRequest si coincide
+      try {
+        const lastRaw = localStorage.getItem('lastQuotedRequest');
+        if (lastRaw) {
+          const last = JSON.parse(lastRaw);
+          if (last.requestId?.toString() === data.requestId?.toString()) {
+            localStorage.removeItem('lastQuotedRequest');
+          }
+        }
+      } catch (_) { /* no crítico */ }
+
       present({
         message: data.message || 'Una de tus cotizaciones expiró',
         duration: 3000,
@@ -436,7 +451,6 @@ const Home = () => {
     }
   };
 
-  // ✅ Recargar cotizaciones cuando el componente se vuelve a mostrar
   // Función para cargar solicitudes
   const loadRequests = async (driverId) => {
     try {
@@ -445,8 +459,50 @@ const Home = () => {
       const data = await response.json();
       
       if (response.ok) {
-        setRequests(data.requests || []);
-        console.log(`✅ ${data.count} solicitudes cargadas`);
+        let fetchedRequests = data.requests || [];
+
+        // Si el backend no devolvió la última solicitud cotizada (en DEV sin GPS real),
+        // verificar su estado real antes de reinyectarla para evitar mostrar canceladas.
+        const lastQuotedRaw = localStorage.getItem('lastQuotedRequest');
+        if (lastQuotedRaw) {
+          try {
+            const lastQuoted = JSON.parse(lastQuotedRaw);
+            const alreadyPresent = fetchedRequests.some(
+              (r) => r.requestId === lastQuoted.requestId
+            );
+
+            if (alreadyPresent) {
+              // Está en la lista → fusionar quotes[] para que el badge del monto funcione
+              fetchedRequests = fetchedRequests.map((r) => {
+                if (r.requestId === lastQuoted.requestId && lastQuoted.quotes?.length) {
+                  return { ...r, quotes: r.quotes?.length ? r.quotes : lastQuoted.quotes };
+                }
+                return r;
+              });
+            } else {
+              // No la devolvió el backend: consultar estado real antes de inyectar
+              try {
+                const statusRes = await requestAPI.getRequest(lastQuoted.requestId);
+                const realStatus = statusRes.data?.request?.status;
+                if (realStatus === 'cancelled' || realStatus === 'expired' || realStatus === 'completed') {
+                  localStorage.removeItem('lastQuotedRequest');
+                  console.log(`🗑️ lastQuotedRequest limpiado: estado = ${realStatus}`);
+                } else {
+                  fetchedRequests = [lastQuoted, ...fetchedRequests];
+                  console.log('📋 Solicitud cotizada inyectada (activa, sin GPS en DEV)');
+                }
+              } catch {
+                // Si no se puede verificar, inyectar igual (evitar regresión en DEV)
+                fetchedRequests = [lastQuoted, ...fetchedRequests];
+              }
+            }
+          } catch (_) {
+            localStorage.removeItem('lastQuotedRequest');
+          }
+        }
+
+        setRequests(fetchedRequests);
+        console.log(`✅ ${fetchedRequests.length} solicitudes cargadas`);
       } else {
         console.error('Error al cargar solicitudes:', data);
       }
@@ -529,7 +585,7 @@ const Home = () => {
       return;
     }
 
-    const myQuote = request.quotes?.find(q => q.driverId === currentUser._id);
+    const myQuote = request.quotes?.find(q => q.driverId?.toString() === currentUser._id?.toString());
 
     if (myQuote) {
       history.push(`/quote-detail/${request.requestId}`);
@@ -549,82 +605,6 @@ const Home = () => {
     }
   };
 
-  // Enviar cotización
-  const handleSendQuote = async () => {
-    if (!quoteAmount || isNaN(quoteAmount) || parseFloat(quoteAmount) <= 0) {
-      present({
-        message: 'Por favor ingresa un monto válido',
-        duration: 2000,
-        color: 'warning',
-      });
-      return;
-    }
-
-    if (!driverLocation) {
-      present({
-        message: '⚠️ Obteniendo tu ubicación... Intenta de nuevo',
-        duration: 2000,
-        color: 'warning',
-      });
-      return;
-    }
-
-    // Validar que user existe y tiene _id
-    if (!user || !user._id) {
-      console.error('❌ Error: user no está definido o no tiene _id');
-      present({
-        message: '⚠️ Error: Usuario no cargado. Intenta de nuevo.',
-        duration: 2000,
-        color: 'danger',
-      });
-      return;
-    }
-
-    try {
-      const quoteData = {
-        driverId: user._id,
-        driverName: user.name,
-        amount: parseFloat(quoteAmount),
-        location: {
-          lat: driverLocation.lat,
-          lng: driverLocation.lng,
-        },
-      };
-
-      await requestAPI.addQuote(selectedRequest.requestId, quoteData);
-
-      socketService.sendQuote({
-        requestId: selectedRequest.requestId,
-        clientId: selectedRequest.clientId,
-        ...quoteData
-      });
-
-      present({
-        message: '✅ Cotización enviada exitosamente',
-        duration: 2000,
-        color: 'success',
-      });
-
-      setShowQuoteModal(false);
-      setQuoteAmount('');
-
-      // Actualizar estado de la solicitud
-      setRequests(prev => 
-        prev.map(req => 
-          req.requestId === selectedRequest.requestId 
-            ? { ...req, quotesCount: req.quotesCount + 1, status: 'quoted' } 
-            : req
-        )
-      );
-    } catch (error) {
-      console.error('❌ Error al enviar cotización:', error);
-      present({
-        message: 'Error al enviar cotización',
-        duration: 3000,
-        color: 'danger',
-      });
-    }
-  };
 
   // Refrescar solicitudes
   const handleRefresh = async (event) => {
@@ -747,59 +727,6 @@ const Home = () => {
             });
           })()
         )}
-
-        {/* Modal de cotización */}
-        <IonModal isOpen={showQuoteModal} onDidDismiss={() => setShowQuoteModal(false)}>
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>Enviar Cotización</IonTitle>
-              <IonButtons slot="end">
-                <IonButton onClick={() => setShowQuoteModal(false)}>Cerrar</IonButton>
-              </IonButtons>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent className="ion-padding">
-            {selectedRequest && (
-              <>
-                <IonText>
-                  <h2>Cliente: {selectedRequest.clientName}</h2>
-                  <p><strong>Vehículo:</strong> {selectedRequest.vehicle?.brand} {selectedRequest.vehicle?.model}</p>
-                  <p><strong>Placa:</strong> {selectedRequest.vehicle?.licensePlate}</p>
-                  <p><strong>Problema:</strong> {selectedRequest.problem}</p>
-                  <p><strong>Origen:</strong> {selectedRequest.origin.address}</p>
-                  <p><strong>Destino:</strong> {selectedRequest.destination.address}</p>
-                </IonText>
-
-                <IonItem style={{ marginTop: '20px' }}>
-                  <IonLabel position="floating">Monto de la cotización ($)</IonLabel>
-                  <IonInput
-                    type="number"
-                    value={quoteAmount}
-                    onIonInput={(e) => setQuoteAmount(e.detail.value)}
-                    placeholder="Ej: 25000"
-                  />
-                </IonItem>
-
-                <IonButton 
-                  expand="block" 
-                  style={{ marginTop: '20px' }}
-                  onClick={handleSendQuote}
-                >
-                  Enviar Cotización
-                </IonButton>
-
-                <IonButton 
-                  expand="block" 
-                  fill="outline"
-                  style={{ marginTop: '10px' }}
-                  onClick={() => setShowQuoteModal(false)}
-                >
-                  Cancelar
-                </IonButton>
-              </>
-            )}
-          </IonContent>
-        </IonModal>
 
         {/* Modal de permisos de ubicación */}
         <LocationPermissionModal

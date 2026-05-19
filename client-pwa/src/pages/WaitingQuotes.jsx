@@ -316,7 +316,7 @@ const WaitingQuotes = () => {
         console.log("🚗 Servicios completados:", quote.driverServiceCount || "❌ Sin servicios");
 
         // ✅ VALIDACIÓN CRÍTICA: Verificar que la cotización sea del request actual
-        if (quote.requestId !== currentRequestId) {
+        if (quote.requestId?.toString() !== currentRequestId?.toString()) {
           console.warn("⚠️ Cotización de request antiguo IGNORADA:", {
             cotizacionRequestId: quote.requestId,
             actualRequestId: currentRequestId,
@@ -761,19 +761,21 @@ const WaitingQuotes = () => {
           })
         );
 
-        // ✅ CRÍTICO: Limpiar cotizaciones del localStorage
+        // ✅ CRÍTICO: Limpiar todo el estado de búsqueda del localStorage
         localStorage.removeItem("quotesReceived");
         localStorage.removeItem("requestData");
-        console.log("🗑️ Cotizaciones y requestData limpiados del localStorage");
+        localStorage.removeItem("currentRequestId");
+        console.log("🗑️ quotesReceived, requestData y currentRequestId limpiados del localStorage");
 
         // Cerrar sheet
         setSheetOpen(false);
 
         showSuccess("¡Cotización aceptada!");
 
-        // Navegar a vista "Conductor en Camino" usando tabs
+        // history.replace evita que WaitingQuotes quede en el stack de navegación.
+        // Si el usuario presiona "atrás" desde DriverOnWay no regresará aquí.
         setTimeout(() => {
-          history.push("/driver-on-way");
+          history.replace("/driver-on-way");
         }, 500);
       } else {
         // ❌ Error del backend - Mostrar detalles

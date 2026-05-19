@@ -174,13 +174,21 @@ const ActiveService = () => {
   useEffect(() => {
     if (!serviceData) return;
 
+    // Flag para evitar doble procesamiento: el backend puede emitir
+    // service:cancelled (directo al conductor) Y request:cancelled (broadcast)
+    // para el mismo evento, haciendo que el handler corra dos veces.
+    let cancellationHandled = false;
+
     const handleServiceCancelled = (data) => {
+      if (cancellationHandled) return;
+
       const cancelledId = data?.requestId?.toString();
       const currentId = serviceData?.requestId?.toString();
 
       // Ignorar eventos de otros servicios
       if (cancelledId && currentId && cancelledId !== currentId) return;
 
+      cancellationHandled = true;
       console.log("🚫 El cliente canceló el servicio en curso");
 
       // Limpiar estado local

@@ -18,6 +18,7 @@ import {
   useIonToast,
 } from '@ionic/react';
 import { requestAPI } from '../services/api';
+import socketService from '../services/socket';
 import './QuoteAmount.css';
 import { arrowBack } from 'ionicons/icons';
 
@@ -26,8 +27,15 @@ const QuoteAmount = () => {
   const location = useLocation();
   const [present] = useIonToast();
   
-  const request = location.state?.request;
-  const driverLocation = location.state?.driverLocation;
+  // Leer de location.state primero (navegación normal desde RequestDetail).
+  // Si Ionic perdió el state (background resume, hot-reload, push notification),
+  // recuperamos del localStorage que Home.jsx guarda antes de hacer history.push.
+  const request = location.state?.request || (() => {
+    try { return JSON.parse(localStorage.getItem('pendingRequestDetail')); } catch { return null; }
+  })();
+  const driverLocation = location.state?.driverLocation || (() => {
+    try { return JSON.parse(localStorage.getItem('pendingDriverLocation')); } catch { return null; }
+  })();
   
   const [amount, setAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
@@ -94,16 +102,42 @@ const QuoteAmount = () => {
       console.log('📤 Enviando cotización al servidor:', quoteData);
 
       await requestAPI.addQuote(request.requestId, quoteData);
-      console.log('✅ Cotización enviada correctamente');
-      
+      console.log('✅ Cotización enviada correctamente (REST)');
+
+      // Notificar al cliente en tiempo real vía socket
+      socketService.sendQuote({
+        requestId: request.requestId,
+        clientId: request.clientId,
+        ...quoteData,
+      });
+
+      // Guardar la solicitud cotizada en localStorage para que Home la muestre
+      // con el badge correcto aunque el backend no la devuelva en /nearby (DEV sin GPS)
+      const quotedRequest = {
+        ...request,
+        quotes: [
+          ...(request.quotes || []),
+          { driverId: quoteData.driverId, driverName: quoteData.driverName, amount: quoteData.amount },
+        ],
+      };
+      localStorage.setItem('lastQuotedRequest', JSON.stringify(quotedRequest));
+
+      // Limpiar el respaldo de RequestDetail: ya no hace falta porque la
+      // cotización se envió correctamente.
+      localStorage.removeItem('pendingRequestDetail');
+      localStorage.removeItem('pendingDriverLocation');
+
       present({
         message: '✅ Cotización enviada',
         duration: 1500,
         color: 'success',
       });
 
-      // Volver al home después de enviar
-      history.replace('/home');
+      // window.location.replace limpia el stack de Ionic completamente,
+      // evitando que RequestDetail quede montado debajo de Home
+      setTimeout(() => {
+        window.location.replace('/home');
+      }, 400);
 
     } catch (error) {
       console.error('❌ Error al enviar cotización:', error);

@@ -14,6 +14,8 @@ import {
   IonIcon,
   IonText,
   IonSpinner,
+  useIonViewWillLeave,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { arrowBack } from "ionicons/icons";
 import { Location } from "iconsax-react";
@@ -36,6 +38,13 @@ const RequestDetail = () => {
   const history = useHistory();
   const location = useLocation();
   const [loading, setLoading] = useState(true);
+
+  // Desmontar el mapa antes de la animación de salida de Ionic
+  // Evita que Mapbox haga appendChild en un contenedor que ya no existe
+  const [showMap, setShowMap] = useState(true);
+  useIonViewWillLeave(() => setShowMap(false));
+  useIonViewWillEnter(() => setShowMap(true));
+
   const [driverPhoto, setDriverPhoto] = useState(
     "https://ionicframework.com/docs/img/demos/avatar.svg",
   );
@@ -134,9 +143,9 @@ const RequestDetail = () => {
       }, 1500);
     } else {
       setLoading(false);
-      // Limpiar respaldo una vez que la página cargó correctamente
-      localStorage.removeItem("pendingRequestDetail");
-      localStorage.removeItem("pendingDriverLocation");
+      // No borramos pendingRequestDetail aquí: QuoteAmount también lo necesita
+      // como fallback si Ionic pierde location.state en la siguiente transición.
+      // La limpieza ocurre en QuoteAmount al confirmar la cotización con éxito.
     }
   }, [request, history]);
 
@@ -200,6 +209,7 @@ const RequestDetail = () => {
   }
 
   return (
+    <IonPage>
     <IonContent>
       <div className="request-detail-page">
         <IonFab slot="fixed" vertical="top" horizontal="start">
@@ -207,13 +217,16 @@ const RequestDetail = () => {
             <IonIcon icon={arrowBack} />
           </IonFabButton>
         </IonFab>
-        {/* Mapa */}
+        {/* Mapa — se desmonta antes de la animación de salida para evitar
+            que Mapbox haga appendChild en un contenedor inválido */}
         <div className="map-section">
-          <RequestDetailMap
-            request={request}
-            driverLocation={driverLocation}
-            driverPhoto={driverPhoto}
-          />
+          {showMap && (
+            <RequestDetailMap
+              request={request}
+              driverLocation={driverLocation}
+              driverPhoto={driverPhoto}
+            />
+          )}
         </div>
 
         {/* Contenido de detalles */}
@@ -437,6 +450,7 @@ const RequestDetail = () => {
         </div>
       </div>
     </IonContent>
+    </IonPage>
   );
 };
 
