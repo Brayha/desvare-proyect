@@ -96,19 +96,19 @@
 
 /* Sección de Comentario */
 .comment-section {
-  padding: 20px 0;
+  padding: 20px;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .comment-label {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
   margin-bottom: 8px;
 }
 
 .comment-textarea {
-  --background: #f5f5f5;
+  --background: white;
   --padding-start: 12px;
   --padding-end: 12px;
   --padding-top: 12px;
@@ -116,6 +116,7 @@
   border-radius: 12px;
   font-size: 14px;
   margin-top: 8px;
+  border: 1px solid #e0e0e0;
 }
 
 .comment-counter {

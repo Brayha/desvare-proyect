@@ -179,11 +179,9 @@ const RatingService = () => {
               {/* Comentario */}
               {rating > 0 && (
                 <div className="comment-section">
-                  <IonText>
                     <p className="comment-label">
                       Cuéntanos más (opcional)
                     </p>
-                  </IonText>
                   <IonTextarea
                     placeholder="¿Qué te gustó o qué se puede mejorar?"
                     value={comment}
