@@ -548,9 +548,9 @@ const RequestService = () => {
                   onClick={() => handleOpenSearchModal(false)}
                 >
                   <div className="search-button-content">
-                    <h2>¿A dónde vamos?</h2>
+                    <h2>¿A dónde quieres llevar tu vehículo?</h2>
                     <p>
-                      Llevaremos tu vehículo a tu taller de confianza, tu casa o
+                     Tu taller de confianza, casa o
                       una dirección en específica?
                     </p>
                   </div>

@@ -178,9 +178,44 @@
   gap: var(--Padding-4, 4px);
   align-self: stretch;
   border-radius: 15px;
-  border: 1px dashed #e5e7eb;
+  border: 2px dashed #e5e7eb;
   background: #f7f7f7;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  animation: border-pulse 2s ease-in-out infinite;
+  cursor: pointer;
+}
+
+/* Brillo de izquierda a derecha */
+.search-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 85, 255, 0.08) 40%,
+    rgba(0, 85, 255, 0.18) 50%,
+    rgba(0, 85, 255, 0.08) 60%,
+    transparent 100%
+  );
+  animation: shimmer-slide 2.4s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 15px;
+}
+
+@keyframes shimmer-slide {
+  0%   { left: -70%; }
+  100% { left: 130%; }
+}
+
+@keyframes border-pulse {
+  0%, 100% { border-color: #e5e7eb; }
+  50%       { border-color: #0055ff; }
 }
 
 .search-button-content {
@@ -190,6 +225,7 @@
   align-items: flex-start;
   gap: 2px;
   flex: 1 0 0;
+  padding-right: 16px;
 }
 
 .search-button-content h2 {
@@ -206,9 +242,9 @@
 
 .search-button-content p {
   overflow: hidden;
-  color: #9ca3af;
+  color: var(--ion-color-secondary);
   text-overflow: ellipsis;
-  font-size: 12px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
@@ -222,12 +258,12 @@
   align-items: center;
   gap: 10px;
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  background: white;
+  border: 1px solid #0055ff;
+  background: #0055ff;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #9ca3af;
+  color: white;
 }
 
 /* Cargando ubicación */
