@@ -772,10 +772,11 @@ const WaitingQuotes = () => {
 
         showSuccess("¡Cotización aceptada!");
 
-        // history.replace evita que WaitingQuotes quede en el stack de navegación.
-        // Si el usuario presiona "atrás" desde DriverOnWay no regresará aquí.
+        // window.location.replace desmonta WaitingQuotes completamente antes de navegar.
+        // Con history.replace, Ionic re-monta el componente que busca requestData/currentRequestId
+        // en localStorage — ya borrados — y redirige a /home en vez de ir a /driver-on-way.
         setTimeout(() => {
-          history.replace("/driver-on-way");
+          window.location.replace("/driver-on-way");
         }, 500);
       } else {
         // ❌ Error del backend - Mostrar detalles
