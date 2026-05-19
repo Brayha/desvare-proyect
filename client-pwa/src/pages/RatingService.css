@@ -19,7 +19,7 @@
 }
 
 .rating-logo {
-  height: 60px;
+  height: 32px;
 }
 
 /* Header */
@@ -33,12 +33,12 @@
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: white;
+  color: var(--ion-color-dark);
 }
 
 .rating-subtitle {
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--ion-color-medium);
   margin: 0;
 }
 

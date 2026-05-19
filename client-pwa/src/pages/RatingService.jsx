@@ -149,8 +149,7 @@ const RatingService = () => {
           </div>
 
           {/* Card de Calificación */}
-          <IonCard className="rating-card">
-            <IonCardContent>
+          <div className="rating-card">
               {/* Estrellas */}
               <div className="stars-section">
                 <IonText>
@@ -197,8 +196,7 @@ const RatingService = () => {
                   <p className="comment-counter">{comment.length}/500</p>
                 </div>
               )}
-            </IonCardContent>
-          </IonCard>
+          </div>
 
           {/* Botones de Acción */}
           <div className="action-buttons">
