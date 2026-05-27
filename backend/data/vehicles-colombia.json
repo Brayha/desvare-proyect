@@ -656,8 +656,7 @@
       "pais_origen": "USA",
       "categories": [
         "CAMIONETAS",
-        "CAMIONES",
-        "BUSES"
+        "CAMIONES"
       ]
     },
     {
@@ -888,8 +887,7 @@
       "pais_origen": "India",
       "categories": [
         "CAMIONETAS",
-        "CAMIONES",
-        "BUSES"
+        "CAMIONES"
       ]
     },
     {
@@ -899,8 +897,7 @@
       "categories": [
         "AUTOS",
         "CAMIONETAS",
-        "CAMIONES",
-        "BUSES"
+        "CAMIONES"
       ]
     },
     {
@@ -919,8 +916,7 @@
       "pais_origen": "China",
       "categories": [
         "CAMIONETAS",
-        "CAMIONES",
-        "BUSES"
+        "CAMIONES"
       ]
     },
     {
@@ -930,8 +926,7 @@
       "categories": [
         "AUTOS",
         "CAMIONETAS",
-        "CAMIONES",
-        "BUSES"
+        "CAMIONES"
       ]
     },
     {
@@ -1834,35 +1829,91 @@
         "CAMIONETAS"
       ],
       "logo": "tank.png"
+    },
+    {
+      "id": "MARCOPOLO_SUPERPOLO",
+      "name": "Marcopolo Superpolo",
+      "pais_origen": "Colombia",
+      "categories": [
+        "BUSES"
+      ],
+      "logo": "marcopolo_superpolo.png"
+    },
+    {
+      "id": "BUSSCAR",
+      "name": "Busscar de Colombia",
+      "pais_origen": "Colombia",
+      "categories": [
+        "BUSES"
+      ],
+      "logo": "busscar.png"
+    },
+    {
+      "id": "YUTONG",
+      "name": "Yutong",
+      "pais_origen": "China",
+      "categories": [
+        "BUSES"
+      ],
+      "logo": "yutong.png"
+    },
+    {
+      "id": "ZHONGTONG",
+      "name": "Zhongtong",
+      "pais_origen": "China",
+      "categories": [
+        "BUSES"
+      ],
+      "logo": "zhongtong.png"
+    },
+    {
+      "id": "KING_LONG",
+      "name": "King Long",
+      "pais_origen": "China",
+      "categories": [
+        "BUSES"
+      ],
+      "logo": "king_long.png"
+    },
+    {
+      "id": "HIGER",
+      "name": "Higer",
+      "pais_origen": "China",
+      "categories": [
+        "BUSES"
+      ],
+      "logo": "higer.png"
+    },
+    {
+      "id": "CONDOR",
+      "name": "Carrocerías Cóndor",
+      "pais_origen": "Colombia",
+      "categories": [
+        "BUSES"
+      ],
+      "logo": "condor.png"
+    },
+    {
+      "id": "CARROCERIAS_OCCIDENTE",
+      "name": "Carrocerías de Occidente",
+      "pais_origen": "Colombia",
+      "categories": [
+        "BUSES"
+      ],
+      "logo": "carrocerias_occidente.png"
+    },
+    {
+      "id": "CHANGAN_TRUCKS",
+      "name": "Changan Trucks",
+      "pais_origen": "China",
+      "categories": [
+        "CAMIONES"
+      ],
+      "logo": "changan_trucks.png"
     }
   ],
   "models": {
     "CHEVROLET": [
-      {
-        "id": "NHR",
-        "name": "NHR",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "NPR",
-        "name": "NPR",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "FRR",
-        "name": "FRR",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "NQR",
-        "name": "NQR",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "LUV_D_MAX",
         "name": "LUV D-MAX",
@@ -2156,23 +2207,72 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CH_NQR",
+        "name": "NQR (Buseta/Busetón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "CH_NPR",
+        "name": "NPR (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "CH_NMR",
+        "name": "NMR (Van/Microbus)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "CH_FRR",
+        "name": "FRR (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "CH_NHR_CAM",
+        "name": "NHR (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2024"
+      },
+      {
+        "id": "CH_NPR_CAM",
+        "name": "NPR (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "CH_NQR_CAM",
+        "name": "NQR (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "CH_FRR_CAM",
+        "name": "FRR (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "CH_FVR_CAM",
+        "name": "FVR (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "RENAULT": [
-      {
-        "id": "KANGOO",
-        "name": "Kangoo",
-        "category": "CAMIONES",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "MASTER",
-        "name": "Master",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "LOGAN",
         "name": "Logan",
@@ -2368,6 +2468,27 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
+      },
+      {
+        "id": "RE_KANGOO_VAN",
+        "name": "Kangoo (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "RE_MASTER_VAN",
+        "name": "Master (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "RE_MASTER_EV",
+        "name": "Master E-Tech Eléctrico (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "MAZDA": [
@@ -2708,30 +2829,30 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2024-2026"
+      },
+      {
+        "id": "KI_BONGO_CAM",
+        "name": "Bongo (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "KI_K2500",
+        "name": "K2500 (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "KI_K3000S",
+        "name": "K3000S (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
       }
     ],
     "TOYOTA": [
-      {
-        "id": "DYNA",
-        "name": "Dyna",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "HIACE",
-        "name": "Hiace",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "COASTER",
-        "name": "Coaster",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "HILUX",
         "name": "Hilux",
@@ -2948,16 +3069,44 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2023-2026"
+      },
+      {
+        "id": "TO_COASTER",
+        "name": "Coaster (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "TO_HIACE_BUS",
+        "name": "Hiace (Van/Microbus)",
+        "category": "BUSES",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "TO_HIACE_VAN",
+        "name": "Hiace Cargo (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "TO_DYNA",
+        "name": "Dyna (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "TO_HILUX_CAM",
+        "name": "Hilux Chasis (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
       }
     ],
     "NISSAN": [
-      {
-        "id": "URVAN",
-        "name": "Urvan",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "FRONTIER",
         "name": "Frontier",
@@ -3132,30 +3281,37 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2023-2026"
+      },
+      {
+        "id": "NI_URVAN",
+        "name": "Urvan (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "NI_NV400",
+        "name": "NV400 (Van/Furgoneta Grande)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "NI_NT400",
+        "name": "NT400 (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "NI_NT500",
+        "name": "NT500 (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
       }
     ],
     "HYUNDAI": [
-      {
-        "id": "H1",
-        "name": "H1",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "PORTER",
-        "name": "Porter",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "MIGHTY",
-        "name": "Mighty",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "HD65",
         "name": "HD65",
@@ -3358,23 +3514,58 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
+      },
+      {
+        "id": "HY_H1_VAN",
+        "name": "H1 (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "HY_STARIA_VAN",
+        "name": "Staria Cargo (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "HY_PORTER",
+        "name": "Porter II (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "HY_PORTER_EV",
+        "name": "Porter II Eléctrico (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "HY_MIGHTY",
+        "name": "Mighty EX8 (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HY_HD120",
+        "name": "HD120 (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "HY_HD270",
+        "name": "HD270 (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "FORD": [
-      {
-        "id": "CARGO",
-        "name": "Cargo",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TRANSIT",
-        "name": "Transit",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2015-2024"
-      },
       {
         "id": "RANGER",
         "name": "Ranger",
@@ -3542,23 +3733,51 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2021-2026"
+      },
+      {
+        "id": "FD_TRANSIT_BUS",
+        "name": "Transit (Van/Microbus)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "FD_TRANSIT_MAYOR",
+        "name": "Transit Mayor (Microbus 19 pax)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FD_TRANSIT_VAN",
+        "name": "Transit (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "FD_TRANSIT_CUSTOM",
+        "name": "Transit Custom (Van/Furgoneta Mediana)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FD_TRANSIT_EV",
+        "name": "E-Transit Eléctrico (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "FD_CARGO",
+        "name": "Cargo 1722 (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2024"
       }
     ],
     "VOLKSWAGEN": [
-      {
-        "id": "TRANSPORTER",
-        "name": "Transporter",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "CRAFTER",
-        "name": "Crafter",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2017-2024"
-      },
       {
         "id": "POLO",
         "name": "Polo",
@@ -3703,6 +3922,27 @@
         "id": "VW_ID_BUZZ",
         "name": "ID. Buzz",
         "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "VW_TRANSPORTER",
+        "name": "Transporter T6 (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "VW_CRAFTER",
+        "name": "Crafter (Van/Furgoneta Grande)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "VW_CRAFTER_EV",
+        "name": "e-Crafter Eléctrico (Van/Furgoneta)",
+        "category": "CAMIONES",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2023-2026"
       }
@@ -4435,27 +4675,6 @@
     ],
     "MITSUBISHI": [
       {
-        "id": "CANTER",
-        "name": "Canter",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FUSO",
-        "name": "Fuso",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ROSA",
-        "name": "Rosa",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
         "id": "L200",
         "name": "L200",
         "category": "GRUA_LIVIANA",
@@ -4580,6 +4799,27 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina/Diésel",
         "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MI_ROSA",
+        "name": "Rosa (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MI_CANTER_BUS",
+        "name": "Canter (Van/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MI_L200_CAM",
+        "name": "L200 Chasis (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "FIAT": [
@@ -4785,22 +5025,6 @@
     ],
     "BYD": [
       {
-        "id": "K8",
-        "name": "K8",
-        "category": "BUSES",
-        "tipo_combustible": "Eléctrico",
-        "pasajeros": "40-50",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "K9",
-        "name": "K9",
-        "category": "BUSES",
-        "tipo_combustible": "Eléctrico",
-        "pasajeros": "50-60",
-        "anos_populares": "2015-2024"
-      },
-      {
         "id": "BYD_SEAGULL",
         "name": "Seagull",
         "category": "AUTOS",
@@ -4910,6 +5134,41 @@
         "name": "Shark",
         "category": "CAMIONETAS",
         "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_BUS_BUSETÓN",
+        "name": "Busetón Eléctrico 50 pax",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "BYD_BUS_PADRON",
+        "name": "Padrón Eléctrico 80 pax (K8)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "BYD_BUS_K9",
+        "name": "Padrón Eléctrico 90 pax (K9)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "BYD_BUS_ART",
+        "name": "Articulado Eléctrico 18m (TransMilenio)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "BYD_BUS_BIART",
+        "name": "Biarticulado Eléctrico 27m (TransMilenio)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
         "anos_populares": "2024-2026"
       }
     ],
@@ -5046,12 +5305,6 @@
         "tipo_combustible": "Diesel"
       },
       {
-        "id": "N55",
-        "name": "N55",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel"
-      },
-      {
         "id": "T6",
         "name": "T6",
         "category": "GRUA_LIVIANA",
@@ -5126,6 +5379,55 @@
         "name": "JS4",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "JAC_HFC6729",
+        "name": "HFC6729 (Buseta Urbana)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "JAC_SUNRAY",
+        "name": "Sunray (Van/Microbus)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "JAC_N55_LIG",
+        "name": "N55 (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "JAC_N75_MED",
+        "name": "N75 (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "JAC_X350_TRACO",
+        "name": "X350 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "JAC_X200_VOLQ",
+        "name": "X200 Volqueta (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "JAC_N55_EV",
+        "name": "iEV5 Eléctrico (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
         "anos_populares": "2023-2026"
       }
     ],
@@ -5665,32 +5967,6 @@
     ],
     "MERCEDES_BENZ": [
       {
-        "id": "SPRINTER",
-        "name": "Sprinter",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "ACTROS",
-        "name": "Actros",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "OF_1724",
-        "name": "OF 1724",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "LO_916",
-        "name": "LO 916",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
         "id": "MB_CLASE_A",
         "name": "Clase A",
         "category": "AUTOS",
@@ -5836,6 +6112,104 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
+      },
+      {
+        "id": "MB_OF1724",
+        "name": "OF 1724 (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MB_OF1318",
+        "name": "OF 1318 (Busetón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "MB_OF916",
+        "name": "OF 916 (Buseta)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "MB_OF2230",
+        "name": "OF 2230 (Bus Articulado)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MB_O500",
+        "name": "O 500 (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MB_O400",
+        "name": "O 400 (Ejecutivo/Lujo)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MB_SPRINTER_VAN",
+        "name": "Sprinter (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MB_SPRINTER_EV",
+        "name": "eSprinter Eléctrico (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "MB_VITO_VAN",
+        "name": "Vito (Van/Furgoneta Mediana)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MB_ATEGO",
+        "name": "Atego (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MB_AXOR",
+        "name": "Axor (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "MB_ACTROS",
+        "name": "Actros (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MB_ACTROS_EV",
+        "name": "eActros 600 Eléctrico (Tractocamión)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "MB_AROCS",
+        "name": "Arocs (Volqueta/Trabajo Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "AUDI": [
@@ -8415,26 +8789,6 @@
     ],
     "VOLVO": [
       {
-        "id": "FH",
-        "name": "FH",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "B7R",
-        "name": "B7R",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "B9R",
-        "name": "B9R",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
         "id": "FM",
         "name": "FM",
         "category": "GRUA_PESADA",
@@ -8531,6 +8885,83 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2024-2026"
+      },
+      {
+        "id": "VO_B7R",
+        "name": "B7R (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2023"
+      },
+      {
+        "id": "VO_B8R",
+        "name": "B8R (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VO_B9R",
+        "name": "B9R (Ejecutivo)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2024"
+      },
+      {
+        "id": "VO_B11R",
+        "name": "B11R (Ejecutivo/Lujo)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VO_7900E",
+        "name": "7900 Electric (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "VO_FH460_TRACO",
+        "name": "FH 460 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VO_FH500_TRACO",
+        "name": "FH 500 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "VO_FM_PES",
+        "name": "FM 370 (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VO_FMX_VOLQ",
+        "name": "FMX 500 6x4 (Volqueta/Fuera de Carretera)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VO_FMX_PESADO",
+        "name": "FMX 540 8x4 (Volqueta Pesada)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "VO_FH_EV",
+        "name": "FH Electric (Tractocamión Eléctrico)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
       }
     ],
     "MINI": [
@@ -8604,6 +9035,20 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GMC_SAVANA",
+        "name": "Savana (Van/Furgoneta Grande)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "GMC_TOPKICK",
+        "name": "Topkick (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2022"
       }
     ],
     "DODGE": [
@@ -9890,11 +10335,18 @@
         "anos_populares": "2010-2024"
       },
       {
-        "id": "BOLERO",
-        "name": "Bolero",
+        "id": "MH_BOLERO_PLUS",
+        "name": "Bolero Maxi Truck Plus (Camión Ligero)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "MH_SUPRO",
+        "name": "Supro Profit Truck (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2025"
       }
     ],
     "TATA": [
@@ -9941,28 +10393,21 @@
         "anos_populares": "2010-2020"
       },
       {
-        "id": "ACE",
-        "name": "Ace",
+        "id": "TA_ACE_VAN",
+        "name": "Ace (Van/Furgoneta)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "TA_ULTRA_LIG",
+        "name": "Ultra T.7 (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2025"
       }
     ],
     "FOTON": [
-      {
-        "id": "VIEW",
-        "name": "View",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "AUMAN",
-        "name": "Auman",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "AUMARK",
         "name": "Aumark",
@@ -10032,6 +10477,62 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2025"
+      },
+      {
+        "id": "FT_VIEW_CS2",
+        "name": "View CS2 (Van/Microbus)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "FT_AUMARK",
+        "name": "Aumark (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FT_AUMARK_LIG",
+        "name": "Aumark S (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FT_AUMARK_MED",
+        "name": "Aumark GT (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "FT_AUMAN_PES",
+        "name": "Auman GTL (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FT_AUMAN_TRACO",
+        "name": "Auman EST (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "FT_AUMAN_VOLQ",
+        "name": "Auman Volqueta 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FT_EV_CAM",
+        "name": "Aumark EST-EV Eléctrico (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "JMC": [
@@ -10043,18 +10544,25 @@
         "anos_populares": "2015-2024"
       },
       {
-        "id": "BOARDING",
-        "name": "Boarding",
+        "id": "JMC_CARRYING",
+        "name": "Carrying (Van/Furgoneta)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2015-2025"
       },
       {
-        "id": "CARRYING",
-        "name": "Carrying",
+        "id": "JMC_BOARDING",
+        "name": "Boarding (Camión Ligero)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2025"
+      },
+      {
+        "id": "JMC_CONQUER",
+        "name": "Conquer (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2025"
       }
     ],
     "DFSK": [
@@ -10073,20 +10581,6 @@
         "anos_populares": "2015-2024"
       },
       {
-        "id": "K01H",
-        "name": "K01H",
-        "category": "CAMIONES",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "C35",
-        "name": "C35",
-        "category": "CAMIONES",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
         "id": "DFSK_GLORY_580",
         "name": "Glory 580",
         "category": "AUTOS",
@@ -10099,6 +10593,27 @@
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
         "anos_populares": "2018-2024"
+      },
+      {
+        "id": "DFSK_K01H",
+        "name": "K01H (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "DFSK_C35",
+        "name": "C35 (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2025"
+      },
+      {
+        "id": "DFSK_K01_EV",
+        "name": "EC31 Eléctrico (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
       }
     ],
     "DONGFENG": [
@@ -10115,13 +10630,6 @@
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
         "anos_populares": "2010-2020"
-      },
-      {
-        "id": "K01S",
-        "name": "K01S",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2015-2024"
       },
       {
         "id": "CAPTAIN",
@@ -10157,6 +10665,41 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "DF_BUS_EV",
+        "name": "EV (Microbus Eléctrico)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "DF_K01S",
+        "name": "K01S (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "DF_CAPTAIN_MED",
+        "name": "Captain D (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "DF_KINLAND_PES",
+        "name": "Kinland (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "DF_VOLQ",
+        "name": "Tianjin Volqueta 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "BRILLIANCE": [
@@ -10496,58 +11039,6 @@
     ],
     "HINO": [
       {
-        "id": "SERIE_300",
-        "name": "Serie 300",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "4-6",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SERIE_500",
-        "name": "Serie 500",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "8-12",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SERIE_700",
-        "name": "Serie 700",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "15-25",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FC9J",
-        "name": "FC9J",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "30-40",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "AK8J",
-        "name": "AK8J",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "20-30",
-        "anos_populares": "2015-2024"
-      },
-      {
         "id": "SERIE_300__316_",
         "name": "Serie 300 (316)",
         "category": "GRUA_PESADA",
@@ -10595,71 +11086,100 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "HI_XZU730",
+        "name": "XZU730 (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HI_FC9J",
+        "name": "FC9J (Buseta)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HI_AK8J",
+        "name": "AK8J (Busetón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HI_GD8J",
+        "name": "GD8J (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "HI_ARTICULADO",
+        "name": "Chasis Articulado BYD-Hino (Bus Articulado)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "HI_300_LIG",
+        "name": "Serie 300 XZU730 (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HI_400_LIG",
+        "name": "Serie 400 FC9J (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HI_500_MED",
+        "name": "Serie 500 GD8J (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HI_500_FURG",
+        "name": "Serie 500 Furgón (Furgón Refrigerado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "HI_500_VOLQ",
+        "name": "Serie 500 Volqueta 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HI_700_PES",
+        "name": "Serie 700 SS1EKUA (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HI_700_TRACO",
+        "name": "Serie 700 SG1EKUA (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "HI_700_VOLQ",
+        "name": "Serie 700 Volqueta 8x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "SCANIA": [
-      {
-        "id": "SERIE_P",
-        "name": "Serie P",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "16-26",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SERIE_G",
-        "name": "Serie G",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-33",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SERIE_R",
-        "name": "Serie R",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SERIE_S",
-        "name": "Serie S",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "K280",
-        "name": "K280",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "40-50",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "K360",
-        "name": "K360",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "45-55",
-        "anos_populares": "2015-2024"
-      },
       {
         "id": "P_250",
         "name": "P 250",
@@ -10701,65 +11221,100 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "SC_K280",
+        "name": "K 280 (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2024"
+      },
+      {
+        "id": "SC_K360",
+        "name": "K 360 (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SC_K410",
+        "name": "K 410 (Ejecutivo/Lujo)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SC_K450",
+        "name": "K 450 (Ejecutivo/Lujo)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SC_F310",
+        "name": "F 310 (Bus Padrón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SC_L310",
+        "name": "L 310 (Bus Articulado)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SC_R450_TRACO",
+        "name": "R 450 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SC_R500_TRACO",
+        "name": "R 500 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SC_S540_TRACO",
+        "name": "S 540 (Tractocamión Lujo)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "SC_G410_PES",
+        "name": "G 410 (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SC_P360_MED",
+        "name": "P 360 (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SC_G450_VOLQ",
+        "name": "G 450 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SC_G500_VOLQ",
+        "name": "G 500 8x4 (Volqueta Pesada)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
       }
     ],
     "ISUZU": [
-      {
-        "id": "NPR",
-        "name": "NPR",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "3-5",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "NQR",
-        "name": "NQR",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "5-7",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FTR",
-        "name": "FTR",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "8-12",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FVR",
-        "name": "FVR",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "10-14",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ELF",
-        "name": "Elf",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "20-30",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "D_MAX",
         "name": "D-Max",
@@ -10836,68 +11391,79 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IZ_ELF_BUS",
+        "name": "Elf (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "IZ_NQR_BUS",
+        "name": "NQR (Buseta/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IZ_FRR_BUS",
+        "name": "FRR (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "IZ_ELF_LIG",
+        "name": "Elf NKR (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IZ_NPR_LIG",
+        "name": "NPR 75L (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IZ_NQR_MED",
+        "name": "NQR 90L (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IZ_FTR_MED",
+        "name": "FTR (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IZ_FVR_PES",
+        "name": "FVR 34 (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "IZ_FVZ_VOLQ",
+        "name": "FVZ 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "IZ_GIGA_TRACO",
+        "name": "Giga FYH (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
       }
     ],
     "FREIGHTLINER": [
-      {
-        "id": "CASCADIA",
-        "name": "Cascadia",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "M2_106",
-        "name": "M2 106",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "12-20",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "BUSINESS_CLASS_M2",
-        "name": "Business Class M2",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "8-16",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "COLUMBIA",
-        "name": "Columbia",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "20-33",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "CORONADO",
-        "name": "Coronado",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "M2_106",
         "name": "M2 106",
@@ -10925,67 +11491,58 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "FL_CASCADIA",
+        "name": "Cascadia 126 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FL_CASCADIA_EV",
+        "name": "eCascadia Eléctrico (Tractocamión)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "FL_CORONADO",
+        "name": "Coronado (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "FL_M2_MED",
+        "name": "M2 106 (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "FL_M2_VOLQ",
+        "name": "M2 112 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "FL_114SD_VOLQ",
+        "name": "114SD (Volqueta/Obra Civil)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FL_122SD_VOLQ",
+        "name": "122SD (Volqueta Pesada)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "KENWORTH": [
-      {
-        "id": "T680",
-        "name": "T680",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "T800",
-        "name": "T800",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "W900",
-        "name": "W900",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "T370",
-        "name": "T370",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "12-20",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "T470",
-        "name": "T470",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "16-26",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "T370",
         "name": "T370",
@@ -11013,55 +11570,51 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "KW_T680",
+        "name": "T680 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "KW_T680E_EV",
+        "name": "T680E Eléctrico (Tractocamión)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KW_T800",
+        "name": "T800 (Tractocamión/Mula Pesada)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "KW_W900",
+        "name": "W900 (Tractocamión Long Haul)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "KW_T370",
+        "name": "T370 (Camión Pesado/Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "KW_T470",
+        "name": "T470 (Camión Pesado/Obra Civil)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
       }
     ],
     "MACK": [
-      {
-        "id": "ANTHEM",
-        "name": "Anthem",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "GRANITE",
-        "name": "Granite",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "20-40",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "PINNACLE",
-        "name": "Pinnacle",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "MD_SERIES",
-        "name": "MD Series",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "8-16",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "LR",
         "name": "LR",
@@ -11069,63 +11622,44 @@
         "tipo_combustible": "Diesel",
         "pasajeros": "30-40",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "MK_ANTHEM_TRACO",
+        "name": "Anthem (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MK_GRANITE_VOLQ",
+        "name": "Granite (Volqueta/Obra Civil)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MK_PINNACLE_TRACO",
+        "name": "Pinnacle (Tractocamión Long Haul)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "MK_MD_MED",
+        "name": "MD Series (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MK_LR_VOLQ",
+        "name": "LR Electric (Camión Recolector Eléctrico)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "INTERNATIONAL": [
-      {
-        "id": "LT_SERIES",
-        "name": "LT Series",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "HV_SERIES",
-        "name": "HV Series",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "20-33",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "HX_SERIES",
-        "name": "HX Series",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Volqueta"
-        ],
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "MV_SERIES",
-        "name": "MV Series",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "8-16",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "IC_BUS",
-        "name": "IC Bus",
-        "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "30-50",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "4300",
         "name": "4300",
@@ -11153,334 +11687,362 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "INT_IC_BUS",
+        "name": "IC Bus (Escolar/Especial)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "INT_CE_BUS",
+        "name": "CE Series (Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "INT_LT_TRACO",
+        "name": "LT Series (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "INT_HV_PES",
+        "name": "HV Series (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "INT_HX_VOLQ",
+        "name": "HX Series (Volqueta/Obra Civil)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "INT_MV_MED",
+        "name": "MV Series (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "INT_LT_EV",
+        "name": "LT EV Eléctrico (Tractocamión)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
       }
     ],
     "VOLKSWAGEN_CAMIONES": [
       {
-        "id": "CONSTELLATION",
-        "name": "Constellation",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "13-31",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
+        "id": "VWB_9180",
+        "name": "Volksbus 9.180 OD (Buseta)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "DELIVERY",
-        "name": "Delivery",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "3-9",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
+        "id": "VWB_11180",
+        "name": "Volksbus 11.180 OD (Busetón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "WORKER",
-        "name": "Worker",
+        "id": "VWC_DELIVERY_MED",
+        "name": "Delivery 11.180 (Camión Mediano)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "10-17",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "METEOR",
-        "name": "Meteor",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-26",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "E_DELIVERY",
-        "name": "e-Delivery",
+        "id": "VWC_EDELIVERY_EV",
+        "name": "e-Delivery Eléctrico (Camión Mediano)",
         "category": "CAMIONES",
         "tipo_combustible": "Eléctrico",
-        "toneladas": "11-14",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2020-2024"
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "VWC_WORKER_PES",
+        "name": "Worker 26.280 (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "VWC_CONSTELLATION_PES",
+        "name": "Constellation 25.390 (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "VWC_METEOR_TRACO",
+        "name": "Meteor 29.520 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "VWC_WORKER_VOLQ",
+        "name": "Worker 31.330 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
       }
     ],
     "IVECO": [
       {
-        "id": "DAILY",
-        "name": "Daily",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "3-7",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "EUROCARGO",
-        "name": "Eurocargo",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "6-19",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TRAKKER",
-        "name": "Trakker",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "26-40",
-        "tipo_carroceria": [
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "S_WAY",
-        "name": "S-Way",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "STRALIS",
-        "name": "Stralis",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "CROSSWAY",
-        "name": "Crossway",
+        "id": "IV_CROSSWAY",
+        "name": "Crossway (Intermunicipal)",
         "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "35-59",
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IV_DAILY_BUS",
+        "name": "Daily (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IV_E_WAY",
+        "name": "E-Way Eléctrico (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "IV_DAILY_VAN",
+        "name": "Daily (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IV_DAILY_EV",
+        "name": "Daily Electric (Van/Furgoneta Eléctrica)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "IV_EUROCARGO_MED",
+        "name": "Eurocargo (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IV_TRAKKER_VOLQ",
+        "name": "Trakker 6x4 (Volqueta/Obra Civil)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IV_SWAY_TRACO",
+        "name": "S-Way (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "IV_SWAY_GNV",
+        "name": "S-Way GNV (Tractocamión Gas Natural)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Gas Natural",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "IV_SWAY_EV",
+        "name": "eS-Way Eléctrico (Tractocamión)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
       }
     ],
     "MAN": [
       {
-        "id": "TGX",
-        "name": "TGX",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-41",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TGS",
-        "name": "TGS",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-41",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TGM",
-        "name": "TGM",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "12-26",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TGL",
-        "name": "TGL",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "7-12",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "LION_COACH",
-        "name": "Lion's Coach",
+        "id": "MAN_LIONS_COACH",
+        "name": "Lion's Coach (Ejecutivo/Lujo)",
         "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "40-55",
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MAN_LIONS_INTERCITY",
+        "name": "Lion's Intercity (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MAN_LIONS_CITY",
+        "name": "Lion's City (Bus Padrón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MAN_LIONS_CITY_EV",
+        "name": "Lion's City E Eléctrico (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "MAN_TGX_TRACO",
+        "name": "TGX 18.460 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MAN_TGS_PES",
+        "name": "TGS 26.440 (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MAN_TGS_VOLQ",
+        "name": "TGS 33.400 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MAN_TGM_MED",
+        "name": "TGM 18.290 (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MAN_TGL_LIG",
+        "name": "TGL 8.180 (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MAN_TGE_VAN",
+        "name": "TGE (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "SINOTRUK": [
       {
-        "id": "HOWO",
-        "name": "Howo",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "12-40",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "HOHAN",
-        "name": "Hohan",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "15-35",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "SITRAK",
-        "name": "Sitrak",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "T5G",
-        "name": "T5G",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "8-20",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "C7H",
-        "name": "C7H",
+        "id": "ST_A7_BUS",
+        "name": "A7 (Microbus Urbano)",
         "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "40-50",
-        "anos_populares": "2018-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "ST_HOWO_VOLQ6",
+        "name": "Howo 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "ST_HOWO_VOLQ8",
+        "name": "Howo 8x4 (Volqueta Pesada)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "ST_HOWO_TRACO",
+        "name": "Howo A7 (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "ST_HOWO_PES",
+        "name": "Howo T5G (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "ST_SITRAK_TRACO",
+        "name": "Sitrak C7H (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "ST_SITRAK_VOLQ",
+        "name": "Sitrak C9H (Volqueta Pesada)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "ST_HOHAN_PES",
+        "name": "Hohan N7G (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2025"
       }
     ],
     "SHACMAN": [
       {
-        "id": "X3000",
-        "name": "X3000",
+        "id": "SH_X3000_TRACO",
+        "name": "X3000 (Tractocamión/Mula)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "25-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2015-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "F3000",
-        "name": "F3000",
+        "id": "SH_F3000_VOLQ6",
+        "name": "F3000 6x4 (Volqueta)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "15-30",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "M3000",
-        "name": "M3000",
+        "id": "SH_F3000_VOLQ8",
+        "name": "F3000 8x4 (Volqueta Pesada)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "10-20",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "H3000",
-        "name": "H3000",
+        "id": "SH_M3000_PES",
+        "name": "M3000S (Camión Pesado)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "20-35",
-        "tipo_carroceria": [
-          "Volqueta"
-        ],
-        "anos_populares": "2012-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "SH_H3000_PES",
+        "name": "H3000 (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "SH_L3000_EV",
+        "name": "L3000 Eléctrico (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "FAW": [
-      {
-        "id": "J6P",
-        "name": "J6P",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "J6M",
-        "name": "J6M",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "12-25",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "TIGER_V",
-        "name": "Tiger V",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "5-12",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "BESTUNE",
         "name": "Bestune",
@@ -11489,107 +12051,134 @@
         "anos_populares": "2019-2024"
       },
       {
-        "id": "CA1168",
-        "name": "CA1168",
+        "id": "FAW_BUS_URB",
+        "name": "CA6100 (Bus Padrón Urbano)",
         "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "35-50",
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "FAW_JIEFANG",
+        "name": "Jiefang (Microbus)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2025"
+      },
+      {
+        "id": "FAW_J6P_TRACO",
+        "name": "J6P (Tractocamión/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FAW_J6M_PES",
+        "name": "J6M (Camión Pesado)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FAW_TIGER_MED",
+        "name": "Tiger V (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "FAW_J6L_VOLQ",
+        "name": "J6L 6x4 (Volqueta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "UD_TRUCKS": [
       {
-        "id": "QUESTER",
-        "name": "Quester",
+        "id": "UD_QUESTER_TRACO",
+        "name": "Quester GHH (Tractocamión/Mula)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2013-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "CRONER",
-        "name": "Croner",
+        "id": "UD_QUESTER_PES",
+        "name": "Quester CGE (Camión Pesado)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "8-16",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "CONDOR",
-        "name": "Condor",
+        "id": "UD_CRONER_MED",
+        "name": "Croner LKE (Camión Mediano)",
         "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "12-26",
-        "tipo_carroceria": [
-          "Carga",
-          "Volqueta"
-        ],
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "UD_CONDOR_LIG",
+        "name": "Condor MKE (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
       }
     ],
     "FUSO": [
       {
-        "id": "CANTER",
-        "name": "Canter",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "3-7",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FIGHTER",
-        "name": "Fighter",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "8-16",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SUPER_GREAT",
-        "name": "Super Great",
-        "category": "CAMIONES",
-        "tipo_combustible": "Diesel",
-        "toneladas": "18-40",
-        "tipo_carroceria": [
-          "Carga"
-        ],
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ROSA",
-        "name": "Rosa",
+        "id": "FUSO_ROSA",
+        "name": "Rosa (Microbus/Escolar)",
         "category": "BUSES",
-        "tipo_combustible": "Diesel",
-        "pasajeros": "20-30",
-        "anos_populares": "2010-2024"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "ECANTER",
-        "name": "eCanter",
+        "id": "FUSO_CANTER",
+        "name": "Canter (Van/Microbus)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "FUSO_ROSA_EV",
+        "name": "eCanter Rosa (Microbus Eléctrico)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "FU_CANTER_LIG",
+        "name": "Canter FE (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "FU_ECANTER_EV",
+        "name": "eCanter Eléctrico (Camión Ligero)",
         "category": "CAMIONES",
         "tipo_combustible": "Eléctrico",
-        "toneladas": "3-6",
-        "tipo_carroceria": [
-          "Carga",
-          "Furgón"
-        ],
-        "anos_populares": "2017-2024"
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "FU_FIGHTER_MED",
+        "name": "Fighter FK (Camión Mediano)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "FU_SUPER_PES",
+        "name": "Super Great FV (Camión Pesado/Mula)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FU_CANTER_VOLQ",
+        "name": "Canter Volqueta (Volqueta Ligera)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
       }
     ],
     "MERCEDES-BENZ": [
@@ -14008,6 +14597,283 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
         "anos_populares": "2024-2026"
+      }
+    ],
+    "MARCOPOLO_SUPERPOLO": [
+      {
+        "id": "MP_TORINO",
+        "name": "Torino (Busetón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MP_TORINO_EV",
+        "name": "Torino Eléctrico (Busetón Eléctrico)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "MP_VIALE",
+        "name": "Viale (Bus Padrón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MP_VIALE_EV",
+        "name": "Viale Eléctrico (Bus Padrón Eléctrico)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "MP_ARTICULADO",
+        "name": "Articulado Eléctrico TransMiZonal",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "MP_ARTICULADO_HIDRO",
+        "name": "Articulado Hidrógeno (3RH2FC)",
+        "category": "BUSES",
+        "tipo_combustible": "Hidrógeno",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "MP_PARADISO",
+        "name": "Paradiso (Intermunicipal/Lujo)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MP_ANDARE",
+        "name": "Andare HD (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MP_VOLARE",
+        "name": "Volare (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MP_NEOBUS",
+        "name": "Neobus (Escolar/Comunitario)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      }
+    ],
+    "BUSSCAR": [
+      {
+        "id": "BUS_URBANUSS",
+        "name": "Urbanuss (Bus Padrón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "BUS_VISTABUS",
+        "name": "Vissta Buss (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "BUS_JUMBUSS",
+        "name": "Jum Buss (Ejecutivo/Lujo)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "BUS_EL_BUSS",
+        "name": "El Buss (Articulado Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      }
+    ],
+    "YUTONG": [
+      {
+        "id": "YT_E9",
+        "name": "E9 Eléctrico (Busetón 62 pax)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "YT_E12",
+        "name": "E12 Eléctrico (Bus Padrón 85 pax)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "YT_ZK5120C",
+        "name": "ZK5120C Eléctrico (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "YT_ZK5180C",
+        "name": "ZK5180C Eléctrico (Bus Articulado)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "YT_ZK6116",
+        "name": "ZK6116HNG (Bus Padrón GNV)",
+        "category": "BUSES",
+        "tipo_combustible": "Gas Natural",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "YT_ZK6838",
+        "name": "ZK6838 (Buseta Diésel)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      }
+    ],
+    "ZHONGTONG": [
+      {
+        "id": "ZT_LCK6850EVG",
+        "name": "LCK6850 EVG Eléctrico (Busetón 9m)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "ZT_LCK6122EVG",
+        "name": "LCK6122 EVG Eléctrico (Bus Padrón 12m)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "ZT_LCK6950HGN",
+        "name": "LCK6950 HGN (Busetón GNV)",
+        "category": "BUSES",
+        "tipo_combustible": "Gas Natural",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "ZT_N18EV",
+        "name": "N18EV Eléctrico (Microbus 18 pax)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      }
+    ],
+    "KING_LONG": [
+      {
+        "id": "KL_XMQ6120",
+        "name": "XMQ6120 (Bus Padrón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "KL_XMQ6900",
+        "name": "XMQ6900 (Busetón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "KL_XMQ6119EV",
+        "name": "XMQ6119 EV Eléctrico (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "KL_INTERMUNICIPAL",
+        "name": "XMQ6127 (Intermunicipal)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2026"
+      }
+    ],
+    "HIGER": [
+      {
+        "id": "HG_KLQ6109",
+        "name": "KLQ6109 (Bus Padrón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HG_KLQ6896",
+        "name": "KLQ6896 (Busetón Urbano)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "HG_EV",
+        "name": "A90 Eléctrico (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      }
+    ],
+    "CONDOR": [
+      {
+        "id": "CO_URBANO",
+        "name": "Cóndor Urbano (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "CO_ESCOLAR",
+        "name": "Cóndor Escolar (Microbus/Escolar)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      }
+    ],
+    "CARROCERIAS_OCCIDENTE": [
+      {
+        "id": "CO_OCCI_URB",
+        "name": "Urbano (Bus Padrón)",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "CO_OCCI_BUS",
+        "name": "Busetón Urbano",
+        "category": "BUSES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
+      }
+    ],
+    "CHANGAN_TRUCKS": [
+      {
+        "id": "CA_STAR_VAN",
+        "name": "Star 2 (Van/Furgoneta)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "CA_STAR9_LIG",
+        "name": "Star 9 (Camión Ligero)",
+        "category": "CAMIONES",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2025"
       }
     ]
   }
