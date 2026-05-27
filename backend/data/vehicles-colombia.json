@@ -474,7 +474,8 @@
       "name": "Geely",
       "pais_origen": "China",
       "categories": [
-        "AUTOS"
+        "AUTOS",
+        "CAMIONETAS"
       ]
     },
     {
@@ -482,12 +483,13 @@
       "name": "Haval",
       "pais_origen": "China",
       "categories": [
-        "CAMIONETAS"
+        "CAMIONETAS",
+        "AUTOS"
       ]
     },
     {
       "id": "SSANGYONG",
-      "name": "SsangYong",
+      "name": "KG Mobility (SsangYong)",
       "pais_origen": "Corea del Sur",
       "categories": [
         "CAMIONETAS"
@@ -991,7 +993,7 @@
     },
     {
       "id": "GAC",
-      "name": "GAC Motor",
+      "name": "GAC Aion",
       "pais_origen": "China",
       "categories": [
         "AUTOS",
@@ -1805,171 +1807,37 @@
         "MOTOS"
       ],
       "_tipo": "Solo eléctrica"
+    },
+    {
+      "id": "DEEPAL",
+      "name": "Deepal",
+      "categories": [
+        "AUTOS",
+        "CAMIONETAS"
+      ],
+      "logo": "deepal.png"
+    },
+    {
+      "id": "ORA",
+      "name": "ORA",
+      "categories": [
+        "AUTOS",
+        "CAMIONETAS"
+      ],
+      "logo": "ora.png"
+    },
+    {
+      "id": "TANK",
+      "name": "Tank",
+      "categories": [
+        "AUTOS",
+        "CAMIONETAS"
+      ],
+      "logo": "tank.png"
     }
   ],
   "models": {
     "CHEVROLET": [
-      {
-        "id": "SPARK",
-        "name": "Spark",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SPARK_GT",
-        "name": "Spark GT",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SPARK_LIFE",
-        "name": "Spark Life",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "SAIL",
-        "name": "Sail",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "ONIX",
-        "name": "Onix",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "ONIX_TURBO",
-        "name": "Onix Turbo",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "JOY",
-        "name": "Joy",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2022-2024"
-      },
-      {
-        "id": "CRUZE",
-        "name": "Cruze",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "CAVALIER",
-        "name": "Cavalier",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "MALIBU",
-        "name": "Malibu",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "TRACKER",
-        "name": "Tracker",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "CAPTIVA",
-        "name": "Captiva",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "TRAX",
-        "name": "Trax",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "EQUINOX",
-        "name": "Equinox",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TRAVERSE",
-        "name": "Traverse",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "BLAZER",
-        "name": "Blazer",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "TAHOE",
-        "name": "Tahoe",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SUBURBAN",
-        "name": "Suburban",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "D_MAX",
-        "name": "D-Max",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "COLORADO",
-        "name": "Colorado",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2012-2024"
-      },
-      {
-        "id": "SILVERADO",
-        "name": "Silverado",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "S10",
-        "name": "S10",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2012-2024"
-      },
-      {
-        "id": "MONTANA",
-        "name": "Montana",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
       {
         "id": "NHR",
         "name": "NHR",
@@ -1994,20 +1862,6 @@
         "category": "BUSES",
         "tipo_combustible": "Diesel",
         "anos_populares": "2010-2024"
-      },
-      {
-        "id": "BOLT_EV",
-        "name": "Bolt EV",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "BOLT_EUV",
-        "name": "Bolt EUV",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
       },
       {
         "id": "LUV_D_MAX",
@@ -2092,114 +1946,219 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
-      }
-    ],
-    "RENAULT": [
+      },
       {
-        "id": "LOGAN",
-        "name": "Logan",
+        "id": "SPARK",
+        "name": "Spark",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "SPARK_GT",
+        "name": "Spark GT",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
         "anos_populares": "2010-2024"
       },
       {
-        "id": "LOGAN_STEPWAY",
-        "name": "Logan Stepway",
+        "id": "ONIX",
+        "name": "Onix Sedán",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2019-2026"
       },
       {
-        "id": "SANDERO",
-        "name": "Sandero",
+        "id": "ONIX_RS",
+        "name": "Onix RS Hatchback",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "SANDERO_STEPWAY",
-        "name": "Sandero Stepway",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "CLIO",
-        "name": "Clio",
+        "id": "SAIL",
+        "name": "Sail",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
         "anos_populares": "2013-2024"
       },
       {
-        "id": "SYMBOL",
-        "name": "Symbol",
+        "id": "CRUZE",
+        "name": "Cruze",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2015"
+        "anos_populares": "2011-2026"
       },
       {
-        "id": "MEGANE",
-        "name": "Mégane",
+        "id": "CAVALIER",
+        "name": "Cavalier",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "FLUENCE",
-        "name": "Fluence",
+        "id": "TRACKER",
+        "name": "Tracker",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "TALIANT",
-        "name": "Taliant",
+        "id": "GROOVE",
+        "name": "Groove",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "DUSTER",
-        "name": "Duster",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "DUSTER_OROCH",
-        "name": "Duster Oroch",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "KOLEOS",
-        "name": "Koleos",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "OROCH",
-        "name": "Oroch",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "CAPTUR",
-        "name": "Captur",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "KWID",
-        "name": "Kwid",
+        "id": "CAPTIVA",
+        "name": "Captiva",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
+        "anos_populares": "2018-2026"
       },
+      {
+        "id": "MONTANA",
+        "name": "Montana",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "SPARK_EUV",
+        "name": "Spark EUV",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "BOLT_EV",
+        "name": "Bolt EV",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2017-2025"
+      },
+      {
+        "id": "CAPTIVA_EV",
+        "name": "Captiva EV",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "C_TRACKER",
+        "name": "Tracker",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "C_GROOVE",
+        "name": "Groove",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "C_CAPTIVA",
+        "name": "Captiva",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "C_TRAX",
+        "name": "Trax",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2025"
+      },
+      {
+        "id": "C_EQUINOX",
+        "name": "Equinox",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "C_TRAVERSE",
+        "name": "Traverse",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "C_BLAZER",
+        "name": "Blazer",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "C_TAHOE",
+        "name": "Tahoe",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "C_SUBURBAN",
+        "name": "Suburban",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "C_DMAX",
+        "name": "D-Max",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "C_COLORADO",
+        "name": "Colorado",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "C_SILVERADO",
+        "name": "Silverado",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "C_MONTANA",
+        "name": "Montana",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "C_BOLT_EUV",
+        "name": "Bolt EUV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "C_CAPTIVA_EV",
+        "name": "Captiva EV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "C_EQUINOX_EV",
+        "name": "Equinox EV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      }
+    ],
+    "RENAULT": [
       {
         "id": "KANGOO",
         "name": "Kangoo",
@@ -2215,42 +2174,203 @@
         "anos_populares": "2010-2024"
       },
       {
+        "id": "LOGAN",
+        "name": "Logan",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "LOGAN_STEPWAY",
+        "name": "Logan Stepway",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2025"
+      },
+      {
+        "id": "SANDERO",
+        "name": "Sandero",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "SANDERO_STEPWAY",
+        "name": "Sandero Stepway",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "CLIO",
+        "name": "Clio",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2025"
+      },
+      {
+        "id": "KWID",
+        "name": "Kwid",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "TALIANT",
+        "name": "Taliant",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "KARDIAN",
+        "name": "Kardian",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CAPTUR",
+        "name": "Captur",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "DUSTER",
+        "name": "Duster",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "DUSTER_ETECH_HYBRID",
+        "name": "Duster E-Tech Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "OROCH",
+        "name": "Oroch",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "ARKANA_HYBRID",
+        "name": "Arkana E-Tech Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "KOLEOS",
+        "name": "Koleos",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "KOLEOS_HYBRID",
+        "name": "Koleos E-Tech Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KWID_ETECH",
+        "name": "Kwid E-Tech Eléctrico",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "MEGANE_ETECH",
+        "name": "Mégane E-Tech Eléctrico",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
         "id": "ZOE",
         "name": "Zoe",
         "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2025"
+      },
+      {
+        "id": "R_DUSTER",
+        "name": "Duster",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "R_DUSTER_HYBRID",
+        "name": "Duster E-Tech Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "R_OROCH",
+        "name": "Oroch",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "R_CAPTUR",
+        "name": "Captur",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "R_KARDIAN",
+        "name": "Kardian",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "R_ARKANA",
+        "name": "Arkana E-Tech Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "R_KOLEOS",
+        "name": "Koleos",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "R_KOLEOS_HYBRID",
+        "name": "Koleos E-Tech Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "R_KANGOO",
+        "name": "Kangoo",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "R_KANGOO_ETECH",
+        "name": "Kangoo E-Tech Eléctrico",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
       }
     ],
     "MAZDA": [
-      {
-        "id": "MAZDA2",
-        "name": "Mazda 2",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "MAZDA2_SEDAN",
-        "name": "Mazda 2 Sedán",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "MAZDA3",
-        "name": "Mazda 3",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "MAZDA6",
-        "name": "Mazda 6",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
       {
         "id": "CX3",
         "name": "CX-3",
@@ -2315,13 +2435,6 @@
         "anos_populares": "2012-2024"
       },
       {
-        "id": "MX5",
-        "name": "MX-5",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
         "id": "BT_50",
         "name": "BT-50",
         "category": "GRUA_LIVIANA",
@@ -2341,6 +2454,76 @@
         "category": "GRUA_LIVIANA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "MAZDA2_HATCH",
+        "name": "Mazda 2 Hatchback",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MAZDA2_SEDAN",
+        "name": "Mazda 2 Sedán",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MAZDA3",
+        "name": "Mazda 3",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MAZDA6",
+        "name": "Mazda 6",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2025"
+      },
+      {
+        "id": "MX5",
+        "name": "MX-5 Miata",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "CX3",
+        "name": "CX-3",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2025"
+      },
+      {
+        "id": "CX30",
+        "name": "CX-30",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "CX5",
+        "name": "CX-5",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "CX50",
+        "name": "CX-50",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "CX9",
+        "name": "CX-9",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
       }
     ],
     "KIA": [
@@ -2349,255 +2532,185 @@
         "name": "Picanto",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
+        "anos_populares": "2011-2026"
       },
       {
-        "id": "RIO",
-        "name": "Rio",
+        "id": "K3",
+        "name": "K3",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2019-2026"
       },
       {
-        "id": "RIO_SEDAN",
-        "name": "Rio Sedán",
+        "id": "K3_CROSS",
+        "name": "K3 Cross",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2012-2024"
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "CERATO",
-        "name": "Cerato",
+        "id": "SONET",
+        "name": "Sonet",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FORTE",
-        "name": "Forte",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "K5",
-        "name": "K5",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "STINGER",
-        "name": "Stinger",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2021-2026"
       },
       {
         "id": "SELTOS",
         "name": "Seltos",
-        "category": "CAMIONETAS",
+        "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "STONIC_HYBRID",
+        "name": "Stonic Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
       },
       {
         "id": "SPORTAGE",
         "name": "Sportage",
-        "category": "CAMIONETAS",
+        "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "SPORTAGE_HYBRID",
+        "name": "Sportage HEV",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
       },
       {
         "id": "SORENTO",
         "name": "Sorento",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Diesel",
-        "anos_populares": "2010-2024"
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
       },
       {
         "id": "CARNIVAL",
         "name": "Carnival",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "SOUL",
-        "name": "Soul",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "STONIC",
-        "name": "Stonic",
-        "category": "CAMIONETAS",
+        "id": "TASMAN",
+        "name": "Tasman",
+        "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "NIRO",
-        "name": "Niro",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Híbrido",
-        "anos_populares": "2017-2024"
+        "id": "EV3",
+        "name": "EV3",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "EV5",
+        "name": "EV5",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
       },
       {
         "id": "EV6",
         "name": "EV6",
-        "category": "CAMIONETAS",
+        "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "EV9",
+        "id": "K_SONET",
+        "name": "Sonet",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "K_SELTOS",
+        "name": "Seltos",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "K_STONIC",
+        "name": "Stonic Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "K_SPORTAGE",
+        "name": "Sportage",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "K_SPORTAGE_HEV",
+        "name": "Sportage HEV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "K_SORENTO",
+        "name": "Sorento",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "K_CARNIVAL",
+        "name": "Carnival",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "K_NIRO",
+        "name": "Niro Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "K_TASMAN",
+        "name": "Tasman",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "K_EV5",
+        "name": "EV5",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "K_EV6",
+        "name": "EV6",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "K_EV9",
         "name": "EV9",
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2024"
+        "anos_populares": "2024-2026"
       }
     ],
     "TOYOTA": [
-      {
-        "id": "YARIS",
-        "name": "Yaris",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "YARIS_SEDAN",
-        "name": "Yaris Sedán",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2014-2024"
-      },
-      {
-        "id": "COROLLA",
-        "name": "Corolla",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "COROLLA_CROSS",
-        "name": "Corolla Cross",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "CAMRY",
-        "name": "Camry",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "PRIUS",
-        "name": "Prius",
-        "category": "AUTOS",
-        "tipo_combustible": "Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "PRIUS_C",
-        "name": "Prius C",
-        "category": "AUTOS",
-        "tipo_combustible": "Híbrido",
-        "anos_populares": "2012-2019"
-      },
-      {
-        "id": "RAV4",
-        "name": "RAV4",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "CHR",
-        "name": "C-HR",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "HIGHLANDER",
-        "name": "Highlander",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "4RUNNER",
-        "name": "4Runner",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SEQUOIA",
-        "name": "Sequoia",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "HILUX",
-        "name": "Hilux",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FORTUNER",
-        "name": "Fortuner",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "PRADO",
-        "name": "Prado",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "LAND_CRUISER",
-        "name": "Land Cruiser",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FJ_CRUISER",
-        "name": "FJ Cruiser",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2014"
-      },
-      {
-        "id": "TACOMA",
-        "name": "Tacoma",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TUNDRA",
-        "name": "Tundra",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SIENNA",
-        "name": "Sienna",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "DYNA",
         "name": "Dyna",
@@ -2620,13 +2733,6 @@
         "anos_populares": "2010-2024"
       },
       {
-        "id": "BZ4X",
-        "name": "bZ4X",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2023-2024"
-      },
-      {
         "id": "HILUX",
         "name": "Hilux",
         "category": "GRUA_LIVIANA",
@@ -2653,148 +2759,204 @@
         "category": "GRUA_LIVIANA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "YARIS_HATCH",
+        "name": "Yaris Hatchback",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "YARIS_SEDAN",
+        "name": "Yaris Sedán",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "YARIS_HEV",
+        "name": "Yaris HEV Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2026-2027"
+      },
+      {
+        "id": "COROLLA",
+        "name": "Corolla",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "CAMRY",
+        "name": "Camry",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "PRIUS",
+        "name": "Prius",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "YARIS_CROSS_HEV",
+        "name": "Yaris Cross HEV",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "COROLLA_CROSS_HEV",
+        "name": "Corolla Cross HEV",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "RAV4_HEV",
+        "name": "RAV4 HEV",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "FORTUNER",
+        "name": "Fortuner",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "LAND_CRUISER_PRADO",
+        "name": "Land Cruiser Prado",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "HILUX",
+        "name": "Hilux",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "BZ4X",
+        "name": "bZ4X",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "T_YARIS_CROSS",
+        "name": "Yaris Cross HEV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "T_COROLLA_CROSS",
+        "name": "Corolla Cross HEV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "T_RAV4",
+        "name": "RAV4 HEV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "T_CHR",
+        "name": "C-HR",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2024"
+      },
+      {
+        "id": "T_HIGHLANDER",
+        "name": "Highlander",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "T_4RUNNER",
+        "name": "4Runner",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "T_SEQUOIA",
+        "name": "Sequoia",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "T_HILUX",
+        "name": "Hilux",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "T_FORTUNER",
+        "name": "Fortuner",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "T_PRADO",
+        "name": "Land Cruiser Prado",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "T_LANDCRUISER",
+        "name": "Land Cruiser",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "T_TACOMA",
+        "name": "Tacoma",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "T_SIENNA",
+        "name": "Sienna",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "T_BZ4X",
+        "name": "bZ4X",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
       }
     ],
     "NISSAN": [
-      {
-        "id": "MARCH",
-        "name": "March",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2021"
-      },
-      {
-        "id": "VERSA",
-        "name": "Versa",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2012-2024"
-      },
-      {
-        "id": "VERSA_NOTE",
-        "name": "Versa Note",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2014-2019"
-      },
-      {
-        "id": "SENTRA",
-        "name": "Sentra",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ALTIMA",
-        "name": "Altima",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "MAXIMA",
-        "name": "Maxima",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "KICKS",
-        "name": "Kicks",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "QASHQAI",
-        "name": "Qashqai",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2014-2024"
-      },
-      {
-        "id": "XTRAIL",
-        "name": "X-Trail",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ROGUE",
-        "name": "Rogue",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2014-2024"
-      },
-      {
-        "id": "MURANO",
-        "name": "Murano",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "PATHFINDER",
-        "name": "Pathfinder",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "ARMADA",
-        "name": "Armada",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "FRONTIER",
-        "name": "Frontier",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TITAN",
-        "name": "Titan",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "PATROL",
-        "name": "Patrol",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "NP300",
-        "name": "NP300",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "URVAN",
         "name": "Urvan",
         "category": "CAMIONES",
         "tipo_combustible": "Diesel",
         "anos_populares": "2010-2024"
-      },
-      {
-        "id": "LEAF",
-        "name": "Leaf",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "ARIYA",
-        "name": "Ariya",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2023-2024"
       },
       {
         "id": "FRONTIER",
@@ -2823,114 +2985,156 @@
         "category": "GRUA_LIVIANA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "VERSA",
+        "name": "Versa",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "SENTRA",
+        "name": "Sentra",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "ALTIMA",
+        "name": "Altima",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "KICKS",
+        "name": "Kicks",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "QASHQAI",
+        "name": "Qashqai",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "XTRAIL",
+        "name": "X-Trail e-Power",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "PATHFINDER",
+        "name": "Pathfinder",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "KAIT",
+        "name": "Kait",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2026-2027"
+      },
+      {
+        "id": "FRONTIER",
+        "name": "Frontier",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "LEAF",
+        "name": "Leaf",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2019-2025"
+      },
+      {
+        "id": "N_KICKS",
+        "name": "Kicks",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "N_QASHQAI",
+        "name": "Qashqai",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "N_XTRAIL",
+        "name": "X-Trail e-Power",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "N_ROGUE",
+        "name": "Rogue",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2025"
+      },
+      {
+        "id": "N_MURANO",
+        "name": "Murano",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "N_PATHFINDER",
+        "name": "Pathfinder",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "N_ARMADA",
+        "name": "Armada",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "N_FRONTIER",
+        "name": "Frontier",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "N_PATROL",
+        "name": "Patrol",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "N_KAIT",
+        "name": "Kait",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2026-2027"
+      },
+      {
+        "id": "N_ARIYA",
+        "name": "Ariya",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
       }
     ],
     "HYUNDAI": [
-      {
-        "id": "I10",
-        "name": "i10",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "GRAND_I10",
-        "name": "Grand i10",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2014-2024"
-      },
-      {
-        "id": "I20",
-        "name": "i20",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "ACCENT",
-        "name": "Accent",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ELANTRA",
-        "name": "Elantra",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "SONATA",
-        "name": "Sonata",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "AZERA",
-        "name": "Azera",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2012-2017"
-      },
-      {
-        "id": "VENUE",
-        "name": "Venue",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "CRETA",
-        "name": "Creta",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "TUCSON",
-        "name": "Tucson",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SANTA_FE",
-        "name": "Santa Fe",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "PALISADE",
-        "name": "Palisade",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "KONA",
-        "name": "Kona",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "BAYON",
-        "name": "Bayon",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "VERACRUZ",
-        "name": "Veracruz",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2012"
-      },
       {
         "id": "H1",
         "name": "H1",
@@ -2951,34 +3155,6 @@
         "category": "CAMIONES",
         "tipo_combustible": "Diesel",
         "anos_populares": "2010-2024"
-      },
-      {
-        "id": "KONA_EV",
-        "name": "Kona EV",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "IONIQ",
-        "name": "Ioniq",
-        "category": "AUTOS",
-        "tipo_combustible": "Híbrido/Eléctrico",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "IONIQ5",
-        "name": "Ioniq 5",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
-      },
-      {
-        "id": "IONIQ6",
-        "name": "Ioniq 6",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2023-2024"
       },
       {
         "id": "HD65",
@@ -3021,142 +3197,170 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GRAND_I10",
+        "name": "Grand i10",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "GRAND_I10_SEDAN",
+        "name": "Grand i10 Sedán",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "I20",
+        "name": "i20",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "ACCENT",
+        "name": "Accent",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "ELANTRA",
+        "name": "Elantra",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "CRETA",
+        "name": "Creta",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "KONA",
+        "name": "Kona",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "KONA_HYBRID",
+        "name": "Kona Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "TUCSON",
+        "name": "Tucson",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "SANTA_FE",
+        "name": "Santa Fe",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "IONIQ",
+        "name": "Ioniq Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2017-2023"
+      },
+      {
+        "id": "IONIQ5",
+        "name": "Ioniq 5",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "IONIQ6",
+        "name": "Ioniq 6",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "H_VENUE",
+        "name": "Venue",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "H_CRETA",
+        "name": "Creta",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "H_KONA",
+        "name": "Kona",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "H_KONA_HYBRID",
+        "name": "Kona Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "H_KONA_EV",
+        "name": "Kona EV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "H_TUCSON",
+        "name": "Tucson",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "H_SANTA_FE",
+        "name": "Santa Fe",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "H_PALISADE",
+        "name": "Palisade",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "H_BAYON",
+        "name": "Bayon",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "H_IONIQ5",
+        "name": "Ioniq 5",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
       }
     ],
     "FORD": [
-      {
-        "id": "FIESTA",
-        "name": "Fiesta",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2019"
-      },
-      {
-        "id": "FIESTA_SEDAN",
-        "name": "Fiesta Sedán",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2019"
-      },
-      {
-        "id": "FOCUS",
-        "name": "Focus",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2012-2018"
-      },
-      {
-        "id": "FUSION",
-        "name": "Fusion",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2020"
-      },
-      {
-        "id": "MUSTANG",
-        "name": "Mustang",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "ECOSPORT",
-        "name": "EcoSport",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "TERRITORY",
-        "name": "Territory",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "ESCAPE",
-        "name": "Escape",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "EDGE",
-        "name": "Edge",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "EXPLORER",
-        "name": "Explorer",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "EXPEDITION",
-        "name": "Expedition",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "BRONCO",
-        "name": "Bronco",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "BRONCO_SPORT",
-        "name": "Bronco Sport",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "RANGER",
-        "name": "Ranger",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "F150",
-        "name": "F-150",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "F150_RAPTOR",
-        "name": "F-150 Raptor",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "F250",
-        "name": "F-250",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "F350",
-        "name": "F-350",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "MAVERICK",
-        "name": "Maverick",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2022-2024"
-      },
       {
         "id": "CARGO",
         "name": "Cargo",
@@ -3170,20 +3374,6 @@
         "category": "BUSES",
         "tipo_combustible": "Diesel",
         "anos_populares": "2015-2024"
-      },
-      {
-        "id": "MUSTANG_MACH_E",
-        "name": "Mustang Mach-E",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "F150_LIGHTNING",
-        "name": "F-150 Lightning",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
       },
       {
         "id": "RANGER",
@@ -3212,114 +3402,149 @@
         "category": "GRUA_LIVIANA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "MUSTANG",
+        "name": "Mustang",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "BRONCO",
+        "name": "Bronco",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "BRONCO_SPORT",
+        "name": "Bronco Sport",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "TERRITORY",
+        "name": "Territory",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "TERRITORY_HYBRID",
+        "name": "Territory Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "MUSTANG_MACH_E",
+        "name": "Mustang Mach-E",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "RANGER",
+        "name": "Ranger",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "F_ECOSPORT",
+        "name": "EcoSport",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2024"
+      },
+      {
+        "id": "F_TERRITORY",
+        "name": "Territory",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "F_TERRITORY_HEV",
+        "name": "Territory Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "F_BRONCO",
+        "name": "Bronco",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "F_BRONCO_SPORT",
+        "name": "Bronco Sport",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "F_EXPLORER",
+        "name": "Explorer",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "F_EXPEDITION",
+        "name": "Expedition",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "F_RANGER",
+        "name": "Ranger",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "F_MAVERICK",
+        "name": "Maverick Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "F_F150",
+        "name": "F-150",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "F_F150_RAPTOR",
+        "name": "F-150 Raptor",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "F_F150_LIGHTNING",
+        "name": "F-150 Lightning",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "F_MUSTANG_MACHE",
+        "name": "Mustang Mach-E",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
       }
     ],
     "VOLKSWAGEN": [
-      {
-        "id": "GOL",
-        "name": "Gol",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2022"
-      },
-      {
-        "id": "POLO",
-        "name": "Polo",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "VIRTUS",
-        "name": "Virtus",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "JETTA",
-        "name": "Jetta",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "VENTO",
-        "name": "Vento",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2014-2020"
-      },
-      {
-        "id": "PASSAT",
-        "name": "Passat",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2012-2024"
-      },
-      {
-        "id": "GOLF",
-        "name": "Golf",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ARTEON",
-        "name": "Arteon",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "TCROSS",
-        "name": "T-Cross",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "TAOS",
-        "name": "Taos",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "TIGUAN",
-        "name": "Tiguan",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TIGUAN_ALLSPACE",
-        "name": "Tiguan Allspace",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "ATLAS",
-        "name": "Atlas",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "AMAROK",
-        "name": "Amarok",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TOUAREG",
-        "name": "Touareg",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2011-2024"
-      },
       {
         "id": "TRANSPORTER",
         "name": "Transporter",
@@ -3335,112 +3560,154 @@
         "anos_populares": "2017-2024"
       },
       {
+        "id": "POLO",
+        "name": "Polo",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "VIRTUS",
+        "name": "Virtus",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "JETTA",
+        "name": "Jetta",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "PASSAT",
+        "name": "Passat",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2025"
+      },
+      {
+        "id": "GOLF",
+        "name": "Golf",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "ARTEON",
+        "name": "Arteon",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "TCROSS",
+        "name": "T-Cross",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "TAOS",
+        "name": "Taos",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "TIGUAN",
+        "name": "Tiguan",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "TOUAREG",
+        "name": "Touareg",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
         "id": "ID3",
         "name": "ID.3",
         "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2022-2026"
       },
       {
         "id": "ID4",
         "name": "ID.4",
-        "category": "CAMIONETAS",
+        "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "ID_BUZZ",
+        "id": "VW_TCROSS",
+        "name": "T-Cross",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "VW_TAOS",
+        "name": "Taos",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "VW_TIGUAN",
+        "name": "Tiguan",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "VW_TIGUAN_ALL",
+        "name": "Tiguan Allspace",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VW_ATLAS",
+        "name": "Atlas",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VW_AMAROK",
+        "name": "Amarok",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "VW_TOUAREG",
+        "name": "Touareg",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "VW_ID4",
+        "name": "ID.4",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "VW_ID_BUZZ",
         "name": "ID. Buzz",
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2023-2024"
+        "anos_populares": "2023-2026"
       }
     ],
     "SUZUKI": [
-      {
-        "id": "ALTO",
-        "name": "Alto",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "CELERIO",
-        "name": "Celerio",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "SWIFT",
-        "name": "Swift",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "DZIRE",
-        "name": "Dzire",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "BALENO",
-        "name": "Baleno",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "CIAZ",
-        "name": "Ciaz",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "VITARA",
-        "name": "Vitara",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "SCROSS",
-        "name": "S-Cross",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "JIMNY",
-        "name": "Jimny",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "GRAND_VITARA",
-        "name": "Grand Vitara",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "XL7",
-        "name": "XL7",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "ERTIGA",
-        "name": "Ertiga",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
       {
         "id": "GN125_ABS",
         "name": "GN 125 ABS",
@@ -3656,86 +3923,156 @@
         "cilindrada": "1340cc",
         "tipo": "Deportiva",
         "anos_populares": "2008-2026"
+      },
+      {
+        "id": "ALTO",
+        "name": "Alto",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "CELERIO",
+        "name": "Celerio",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SWIFT",
+        "name": "Swift",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "DZIRE",
+        "name": "Dzire",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "BALENO",
+        "name": "Baleno",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "S_PRESSO",
+        "name": "S-Presso",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "IGNIS",
+        "name": "Ignis",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "VITARA",
+        "name": "Vitara",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "GRAND_VITARA",
+        "name": "Grand Vitara",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "SCROSS",
+        "name": "S-Cross",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2025"
+      },
+      {
+        "id": "FRONX",
+        "name": "Fronx",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "JIMNY",
+        "name": "Jimny",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "S_SPRESSO",
+        "name": "S-Presso",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "S_IGNIS",
+        "name": "Ignis",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "S_FRONX",
+        "name": "Fronx",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "S_VITARA",
+        "name": "Vitara",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "S_SCROSS",
+        "name": "S-Cross",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2025"
+      },
+      {
+        "id": "S_GRAND_VITARA",
+        "name": "Grand Vitara",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "S_XL7",
+        "name": "XL7",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "S_ERTIGA",
+        "name": "Ertiga",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "S_JIMNY",
+        "name": "Jimny",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
       }
     ],
     "HONDA": [
-      {
-        "id": "CITY",
-        "name": "City",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "CIVIC",
-        "name": "Civic",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ACCORD",
-        "name": "Accord",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "FIT",
-        "name": "Fit",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2020"
-      },
-      {
-        "id": "INSIGHT",
-        "name": "Insight",
-        "category": "AUTOS",
-        "tipo_combustible": "Híbrido",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "HRV",
-        "name": "HR-V",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "CRV",
-        "name": "CR-V",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "PILOT",
-        "name": "Pilot",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "PASSPORT",
-        "name": "Passport",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "RIDGELINE",
-        "name": "Ridgeline",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "ODYSSEY",
-        "name": "Odyssey",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
       {
         "id": "CB100",
         "name": "CB 100",
@@ -3975,51 +4312,128 @@
         "cilindrada": "1000cc",
         "tipo": "Deportiva",
         "anos_populares": "2020-2026"
+      },
+      {
+        "id": "CITY",
+        "name": "City",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "CIVIC",
+        "name": "Civic",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "ACCORD",
+        "name": "Accord",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "HRV",
+        "name": "HR-V",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "CRV",
+        "name": "CR-V",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "ZRV",
+        "name": "ZR-V",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "PILOT",
+        "name": "Pilot",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "RIDGELINE",
+        "name": "Ridgeline",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "PROLOGUE",
+        "name": "Prologue",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "HO_HRV",
+        "name": "HR-V",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "HO_CRV",
+        "name": "CR-V",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "HO_ZRV",
+        "name": "ZR-V",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "HO_PILOT",
+        "name": "Pilot",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "HO_PASSPORT",
+        "name": "Passport",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "HO_RIDGELINE",
+        "name": "Ridgeline",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "HO_ODYSSEY",
+        "name": "Odyssey",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "HO_PROLOGUE",
+        "name": "Prologue",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "MITSUBISHI": [
-      {
-        "id": "MIRAGE",
-        "name": "Mirage",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "LANCER",
-        "name": "Lancer",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "ASX",
-        "name": "ASX",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "OUTLANDER",
-        "name": "Outlander",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "ECLIPSE_CROSS",
-        "name": "Eclipse Cross",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "MONTERO",
-        "name": "Montero",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "L200",
-        "name": "L200",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
-      },
       {
         "id": "CANTER",
         "name": "Canter",
@@ -4096,33 +4510,79 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "MITS_OUTLANDER",
+        "name": "Outlander",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MITS_ECLIPSE_CROSS",
+        "name": "Eclipse Cross",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MITS_ASX",
+        "name": "ASX",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "MITS_MONTERO",
+        "name": "Montero Sport",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MITS_L200",
+        "name": "L200 Triton",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MI_ASX",
+        "name": "ASX",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "MI_OUTLANDER",
+        "name": "Outlander",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MI_ECLIPSE_CROSS",
+        "name": "Eclipse Cross",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MI_MONTERO",
+        "name": "Montero Sport",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MI_L200",
+        "name": "L200 Triton",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
       }
     ],
     "FIAT": [
-      {
-        "id": "MOBI",
-        "name": "Mobi",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "ARGO",
-        "name": "Argo",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "CRONOS",
-        "name": "Cronos",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "500",
-        "name": "500",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
       {
         "id": "500X",
         "name": "500X",
@@ -4146,79 +4606,109 @@
         "name": "Ducato",
         "category": "CAMIONES",
         "tipo_combustible": "Diesel"
+      },
+      {
+        "id": "FIAT_CRONOS",
+        "name": "Cronos",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "FIAT_MOBI",
+        "name": "Mobi",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "FIAT_PULSE",
+        "name": "Pulse",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "FIAT_FASTBACK",
+        "name": "Fastback",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "FIAT_TORO",
+        "name": "Toro",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "FIAT_500",
+        "name": "Fiat 500e",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
       }
     ],
     "JEEP": [
       {
-        "id": "RENEGADE",
+        "id": "J_AVENGER",
+        "name": "Avenger",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "J_RENEGADE",
         "name": "Renegade",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "COMPASS",
+        "id": "J_COMPASS",
         "name": "Compass",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
       },
       {
-        "id": "CHEROKEE",
-        "name": "Cherokee",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "GRAND_CHEROKEE",
-        "name": "Grand Cherokee",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "WRANGLER",
-        "name": "Wrangler",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "GLADIATOR",
-        "name": "Gladiator",
+        "id": "J_COMMANDER",
+        "name": "Commander",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "WRANGLER_4XE",
+        "id": "J_GRAND_CHEROKEE",
+        "name": "Grand Cherokee",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "J_WRANGLER",
+        "name": "Wrangler",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "J_WRANGLER_4XE",
         "name": "Wrangler 4xe",
         "category": "CAMIONETAS",
         "tipo_combustible": "Híbrido Enchufable",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "J_GLADIATOR",
+        "name": "Gladiator",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
       }
     ],
     "PEUGEOT": [
-      {
-        "id": "208",
-        "name": "208",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "301",
-        "name": "301",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "308",
-        "name": "308",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "408",
-        "name": "408",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
       {
         "id": "2008",
         "name": "2008",
@@ -4242,72 +4732,58 @@
         "name": "Partner",
         "category": "CAMIONES",
         "tipo_combustible": "Diesel"
+      },
+      {
+        "id": "PEUGEOT_208",
+        "name": "208",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "PEUGEOT_308",
+        "name": "308",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "PEUGEOT_2008",
+        "name": "2008",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "PEUGEOT_3008",
+        "name": "3008",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "PEUGEOT_5008",
+        "name": "5008",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "PEUGEOT_E208",
+        "name": "e-208",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "PEUGEOT_E2008",
+        "name": "e-2008",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
       }
     ],
     "BYD": [
-      {
-        "id": "DOLPHIN",
-        "name": "Dolphin",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "SEAL",
-        "name": "Seal",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
-      },
-      {
-        "id": "HAN",
-        "name": "Han",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "TANG",
-        "name": "Tang",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "ATTO3",
-        "name": "Atto 3",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
-      },
-      {
-        "id": "SONG_PLUS",
-        "name": "Song Plus",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Híbrido Enchufable",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "YUAN_PLUS",
-        "name": "Yuan Plus",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "E2",
-        "name": "e2",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "E3",
-        "name": "e3",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
-      },
       {
         "id": "K8",
         "name": "K8",
@@ -4323,92 +4799,228 @@
         "tipo_combustible": "Eléctrico",
         "pasajeros": "50-60",
         "anos_populares": "2015-2024"
+      },
+      {
+        "id": "BYD_SEAGULL",
+        "name": "Seagull",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "BYD_DOLPHIN",
+        "name": "Dolphin",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "BYD_YUAN_UP",
+        "name": "Yuan Up",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_YUAN_PLUS",
+        "name": "Yuan Plus (Atto 3)",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "BYD_SONG_PLUS_EV",
+        "name": "Song Plus EV",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_SONG_PLUS_DMI",
+        "name": "Song Plus DM-i",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_SEALION7",
+        "name": "Sealion 7",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_TANG",
+        "name": "Tang",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "BYD_SHARK",
+        "name": "Shark",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_YUAN_UP_CAM",
+        "name": "Yuan Up",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_YUAN_PLUS_CAM",
+        "name": "Yuan Plus (Atto 3)",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "BYD_SONG_PLUS_EV_CAM",
+        "name": "Song Plus EV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_SONG_PLUS_DMI_CAM",
+        "name": "Song Plus DM-i",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_SEALION7_CAM",
+        "name": "Sealion 7",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BYD_TANG_CAM",
+        "name": "Tang",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "BYD_SHARK_CAM",
+        "name": "Shark",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
       }
     ],
     "MG": [
+      {
+        "id": "MG3",
+        "name": "MG3",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "MG3_HYBRID",
+        "name": "MG3 Hybrid+",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2024-2026"
+      },
       {
         "id": "MG5",
         "name": "MG5",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2026"
       },
       {
         "id": "MG6",
         "name": "MG6",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "MG3",
-        "name": "MG3",
+        "id": "MG_ONE",
+        "name": "MG One",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "ZS",
+        "id": "MG_ZS",
         "name": "ZS",
-        "category": "CAMIONETAS",
+        "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "HS",
-        "name": "HS",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "RX5",
-        "name": "RX5",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
+        "id": "MG_ZS_HYBRID",
+        "name": "ZS Hybrid+",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2024-2026"
       },
       {
         "id": "MG4",
-        "name": "MG4",
+        "name": "MG4 Cross",
         "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "ZS_EV",
+        "id": "MG_RX5",
+        "name": "RX5",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "MG_ZS_CAM",
+        "name": "ZS",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "MG_ZS_HYBRID_CAM",
+        "name": "ZS Hybrid+",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "MG_HS_CAM",
+        "name": "HS",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "MG_RX5_CAM",
+        "name": "RX5",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "MG4_CAM",
+        "name": "MG4 Cross",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "MG_ZS_EV_CAM",
         "name": "ZS EV",
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "MG_MARVEL_R",
-        "name": "Marvel R",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2020-2026"
       }
     ],
     "JAC": [
-      {
-        "id": "J2",
-        "name": "J2",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "J3",
-        "name": "J3",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "J4",
-        "name": "J4",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
       {
         "id": "S2",
         "name": "S2",
@@ -4487,147 +5099,158 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "JAC_E30X",
+        "name": "E30X",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "JAC_T6",
+        "name": "T6",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "JAC_T8",
+        "name": "T8",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "JAC_JS4",
+        "name": "JS4",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2023-2026"
       }
     ],
     "CHERY": [
       {
-        "id": "QQ",
-        "name": "QQ",
+        "id": "CHERY_ICAR03",
+        "name": "iCar 03",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CHERY_E5",
+        "name": "E5",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "CHERY_TIGGO4",
+        "name": "Tiggo 4 CSH",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CHERY_TIGGO7",
+        "name": "Tiggo 7 Pro PHEV",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CHERY_TIGGO8",
+        "name": "Tiggo 8 PHEV",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CHERY_TIGGO9",
+        "name": "Tiggo 9 PHEV",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "CHERY_ARRIZO6",
+        "name": "Arrizo 6 Pro",
         "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2020"
+        "anos_populares": "2019-2025"
       },
       {
-        "id": "FULWIN",
-        "name": "Fulwin",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2012-2018"
-      },
-      {
-        "id": "ARRIZO5",
-        "name": "Arrizo 5",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "ARRIZO6",
-        "name": "Arrizo 6",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "YOYO",
-        "name": "Yoyo",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2023-2024"
-      },
-      {
-        "id": "TIGGO2",
-        "name": "Tiggo 2",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "TIGGO2_PRO",
+        "id": "CH_TIGGO2_PRO",
         "name": "Tiggo 2 Pro",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "TIGGO3",
-        "name": "Tiggo 3",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "TIGGO4",
-        "name": "Tiggo 4",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "TIGGO4_PRO",
+        "id": "CH_TIGGO4_PRO",
         "name": "Tiggo 4 Pro",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "TIGGO5",
-        "name": "Tiggo 5",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2014-2024"
-      },
-      {
-        "id": "TIGGO7",
-        "name": "Tiggo 7",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "TIGGO7_PRO",
+        "id": "CH_TIGGO7_PRO",
         "name": "Tiggo 7 Pro",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "TIGGO8",
-        "name": "Tiggo 8",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "TIGGO8_PRO",
+        "id": "CH_TIGGO8_PRO",
         "name": "Tiggo 8 Pro",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "TIGGO8_PRO_MAX",
+        "id": "CH_TIGGO8_PRO_MAX",
         "name": "Tiggo 8 Pro Max",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2022-2024"
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "CH_TIGGO4_CSH",
+        "name": "Tiggo 4 CSH",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CH_TIGGO7_PHEV",
+        "name": "Tiggo 7 Pro PHEV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CH_TIGGO8_PHEV",
+        "name": "Tiggo 8 PHEV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CH_TIGGO9_PHEV",
+        "name": "Tiggo 9 PHEV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "CH_ICAR03",
+        "name": "iCar 03",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "GREAT_WALL": [
-      {
-        "id": "WINGLE5",
-        "name": "Wingle 5",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "WINGLE6",
-        "name": "Wingle 6",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "WINGLE7",
-        "name": "Wingle 7",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
-      },
-      {
-        "id": "POER",
-        "name": "Poer",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
-      },
       {
         "id": "WINGLE_5",
         "name": "Wingle 5",
@@ -4648,16 +5271,30 @@
         "category": "GRUA_LIVIANA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "GW_POER",
+        "name": "Poer",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "GW_WINGLE6",
+        "name": "Wingle 6",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2018-2025"
+      },
+      {
+        "id": "GW_WINGLE7",
+        "name": "Wingle 7",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
       }
     ],
     "TESLA": [
-      {
-        "id": "MODEL3",
-        "name": "Model 3",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2017-2024"
-      },
       {
         "id": "MODELY",
         "name": "Model Y",
@@ -4666,108 +5303,42 @@
         "anos_populares": "2020-2024"
       },
       {
-        "id": "MODELS",
-        "name": "Model S",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2012-2024"
-      },
-      {
         "id": "MODELX",
         "name": "Model X",
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2015-2024"
+      },
+      {
+        "id": "TESLA_MODEL3",
+        "name": "Model 3",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "TESLA_MODELY",
+        "name": "Model Y",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "TESLA_MODELX",
+        "name": "Model X",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "TESLA_MODELS",
+        "name": "Model S",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2019-2026"
       }
     ],
     "BMW": [
-      {
-        "id": "SERIE_1",
-        "name": "Serie 1",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "SERIE_2",
-        "name": "Serie 2",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "SERIE_3",
-        "name": "Serie 3",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "SERIE_5",
-        "name": "Serie 5",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "SERIE_7",
-        "name": "Serie 7",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "X1",
-        "name": "X1",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "X2",
-        "name": "X2",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "X3",
-        "name": "X3",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "X4",
-        "name": "X4",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "X5",
-        "name": "X5",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "X6",
-        "name": "X6",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "I3",
-        "name": "i3",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2013-2022"
-      },
-      {
-        "id": "I4",
-        "name": "i4",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
-      },
-      {
-        "id": "IX",
-        "name": "iX",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
-      },
       {
         "id": "G310GS",
         "name": "G 310 GS",
@@ -4943,90 +5514,156 @@
         "cilindrada": "1000cc",
         "tipo": "Deportiva",
         "anos_populares": "2021-2024"
+      },
+      {
+        "id": "BMW_SERIE1",
+        "name": "Serie 1",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "BMW_SERIE2",
+        "name": "Serie 2",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "BMW_SERIE3",
+        "name": "Serie 3",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "BMW_SERIE5",
+        "name": "Serie 5",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "BMW_SERIE7",
+        "name": "Serie 7",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "BMW_X1",
+        "name": "X1",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "BMW_X3",
+        "name": "X3",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "BMW_X5",
+        "name": "X5",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "BMW_I4",
+        "name": "i4",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "BMW_IX1",
+        "name": "iX1",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "BMW_IX3",
+        "name": "iX3",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "BM_X1",
+        "name": "X1",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "BM_X2",
+        "name": "X2",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "BM_X3",
+        "name": "X3",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "BM_X4",
+        "name": "X4",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "BM_X5",
+        "name": "X5",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "BM_X6",
+        "name": "X6",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "BM_X7",
+        "name": "X7",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "BM_IX1",
+        "name": "iX1",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "BM_IX3",
+        "name": "iX3",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "BM_IX",
+        "name": "iX",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
       }
     ],
     "MERCEDES_BENZ": [
-      {
-        "id": "CLASE_A",
-        "name": "Clase A",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "CLASE_C",
-        "name": "Clase C",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "CLASE_E",
-        "name": "Clase E",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "CLASE_S",
-        "name": "Clase S",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "GLA",
-        "name": "GLA",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "GLB",
-        "name": "GLB",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "GLC",
-        "name": "GLC",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "GLE",
-        "name": "GLE",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "GLS",
-        "name": "GLS",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "G_CLASS",
-        "name": "Clase G",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "EQC",
-        "name": "EQC",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "EQS",
-        "name": "EQS",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "EQE",
-        "name": "EQE",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
-      },
       {
         "id": "SPRINTER",
         "name": "Sprinter",
@@ -5052,88 +5689,281 @@
         "category": "BUSES",
         "tipo_combustible": "Diesel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "MB_CLASE_A",
+        "name": "Clase A",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2025"
+      },
+      {
+        "id": "MB_CLASE_C",
+        "name": "Clase C",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MB_CLASE_E",
+        "name": "Clase E",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MB_CLASE_S",
+        "name": "Clase S",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MB_GLA",
+        "name": "GLA",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "MB_GLB",
+        "name": "GLB",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "MB_GLC",
+        "name": "GLC",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "MB_GLE",
+        "name": "GLE",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "MB_EQA",
+        "name": "EQA",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "MB_EQB",
+        "name": "EQB",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "MB_EQE",
+        "name": "EQE",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "MB_EQS",
+        "name": "EQS",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "MB_GLA_CAM",
+        "name": "GLA",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "MB_GLB_CAM",
+        "name": "GLB",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "MB_GLC_CAM",
+        "name": "GLC",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "MB_GLE_CAM",
+        "name": "GLE",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "MB_GLS_CAM",
+        "name": "GLS",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "MB_G_CLASS",
+        "name": "Clase G",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MB_EQB_CAM",
+        "name": "EQB",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "MB_EQC_CAM",
+        "name": "EQC",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2020-2025"
+      },
+      {
+        "id": "MB_EQS_SUV",
+        "name": "EQS SUV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
       }
     ],
     "AUDI": [
       {
-        "id": "A1",
+        "id": "AUDI_A1",
         "name": "A1",
         "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
       },
       {
-        "id": "A3",
+        "id": "AUDI_A3",
         "name": "A3",
         "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
       },
       {
-        "id": "A4",
+        "id": "AUDI_A4",
         "name": "A4",
         "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "A5",
+        "id": "AUDI_A5",
         "name": "A5",
         "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "A6",
+        "id": "AUDI_A6",
         "name": "A6",
         "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "A7",
-        "name": "A7",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "Q2",
-        "name": "Q2",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "Q3",
+        "id": "AUDI_Q3",
         "name": "Q3",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
       },
       {
-        "id": "Q5",
+        "id": "AUDI_Q5",
         "name": "Q5",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "Q7",
+        "id": "AUDI_Q7",
         "name": "Q7",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "Q8",
-        "name": "Q8",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "E_TRON",
+        "id": "AUDI_ETRON",
         "name": "e-tron",
-        "category": "CAMIONETAS",
+        "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2019-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "E_TRON_GT",
+        "id": "AUDI_Q4_ETRON",
+        "name": "Q4 e-tron",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "AUDI_ETRON_GT",
         "name": "e-tron GT",
         "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "AU_Q2",
+        "name": "Q2",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "AU_Q3",
+        "name": "Q3",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "AU_Q5",
+        "name": "Q5",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "AU_Q7",
+        "name": "Q7",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "AU_Q8",
+        "name": "Q8",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "AU_ETRON_CAM",
+        "name": "e-tron",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "AU_Q4_ETRON",
+        "name": "Q4 e-tron",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
       }
     ],
     "YAMAHA": [
@@ -7197,81 +8027,86 @@
     ],
     "RAM": [
       {
-        "id": "1500",
-        "name": "1500",
+        "id": "RAM_1500",
+        "name": "Ram 1500",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "2500",
-        "name": "2500",
+        "id": "RAM_2500",
+        "name": "Ram 2500",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "3500",
-        "name": "3500",
+        "id": "RAM_3500",
+        "name": "Ram 3500",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "RAM_RAMPAGE",
+        "name": "Rampage",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2023-2026"
       }
     ],
     "LAND_ROVER": [
       {
-        "id": "DISCOVERY_SPORT",
+        "id": "LR_DISCO_SPORT",
         "name": "Discovery Sport",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "DISCOVERY",
+        "id": "LR_DISCOVERY",
         "name": "Discovery",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "RANGE_ROVER_EVOQUE",
+        "id": "LR_EVOQUE",
         "name": "Range Rover Evoque",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
       },
       {
-        "id": "RANGE_ROVER_VELAR",
+        "id": "LR_VELAR",
         "name": "Range Rover Velar",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
       },
       {
-        "id": "RANGE_ROVER_SPORT",
+        "id": "LR_RR_SPORT",
         "name": "Range Rover Sport",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "RANGE_ROVER",
+        "id": "LR_RR",
         "name": "Range Rover",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "DEFENDER",
+        "id": "LR_DEFENDER",
         "name": "Defender",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
       }
     ],
     "SUBARU": [
-      {
-        "id": "IMPREZA",
-        "name": "Impreza",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "LEGACY",
-        "name": "Legacy",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
       {
         "id": "XV",
         "name": "XV",
@@ -7289,15 +8124,37 @@
         "name": "Outback",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina"
+      },
+      {
+        "id": "SUBARU_IMPREZA",
+        "name": "Impreza",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "SUBARU_XV",
+        "name": "XV / Crosstrek",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "SUBARU_FORESTER",
+        "name": "Forester",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "SUBARU_OUTBACK",
+        "name": "Outback",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
       }
     ],
     "CITROEN": [
-      {
-        "id": "C3",
-        "name": "C3",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
       {
         "id": "C4_CACTUS",
         "name": "C4 Cactus",
@@ -7315,132 +8172,248 @@
         "name": "Berlingo",
         "category": "CAMIONES",
         "tipo_combustible": "Diesel"
+      },
+      {
+        "id": "CITROEN_C3",
+        "name": "C3",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "CITROEN_C3_AIRCROSS",
+        "name": "C3 Aircross",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "CITROEN_C4_CACTUS",
+        "name": "C4 Cactus",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2024"
+      },
+      {
+        "id": "CITROEN_C5_AIRCROSS",
+        "name": "C5 Aircross",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "CITROEN_EC3",
+        "name": "ë-C3",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "SSANGYONG": [
       {
-        "id": "TIVOLI",
+        "id": "SS_TIVOLI",
         "name": "Tivoli",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "KORANDO",
+        "id": "SS_KORANDO",
         "name": "Korando",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "REXTON",
+        "id": "SS_REXTON",
         "name": "Rexton",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "MUSSO",
+        "id": "SS_MUSSO",
         "name": "Musso",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "SS_TORRES",
+        "name": "Torres",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "SS_TORRES_EVX",
+        "name": "Torres EVX",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "HAVAL": [
       {
-        "id": "H2",
-        "name": "H2",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "id": "HAVAL_JOLION",
+        "name": "Jolion Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "H6",
-        "name": "H6",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "id": "HAVAL_H6",
+        "name": "H6 Hybrid",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "JOLION",
-        "name": "Jolion",
+        "id": "HAVAL_H7",
+        "name": "H7",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "HV_JOLION",
+        "name": "Jolion Hybrid",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "HV_H6",
+        "name": "H6 Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "HV_H7",
+        "name": "H7",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
       }
     ],
     "GEELY": [
       {
-        "id": "EMGRAND_7",
-        "name": "Emgrand 7",
+        "id": "GEELY_EX2",
+        "name": "Geome EX2",
         "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "COOLRAY",
-        "name": "Coolray",
+        "id": "GEELY_EX5",
+        "name": "EX5",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "GEELY_STARRAY_EMI",
+        "name": "Starray EM-i",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "GL_EX2_CAM",
+        "name": "Geome EX2",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "GL_EX5_CAM",
+        "name": "EX5",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "GL_STARRAY",
+        "name": "Starray EM-i",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2025-2026"
       }
     ],
     "PORSCHE": [
       {
-        "id": "718",
-        "name": "718",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "911",
-        "name": "911",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "MACAN",
-        "name": "Macan",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "CAYENNE",
+        "id": "PORSCHE_CAYENNE",
         "name": "Cayenne",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "TAYCAN",
+        "id": "PORSCHE_MACAN",
+        "name": "Macan",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "PORSCHE_MACAN_EV",
+        "name": "Macan EV",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "PORSCHE_TAYCAN",
         "name": "Taycan",
         "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "PORSCHE_911",
+        "name": "911",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "PORSCHE_PANAMERA",
+        "name": "Panamera",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "PO_MACAN",
+        "name": "Macan",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "PO_MACAN_EV",
+        "name": "Macan EV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "PO_CAYENNE",
+        "name": "Cayenne",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "PO_CAYENNE_HYBRID",
+        "name": "Cayenne E-Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2019-2026"
       }
     ],
     "VOLVO": [
-      {
-        "id": "S60",
-        "name": "S60",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "S90",
-        "name": "S90",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "XC40",
-        "name": "XC40",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "XC60",
-        "name": "XC60",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "XC90",
-        "name": "XC90",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
-      },
       {
         "id": "FH",
         "name": "FH",
@@ -7488,66 +8461,185 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "VOLVO_XC40",
+        "name": "XC40",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VOLVO_XC60",
+        "name": "XC60",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "VOLVO_XC90",
+        "name": "XC90",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "VOLVO_EX40",
+        "name": "EX40",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "VOLVO_EX90",
+        "name": "EX90",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "VO_XC40",
+        "name": "XC40",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VO_XC60",
+        "name": "XC60",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "VO_XC90",
+        "name": "XC90",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "VO_EX40",
+        "name": "EX40",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "VO_EX90",
+        "name": "EX90",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "MINI": [
-      {
-        "id": "COOPER",
-        "name": "Cooper",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "COOPER_S",
-        "name": "Cooper S",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
       {
         "id": "COUNTRYMAN",
         "name": "Countryman",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina"
+      },
+      {
+        "id": "MINI_COOPER",
+        "name": "Cooper",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "MINI_COUNTRYMAN",
+        "name": "Countryman",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2011-2026"
+      },
+      {
+        "id": "MINI_CLUBMAN",
+        "name": "Clubman",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2024"
+      },
+      {
+        "id": "MINI_ELECTRIC",
+        "name": "Cooper Electric",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2020-2026"
       }
     ],
     "GMC": [
       {
-        "id": "SIERRA_1500",
+        "id": "GMC_SIERRA1500",
         "name": "Sierra 1500",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "SIERRA_2500",
+        "id": "GMC_SIERRA2500",
         "name": "Sierra 2500",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel"
+        "tipo_combustible": "Gasolina/Diésel",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "YUKON",
+        "id": "GMC_YUKON",
         "name": "Yukon",
         "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "GMC_TERRAIN",
+        "name": "Terrain",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "GMC_HUMMER_EV",
+        "name": "Hummer EV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
       }
     ],
     "DODGE": [
-      {
-        "id": "CHARGER",
-        "name": "Charger",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
-      {
-        "id": "CHALLENGER",
-        "name": "Challenger",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina"
-      },
       {
         "id": "DURANGO",
         "name": "Durango",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina"
+      },
+      {
+        "id": "DODGE_DURANGO",
+        "name": "Durango",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "DODGE_CHALLENGER",
+        "name": "Challenger",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2025"
+      },
+      {
+        "id": "DODGE_CHARGER",
+        "name": "Charger",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "DODGE_RAM1500",
+        "name": "Ram 1500",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
       }
     ],
     "CHRYSLER": [
@@ -7742,6 +8834,20 @@
         "cilindrada": "150cc",
         "tipo": "Urbana",
         "anos_populares": "2019-2024"
+      },
+      {
+        "id": "LIFAN_820",
+        "name": "820 (Murman)",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2022"
+      },
+      {
+        "id": "LIFAN_X60",
+        "name": "X60",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2014-2022"
       }
     ],
     "SHINERAY": [
@@ -8413,20 +9519,6 @@
     ],
     "SEAT": [
       {
-        "id": "IBIZA",
-        "name": "Ibiza",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "LEON",
-        "name": "León",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
         "id": "ARONA",
         "name": "Arona",
         "category": "CAMIONETAS",
@@ -8446,30 +9538,30 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
         "anos_populares": "2018-2024"
+      },
+      {
+        "id": "SEAT_IBIZA",
+        "name": "Ibiza",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SEAT_ARONA",
+        "name": "Arona",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SEAT_ATECA",
+        "name": "Ateca",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2016-2026"
       }
     ],
     "SKODA": [
-      {
-        "id": "FABIA",
-        "name": "Fabia",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "OCTAVIA",
-        "name": "Octavia",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SUPERB",
-        "name": "Superb",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "KAMIQ",
         "name": "Kamiq",
@@ -8490,23 +9582,37 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
         "anos_populares": "2016-2024"
+      },
+      {
+        "id": "SKODA_FABIA",
+        "name": "Fabia",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SKODA_OCTAVIA",
+        "name": "Octavia",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SKODA_KAROQ",
+        "name": "Karoq",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SKODA_KODIAQ",
+        "name": "Kodiaq",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
       }
     ],
     "ALFA_ROMEO": [
-      {
-        "id": "GIULIETTA",
-        "name": "Giulietta",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2020"
-      },
-      {
-        "id": "GIULIA",
-        "name": "Giulia",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
       {
         "id": "STELVIO",
         "name": "Stelvio",
@@ -8520,30 +9626,30 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Híbrido",
         "anos_populares": "2022-2024"
+      },
+      {
+        "id": "ALFA_GIULIA",
+        "name": "Giulia",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "ALFA_STELVIO",
+        "name": "Stelvio",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "ALFA_TONALE",
+        "name": "Tonale",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2023-2026"
       }
     ],
     "LEXUS": [
-      {
-        "id": "IS",
-        "name": "IS",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "ES",
-        "name": "ES",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "LS",
-        "name": "LS",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina/Híbrido",
-        "anos_populares": "2010-2024"
-      },
       {
         "id": "UX",
         "name": "UX",
@@ -8585,6 +9691,41 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2023-2024"
+      },
+      {
+        "id": "LEXUS_NX",
+        "name": "NX",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "LEXUS_RX",
+        "name": "RX",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "LEXUS_ES",
+        "name": "ES",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "LEXUS_GX",
+        "name": "GX",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "LEXUS_UX",
+        "name": "UX",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2019-2026"
       }
     ],
     "INFINITI": [
@@ -8663,27 +9804,6 @@
     ],
     "GENESIS": [
       {
-        "id": "G70",
-        "name": "G70",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "G80",
-        "name": "G80",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "G90",
-        "name": "G90",
-        "category": "AUTOS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2016-2024"
-      },
-      {
         "id": "GV60",
         "name": "GV60",
         "category": "CAMIONETAS",
@@ -8705,11 +9825,39 @@
         "anos_populares": "2020-2024"
       },
       {
-        "id": "ELECTRIFIED_G80",
+        "id": "GENESIS_G80",
+        "name": "G80",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "GENESIS_G90",
+        "name": "G90",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "GENESIS_GV70",
+        "name": "GV70",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "GENESIS_GV80",
+        "name": "GV80",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "GENESIS_ELECTRIFIED_G80",
         "name": "Electrified G80",
         "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
+        "anos_populares": "2022-2026"
       }
     ],
     "MAHINDRA": [
@@ -8802,20 +9950,6 @@
     ],
     "FOTON": [
       {
-        "id": "TUNLAND",
-        "name": "Tunland",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2012-2024"
-      },
-      {
-        "id": "SAUVANA",
-        "name": "Sauvana",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2015-2024"
-      },
-      {
         "id": "VIEW",
         "name": "View",
         "category": "CAMIONES",
@@ -8870,6 +10004,34 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "FT_TUNLAND_G7",
+        "name": "Tunland G7",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "FT_TUNLAND_V7",
+        "name": "Tunland V7 Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "FT_TUNLAND_V9",
+        "name": "Tunland V9 Hybrid",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "FT_SAUVANA",
+        "name": "Sauvana",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2025"
       }
     ],
     "JMC": [
@@ -8923,6 +10085,20 @@
         "category": "CAMIONES",
         "tipo_combustible": "Gasolina",
         "anos_populares": "2015-2024"
+      },
+      {
+        "id": "DFSK_GLORY_580",
+        "name": "Glory 580",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2025"
+      },
+      {
+        "id": "DFSK_GLORY_500",
+        "name": "Glory 500",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2018-2024"
       }
     ],
     "DONGFENG": [
@@ -9008,41 +10184,76 @@
     ],
     "JETOUR": [
       {
-        "id": "X70",
+        "id": "JT_X70",
         "name": "X70",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2019-2026"
       },
       {
-        "id": "X90",
+        "id": "JT_X90",
         "name": "X90",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "DASHING",
+        "id": "JT_DASHING",
         "name": "Dashing",
         "category": "CAMIONETAS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2022-2024"
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "JT_T2",
+        "name": "T2",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
       }
     ],
     "OMODA": [
       {
-        "id": "C5",
-        "name": "C5",
-        "category": "CAMIONETAS",
+        "id": "OMODA5",
+        "name": "Omoda 5",
+        "category": "AUTOS",
         "tipo_combustible": "Gasolina",
-        "anos_populares": "2022-2024"
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "E5",
-        "name": "E5",
+        "id": "OMODA5_EV",
+        "name": "Omoda 5 EV",
         "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2023-2024"
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "OMODA7",
+        "name": "Omoda 7",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "OM_C5",
+        "name": "Omoda 5",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "OM_C5_EV",
+        "name": "Omoda 5 EV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "OM_C7",
+        "name": "Omoda 7",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2025-2026"
       }
     ],
     "LYNK_CO": [
@@ -9061,65 +10272,79 @@
         "anos_populares": "2020-2024"
       },
       {
-        "id": "03",
-        "name": "03",
+        "id": "LYNK01",
+        "name": "01",
         "category": "AUTOS",
-        "tipo_combustible": "Híbrido",
-        "anos_populares": "2019-2024"
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "LYNK05",
+        "name": "05",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2023-2026"
       }
     ],
     "GAC": [
       {
-        "id": "GS3",
-        "name": "GS3",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
+        "id": "GAC_AION_UT",
+        "name": "Aion UT",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       },
       {
-        "id": "GS4",
-        "name": "GS4",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2015-2024"
+        "id": "GAC_AION_V",
+        "name": "Aion V",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "GS5",
-        "name": "GS5",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2018-2024"
+        "id": "GAC_AION_Y",
+        "name": "Aion Y",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "GS8",
-        "name": "GS8",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Gasolina",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "AION_S",
+        "id": "GAC_AION_S",
         "name": "Aion S",
         "category": "AUTOS",
         "tipo_combustible": "Eléctrico",
-        "anos_populares": "2019-2024"
+        "anos_populares": "2022-2025"
+      },
+      {
+        "id": "GAC_AION_UT_CAM",
+        "name": "Aion UT",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "GAC_AION_V_CAM",
+        "name": "Aion V",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "GAC_AION_Y_CAM",
+        "name": "Aion Y",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GAC_GS4",
+        "name": "GS4",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2015-2025"
       }
     ],
     "NIO": [
-      {
-        "id": "ET5",
-        "name": "ET5",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
-      },
-      {
-        "id": "ET7",
-        "name": "ET7",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2022-2024"
-      },
       {
         "id": "ES6",
         "name": "ES6",
@@ -9140,23 +10365,30 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2020-2024"
+      },
+      {
+        "id": "NIO_ET5",
+        "name": "ET5",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "NIO_ET7",
+        "name": "ET7",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "NIO_EL6",
+        "name": "EL6",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
       }
     ],
     "XPENG": [
-      {
-        "id": "P5",
-        "name": "P5",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "P7",
-        "name": "P7",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2020-2024"
-      },
       {
         "id": "G3",
         "name": "G3",
@@ -9170,6 +10402,27 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2024"
+      },
+      {
+        "id": "XPENG_P7",
+        "name": "P7",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "XPENG_G9",
+        "name": "G9",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "XPENG_G6",
+        "name": "G6",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
       }
     ],
     "RIVIAN": [
@@ -9190,35 +10443,21 @@
     ],
     "LUCID": [
       {
-        "id": "AIR",
-        "name": "Air",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2021-2024"
-      },
-      {
         "id": "GRAVITY",
         "name": "Gravity",
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2024"
+      },
+      {
+        "id": "LUCID_AIR",
+        "name": "Air",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2022-2026"
       }
     ],
     "POLESTAR": [
-      {
-        "id": "POLESTAR_1",
-        "name": "Polestar 1",
-        "category": "AUTOS",
-        "tipo_combustible": "Híbrido",
-        "anos_populares": "2019-2021"
-      },
-      {
-        "id": "POLESTAR_2",
-        "name": "Polestar 2",
-        "category": "AUTOS",
-        "tipo_combustible": "Eléctrico",
-        "anos_populares": "2020-2024"
-      },
       {
         "id": "POLESTAR_3",
         "name": "Polestar 3",
@@ -9232,6 +10471,27 @@
         "category": "CAMIONETAS",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2024-2025"
+      },
+      {
+        "id": "POLESTAR2",
+        "name": "Polestar 2",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "POLESTAR3",
+        "name": "Polestar 3",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "POLESTAR4",
+        "name": "Polestar 4",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
       }
     ],
     "HINO": [
@@ -9493,13 +10753,6 @@
         "anos_populares": "2010-2024"
       },
       {
-        "id": "D_MAX_ISUZU",
-        "name": "D-Max",
-        "category": "CAMIONETAS",
-        "tipo_combustible": "Diesel",
-        "anos_populares": "2010-2024"
-      },
-      {
         "id": "ELF",
         "name": "Elf",
         "category": "BUSES",
@@ -9569,6 +10822,20 @@
         "category": "GRUA_PESADA",
         "tipo_combustible": "Diésel",
         "anos_populares": "2010-2024"
+      },
+      {
+        "id": "IZ_DMAX",
+        "name": "D-Max",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "IZ_MU_X",
+        "name": "MU-X",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Diésel",
+        "anos_populares": "2015-2026"
       }
     ],
     "FREIGHTLINER": [
@@ -12609,6 +13876,138 @@
         "autonomia": "155 km",
         "potencia": "34000W",
         "anos_populares": "2022-2026"
+      }
+    ],
+    "DEEPAL": [
+      {
+        "id": "DEEPAL_S05",
+        "name": "S05 E-Max",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "DEEPAL_S07",
+        "name": "S07 Max",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "DEEPAL_S07_EMAX",
+        "name": "S07 E-Max",
+        "category": "AUTOS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "DEEPAL_L07",
+        "name": "L07",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "DP_S05",
+        "name": "S05 E-Max",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "DP_S07",
+        "name": "S07 Max",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "DP_S07_EMAX",
+        "name": "S07 E-Max PHEV",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Híbrido Enchufable",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "DP_L07",
+        "name": "L07",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2025-2026"
+      }
+    ],
+    "ORA": [
+      {
+        "id": "ORA_CAT",
+        "name": "Ora Cat",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "ORA_FUNKY_CAT",
+        "name": "Funky Cat",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "ORA_LIGHTNING_CAT",
+        "name": "Lightning Cat",
+        "category": "AUTOS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "ORA_CAT_CAM",
+        "name": "Ora Cat",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "ORA_FUNKY_CAM",
+        "name": "Funky Cat",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "ORA_LIGHTNING_CAM",
+        "name": "Lightning Cat",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Eléctrico",
+        "anos_populares": "2024-2026"
+      }
+    ],
+    "TANK": [
+      {
+        "id": "TANK_300",
+        "name": "Tank 300",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "TANK_500",
+        "name": "Tank 500",
+        "category": "AUTOS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "TK_300",
+        "name": "Tank 300",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina/Híbrido",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "TK_500",
+        "name": "Tank 500",
+        "category": "CAMIONETAS",
+        "tipo_combustible": "Gasolina",
+        "anos_populares": "2024-2026"
       }
     ]
   }
