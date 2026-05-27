@@ -52,6 +52,9 @@ const VehicleCategorySelector = ({
             </div>
             <div className="vehicle-added-card-content-text">
               <h3 className="vehicle-brand-name">{category.name}</h3>
+              <p className="vehicle-brand-subtext">
+                Motos a gasolina y electricas
+              </p>
             </div>
           </div>
         </div>

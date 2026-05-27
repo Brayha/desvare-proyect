@@ -578,6 +578,7 @@ const ActiveService = () => {
     presentAlert({
       header: "🔒 Validar Código de Seguridad",
       message: "Solicita al cliente el código de 4 dígitos para ver el destino",
+      mode: 'ios',
       inputs: [
         {
           name: "code",
@@ -636,6 +637,7 @@ const ActiveService = () => {
     presentAlert({
       header: "¿Cancelar el servicio?",
       message: "Esta acción no se puede deshacer. El cliente será notificado.",
+      mode: 'ios',
       inputs: [
         {
           type: "radio",
@@ -665,11 +667,11 @@ const ActiveService = () => {
       ],
       buttons: [
         {
-          text: "Volver",
+          text: "No, volver",
           role: "cancel",
         },
         {
-          text: "Cancelar servicio",
+          text: "Si, Cancelar",
           cssClass: "alert-button-danger",
           handler: async (reason) => {
             if (!reason) {
@@ -744,6 +746,7 @@ const ActiveService = () => {
       header: "✅ Completar Servicio",
       message:
         "¿Confirmas que llegaste al destino y completaste el servicio exitosamente?",
+      mode: 'ios',
       buttons: [
         {
           text: "Cancelar",

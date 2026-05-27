@@ -210,7 +210,7 @@ const RequestDetail = () => {
 
   return (
     <IonPage>
-    <IonContent>
+    <IonContent className="ion-no-padding">
       <div className="request-detail-page">
         <IonFab slot="fixed" vertical="top" horizontal="start">
           <IonFabButton color="light" onClick={() => history.goBack()}>

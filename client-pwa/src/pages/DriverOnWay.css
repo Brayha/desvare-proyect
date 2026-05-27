@@ -117,6 +117,32 @@
   color: #3880ff;
 }
 
+.alert-button-confirm {
+  --background: #0055ff;
+  --border-radius: 8px;
+  color: #fff;
+}
+
+.logo-content {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background-color: #fff;
+  border-radius: 32px;
+  padding: 16px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-content img {
+  width: 100px;
+  height: auto;
+}
+
 /* Botones de acción */
 .action-buttons {
   display: grid;

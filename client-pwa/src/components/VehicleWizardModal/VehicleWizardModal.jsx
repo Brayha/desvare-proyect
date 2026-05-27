@@ -101,7 +101,7 @@ const VehicleWizardModal = ({
 
   // Funciones de carga - NO usar useCallback para evitar loops infinitos
   // Categorías que no aplican para clientes (son vehículos de conductores)
-  const HIDDEN_CLIENT_CATEGORIES = ['GRUA_LIVIANA', 'GRUA_PESADA'];
+  const HIDDEN_CLIENT_CATEGORIES = ['GRUA_LIVIANA', 'GRUA_PESADA', 'GRUA_MOTO'];
 
   const loadCategories = async () => {
     try {

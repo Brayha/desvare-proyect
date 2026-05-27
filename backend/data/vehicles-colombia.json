@@ -287,7 +287,8 @@
       "pais_origen": "Japón",
       "categories": [
         "AUTOS",
-        "CAMIONETAS"
+        "CAMIONETAS",
+        "MOTOS"
       ]
     },
     {
@@ -636,9 +637,8 @@
       "id": "AUTECO",
       "name": "Auteco",
       "pais_origen": "Colombia",
-      "categories": [
-        "MOTOS"
-      ]
+      "categories": [],
+      "_nota": "Distribuidor de TVS, Bajaj y Kawasaki en Colombia. No es fabricante."
     },
     {
       "id": "RAM",
@@ -688,9 +688,8 @@
       "id": "DISCOVER",
       "name": "Discover",
       "pais_origen": "India",
-      "categories": [
-        "MOTOS"
-      ]
+      "categories": [],
+      "_nota": "Sub-línea de Bajaj. Modelos integrados en la marca Bajaj."
     },
     {
       "id": "KEEWAY",
@@ -769,9 +768,8 @@
       "id": "UM_MOTORCYCLES",
       "name": "UM",
       "pais_origen": "USA",
-      "categories": [
-        "MOTOS"
-      ]
+      "categories": [],
+      "_nota": "DUPLICADO - usar brand id UM en su lugar"
     },
     {
       "id": "PIAGGIO",
@@ -1695,6 +1693,118 @@
       "categories": [
         "GRUA_LIVIANA"
       ]
+    },
+    {
+      "id": "LONCIN",
+      "name": "Loncin",
+      "pais_origen": "China",
+      "categories": [
+        "MOTOS"
+      ]
+    },
+    {
+      "id": "CFMOTO",
+      "name": "CF Moto",
+      "pais_origen": "China",
+      "categories": [
+        "MOTOS"
+      ]
+    },
+    {
+      "id": "HUSQVARNA",
+      "name": "Husqvarna",
+      "pais_origen": "Suecia",
+      "categories": [
+        "MOTOS"
+      ]
+    },
+    {
+      "id": "GASGAS",
+      "name": "GasGas",
+      "pais_origen": "España",
+      "categories": [
+        "MOTOS"
+      ]
+    },
+    {
+      "id": "VICTORY",
+      "name": "Victory",
+      "pais_origen": "Colombia",
+      "categories": [
+        "MOTOS"
+      ],
+      "_nota": "Marca propia del Grupo Auteco Colombia. No confundir con Indian Motorcycle Victory (marca americana descontinuada)."
+    },
+    {
+      "id": "KOVE",
+      "name": "Kove",
+      "pais_origen": "China",
+      "categories": [
+        "MOTOS"
+      ]
+    },
+    {
+      "id": "MV_AGUSTA",
+      "name": "MV Agusta",
+      "pais_origen": "Italia",
+      "categories": [
+        "MOTOS"
+      ]
+    },
+    {
+      "id": "INDIAN",
+      "name": "Indian Motorcycle",
+      "pais_origen": "USA",
+      "categories": [
+        "MOTOS"
+      ]
+    },
+    {
+      "id": "NIU",
+      "name": "NIU",
+      "pais_origen": "China",
+      "categories": [
+        "MOTOS"
+      ],
+      "_tipo": "Solo eléctrica"
+    },
+    {
+      "id": "GOGORO",
+      "name": "Gogoro",
+      "pais_origen": "Taiwán",
+      "categories": [
+        "MOTOS"
+      ],
+      "_tipo": "Solo eléctrica",
+      "_nota": "Operada por Terpel Voltex en Colombia con sistema de baterías intercambiables"
+    },
+    {
+      "id": "ZEEHO",
+      "name": "Zeeho",
+      "pais_origen": "China",
+      "categories": [
+        "MOTOS"
+      ],
+      "_tipo": "Solo eléctrica",
+      "_nota": "Sub-marca eléctrica de CF Moto, presente en Colombia"
+    },
+    {
+      "id": "ENERGICA",
+      "name": "Energica",
+      "pais_origen": "Italia",
+      "categories": [
+        "MOTOS"
+      ],
+      "_tipo": "Solo eléctrica"
+    },
+    {
+      "id": "ZERO",
+      "name": "Zero Motorcycles",
+      "pais_origen": "USA",
+      "categories": [
+        "MOTOS"
+      ],
+      "_tipo": "Solo eléctrica"
     }
   ],
   "models": {
@@ -3332,116 +3442,212 @@
         "anos_populares": "2019-2024"
       },
       {
-        "id": "GN_125",
-        "name": "GN 125",
+        "id": "GN125_ABS",
+        "name": "GN 125 ABS",
         "category": "MOTOS",
         "cilindrada": "125cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "AX_100",
-        "name": "AX 100",
-        "category": "MOTOS",
-        "cilindrada": "100cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "GIXXER_150",
-        "name": "Gixxer 150",
+        "id": "AX4_ABS",
+        "name": "AX4 ABS",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Naked",
-        "anos_populares": "2014-2024"
+        "tipo": "Urbana",
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "GIXXER_SF_150",
-        "name": "Gixxer SF 150",
+        "id": "VIVA_FI",
+        "name": "Viva FI ABS",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "GIXXER150",
+        "name": "Gixxer FI 150 ABS",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Sport",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "GIXXER_SF150",
+        "name": "Gixxer SF FI 150 ABS",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Sport",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "GSXR150",
+        "name": "GSX-R150 ABS",
         "category": "MOTOS",
         "cilindrada": "150cc",
         "tipo": "Deportiva",
-        "anos_populares": "2015-2024"
+        "anos_populares": "2017-2026"
       },
       {
-        "id": "GIXXER_250",
+        "id": "GSXS150",
+        "name": "GSX-S150 ABS",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Naked",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "GIXXER250",
         "name": "Gixxer 250",
         "category": "MOTOS",
         "cilindrada": "250cc",
-        "tipo": "Naked",
-        "anos_populares": "2019-2024"
+        "tipo": "Sport",
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "GIXXER_SF_250",
+        "id": "GIXXER_SF250",
         "name": "Gixxer SF 250",
         "category": "MOTOS",
         "cilindrada": "250cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2019-2024"
+        "tipo": "Sport",
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "GSX_S150",
-        "name": "GSX-S150",
+        "id": "DR150_ABS",
+        "name": "DR 150 ABS",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Naked",
-        "anos_populares": "2017-2024"
+        "tipo": "Enduro",
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "GSX_R150",
-        "name": "GSX-R150",
+        "id": "DR160X",
+        "name": "DR 160X",
         "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2017-2024"
+        "cilindrada": "160cc",
+        "tipo": "Enduro",
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "GSX_S750",
-        "name": "GSX-S750",
+        "id": "DRZ4S",
+        "name": "DR-Z4S",
         "category": "MOTOS",
-        "cilindrada": "750cc",
-        "tipo": "Naked",
-        "anos_populares": "2015-2024"
+        "cilindrada": "450cc",
+        "tipo": "Enduro",
+        "anos_populares": "2024-2026"
       },
       {
-        "id": "GSX_S1000",
+        "id": "DRZ4SM",
+        "name": "DR-Z4SM",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Supermoto",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "BURGMAN_FI",
+        "name": "Burgman FI",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "ADDRESS",
+        "name": "Address NM",
+        "category": "MOTOS",
+        "cilindrada": "113cc",
+        "tipo": "Scooter",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "AVENIS",
+        "name": "Avenis",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "VSTROM160",
+        "name": "V-Strom 160",
+        "category": "MOTOS",
+        "cilindrada": "160cc",
+        "tipo": "Adventure",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "VSTROM250",
+        "name": "V-Strom 250 SX",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Adventure",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "VSTROM650",
+        "name": "V-Strom 650",
+        "category": "MOTOS",
+        "cilindrada": "650cc",
+        "tipo": "Adventure",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "VSTROM800",
+        "name": "V-Strom 800 DE",
+        "category": "MOTOS",
+        "cilindrada": "776cc",
+        "tipo": "Adventure",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "VSTROM1050",
+        "name": "V-Strom 1050 DE",
+        "category": "MOTOS",
+        "cilindrada": "1037cc",
+        "tipo": "Adventure",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "SV650",
+        "name": "SV650A",
+        "category": "MOTOS",
+        "cilindrada": "645cc",
+        "tipo": "Naked",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "GSX8R",
+        "name": "GSX-8R",
+        "category": "MOTOS",
+        "cilindrada": "776cc",
+        "tipo": "Sport",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "GSX8S",
+        "name": "GSX-8S",
+        "category": "MOTOS",
+        "cilindrada": "776cc",
+        "tipo": "Naked",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "GSXS1000",
         "name": "GSX-S1000",
         "category": "MOTOS",
-        "cilindrada": "1000cc",
+        "cilindrada": "999cc",
         "tipo": "Naked",
-        "anos_populares": "2015-2024"
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "GSX_R600",
-        "name": "GSX-R600",
-        "category": "MOTOS",
-        "cilindrada": "600cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2020"
-      },
-      {
-        "id": "GSX_R750",
-        "name": "GSX-R750",
-        "category": "MOTOS",
-        "cilindrada": "750cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2020"
-      },
-      {
-        "id": "GSX_R1000",
-        "name": "GSX-R1000",
-        "category": "MOTOS",
-        "cilindrada": "1000cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "GSX_R1000R",
+        "id": "GSXR1000R",
         "name": "GSX-R1000R",
         "category": "MOTOS",
-        "cilindrada": "1000cc",
+        "cilindrada": "999cc",
         "tipo": "Deportiva",
-        "anos_populares": "2017-2024"
+        "anos_populares": "2017-2026"
       },
       {
         "id": "HAYABUSA",
@@ -3449,103 +3655,7 @@
         "category": "MOTOS",
         "cilindrada": "1340cc",
         "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "SV650",
-        "name": "SV650",
-        "category": "MOTOS",
-        "cilindrada": "650cc",
-        "tipo": "Naked",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "V_STROM_650",
-        "name": "V-Strom 650",
-        "category": "MOTOS",
-        "cilindrada": "650cc",
-        "tipo": "Adventure",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "V_STROM_1000",
-        "name": "V-Strom 1000",
-        "category": "MOTOS",
-        "cilindrada": "1000cc",
-        "tipo": "Adventure",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "V_STROM_1050",
-        "name": "V-Strom 1050",
-        "category": "MOTOS",
-        "cilindrada": "1050cc",
-        "tipo": "Adventure",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "DR_200",
-        "name": "DR 200",
-        "category": "MOTOS",
-        "cilindrada": "200cc",
-        "tipo": "Enduro",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "DR_650",
-        "name": "DR 650",
-        "category": "MOTOS",
-        "cilindrada": "650cc",
-        "tipo": "Enduro",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "DRZ_400",
-        "name": "DR-Z 400",
-        "category": "MOTOS",
-        "cilindrada": "400cc",
-        "tipo": "Enduro",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "BOULEVARD_C50",
-        "name": "Boulevard C50",
-        "category": "MOTOS",
-        "cilindrada": "800cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2019"
-      },
-      {
-        "id": "BOULEVARD_M109R",
-        "name": "Boulevard M109R",
-        "category": "MOTOS",
-        "cilindrada": "1800cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2019"
-      },
-      {
-        "id": "INTRUDER_150",
-        "name": "Intruder 150",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "BURGMAN_200",
-        "name": "Burgman 200",
-        "category": "MOTOS",
-        "cilindrada": "200cc",
-        "tipo": "Scooter",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "BURGMAN_400",
-        "name": "Burgman 400",
-        "category": "MOTOS",
-        "cilindrada": "400cc",
-        "tipo": "Scooter",
-        "anos_populares": "2017-2024"
+        "anos_populares": "2008-2026"
       }
     ],
     "HONDA": [
@@ -3627,36 +3737,12 @@
         "anos_populares": "2018-2024"
       },
       {
-        "id": "WAVE",
-        "name": "Wave",
+        "id": "CB100",
+        "name": "CB 100",
         "category": "MOTOS",
-        "cilindrada": "110cc",
+        "cilindrada": "100cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "XR190",
-        "name": "XR 190",
-        "category": "MOTOS",
-        "cilindrada": "190cc",
-        "tipo": "Enduro",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "CB190",
-        "name": "CB 190",
-        "category": "MOTOS",
-        "cilindrada": "190cc",
-        "tipo": "Naked",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "CB160F",
-        "name": "CB 160F",
-        "category": "MOTOS",
-        "cilindrada": "160cc",
-        "tipo": "Naked",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2020-2026"
       },
       {
         "id": "CB125F",
@@ -3664,7 +3750,143 @@
         "category": "MOTOS",
         "cilindrada": "125cc",
         "tipo": "Trabajo",
-        "anos_populares": "2015-2024"
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "CB125F_DLX",
+        "name": "CB 125F DLX",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "CB125F_MAX",
+        "name": "CB 125F MAX II",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "WAVE110S",
+        "name": "Wave 110S",
+        "category": "MOTOS",
+        "cilindrada": "110cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "XBLADE160",
+        "name": "X-Blade 160",
+        "category": "MOTOS",
+        "cilindrada": "160cc",
+        "tipo": "Naked",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "CB190R",
+        "name": "CB 190R",
+        "category": "MOTOS",
+        "cilindrada": "190cc",
+        "tipo": "Naked",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "NX190",
+        "name": "NX 190",
+        "category": "MOTOS",
+        "cilindrada": "190cc",
+        "tipo": "Doble Propósito",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "CB300F",
+        "name": "CB 300F",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Naked",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "CB350D",
+        "name": "CB 350D",
+        "category": "MOTOS",
+        "cilindrada": "350cc",
+        "tipo": "Naked",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "XR150L",
+        "name": "XR 150L",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Enduro",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "XR190L",
+        "name": "XR 190L",
+        "category": "MOTOS",
+        "cilindrada": "190cc",
+        "tipo": "Enduro",
+        "anos_populares": "2013-2026"
+      },
+      {
+        "id": "XR300TORNADO",
+        "name": "XR 300 Tornado",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Enduro",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "XRE300SAHARA",
+        "name": "XRE 300 Sahara",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Adventure",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "NAVI110",
+        "name": "Navi 110",
+        "category": "MOTOS",
+        "cilindrada": "110cc",
+        "tipo": "Scooter",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "NAVI_ADV",
+        "name": "Navi 110 Adventure",
+        "category": "MOTOS",
+        "cilindrada": "110cc",
+        "tipo": "Scooter",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "DIO",
+        "name": "DIO",
+        "category": "MOTOS",
+        "cilindrada": "110cc",
+        "tipo": "Scooter",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "PCX160",
+        "name": "PCX 160",
+        "category": "MOTOS",
+        "cilindrada": "160cc",
+        "tipo": "Scooter",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "ADV150",
+        "name": "ADV 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Scooter",
+        "anos_populares": "2020-2026"
       },
       {
         "id": "CB500X",
@@ -3672,7 +3894,7 @@
         "category": "MOTOS",
         "cilindrada": "500cc",
         "tipo": "Adventure",
-        "anos_populares": "2013-2024"
+        "anos_populares": "2013-2026"
       },
       {
         "id": "CB500F",
@@ -3680,31 +3902,7 @@
         "category": "MOTOS",
         "cilindrada": "500cc",
         "tipo": "Naked",
-        "anos_populares": "2013-2024"
-      },
-      {
-        "id": "CBR600RR",
-        "name": "CBR 600RR",
-        "category": "MOTOS",
-        "cilindrada": "600cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "CBR1000RR",
-        "name": "CBR 1000RR",
-        "category": "MOTOS",
-        "cilindrada": "1000cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "AFRICA_TWIN",
-        "name": "Africa Twin",
-        "category": "MOTOS",
-        "cilindrada": "1100cc",
-        "tipo": "Adventure",
-        "anos_populares": "2016-2024"
+        "anos_populares": "2013-2026"
       },
       {
         "id": "NC750X",
@@ -3712,23 +3910,71 @@
         "category": "MOTOS",
         "cilindrada": "750cc",
         "tipo": "Adventure",
-        "anos_populares": "2014-2024"
+        "anos_populares": "2016-2026"
       },
       {
-        "id": "PCX_150",
-        "name": "PCX 150",
+        "id": "NC750",
+        "name": "NC 750",
         "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Scooter",
-        "anos_populares": "2018-2024"
+        "cilindrada": "750cc",
+        "tipo": "Touring",
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "ADV_150",
-        "name": "ADV 150",
+        "id": "CB650R",
+        "name": "CB 650R",
         "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Scooter",
-        "anos_populares": "2020-2024"
+        "cilindrada": "650cc",
+        "tipo": "Naked",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "CBR650R",
+        "name": "CBR 650R",
+        "category": "MOTOS",
+        "cilindrada": "650cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "CB1000R",
+        "name": "CB 1000R",
+        "category": "MOTOS",
+        "cilindrada": "1000cc",
+        "tipo": "Naked",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "AFRICATWIN",
+        "name": "Africa Twin",
+        "category": "MOTOS",
+        "cilindrada": "1100cc",
+        "tipo": "Adventure",
+        "anos_populares": "2016-2026"
+      },
+      {
+        "id": "NT1100",
+        "name": "NT 1100",
+        "category": "MOTOS",
+        "cilindrada": "1100cc",
+        "tipo": "Touring",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "CBR600RR",
+        "name": "CBR 600RR",
+        "category": "MOTOS",
+        "cilindrada": "600cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2010-2023"
+      },
+      {
+        "id": "CBR1000RR",
+        "name": "CBR 1000RR-R Fireblade",
+        "category": "MOTOS",
+        "cilindrada": "1000cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2020-2026"
       }
     ],
     "MITSUBISHI": [
@@ -4892,20 +5138,52 @@
     ],
     "YAMAHA": [
       {
-        "id": "CRYPTON",
-        "name": "Crypton",
+        "id": "CRYPTON_FINN",
+        "name": "Crypton Finn",
         "category": "MOTOS",
-        "cilindrada": "115cc",
+        "cilindrada": "110cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "CRYPTON_FI",
-        "name": "Crypton FI",
+        "id": "FZ_V3",
+        "name": "FZ Versión 3.0",
         "category": "MOTOS",
-        "cilindrada": "115cc",
+        "cilindrada": "149cc",
+        "tipo": "Urbana",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "FZ25_ABS",
+        "name": "FZ 25 ABS",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Urbana",
+        "anos_populares": "2017-2026"
+      },
+      {
+        "id": "FZ16",
+        "name": "FZ 16",
+        "category": "MOTOS",
+        "cilindrada": "153cc",
         "tipo": "Trabajo",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2010-2020"
+      },
+      {
+        "id": "SZRR",
+        "name": "SZ-RR",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2012-2019"
+      },
+      {
+        "id": "FAZER150",
+        "name": "Fazer 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2012-2018"
       },
       {
         "id": "XTZ125",
@@ -4913,7 +5191,7 @@
         "category": "MOTOS",
         "cilindrada": "125cc",
         "tipo": "Enduro",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2005-2026"
       },
       {
         "id": "XTZ150",
@@ -4921,7 +5199,15 @@
         "category": "MOTOS",
         "cilindrada": "150cc",
         "tipo": "Enduro",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "XTZ150_ABS",
+        "name": "XTZ 150 ABS",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
       },
       {
         "id": "XTZ250",
@@ -4929,79 +5215,23 @@
         "category": "MOTOS",
         "cilindrada": "250cc",
         "tipo": "Enduro",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2012-2026"
       },
       {
-        "id": "FZ150",
-        "name": "FZ 150",
+        "id": "MT15",
+        "name": "MT-15",
         "category": "MOTOS",
-        "cilindrada": "150cc",
+        "cilindrada": "155cc",
         "tipo": "Naked",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "FZ16",
-        "name": "FZ 16",
-        "category": "MOTOS",
-        "cilindrada": "153cc",
-        "tipo": "Naked",
-        "anos_populares": "2011-2024"
-      },
-      {
-        "id": "FZ25",
-        "name": "FZ 25",
-        "category": "MOTOS",
-        "cilindrada": "250cc",
-        "tipo": "Naked",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "FAZER_150",
-        "name": "Fazer 150",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FAZER_250",
-        "name": "Fazer 250",
-        "category": "MOTOS",
-        "cilindrada": "250cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "YZF_R15",
-        "name": "YZF R15",
+        "id": "R15V4",
+        "name": "R15 v4",
         "category": "MOTOS",
         "cilindrada": "155cc",
         "tipo": "Deportiva",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "YZF_R3",
-        "name": "YZF R3",
-        "category": "MOTOS",
-        "cilindrada": "321cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "YZF_R6",
-        "name": "YZF R6",
-        "category": "MOTOS",
-        "cilindrada": "600cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2020"
-      },
-      {
-        "id": "YZF_R1",
-        "name": "YZF R1",
-        "category": "MOTOS",
-        "cilindrada": "1000cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2021-2026"
       },
       {
         "id": "MT03",
@@ -5009,7 +5239,15 @@
         "category": "MOTOS",
         "cilindrada": "321cc",
         "tipo": "Naked",
-        "anos_populares": "2016-2024"
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "R3",
+        "name": "YZF-R3",
+        "category": "MOTOS",
+        "cilindrada": "321cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2015-2026"
       },
       {
         "id": "MT07",
@@ -5017,7 +5255,7 @@
         "category": "MOTOS",
         "cilindrada": "689cc",
         "tipo": "Naked",
-        "anos_populares": "2014-2024"
+        "anos_populares": "2014-2026"
       },
       {
         "id": "MT09",
@@ -5025,435 +5263,478 @@
         "category": "MOTOS",
         "cilindrada": "890cc",
         "tipo": "Naked",
-        "anos_populares": "2014-2024"
+        "anos_populares": "2014-2026"
       },
       {
-        "id": "MT10",
-        "name": "MT-10",
+        "id": "MT09_SP",
+        "name": "MT-09 SP",
         "category": "MOTOS",
-        "cilindrada": "998cc",
+        "cilindrada": "890cc",
         "tipo": "Naked",
-        "anos_populares": "2016-2024"
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "TRACER9",
+        "name": "Tracer 9 GT",
+        "category": "MOTOS",
+        "cilindrada": "890cc",
+        "tipo": "Touring",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "XSR900",
+        "name": "XSR 900",
+        "category": "MOTOS",
+        "cilindrada": "890cc",
+        "tipo": "Sport Heritage",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "YZFR9",
+        "name": "YZF-R9",
+        "category": "MOTOS",
+        "cilindrada": "890cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "R6",
+        "name": "YZF R6",
+        "category": "MOTOS",
+        "cilindrada": "600cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2010-2020"
+      },
+      {
+        "id": "R1",
+        "name": "YZF R1",
+        "category": "MOTOS",
+        "cilindrada": "1000cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2010-2023"
       },
       {
         "id": "NMAX",
-        "name": "NMAX",
-        "category": "MOTOS",
-        "cilindrada": "155cc",
-        "tipo": "Scooter",
-        "anos_populares": "2016-2024"
-      },
-      {
-        "id": "NMAX_CONNECTED",
         "name": "NMAX Connected",
         "category": "MOTOS",
         "cilindrada": "155cc",
         "tipo": "Scooter",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "AEROX",
-        "name": "Aerox",
+        "id": "AEROX155",
+        "name": "Aerox 155",
         "category": "MOTOS",
         "cilindrada": "155cc",
         "tipo": "Scooter",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "RAY_ZR",
-        "name": "Ray ZR",
-        "category": "MOTOS",
-        "cilindrada": "115cc",
-        "tipo": "Scooter",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "BWS_125",
-        "name": "BWS 125",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Scooter",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "XMAX_300",
+        "id": "XMAX300",
         "name": "XMAX 300",
         "category": "MOTOS",
         "cilindrada": "300cc",
         "tipo": "Scooter",
-        "anos_populares": "2017-2024"
+        "anos_populares": "2017-2026"
       },
       {
-        "id": "TENERE_700",
+        "id": "TMAX",
+        "name": "TMAX",
+        "category": "MOTOS",
+        "cilindrada": "562cc",
+        "tipo": "Scooter",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "TENERE700",
         "name": "Ténéré 700",
         "category": "MOTOS",
         "cilindrada": "689cc",
         "tipo": "Adventure",
-        "anos_populares": "2019-2024"
-      },
-      {
-        "id": "SUPER_TENERE",
-        "name": "Super Ténéré",
-        "category": "MOTOS",
-        "cilindrada": "1200cc",
-        "tipo": "Adventure",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "TRACER_900",
-        "name": "Tracer 900",
-        "category": "MOTOS",
-        "cilindrada": "890cc",
-        "tipo": "Adventure",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "SZ_RR",
-        "name": "SZ RR",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Naked",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2021-2026"
       }
     ],
     "BAJAJ": [
       {
-        "id": "BOXER_100",
-        "name": "Boxer 100",
+        "id": "BOXER_CT100_KS",
+        "name": "Boxer CT100 KS",
         "category": "MOTOS",
         "cilindrada": "100cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "BOXER_CT",
-        "name": "Boxer CT",
+        "id": "BOXER_CT100_KS_R",
+        "name": "Boxer CT100 KS Racing",
         "category": "MOTOS",
         "cilindrada": "100cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2024-2026"
       },
       {
-        "id": "BOXER_150",
-        "name": "Boxer 150",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "BOXER_BM",
-        "name": "Boxer BM",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "CT_100",
-        "name": "CT 100",
+        "id": "BOXER_CT100_ES",
+        "name": "Boxer CT100 ES",
         "category": "MOTOS",
         "cilindrada": "100cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "PLATINA",
-        "name": "Platina",
+        "id": "BOXER_CT100_ES_R",
+        "name": "Boxer CT100 ES Racing",
         "category": "MOTOS",
         "cilindrada": "100cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2024-2026"
       },
       {
-        "id": "DISCOVER_100",
-        "name": "Discover 100",
-        "category": "MOTOS",
-        "cilindrada": "100cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "DISCOVER_125",
-        "name": "Discover 125",
+        "id": "BOXER_CT125",
+        "name": "Boxer CT125 Sport",
         "category": "MOTOS",
         "cilindrada": "125cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "DISCOVER_150",
-        "name": "Discover 150",
+        "id": "BOXER_150X",
+        "name": "Boxer 150X",
         "category": "MOTOS",
         "cilindrada": "150cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "PULSAR_135",
-        "name": "Pulsar 135",
+        "id": "PULSAR_N125",
+        "name": "Pulsar N125 FI",
         "category": "MOTOS",
-        "cilindrada": "135cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2018"
+        "cilindrada": "125cc",
+        "tipo": "Sport",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "PULSAR_NS125",
+        "name": "Pulsar NS125",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Sport",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "PULSAR_P150",
+        "name": "Pulsar P150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Sport",
+        "anos_populares": "2023-2026"
       },
       {
         "id": "PULSAR_150",
         "name": "Pulsar 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
+        "tipo": "Sport",
+        "anos_populares": "2010-2022"
+      },
+      {
+        "id": "PULSAR_N160_PRO",
+        "name": "Pulsar N160 Pro",
+        "category": "MOTOS",
+        "cilindrada": "160cc",
+        "tipo": "Sport",
+        "anos_populares": "2023-2026"
       },
       {
         "id": "PULSAR_NS160",
-        "name": "Pulsar NS 160",
+        "name": "Pulsar NS160 FI ABS",
         "category": "MOTOS",
         "cilindrada": "160cc",
-        "tipo": "Naked",
-        "anos_populares": "2015-2024"
+        "tipo": "Sport",
+        "anos_populares": "2018-2026"
       },
       {
         "id": "PULSAR_NS200",
-        "name": "Pulsar NS 200",
+        "name": "Pulsar NS200 FI ABS",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Naked",
-        "anos_populares": "2012-2024"
+        "tipo": "Sport",
+        "anos_populares": "2013-2026"
       },
       {
         "id": "PULSAR_RS200",
-        "name": "Pulsar RS 200",
+        "name": "Pulsar RS200 FI ABS",
         "category": "MOTOS",
         "cilindrada": "200cc",
         "tipo": "Deportiva",
-        "anos_populares": "2015-2024"
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "PULSAR_AS200",
-        "name": "Pulsar AS 200",
+        "id": "PULSAR_N250",
+        "name": "Pulsar N250 FI",
         "category": "MOTOS",
-        "cilindrada": "200cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2015-2024"
+        "cilindrada": "250cc",
+        "tipo": "Sport",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "PULSAR_NS400Z",
+        "name": "Pulsar NS400Z",
+        "category": "MOTOS",
+        "cilindrada": "400cc",
+        "tipo": "Naked",
+        "anos_populares": "2024-2026"
       },
       {
         "id": "PULSAR_220F",
         "name": "Pulsar 220F",
         "category": "MOTOS",
         "cilindrada": "220cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
+        "tipo": "Sport",
+        "anos_populares": "2010-2022"
       },
       {
-        "id": "PULSAR_N250",
-        "name": "Pulsar N250",
+        "id": "DISCOVER_125",
+        "name": "Discover 125 Sport",
         "category": "MOTOS",
-        "cilindrada": "250cc",
-        "tipo": "Naked",
-        "anos_populares": "2021-2024"
-      },
-      {
-        "id": "PULSAR_F250",
-        "name": "Pulsar F250",
-        "category": "MOTOS",
-        "cilindrada": "250cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2021-2024"
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2015-2026"
       },
       {
         "id": "DOMINAR_250",
         "name": "Dominar 250",
         "category": "MOTOS",
         "cilindrada": "250cc",
-        "tipo": "Adventure",
-        "anos_populares": "2020-2024"
+        "tipo": "Touring",
+        "anos_populares": "2019-2026"
       },
       {
-        "id": "DOMINAR_400",
-        "name": "Dominar 400",
+        "id": "DOMINAR_400_T",
+        "name": "Dominar 400 Touring",
         "category": "MOTOS",
         "cilindrada": "400cc",
-        "tipo": "Adventure",
-        "anos_populares": "2017-2024"
+        "tipo": "Touring",
+        "anos_populares": "2019-2026"
       },
       {
-        "id": "AVENGER_STREET_160",
-        "name": "Avenger Street 160",
+        "id": "DOMINAR_400_V",
+        "name": "Dominar 400 Volcano",
         "category": "MOTOS",
-        "cilindrada": "160cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "AVENGER_STREET_220",
-        "name": "Avenger Street 220",
-        "category": "MOTOS",
-        "cilindrada": "220cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "AVENGER_CRUISE_220",
-        "name": "Avenger Cruise 220",
-        "category": "MOTOS",
-        "cilindrada": "220cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2024"
+        "cilindrada": "400cc",
+        "tipo": "Touring",
+        "anos_populares": "2024-2026"
       }
     ],
     "AKT": [
       {
+        "id": "DYNAMIC_RX",
+        "name": "Dynamic RX Fi",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2022-2026"
+      },
+      {
         "id": "DYNAMIC_PRO",
-        "name": "Dynamic Pro",
+        "name": "Dynamic Pro CBS",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SPECIAL110X",
+        "name": "Special 110 X",
         "category": "MOTOS",
         "cilindrada": "110cc",
         "tipo": "Trabajo",
-        "anos_populares": "2015-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "DYNAMIC_125",
-        "name": "Dynamic 125",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "DYNAMIC_R",
-        "name": "Dynamic R",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2018-2024"
-      },
-      {
-        "id": "SPECIAL_110",
-        "name": "Special 110",
-        "category": "MOTOS",
-        "cilindrada": "110cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2010-2020"
-      },
-      {
-        "id": "SPECIAL_125",
-        "name": "Special 125",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "FLEX_125",
-        "name": "Flex 125",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "NKD_125",
+        "id": "NKD125",
         "name": "NKD 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
         "tipo": "Naked",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2019-2026"
       },
       {
-        "id": "TT_150",
-        "name": "TT 150",
+        "id": "NKD125_CLASSIC",
+        "name": "NKD 125 Classic",
         "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Enduro",
-        "anos_populares": "2012-2024"
+        "cilindrada": "125cc",
+        "tipo": "Naked",
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "TT_200",
-        "name": "TT 200",
+        "id": "NKD125_FP",
+        "name": "NKD 125 FP",
         "category": "MOTOS",
-        "cilindrada": "200cc",
-        "tipo": "Enduro",
-        "anos_populares": "2015-2024"
+        "cilindrada": "125cc",
+        "tipo": "Naked",
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "TTR_150",
-        "name": "TTR 150",
+        "id": "CHR125",
+        "name": "CHR 125",
         "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Enduro",
-        "anos_populares": "2010-2024"
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "TTR_180",
-        "name": "TTR 180",
+        "id": "FLEX125",
+        "name": "Flex 125",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "XRS180",
+        "name": "XRS 180",
         "category": "MOTOS",
         "cilindrada": "180cc",
-        "tipo": "Enduro",
-        "anos_populares": "2013-2024"
+        "tipo": "Naked",
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "TTR_200",
-        "name": "TTR 200",
+        "id": "CR4_125",
+        "name": "CR4 125",
         "category": "MOTOS",
-        "cilindrada": "200cc",
-        "tipo": "Enduro",
-        "anos_populares": "2015-2024"
+        "cilindrada": "125cc",
+        "tipo": "Sport",
+        "anos_populares": "2020-2026"
       },
       {
         "id": "CR4_150",
         "name": "CR4 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2014-2020"
+        "tipo": "Sport",
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "CR5_180",
-        "name": "CR5 180",
-        "category": "MOTOS",
-        "cilindrada": "180cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "AK_200",
-        "name": "AK 200",
+        "id": "CR4_200",
+        "name": "CR4 200 Pro",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Naked",
-        "anos_populares": "2018-2024"
+        "tipo": "Sport",
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "EVO_R3",
-        "name": "EVO R3",
+        "id": "AKT_250R",
+        "name": "250 R",
         "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2016-2024"
+        "cilindrada": "250cc",
+        "tipo": "Sport",
+        "anos_populares": "2024-2026"
       },
       {
-        "id": "EVO_R4",
-        "name": "EVO R4",
+        "id": "TTR125",
+        "name": "TTR 125",
         "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2019-2024"
+        "cilindrada": "125cc",
+        "tipo": "Enduro",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "TTR125_EE",
+        "name": "TTR 125 Edición Especial",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "TTR200",
+        "name": "TTR 200",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Enduro",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "TTR200_EE",
+        "name": "TTR 200 Edición Especial",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "TT200_ABS",
+        "name": "TT200 con ABS",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Enduro",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "TT200_RALLY",
+        "name": "TT200 Rally",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Enduro",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "RALLY300",
+        "name": "Rally 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Adventure",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "DS300",
+        "name": "DS 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Adventure",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "DS525X",
+        "name": "DS 525X",
+        "category": "MOTOS",
+        "cilindrada": "525cc",
+        "tipo": "Adventure",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "DS900X",
+        "name": "DS 900X",
+        "category": "MOTOS",
+        "cilindrada": "900cc",
+        "tipo": "Adventure",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "DYNAMIC125",
+        "name": "Dynamic 125",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2015-2022"
+      },
+      {
+        "id": "JET_EVO",
+        "name": "Jet Evo",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2016-2023"
       },
       {
         "id": "EVO_ELECTRIC",
         "name": "EVO Electric",
         "category": "MOTOS",
         "cilindrada": "Eléctrica",
-        "tipo": "Urbana",
-        "anos_populares": "2022-2024"
-      },
-      {
-        "id": "JET_4",
-        "name": "Jet 4",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Scooter",
-        "anos_populares": "2019-2024"
+        "tipo": "Scooter Eléctrico",
+        "anos_populares": "2020-2024",
+        "nombre": "EVO Electric",
+        "autonomia": "80 km",
+        "potencia": "1500W"
       }
     ],
     "HERO": [
@@ -5624,88 +5905,100 @@
         "cilindrada": "125cc",
         "tipo": "Scooter",
         "anos_populares": "2018-2024"
+      },
+      {
+        "id": "HERO_VIDA_VX2",
+        "name": "VIDA VX2",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Moto Eléctrica",
+        "autonomia": "130 km",
+        "potencia": "4000W",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "HERO_DIRTE_K3",
+        "name": "Dirt-E K3",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Enduro Eléctrico",
+        "autonomia": "80 km",
+        "potencia": "3000W",
+        "anos_populares": "2026-2026"
       }
     ],
     "KAWASAKI": [
       {
-        "id": "NINJA_250R",
+        "id": "NINJA250R",
         "name": "Ninja 250R",
         "category": "MOTOS",
         "cilindrada": "250cc",
         "tipo": "Deportiva",
-        "anos_populares": "2010-2013"
+        "anos_populares": "2010-2018"
       },
       {
-        "id": "NINJA_300",
+        "id": "NINJA300",
         "name": "Ninja 300",
         "category": "MOTOS",
         "cilindrada": "300cc",
         "tipo": "Deportiva",
-        "anos_populares": "2013-2024"
+        "anos_populares": "2013-2018"
       },
       {
-        "id": "NINJA_400",
+        "id": "NINJA400",
         "name": "Ninja 400",
         "category": "MOTOS",
         "cilindrada": "400cc",
         "tipo": "Deportiva",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "NINJA_650",
+        "id": "NINJA500",
+        "name": "Ninja 500",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "NINJA650",
         "name": "Ninja 650",
         "category": "MOTOS",
         "cilindrada": "650cc",
         "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2012-2026"
       },
       {
-        "id": "NINJA_ZX6R",
+        "id": "NINJAZX6R",
         "name": "Ninja ZX-6R",
         "category": "MOTOS",
         "cilindrada": "636cc",
         "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "NINJA_ZX10R",
+        "id": "NINJAZX10R",
         "name": "Ninja ZX-10R",
         "category": "MOTOS",
         "cilindrada": "1000cc",
         "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "NINJA_1000",
+        "id": "NINJA1000",
         "name": "Ninja 1000",
         "category": "MOTOS",
         "cilindrada": "1000cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2011-2024"
+        "tipo": "Touring",
+        "anos_populares": "2011-2022"
       },
       {
-        "id": "NINJA_H2",
+        "id": "NINJAH2",
         "name": "Ninja H2",
         "category": "MOTOS",
         "cilindrada": "1000cc",
         "tipo": "Deportiva",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "Z250",
-        "name": "Z250",
-        "category": "MOTOS",
-        "cilindrada": "250cc",
-        "tipo": "Naked",
-        "anos_populares": "2013-2017"
-      },
-      {
-        "id": "Z300",
-        "name": "Z300",
-        "category": "MOTOS",
-        "cilindrada": "300cc",
-        "tipo": "Naked",
-        "anos_populares": "2015-2024"
+        "anos_populares": "2015-2026"
       },
       {
         "id": "Z400",
@@ -5713,7 +6006,15 @@
         "category": "MOTOS",
         "cilindrada": "400cc",
         "tipo": "Naked",
-        "anos_populares": "2019-2024"
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "Z500",
+        "name": "Z500",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Naked",
+        "anos_populares": "2024-2026"
       },
       {
         "id": "Z650",
@@ -5721,15 +6022,7 @@
         "category": "MOTOS",
         "cilindrada": "650cc",
         "tipo": "Naked",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "Z800",
-        "name": "Z800",
-        "category": "MOTOS",
-        "cilindrada": "800cc",
-        "tipo": "Naked",
-        "anos_populares": "2013-2016"
+        "anos_populares": "2017-2026"
       },
       {
         "id": "Z900",
@@ -5737,7 +6030,7 @@
         "category": "MOTOS",
         "cilindrada": "900cc",
         "tipo": "Naked",
-        "anos_populares": "2017-2024"
+        "anos_populares": "2017-2026"
       },
       {
         "id": "Z1000",
@@ -5745,475 +6038,461 @@
         "category": "MOTOS",
         "cilindrada": "1000cc",
         "tipo": "Naked",
-        "anos_populares": "2010-2020"
+        "anos_populares": "2010-2022"
       },
       {
-        "id": "Z_H2",
+        "id": "ZH2",
         "name": "Z H2",
         "category": "MOTOS",
         "cilindrada": "1000cc",
         "tipo": "Naked",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "ER6N",
+        "id": "Z800",
+        "name": "Z800",
+        "category": "MOTOS",
+        "cilindrada": "800cc",
+        "tipo": "Naked",
+        "anos_populares": "2013-2019"
+      },
+      {
+        "id": "ERN6",
         "name": "ER-6n",
         "category": "MOTOS",
         "cilindrada": "650cc",
         "tipo": "Naked",
-        "anos_populares": "2010-2016"
+        "anos_populares": "2006-2017"
       },
       {
-        "id": "ER6F",
-        "name": "ER-6f",
-        "category": "MOTOS",
-        "cilindrada": "650cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2016"
-      },
-      {
-        "id": "VERSYS_300",
+        "id": "VERSYSX300",
         "name": "Versys-X 300",
         "category": "MOTOS",
         "cilindrada": "300cc",
         "tipo": "Adventure",
-        "anos_populares": "2017-2024"
+        "anos_populares": "2017-2023"
       },
       {
-        "id": "VERSYS_650",
+        "id": "VERSYS650",
         "name": "Versys 650",
         "category": "MOTOS",
         "cilindrada": "650cc",
         "tipo": "Adventure",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2007-2026"
       },
       {
-        "id": "VERSYS_1000",
+        "id": "VERSYS1000",
         "name": "Versys 1000",
         "category": "MOTOS",
         "cilindrada": "1000cc",
         "tipo": "Adventure",
-        "anos_populares": "2012-2024"
+        "anos_populares": "2012-2026"
       },
       {
-        "id": "KLR_650",
+        "id": "KLR650",
         "name": "KLR 650",
         "category": "MOTOS",
         "cilindrada": "650cc",
         "tipo": "Enduro",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2008-2023"
       },
       {
-        "id": "KLX_150",
+        "id": "KLX150",
         "name": "KLX 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
         "tipo": "Enduro",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "KLX_250",
-        "name": "KLX 250",
+        "id": "KLX230",
+        "name": "KLX 230",
         "category": "MOTOS",
-        "cilindrada": "250cc",
+        "cilindrada": "233cc",
         "tipo": "Enduro",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "KLX_450R",
+        "id": "KLX300",
+        "name": "KLX 300",
+        "category": "MOTOS",
+        "cilindrada": "292cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "KLX450R",
         "name": "KLX 450R",
         "category": "MOTOS",
         "cilindrada": "450cc",
-        "tipo": "Enduro",
-        "anos_populares": "2010-2015"
+        "tipo": "Motocross",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "KX_250F",
-        "name": "KX 250F",
+        "id": "KX250",
+        "name": "KX 250",
         "category": "MOTOS",
         "cilindrada": "250cc",
         "tipo": "Motocross",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "KX_450F",
-        "name": "KX 450F",
+        "id": "KX450",
+        "name": "KX 450",
         "category": "MOTOS",
-        "cilindrada": "450cc",
+        "cilindrada": "449cc",
         "tipo": "Motocross",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "VULCAN_S",
+        "id": "VULCANS",
         "name": "Vulcan S",
         "category": "MOTOS",
         "cilindrada": "650cc",
         "tipo": "Cruiser",
-        "anos_populares": "2015-2024"
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "VULCAN_900",
+        "id": "VULCAN900",
         "name": "Vulcan 900",
         "category": "MOTOS",
         "cilindrada": "900cc",
         "tipo": "Cruiser",
-        "anos_populares": "2010-2020"
-      },
-      {
-        "id": "VULCAN_1700",
-        "name": "Vulcan 1700",
-        "category": "MOTOS",
-        "cilindrada": "1700cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2018"
+        "anos_populares": "2006-2020"
       },
       {
         "id": "W800",
         "name": "W800",
         "category": "MOTOS",
         "cilindrada": "800cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2011-2024"
+        "tipo": "Retro",
+        "anos_populares": "2019-2026"
       }
     ],
     "KTM": [
       {
-        "id": "125_DUKE",
+        "id": "KTM125DUKE",
         "name": "125 Duke",
         "category": "MOTOS",
         "cilindrada": "125cc",
         "tipo": "Naked",
-        "anos_populares": "2011-2024"
+        "anos_populares": "2012-2026"
       },
       {
-        "id": "200_DUKE",
-        "name": "200 Duke",
-        "category": "MOTOS",
-        "cilindrada": "200cc",
-        "tipo": "Naked",
-        "anos_populares": "2012-2024"
-      },
-      {
-        "id": "250_DUKE",
-        "name": "250 Duke",
-        "category": "MOTOS",
-        "cilindrada": "250cc",
-        "tipo": "Naked",
-        "anos_populares": "2017-2024"
-      },
-      {
-        "id": "390_DUKE",
+        "id": "KTM390DUKE",
         "name": "390 Duke",
         "category": "MOTOS",
         "cilindrada": "390cc",
         "tipo": "Naked",
-        "anos_populares": "2013-2024"
+        "anos_populares": "2014-2026"
       },
       {
-        "id": "690_DUKE",
-        "name": "690 Duke",
-        "category": "MOTOS",
-        "cilindrada": "690cc",
-        "tipo": "Naked",
-        "anos_populares": "2012-2024"
-      },
-      {
-        "id": "790_DUKE",
+        "id": "KTM790DUKE",
         "name": "790 Duke",
         "category": "MOTOS",
-        "cilindrada": "790cc",
+        "cilindrada": "799cc",
         "tipo": "Naked",
-        "anos_populares": "2018-2024"
+        "anos_populares": "2018-2022"
       },
       {
-        "id": "890_DUKE_R",
+        "id": "KTM890DUKE",
         "name": "890 Duke R",
         "category": "MOTOS",
-        "cilindrada": "890cc",
+        "cilindrada": "889cc",
         "tipo": "Naked",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "1290_SUPER_DUKE_R",
-        "name": "1290 Super Duke R",
+        "id": "KTM1390SDK",
+        "name": "1390 Super Duke R",
         "category": "MOTOS",
-        "cilindrada": "1290cc",
+        "cilindrada": "1350cc",
         "tipo": "Naked",
-        "anos_populares": "2014-2024"
+        "anos_populares": "2024-2026"
       },
       {
-        "id": "RC_125",
+        "id": "KTM125RC",
         "name": "RC 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
         "tipo": "Deportiva",
-        "anos_populares": "2014-2024"
+        "anos_populares": "2014-2026"
       },
       {
-        "id": "RC_200",
-        "name": "RC 200",
-        "category": "MOTOS",
-        "cilindrada": "200cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2014-2024"
-      },
-      {
-        "id": "RC_390",
+        "id": "KTM390RC",
         "name": "RC 390",
         "category": "MOTOS",
         "cilindrada": "390cc",
         "tipo": "Deportiva",
-        "anos_populares": "2014-2024"
+        "anos_populares": "2014-2026"
       },
       {
-        "id": "250_ADVENTURE",
-        "name": "250 Adventure",
+        "id": "KTM390ADVX",
+        "name": "390 Adventure X",
         "category": "MOTOS",
-        "cilindrada": "250cc",
+        "cilindrada": "399cc",
         "tipo": "Adventure",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2026-2026"
       },
       {
-        "id": "390_ADVENTURE",
-        "name": "390 Adventure",
+        "id": "KTM390ADVR",
+        "name": "390 Adventure R",
         "category": "MOTOS",
-        "cilindrada": "390cc",
+        "cilindrada": "399cc",
         "tipo": "Adventure",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2026-2026"
       },
       {
-        "id": "690_ENDURO_R",
-        "name": "690 Enduro R",
-        "category": "MOTOS",
-        "cilindrada": "690cc",
-        "tipo": "Enduro",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "790_ADVENTURE",
+        "id": "KTM790ADV",
         "name": "790 Adventure",
         "category": "MOTOS",
-        "cilindrada": "790cc",
+        "cilindrada": "799cc",
         "tipo": "Adventure",
-        "anos_populares": "2019-2024"
+        "anos_populares": "2019-2022"
       },
       {
-        "id": "890_ADVENTURE",
+        "id": "KTM890ADV",
         "name": "890 Adventure",
         "category": "MOTOS",
-        "cilindrada": "890cc",
+        "cilindrada": "889cc",
         "tipo": "Adventure",
-        "anos_populares": "2021-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "1290_SUPER_ADVENTURE",
+        "id": "KTM1290ADV",
         "name": "1290 Super Adventure",
         "category": "MOTOS",
         "cilindrada": "1290cc",
         "tipo": "Adventure",
-        "anos_populares": "2015-2024"
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "350_EXC_F",
-        "name": "350 EXC-F",
+        "id": "KTM390ENDURO",
+        "name": "390 Enduro R",
         "category": "MOTOS",
-        "cilindrada": "350cc",
+        "cilindrada": "399cc",
         "tipo": "Enduro",
-        "anos_populares": "2012-2024"
+        "anos_populares": "2026-2026"
       },
       {
-        "id": "450_EXC_F",
-        "name": "450 EXC-F",
+        "id": "KTM390SMC",
+        "name": "390 SMC R",
         "category": "MOTOS",
-        "cilindrada": "450cc",
-        "tipo": "Enduro",
-        "anos_populares": "2010-2024"
+        "cilindrada": "399cc",
+        "tipo": "Supermoto",
+        "anos_populares": "2026-2026"
       },
       {
-        "id": "500_EXC_F",
-        "name": "500 EXC-F",
+        "id": "KTM690ENDURO",
+        "name": "690 Enduro R",
         "category": "MOTOS",
-        "cilindrada": "500cc",
+        "cilindrada": "690cc",
         "tipo": "Enduro",
-        "anos_populares": "2012-2024"
+        "anos_populares": "2014-2026"
       },
       {
-        "id": "250_SX_F",
+        "id": "KTM250SXF",
         "name": "250 SX-F",
         "category": "MOTOS",
         "cilindrada": "250cc",
         "tipo": "Motocross",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "350_SX_F",
+        "id": "KTM350SXF",
         "name": "350 SX-F",
         "category": "MOTOS",
         "cilindrada": "350cc",
         "tipo": "Motocross",
-        "anos_populares": "2011-2024"
+        "anos_populares": "2011-2026"
       },
       {
-        "id": "450_SX_F",
+        "id": "KTM450SXF",
         "name": "450 SX-F",
         "category": "MOTOS",
         "cilindrada": "450cc",
         "tipo": "Motocross",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "KTM250EXCF",
+        "name": "250 EXC-F",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Enduro",
+        "anos_populares": "2010-2026"
+      },
+      {
+        "id": "KTM350EXCF",
+        "name": "350 EXC-F",
+        "category": "MOTOS",
+        "cilindrada": "350cc",
+        "tipo": "Enduro",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "KTM500EXCF",
+        "name": "500 EXC-F",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Enduro",
+        "anos_populares": "2012-2026"
       }
     ],
     "TVS": [
       {
-        "id": "STAR_CITY",
-        "name": "Star City",
-        "category": "MOTOS",
-        "cilindrada": "110cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "STAR_CITY_PLUS",
-        "name": "Star City Plus",
-        "category": "MOTOS",
-        "cilindrada": "110cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "SPORT_100",
+        "id": "SPORT100",
         "name": "Sport 100",
         "category": "MOTOS",
         "cilindrada": "100cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2024"
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "MAX_125",
-        "name": "Max 125",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Trabajo",
-        "anos_populares": "2010-2018"
-      },
-      {
-        "id": "NEO",
-        "name": "Neo",
+        "id": "SPORT110",
+        "name": "Sport 110 FI",
         "category": "MOTOS",
         "cilindrada": "110cc",
         "tipo": "Trabajo",
-        "anos_populares": "2010-2020"
+        "anos_populares": "2026-2026"
       },
       {
-        "id": "RADEON",
-        "name": "Radeon",
+        "id": "NEO125",
+        "name": "NEO 125 FI",
         "category": "MOTOS",
-        "cilindrada": "110cc",
-        "tipo": "Urbana",
-        "anos_populares": "2018-2024"
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2025-2026"
       },
       {
-        "id": "RAIDER",
-        "name": "Raider",
+        "id": "RAIDER125",
+        "name": "Raider 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
         "tipo": "Urbana",
-        "anos_populares": "2019-2024"
+        "anos_populares": "2021-2026"
       },
       {
-        "id": "APACHE_RTR_160",
-        "name": "Apache RTR 160",
+        "id": "RAIDER125_FI",
+        "name": "Raider 125 FI",
         "category": "MOTOS",
-        "cilindrada": "160cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
+        "cilindrada": "125cc",
+        "tipo": "Urbana",
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "APACHE_RTR_160_4V",
+        "id": "RAIDER125_R",
+        "name": "Raider 125 Racing",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Urbana",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "RONIN225",
+        "name": "Ronin 225",
+        "category": "MOTOS",
+        "cilindrada": "225cc",
+        "tipo": "Naked",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "APACHE160",
         "name": "Apache RTR 160 4V",
         "category": "MOTOS",
         "cilindrada": "160cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2018-2024"
+        "tipo": "Sport",
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "APACHE_RTR_180",
-        "name": "Apache RTR 180",
+        "id": "APACHE160_XC",
+        "name": "Apache RTR 160 4V XC FI",
         "category": "MOTOS",
-        "cilindrada": "180cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2010-2024"
+        "cilindrada": "160cc",
+        "tipo": "Sport",
+        "anos_populares": "2024-2026"
       },
       {
-        "id": "APACHE_RTR_200_4V",
+        "id": "APACHE160_R",
+        "name": "Apache RTR 160 4V XC FI Racing",
+        "category": "MOTOS",
+        "cilindrada": "160cc",
+        "tipo": "Sport",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "APACHE200",
         "name": "Apache RTR 200 4V",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2016-2024"
+        "tipo": "Sport",
+        "anos_populares": "2016-2026"
       },
       {
-        "id": "APACHE_RR_310",
-        "name": "Apache RR 310",
+        "id": "APACHE200_XC",
+        "name": "Apache RTR 200 4V XC FI ABS",
         "category": "MOTOS",
-        "cilindrada": "310cc",
-        "tipo": "Deportiva",
-        "anos_populares": "2018-2024"
+        "cilindrada": "200cc",
+        "tipo": "Sport",
+        "anos_populares": "2024-2026"
       },
       {
-        "id": "NTORQ_125",
-        "name": "Ntorq 125",
+        "id": "APACHE310",
+        "name": "Apache RTR 310",
         "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Scooter",
-        "anos_populares": "2018-2024"
+        "cilindrada": "312cc",
+        "tipo": "Naked",
+        "anos_populares": "2023-2026"
       },
       {
-        "id": "NTORQ_RACE_EDITION",
-        "name": "Ntorq Race Edition",
+        "id": "APACHE_RTX300",
+        "name": "Apache RTX 300",
         "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Scooter",
-        "anos_populares": "2020-2024"
+        "cilindrada": "299cc",
+        "tipo": "Adventure",
+        "anos_populares": "2026-2026"
       },
       {
-        "id": "JUPITER",
-        "name": "Jupiter",
-        "category": "MOTOS",
-        "cilindrada": "110cc",
-        "tipo": "Scooter",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "JUPITER_125",
-        "name": "Jupiter 125",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Scooter",
-        "anos_populares": "2020-2024"
-      },
-      {
-        "id": "WEGO",
-        "name": "Wego",
+        "id": "DAZZ110",
+        "name": "DAZZ 110",
         "category": "MOTOS",
         "cilindrada": "110cc",
         "tipo": "Scooter",
-        "anos_populares": "2010-2020"
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "SCOOTY_PEP",
-        "name": "Scooty Pep+",
+        "id": "NTORQ125",
+        "name": "NTORQ 125 XConnect",
         "category": "MOTOS",
-        "cilindrada": "88cc",
+        "cilindrada": "125cc",
         "tipo": "Scooter",
-        "anos_populares": "2010-2018"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "IQUBE_ELECTRIC",
+        "id": "NTORQ125_FI",
+        "name": "NTORQ 125 XConnect FI",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "NTORQ150",
+        "name": "NTORQ 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Scooter",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "TVS_IQUBE",
         "name": "iQube Electric",
         "category": "MOTOS",
         "cilindrada": "Eléctrica",
-        "tipo": "Scooter",
-        "anos_populares": "2022-2024"
+        "tipo": "Scooter Eléctrico",
+        "autonomia": "100 km",
+        "potencia": "4600W",
+        "anos_populares": "2025-2026"
       }
     ],
     "AUTECO": [
@@ -6332,140 +6611,132 @@
     ],
     "ROYAL_ENFIELD": [
       {
-        "id": "BULLET_350",
-        "name": "Bullet 350",
+        "id": "HNTR350",
+        "name": "HNTR 350",
         "category": "MOTOS",
         "cilindrada": "350cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2024"
+        "tipo": "Naked",
+        "anos_populares": "2022-2026"
       },
       {
-        "id": "BULLET_500",
-        "name": "Bullet 500",
-        "category": "MOTOS",
-        "cilindrada": "500cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2018"
-      },
-      {
-        "id": "CLASSIC_350",
-        "name": "Classic 350",
-        "category": "MOTOS",
-        "cilindrada": "350cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2024"
-      },
-      {
-        "id": "CLASSIC_500",
-        "name": "Classic 500",
-        "category": "MOTOS",
-        "cilindrada": "500cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2021"
-      },
-      {
-        "id": "CLASSIC_CHROME_350",
-        "name": "Classic Chrome 350",
-        "category": "MOTOS",
-        "cilindrada": "350cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2015-2024"
-      },
-      {
-        "id": "ELECTRA_350",
-        "name": "Electra 350",
-        "category": "MOTOS",
-        "cilindrada": "350cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2010-2018"
-      },
-      {
-        "id": "THUNDERBIRD_350",
-        "name": "Thunderbird 350",
-        "category": "MOTOS",
-        "cilindrada": "350cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2012-2020"
-      },
-      {
-        "id": "THUNDERBIRD_500",
-        "name": "Thunderbird 500",
-        "category": "MOTOS",
-        "cilindrada": "500cc",
-        "tipo": "Cruiser",
-        "anos_populares": "2012-2020"
-      },
-      {
-        "id": "METEOR_350",
+        "id": "METEOR350",
         "name": "Meteor 350",
         "category": "MOTOS",
         "cilindrada": "350cc",
         "tipo": "Cruiser",
-        "anos_populares": "2020-2024"
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "HUNTER_350",
-        "name": "Hunter 350",
+        "id": "CLASSIC350",
+        "name": "Classic 350",
         "category": "MOTOS",
         "cilindrada": "350cc",
-        "tipo": "Naked",
-        "anos_populares": "2022-2024"
+        "tipo": "Retro",
+        "anos_populares": "2012-2026"
       },
       {
-        "id": "SCRAM_411",
-        "name": "Scram 411",
+        "id": "BULLET350",
+        "name": "Bullet 350",
         "category": "MOTOS",
-        "cilindrada": "411cc",
-        "tipo": "Scrambler",
-        "anos_populares": "2022-2024"
+        "cilindrada": "350cc",
+        "tipo": "Retro",
+        "anos_populares": "2005-2026"
       },
       {
-        "id": "HIMALAYAN",
+        "id": "GUERRILLA450",
+        "name": "Guerrilla 450",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Naked",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "HIMALAYAN450",
+        "name": "New Himalayan 450",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Adventure",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "INTERCEPTOR650",
+        "name": "Interceptor 650",
+        "category": "MOTOS",
+        "cilindrada": "648cc",
+        "tipo": "Retro",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "CONTGT650",
+        "name": "Continental GT 650",
+        "category": "MOTOS",
+        "cilindrada": "648cc",
+        "tipo": "Cafe Racer",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "SHOTGUN650",
+        "name": "Shotgun 650",
+        "category": "MOTOS",
+        "cilindrada": "648cc",
+        "tipo": "Scrambler",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "SUPER_METEOR",
+        "name": "Super Meteor 650",
+        "category": "MOTOS",
+        "cilindrada": "648cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "BEAR650",
+        "name": "Bear 650",
+        "category": "MOTOS",
+        "cilindrada": "648cc",
+        "tipo": "Scrambler",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "HIMALAYAN411",
         "name": "Himalayan",
         "category": "MOTOS",
         "cilindrada": "411cc",
         "tipo": "Adventure",
-        "anos_populares": "2016-2024"
+        "anos_populares": "2016-2023"
       },
       {
-        "id": "CONTINENTAL_GT_535",
-        "name": "Continental GT 535",
+        "id": "SCRAM411",
+        "name": "Scram 411",
         "category": "MOTOS",
-        "cilindrada": "535cc",
-        "tipo": "Café Racer",
-        "anos_populares": "2013-2017"
+        "cilindrada": "411cc",
+        "tipo": "Scrambler",
+        "anos_populares": "2022-2023"
       },
       {
-        "id": "CONTINENTAL_GT_650",
-        "name": "Continental GT 650",
+        "id": "CLASSIC500",
+        "name": "Classic 500",
         "category": "MOTOS",
-        "cilindrada": "650cc",
-        "tipo": "Café Racer",
-        "anos_populares": "2018-2024"
+        "cilindrada": "500cc",
+        "tipo": "Retro",
+        "anos_populares": "2012-2020"
       },
       {
-        "id": "INTERCEPTOR_650",
-        "name": "Interceptor 650",
+        "id": "BULLET500",
+        "name": "Bullet 500",
         "category": "MOTOS",
-        "cilindrada": "650cc",
-        "tipo": "Naked",
-        "anos_populares": "2018-2024"
+        "cilindrada": "500cc",
+        "tipo": "Retro",
+        "anos_populares": "2005-2020"
       },
       {
-        "id": "SUPER_METEOR_650",
-        "name": "Super Meteor 650",
+        "id": "THUNDERBIRD350",
+        "name": "Thunderbird 350",
         "category": "MOTOS",
-        "cilindrada": "650cc",
+        "cilindrada": "350cc",
         "tipo": "Cruiser",
-        "anos_populares": "2023-2024"
-      },
-      {
-        "id": "SHOTGUN_650",
-        "name": "Shotgun 650",
-        "category": "MOTOS",
-        "cilindrada": "650cc",
-        "tipo": "Bobber",
-        "anos_populares": "2024"
+        "anos_populares": "2010-2020"
       }
     ],
     "DUCATI": [
@@ -6902,6 +7173,26 @@
         "cilindrada": "Eléctrica",
         "tipo": "Eléctrica",
         "anos_populares": "2019-2024"
+      },
+      {
+        "id": "HD_LIVEWIRE_ONE",
+        "name": "LiveWire One",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Naked Eléctrica",
+        "autonomia": "235 km",
+        "potencia": "82000W",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "HD_LIVEWIRE_S2",
+        "name": "LiveWire S2 Del Mar",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Naked Eléctrica",
+        "autonomia": "200 km",
+        "potencia": "48000W",
+        "anos_populares": "2023-2026"
       }
     ],
     "RAM": [
@@ -7275,53 +7566,60 @@
     ],
     "ITALIKA": [
       {
-        "id": "DS150",
-        "name": "DS150",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Trabajo"
-      },
-      {
-        "id": "DS125",
-        "name": "DS125",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Trabajo"
-      },
-      {
-        "id": "FT150",
-        "name": "FT 150",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Trabajo"
-      },
-      {
-        "id": "FT125",
+        "id": "ITA_FT125",
         "name": "FT 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
-        "tipo": "Trabajo"
+        "tipo": "Trabajo",
+        "anos_populares": "2015-2024"
       },
       {
-        "id": "RT200",
-        "name": "RT 200",
+        "id": "ITA_FT150",
+        "name": "FT 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2015-2024"
+      },
+      {
+        "id": "ITA_FT200",
+        "name": "FT 200",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Trabajo"
+        "tipo": "Enduro",
+        "anos_populares": "2018-2024"
       },
       {
-        "id": "XS125",
-        "name": "XS 125",
+        "id": "ITA_DS150",
+        "name": "DS 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Sport",
+        "anos_populares": "2016-2024"
+      },
+      {
+        "id": "ITA_DS125",
+        "name": "DS 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
-        "tipo": "Urbana"
+        "tipo": "Sport",
+        "anos_populares": "2016-2024"
       },
       {
-        "id": "DM150",
+        "id": "ITA_DM150",
         "name": "DM 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Urbana"
+        "tipo": "Doble Propósito",
+        "anos_populares": "2016-2024"
+      },
+      {
+        "id": "ITA_RT200",
+        "name": "RT 200",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2016-2024"
       }
     ],
     "DISCOVER": [
@@ -7356,145 +7654,284 @@
     ],
     "KEEWAY": [
       {
-        "id": "RKS_150",
-        "name": "RKS 150",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Deportiva"
-      },
-      {
-        "id": "RKS_125",
+        "id": "RKS125",
         "name": "RKS 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
-        "tipo": "Urbana"
+        "tipo": "Sport",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "SUPERLIGHT_150",
+        "id": "RKS150",
+        "name": "RKS 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Sport",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SUPERLIGHT150",
         "name": "Superlight 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Cruiser"
+        "tipo": "Naked",
+        "anos_populares": "2016-2024"
       },
       {
-        "id": "SUPERLIGHT_200",
+        "id": "SUPERLIGHT200",
         "name": "Superlight 200",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Cruiser"
+        "tipo": "Naked",
+        "anos_populares": "2018-2024"
       },
       {
-        "id": "RKV_200",
+        "id": "RKV200",
         "name": "RKV 200",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Adventure"
+        "tipo": "Deportiva",
+        "anos_populares": "2016-2024"
+      },
+      {
+        "id": "VIESTE300",
+        "name": "Vieste 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Scooter",
+        "anos_populares": "2020-2024"
       }
     ],
     "LIFAN": [
       {
-        "id": "KPR_150",
+        "id": "LIFAN_KPR150",
         "name": "KPR 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Deportiva"
+        "tipo": "Sport",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "KPR_200",
+        "id": "LIFAN_KPR200",
         "name": "KPR 200",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Deportiva"
+        "tipo": "Sport",
+        "anos_populares": "2017-2026"
       },
       {
-        "id": "LF_125",
+        "id": "LIFAN_LF125",
         "name": "LF 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
-        "tipo": "Trabajo"
+        "tipo": "Trabajo",
+        "anos_populares": "2012-2026"
       },
       {
-        "id": "LF_150",
+        "id": "LIFAN_LF150",
         "name": "LF 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Trabajo"
+        "tipo": "Trabajo",
+        "anos_populares": "2012-2026"
+      },
+      {
+        "id": "LIFAN_X-PECT",
+        "name": "X-Pect 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Urbana",
+        "anos_populares": "2019-2024"
       }
     ],
     "SHINERAY": [
       {
-        "id": "XY_150",
-        "name": "XY 150",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Trabajo"
-      },
-      {
-        "id": "XY_125",
+        "id": "SR_125",
         "name": "XY 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
-        "tipo": "Trabajo"
+        "tipo": "Trabajo",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "XY_200",
+        "id": "SR_150",
+        "name": "XY 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "SR_200",
         "name": "XY 200",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Deportiva"
+        "tipo": "Enduro",
+        "anos_populares": "2018-2024"
+      },
+      {
+        "id": "SR_SPORT200",
+        "name": "XY Sport 200",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Sport",
+        "anos_populares": "2020-2024"
       }
     ],
     "UM": [
       {
-        "id": "DSR_125",
-        "name": "DSR 125",
-        "category": "MOTOS",
-        "cilindrada": "125cc",
-        "tipo": "Adventure"
-      },
-      {
-        "id": "DSR_200",
-        "name": "DSR 200",
+        "id": "UM_RENEGADE_S",
+        "name": "Renegade Sport 200S",
         "category": "MOTOS",
         "cilindrada": "200cc",
-        "tipo": "Adventure"
+        "tipo": "Cruiser",
+        "anos_populares": "2026-2026"
       },
       {
-        "id": "XTREET",
-        "name": "Xtreet",
+        "id": "UM_RENEGADE_CMD",
+        "name": "Renegade Commando 300",
         "category": "MOTOS",
-        "cilindrada": "230cc",
-        "tipo": "Enduro"
+        "cilindrada": "300cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_RENEGADE_FREE",
+        "name": "Renegade Freedom 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_RENEGADE_LX",
+        "name": "Renegade Classic LX 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_RENEGADE_ST",
+        "name": "Renegade ST 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Touring",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_XTREET_RS",
+        "name": "Xtreet RS 250 4V",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Naked",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_XTREET_SS",
+        "name": "Xtreet SS 401 8V",
+        "category": "MOTOS",
+        "cilindrada": "401cc",
+        "tipo": "Sport",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_DSR_EX",
+        "name": "DSR EX",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Doble Propósito",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_XPEED125",
+        "name": "Xpeed 125 ADV",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Scooter",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_XPEED150",
+        "name": "Xpeed 150 ADV",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Scooter",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_ROCKVILLE200",
+        "name": "Rockville 200",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Scooter",
+        "anos_populares": "2026-2026"
+      },
+      {
+        "id": "UM_ROCKVILLE300",
+        "name": "Rockville 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Scooter",
+        "anos_populares": "2026-2026"
       }
     ],
     "BENELLI": [
       {
-        "id": "TNT_150",
-        "name": "TNT 150",
+        "id": "TNT25N",
+        "name": "TNT 25N",
         "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Naked"
+        "cilindrada": "250cc",
+        "tipo": "Naked",
+        "anos_populares": "2020-2026"
       },
       {
-        "id": "TNT_300",
-        "name": "TNT 300",
+        "id": "TNT302",
+        "name": "TNT 302",
         "category": "MOTOS",
         "cilindrada": "300cc",
-        "tipo": "Naked"
+        "tipo": "Naked",
+        "anos_populares": "2016-2022"
       },
       {
-        "id": "TRK_502",
+        "id": "TRK502",
         "name": "TRK 502",
         "category": "MOTOS",
         "cilindrada": "500cc",
-        "tipo": "Adventure"
+        "tipo": "Adventure",
+        "anos_populares": "2018-2026"
       },
       {
-        "id": "LEONCINO_500",
-        "name": "Leoncino 500",
+        "id": "TRK502X",
+        "name": "TRK 502X",
         "category": "MOTOS",
         "cilindrada": "500cc",
-        "tipo": "Scrambler"
+        "tipo": "Adventure",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "LEONCINO500",
+        "name": "Leoncino 500 Trail",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Scrambler",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "LEONCINO800",
+        "name": "Leoncino 800",
+        "category": "MOTOS",
+        "cilindrada": "754cc",
+        "tipo": "Naked",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "BN302",
+        "name": "BN 302",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Naked",
+        "anos_populares": "2015-2020"
       }
     ],
     "TRIUMPH": [
@@ -7775,25 +8212,36 @@
     ],
     "ZONGSHEN": [
       {
-        "id": "RX3",
+        "id": "ZS_RX3",
         "name": "RX3",
         "category": "MOTOS",
         "cilindrada": "250cc",
-        "tipo": "Adventure"
+        "tipo": "Adventure",
+        "anos_populares": "2016-2024"
       },
       {
-        "id": "Z_ONE",
-        "name": "Z-One",
+        "id": "ZS_ZZONE",
+        "name": "Z-Zone 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
-        "tipo": "Trabajo"
+        "tipo": "Trabajo",
+        "anos_populares": "2016-2024"
       },
       {
-        "id": "RX1",
-        "name": "RX1",
+        "id": "ZS_RX1",
+        "name": "RX1 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Enduro"
+        "tipo": "Trabajo",
+        "anos_populares": "2016-2024"
+      },
+      {
+        "id": "ZS_ZS155",
+        "name": "ZS 155",
+        "category": "MOTOS",
+        "cilindrada": "155cc",
+        "tipo": "Sport",
+        "anos_populares": "2018-2024"
       }
     ],
     "VENTO": [
@@ -7821,94 +8269,146 @@
     ],
     "PIAGGIO": [
       {
-        "id": "MP3_500",
-        "name": "MP3 500",
-        "category": "MOTOS",
-        "cilindrada": "500cc",
-        "tipo": "Scooter"
-      },
-      {
-        "id": "LIBERTY_150",
+        "id": "PIAGGIO_LIB150",
         "name": "Liberty 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Scooter"
+        "tipo": "Scooter",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "BV_350",
-        "name": "BV 350",
+        "id": "PIAGGIO_MP3",
+        "name": "MP3 500",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Scooter",
+        "anos_populares": "2015-2022"
+      },
+      {
+        "id": "PIAGGIO_BV350",
+        "name": "Beverly 350",
         "category": "MOTOS",
         "cilindrada": "350cc",
-        "tipo": "Scooter"
+        "tipo": "Scooter",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "PIAGGIO_MEDLEY",
+        "name": "Medley 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Scooter",
+        "anos_populares": "2018-2026"
       }
     ],
     "VESPA": [
       {
-        "id": "PRIMAVERA_150",
-        "name": "Primavera 150",
-        "category": "MOTOS",
-        "cilindrada": "150cc",
-        "tipo": "Scooter"
-      },
-      {
-        "id": "GTS_300",
-        "name": "GTS 300",
-        "category": "MOTOS",
-        "cilindrada": "300cc",
-        "tipo": "Scooter"
-      },
-      {
-        "id": "SPRINT_150",
+        "id": "VESPA_SPRINT",
         "name": "Sprint 150",
         "category": "MOTOS",
         "cilindrada": "150cc",
-        "tipo": "Scooter"
+        "tipo": "Scooter",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "VESPA_PRIMAV",
+        "name": "Primavera 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Scooter",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "VESPA_GTS300",
+        "name": "GTS 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Scooter",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "VESPA_ELETTRICA",
+        "name": "Elettrica",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Scooter",
+        "anos_populares": "2021-2026"
       }
     ],
     "KYMCO": [
       {
-        "id": "AGILITY_125",
+        "id": "KYMCO_AGILITY",
         "name": "Agility 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
-        "tipo": "Scooter"
+        "tipo": "Scooter",
+        "anos_populares": "2010-2026"
       },
       {
-        "id": "AK_550",
+        "id": "KYMCO_LIKE150",
+        "name": "Like 150i",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Scooter",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "KYMCO_DOWN350",
+        "name": "Downtown 350i",
+        "category": "MOTOS",
+        "cilindrada": "350cc",
+        "tipo": "Scooter",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "KYMCO_XCITING",
+        "name": "Xciting S 400",
+        "category": "MOTOS",
+        "cilindrada": "400cc",
+        "tipo": "Scooter",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "KYMCO_AK550",
         "name": "AK 550",
         "category": "MOTOS",
         "cilindrada": "550cc",
-        "tipo": "Scooter"
-      },
-      {
-        "id": "DOWNTOWN_300",
-        "name": "Downtown 300",
-        "category": "MOTOS",
-        "cilindrada": "300cc",
-        "tipo": "Scooter"
+        "tipo": "Scooter",
+        "anos_populares": "2018-2024"
       }
     ],
     "SYM": [
       {
-        "id": "SYMPHONY_125",
+        "id": "SYM_SYM125",
         "name": "Symphony 125",
         "category": "MOTOS",
         "cilindrada": "125cc",
-        "tipo": "Scooter"
+        "tipo": "Scooter",
+        "anos_populares": "2015-2026"
       },
       {
-        "id": "CRUISYM_300",
+        "id": "SYM_CRUISYM",
         "name": "Cruisym 300",
         "category": "MOTOS",
         "cilindrada": "300cc",
-        "tipo": "Scooter"
+        "tipo": "Scooter",
+        "anos_populares": "2017-2024"
       },
       {
-        "id": "JOYMAX_300",
+        "id": "SYM_JOYMAX",
         "name": "Joymax 300",
         "category": "MOTOS",
         "cilindrada": "300cc",
-        "tipo": "Scooter"
+        "tipo": "Scooter",
+        "anos_populares": "2017-2024"
+      },
+      {
+        "id": "SYM_CITYCOM",
+        "name": "City Com 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Scooter",
+        "anos_populares": "2019-2024"
       }
     ],
     "SEAT": [
@@ -11247,6 +11747,868 @@
       {
         "id": "GRUA_LIVIANA_DONGFENG_EQ1108",
         "name": "EQ1108"
+      }
+    ],
+    "LONCIN": [
+      {
+        "id": "LONCIN_GP150R",
+        "name": "GP 150R",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Sport",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "LONCIN_GP250R",
+        "name": "GP 250R",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Sport",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "LONCIN_LX150",
+        "name": "LX 150",
+        "category": "MOTOS",
+        "cilindrada": "150cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "LONCIN_LX125",
+        "name": "LX 125",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "LONCIN_CR4",
+        "name": "CR4 250",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Sport",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "LONCIN_VOGE500",
+        "name": "Voge 500R",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Sport",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "LONCIN_VOGE500DS",
+        "name": "Voge 500DS",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Adventure",
+        "anos_populares": "2022-2026"
+      }
+    ],
+    "CFMOTO": [
+      {
+        "id": "CF_250NK_FUN",
+        "name": "250NK FUN",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Naked",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "CF_250SR_FUN",
+        "name": "250SR FUN",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "CF_300NK",
+        "name": "300NK",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Naked",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "CF_300CLX",
+        "name": "300CLX",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Cafe Racer",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "CF_300SR_S",
+        "name": "300SR-S",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "CF_450MT",
+        "name": "450MT",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Adventure",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "CF_450MT_SPORT",
+        "name": "450MT Sport",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Adventure",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "CF_450MT_RALLY",
+        "name": "450MT Rally",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Adventure",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "CF_450CLC",
+        "name": "450CLC Bobber",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "CF_675NK",
+        "name": "675NK",
+        "category": "MOTOS",
+        "cilindrada": "675cc",
+        "tipo": "Naked",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "CF_675SR_R",
+        "name": "675SR-R",
+        "category": "MOTOS",
+        "cilindrada": "675cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "CF_700MT",
+        "name": "700MT",
+        "category": "MOTOS",
+        "cilindrada": "693cc",
+        "tipo": "Adventure",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "CF_800MTX",
+        "name": "800MT-X",
+        "category": "MOTOS",
+        "cilindrada": "799cc",
+        "tipo": "Adventure",
+        "anos_populares": "2024-2026"
+      }
+    ],
+    "HUSQVARNA": [
+      {
+        "id": "HQV_SVP200",
+        "name": "Svartpilen 200",
+        "category": "MOTOS",
+        "cilindrada": "200cc",
+        "tipo": "Naked",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "HQV_SVP250",
+        "name": "Svartpilen 250",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Naked",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "HQV_SVP401",
+        "name": "Svartpilen 401",
+        "category": "MOTOS",
+        "cilindrada": "390cc",
+        "tipo": "Naked",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "HQV_SVP401C",
+        "name": "Svartpilen 401 Classic",
+        "category": "MOTOS",
+        "cilindrada": "390cc",
+        "tipo": "Naked",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "HQV_SVP801",
+        "name": "Svartpilen 801",
+        "category": "MOTOS",
+        "cilindrada": "799cc",
+        "tipo": "Naked",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "HQV_SVP801SE",
+        "name": "Svartpilen 801 SE",
+        "category": "MOTOS",
+        "cilindrada": "799cc",
+        "tipo": "Naked",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "HQV_VTP401",
+        "name": "Vitpilen 401",
+        "category": "MOTOS",
+        "cilindrada": "390cc",
+        "tipo": "Sport",
+        "anos_populares": "2019-2024"
+      },
+      {
+        "id": "HQV_VTP801",
+        "name": "Vitpilen 801",
+        "category": "MOTOS",
+        "cilindrada": "799cc",
+        "tipo": "Sport",
+        "anos_populares": "2022-2024"
+      },
+      {
+        "id": "HQV_FE250",
+        "name": "FE 250",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Enduro",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "HQV_FE350",
+        "name": "FE 350",
+        "category": "MOTOS",
+        "cilindrada": "350cc",
+        "tipo": "Enduro",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "HQV_FE500",
+        "name": "FE 500",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Enduro",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "HQV_FC250",
+        "name": "FC 250",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Motocross",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "HQV_FC450",
+        "name": "FC 450",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Motocross",
+        "anos_populares": "2020-2026"
+      }
+    ],
+    "GASGAS": [
+      {
+        "id": "GG_MC50",
+        "name": "MC 50",
+        "category": "MOTOS",
+        "cilindrada": "50cc",
+        "tipo": "Motocross",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_MC65",
+        "name": "MC 65",
+        "category": "MOTOS",
+        "cilindrada": "65cc",
+        "tipo": "Motocross",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_MC85",
+        "name": "MC 85",
+        "category": "MOTOS",
+        "cilindrada": "85cc",
+        "tipo": "Motocross",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_MC125",
+        "name": "MC 125",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Motocross",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_MC250F",
+        "name": "MC 250F",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Motocross",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_MC450F",
+        "name": "MC 450F",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Motocross",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_EC250",
+        "name": "EC 250",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_EC300",
+        "name": "EC 300",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_EC300GP",
+        "name": "EC 300 GP",
+        "category": "MOTOS",
+        "cilindrada": "300cc",
+        "tipo": "Enduro",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "GG_EC350F",
+        "name": "EC 350F",
+        "category": "MOTOS",
+        "cilindrada": "350cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "GG_EC500F",
+        "name": "EC 500F",
+        "category": "MOTOS",
+        "cilindrada": "500cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
+      }
+    ],
+    "VICTORY": [
+      {
+        "id": "VIC_ADV_R125",
+        "name": "Advance R 125",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "VIC_ADV_R125TK",
+        "name": "Advance R 125 TK",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "VIC_ADV_X1TK",
+        "name": "Advance X1 TK",
+        "category": "MOTOS",
+        "cilindrada": "127cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "VIC_ONE_MP",
+        "name": "One MP TK",
+        "category": "MOTOS",
+        "cilindrada": "100cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "VIC_ONE_125",
+        "name": "One 125",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Trabajo",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "VIC_MRX125",
+        "name": "MRX 125",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Enduro",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "VIC_MRX125S",
+        "name": "MRX 125 S",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Enduro",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "VIC_MRX125FOX",
+        "name": "MRX 125 FOX",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Enduro",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "VIC_MRX125TK",
+        "name": "MRX 125 Trakku",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Enduro",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "VIC_ELECTRA",
+        "name": "Victory Electra",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Trabajo",
+        "anos_populares": "2022-2026"
+      }
+    ],
+    "KOVE": [
+      {
+        "id": "KOVE_125R",
+        "name": "125R",
+        "category": "MOTOS",
+        "cilindrada": "125cc",
+        "tipo": "Sport",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_321R",
+        "name": "321R",
+        "category": "MOTOS",
+        "cilindrada": "321cc",
+        "tipo": "Naked",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_321RR",
+        "name": "321RR",
+        "category": "MOTOS",
+        "cilindrada": "321cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_450RR",
+        "name": "450RR",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Enduro",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_450RALLY",
+        "name": "450 Rally STD",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Rally",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_450RALLYPRO",
+        "name": "450 Rally Pro",
+        "category": "MOTOS",
+        "cilindrada": "450cc",
+        "tipo": "Rally",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_510F",
+        "name": "510F",
+        "category": "MOTOS",
+        "cilindrada": "510cc",
+        "tipo": "Enduro",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_510X",
+        "name": "510X",
+        "category": "MOTOS",
+        "cilindrada": "510cc",
+        "tipo": "Adventure",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_800X",
+        "name": "800X",
+        "category": "MOTOS",
+        "cilindrada": "800cc",
+        "tipo": "Adventure",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_800XPRO",
+        "name": "800X Pro",
+        "category": "MOTOS",
+        "cilindrada": "800cc",
+        "tipo": "Adventure",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "KOVE_MX250",
+        "name": "MX 250 Cross",
+        "category": "MOTOS",
+        "cilindrada": "250cc",
+        "tipo": "Motocross",
+        "anos_populares": "2025-2026"
+      }
+    ],
+    "MV_AGUSTA": [
+      {
+        "id": "MVA_BRUTALE800",
+        "name": "Brutale 800",
+        "category": "MOTOS",
+        "cilindrada": "798cc",
+        "tipo": "Naked",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "MVA_BRUTALE1000",
+        "name": "Brutale 1000 RS",
+        "category": "MOTOS",
+        "cilindrada": "998cc",
+        "tipo": "Naked",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "MVA_F3",
+        "name": "F3 800",
+        "category": "MOTOS",
+        "cilindrada": "798cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2013-2024"
+      },
+      {
+        "id": "MVA_F4",
+        "name": "F4",
+        "category": "MOTOS",
+        "cilindrada": "998cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2010-2020"
+      },
+      {
+        "id": "MVA_TURISMO800",
+        "name": "Turismo Veloce 800",
+        "category": "MOTOS",
+        "cilindrada": "798cc",
+        "tipo": "Sport Touring",
+        "anos_populares": "2015-2024"
+      },
+      {
+        "id": "MVA_SUPERVELOCE",
+        "name": "Superveloce 800",
+        "category": "MOTOS",
+        "cilindrada": "798cc",
+        "tipo": "Deportiva",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "MVA_RUSH",
+        "name": "Rush 1000",
+        "category": "MOTOS",
+        "cilindrada": "998cc",
+        "tipo": "Naked",
+        "anos_populares": "2020-2024"
+      }
+    ],
+    "INDIAN": [
+      {
+        "id": "IND_SCOUT",
+        "name": "Scout",
+        "category": "MOTOS",
+        "cilindrada": "1133cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IND_SCOUT_BOB",
+        "name": "Scout Bobber",
+        "category": "MOTOS",
+        "cilindrada": "1133cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2018-2026"
+      },
+      {
+        "id": "IND_SCOUT_ROGUE",
+        "name": "Scout Rogue",
+        "category": "MOTOS",
+        "cilindrada": "1133cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "IND_CHIEF",
+        "name": "Chief",
+        "category": "MOTOS",
+        "cilindrada": "1769cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "IND_CHIEF_DARK",
+        "name": "Chief Dark Horse",
+        "category": "MOTOS",
+        "cilindrada": "1769cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "IND_CHIEFTAIN",
+        "name": "Chieftain",
+        "category": "MOTOS",
+        "cilindrada": "1769cc",
+        "tipo": "Touring",
+        "anos_populares": "2014-2026"
+      },
+      {
+        "id": "IND_ROADMASTER",
+        "name": "Roadmaster",
+        "category": "MOTOS",
+        "cilindrada": "1769cc",
+        "tipo": "Touring",
+        "anos_populares": "2015-2026"
+      },
+      {
+        "id": "IND_CHALLENGER",
+        "name": "Challenger",
+        "category": "MOTOS",
+        "cilindrada": "1769cc",
+        "tipo": "Sport Touring",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "IND_SPORT_CHIEF",
+        "name": "Sport Chief",
+        "category": "MOTOS",
+        "cilindrada": "1769cc",
+        "tipo": "Cruiser",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "IND_FTR1200",
+        "name": "FTR 1200",
+        "category": "MOTOS",
+        "cilindrada": "1203cc",
+        "tipo": "Naked",
+        "anos_populares": "2019-2024"
+      }
+    ],
+    "NIU": [
+      {
+        "id": "NIU_NQI_SPORT",
+        "name": "NQi Sport",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Scooter Eléctrico",
+        "autonomia": "55-65 km",
+        "potencia": "1500W",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "NIU_NQI_GTS",
+        "name": "NQi GTS",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Scooter Eléctrico",
+        "autonomia": "90-100 km",
+        "potencia": "3000W",
+        "anos_populares": "2021-2026"
+      },
+      {
+        "id": "NIU_MQI_GT",
+        "name": "MQi GT",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Scooter Eléctrico",
+        "autonomia": "80 km",
+        "potencia": "1200W",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "NIU_RQI_SPORT",
+        "name": "RQi Sport",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Naked Eléctrica",
+        "autonomia": "120 km",
+        "potencia": "7500W",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "NIU_UQI_GT",
+        "name": "UQi GT",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Scooter Eléctrico",
+        "autonomia": "100 km",
+        "potencia": "1500W",
+        "anos_populares": "2022-2026"
+      }
+    ],
+    "GOGORO": [
+      {
+        "id": "GGR_VIVA_MIX",
+        "name": "Viva Mix",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Scooter Eléctrico",
+        "autonomia": "150 km",
+        "potencia": "6000W",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "GGR_2PLUS",
+        "name": "Gogoro 2 Plus",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Scooter Eléctrico",
+        "autonomia": "170 km",
+        "potencia": "7000W",
+        "anos_populares": "2023-2026"
+      },
+      {
+        "id": "GGR_S2",
+        "name": "SuperSport S2",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Sport Eléctrico",
+        "autonomia": "145 km",
+        "potencia": "7700W",
+        "anos_populares": "2024-2026"
+      }
+    ],
+    "ZEEHO": [
+      {
+        "id": "ZEEHO_AE8",
+        "name": "AE8",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Sport Eléctrico",
+        "autonomia": "120 km",
+        "potencia": "8000W",
+        "anos_populares": "2024-2026"
+      },
+      {
+        "id": "ZEEHO_AE8S",
+        "name": "AE8S Pro",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Sport Eléctrico",
+        "autonomia": "150 km",
+        "potencia": "10000W",
+        "anos_populares": "2025-2026"
+      },
+      {
+        "id": "ZEEHO_CYBER",
+        "name": "Cyber",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Scooter Eléctrico",
+        "autonomia": "100 km",
+        "potencia": "3000W",
+        "anos_populares": "2024-2026"
+      }
+    ],
+    "ENERGICA": [
+      {
+        "id": "ENG_EGO",
+        "name": "Ego",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Deportiva Eléctrica",
+        "autonomia": "180 km",
+        "potencia": "107000W",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "ENG_EVA",
+        "name": "Eva Ribelle",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Naked Eléctrica",
+        "autonomia": "180 km",
+        "potencia": "80000W",
+        "anos_populares": "2020-2026"
+      },
+      {
+        "id": "ENG_EXPERIA",
+        "name": "Experia",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Touring Eléctrico",
+        "autonomia": "256 km",
+        "potencia": "75000W",
+        "anos_populares": "2022-2026"
+      }
+    ],
+    "ZERO": [
+      {
+        "id": "ZERO_S",
+        "name": "Zero S",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Naked Eléctrica",
+        "autonomia": "200 km",
+        "potencia": "34000W",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "ZERO_SR",
+        "name": "Zero SR/F",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Naked Eléctrica",
+        "autonomia": "259 km",
+        "potencia": "82000W",
+        "anos_populares": "2019-2026"
+      },
+      {
+        "id": "ZERO_DSR",
+        "name": "Zero DSR/X",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Adventure Eléctrica",
+        "autonomia": "233 km",
+        "potencia": "82000W",
+        "anos_populares": "2022-2026"
+      },
+      {
+        "id": "ZERO_FXE",
+        "name": "Zero FXE",
+        "category": "MOTOS",
+        "cilindrada": "Eléctrica",
+        "tipo": "Supermoto Eléctrico",
+        "autonomia": "155 km",
+        "potencia": "34000W",
+        "anos_populares": "2022-2026"
       }
     ]
   }

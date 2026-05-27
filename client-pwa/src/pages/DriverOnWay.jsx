@@ -343,24 +343,19 @@ const DriverOnWay = () => {
     
     // Primero, ofrecer llamar al conductor
     presentAlert({
-      header: '⚠️ Cancelar Servicio',
+      header: 'Cancelar Servicio',
+      mode: 'ios',
       message: serviceData?.driver?.phone 
-        ? `¿Deseas llamar a ${serviceData.driver.name} antes de cancelar?`
+        ? `¿Estás seguro que deseas cancelar el servicio?`
         : '¿Estás seguro que deseas cancelar el servicio?',
       buttons: [
         {
-          text: 'Volver',
+          text: 'No, volver',
           role: 'cancel'
         },
-        ...(serviceData?.driver?.phone ? [{
-          text: `📞 Llamar a ${serviceData.driver.name}`,
-          handler: () => {
-            window.location.href = `tel:${serviceData.driver.phone}`;
-            return true; // Cerrar el alert después de iniciar la llamada
-          }
-        }] : []),
         {
-          text: 'Continuar con cancelación',
+          text: 'Si, cancelar',
+          cssClass: 'alert-button-confirm',
           handler: () => {
             // Usar setTimeout para asegurar que el primer alert se cierre antes
             setTimeout(() => {

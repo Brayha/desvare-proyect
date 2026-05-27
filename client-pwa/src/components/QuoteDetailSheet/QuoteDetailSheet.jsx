@@ -141,8 +141,8 @@ const QuoteDetailSheet = ({
     <IonModal
       isOpen={isOpen}
       onDidDismiss={onDismiss}
-      breakpoints={[0, 0.4, 1]}
-      initialBreakpoint={0.4}
+      breakpoints={[1, 6]}
+      initialBreakpoint={0.6}
       backdropBreakpoint={1}
       handle={true}
       handleBehavior="cycle"
