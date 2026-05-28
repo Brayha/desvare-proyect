@@ -13,6 +13,7 @@ const User = require('../models/User');
 const { uploadDriverDocument, uploadMultipleDocuments } = require('../services/storage');
 const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
 const { sendOTP, verifyOTP } = require('../services/sms');
+const { notifyAdminNewDriver, notifyDriverApproved } = require('../services/emailService');
 
 // Configurar multer para manejar archivos en memoria
 const upload = multer({
@@ -512,6 +513,13 @@ router.post('/register-complete', async (req, res) => {
 
     console.log(`✅ Datos básicos guardados para conductor ${userId}`);
 
+    // Notificar al admin por email (no bloqueante — si falla no interrumpe el registro)
+    notifyAdminNewDriver({
+      name: driver.name,
+      phone: driver.phone,
+      city: driver.driverProfile?.city || 'N/A',
+    }).catch(err => console.warn('⚠️ Email admin no enviado:', err.message));
+
     res.json({
       message: 'Datos básicos guardados exitosamente',
       driver: {
@@ -520,7 +528,7 @@ router.post('/register-complete', async (req, res) => {
         entityType: driver.driverProfile.entityType,
         city: driver.driverProfile.city,
         status: driver.driverProfile.status,
-        towTruck: driver.driverProfile.towTruck // Incluir datos de grúa en respuesta
+        towTruck: driver.driverProfile.towTruck
       }
     });
 

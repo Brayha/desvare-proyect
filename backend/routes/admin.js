@@ -13,6 +13,7 @@ const Admin = require('../models/Admin');
 const User = require('../models/User');
 const Request = require('../models/Request');
 const { requireAdmin } = require('../middleware/adminAuth');
+const { notifyDriverApproved } = require('../services/emailService');
 const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
 
 // ============================================
@@ -359,8 +360,13 @@ router.put('/drivers/:id/approve', async (req, res) => {
         console.log(`📱 Push notification enviada a ${driver.name}`);
       } catch (error) {
         console.error('⚠️ Error enviando push notification:', error.message);
-        // No fallar si la notificación push falla
       }
+    }
+
+    // 🆕 EMAIL AL CONDUCTOR: Notificar que fue aprobado (si tiene email)
+    if (driver.email) {
+      notifyDriverApproved({ name: driver.name, email: driver.email })
+        .catch(err => console.warn('⚠️ Email aprobación no enviado:', err.message));
     }
 
     res.json({

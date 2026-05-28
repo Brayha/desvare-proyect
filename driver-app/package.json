@@ -17,6 +17,7 @@
     "@capacitor/push-notifications": "^7.0.3",
     "@ionic/react": "^8.7.7",
     "@ionic/react-router": "^8.7.7",
+    "@sentry/react": "^10.54.0",
     "axios": "^1.12.2",
     "history": "^4.10.1",
     "iconsax-react": "^0.0.8",

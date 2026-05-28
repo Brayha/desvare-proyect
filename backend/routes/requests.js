@@ -3,9 +3,11 @@ const router = express.Router();
 const Request = require('../models/Request');
 const User = require('../models/User');
 const { sendPushNotification } = require('../services/notifications');
+const { requireAuth, requireDriver, optionalAuth } = require('../middleware/auth');
 
 // POST /api/requests/new - Crear nueva solicitud de cotización
-router.post('/new', async (req, res) => {
+// optionalAuth: funciona con o sin login (clientes sin cuenta pueden pedir servicio)
+router.post('/new', optionalAuth, async (req, res) => {
   try {
     const { 
       clientId, 
@@ -116,8 +118,8 @@ router.post('/new', async (req, res) => {
   }
 });
 
-// POST /api/requests/:id/quote - Agregar cotización a una solicitud
-router.post('/:id/quote', async (req, res) => {
+// POST /api/requests/:id/quote - Agregar cotización (solo conductores aprobados)
+router.post('/:id/quote', requireAuth, requireDriver, async (req, res) => {
   try {
     const { id } = req.params;
     const { driverId, driverName, amount, location } = req.body;
@@ -324,8 +326,8 @@ router.post('/:id/quote', async (req, res) => {
   }
 });
 
-// POST /api/requests/:id/accept - Aceptar una cotización específica
-router.post('/:id/accept', async (req, res) => {
+// POST /api/requests/:id/accept - Aceptar cotización (solo clientes autenticados)
+router.post('/:id/accept', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { clientId, driverId } = req.body;
@@ -473,8 +475,8 @@ router.post('/:id/accept', async (req, res) => {
   }
 });
 
-// DELETE /api/requests/:requestId/quote/:driverId - Cancelar cotización del conductor
-router.delete('/:requestId/quote/:driverId', async (req, res) => {
+// DELETE /api/requests/:requestId/quote/:driverId - Cancelar cotización (conductor autenticado)
+router.delete('/:requestId/quote/:driverId', requireAuth, requireDriver, async (req, res) => {
   try {
     const { requestId, driverId } = req.params;
     const { reason, customReason } = req.body;
@@ -771,8 +773,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// GET /api/requests/nearby/:driverId - Obtener solicitudes cercanas a un conductor
-router.get('/nearby/:driverId', async (req, res) => {
+// GET /api/requests/nearby/:driverId - Obtener solicitudes cercanas (solo conductor aprobado)
+router.get('/nearby/:driverId', requireAuth, requireDriver, async (req, res) => {
   try {
     const { driverId } = req.params;
     
@@ -913,9 +915,9 @@ router.get('/nearby/:driverId', async (req, res) => {
 });
 
 // ========================================
-// POST /api/requests/:id/complete - Completar servicio
+// POST /api/requests/:id/complete - Completar servicio (solo conductor aprobado)
 // ========================================
-router.post('/:id/complete', async (req, res) => {
+router.post('/:id/complete', requireAuth, requireDriver, async (req, res) => {
   try {
     const { id } = req.params;
     const { driverId, completedAt } = req.body;
@@ -965,9 +967,9 @@ router.post('/:id/complete', async (req, res) => {
 });
 
 // ========================================
-// POST /api/requests/:id/rate - Calificar servicio
+// POST /api/requests/:id/rate - Calificar servicio (cliente autenticado)
 // ========================================
-router.post('/:id/rate', async (req, res) => {
+router.post('/:id/rate', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { stars, comment, tip } = req.body;

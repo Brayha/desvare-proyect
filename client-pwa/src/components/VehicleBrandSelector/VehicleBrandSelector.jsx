@@ -6,7 +6,9 @@ import {
   IonSearchbar,
   IonText,
   IonSpinner,
+  IonIcon,
 } from "@ionic/react";
+import { helpCircleOutline, arrowForwardOutline, closeCircleOutline } from "ionicons/icons";
 import { getVehicleImage } from "../../utils/vehicleImages";
 import "./VehicleBrandSelector.css";
 
@@ -22,6 +24,8 @@ import "./VehicleBrandSelector.css";
  */
 const VehicleBrandSelector = ({ brands, selectedBrand, selectedCategory, onSelect, loading }) => {
   const [searchText, setSearchText] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customBrandName, setCustomBrandName] = useState("");
 
   // Filtrar marcas por búsqueda
   const filteredBrands =
@@ -79,7 +83,7 @@ const VehicleBrandSelector = ({ brands, selectedBrand, selectedCategory, onSelec
           debounce={300}
           className="brand-searchbar"
         />
-        {filteredBrands.length === 0 ? (
+        {filteredBrands.length === 0 && !showCustomInput ? (
           <div className="vehicle-brand-empty">
             <IonText color="medium">
               <p>No se encontraron marcas con "{searchText}"</p>
@@ -107,6 +111,48 @@ const VehicleBrandSelector = ({ brands, selectedBrand, selectedCategory, onSelec
               </IonItem>
             ))}
           </IonList>
+        )}
+
+        {/* Opción: No encuentro mi marca */}
+        {!showCustomInput ? (
+          <div className="other-option-trigger" onClick={() => setShowCustomInput(true)}>
+            <IonIcon icon={helpCircleOutline} className="other-option-icon" />
+            <span>No encuentro mi marca</span>
+          </div>
+        ) : (
+          <div className="other-option-form">
+            <div className="other-option-form-header">
+              <IonText><p className="other-option-form-title">Escribe el nombre de la marca</p></IonText>
+              <IonIcon
+                icon={closeCircleOutline}
+                className="other-option-close"
+                onClick={() => { setShowCustomInput(false); setCustomBrandName(""); }}
+              />
+            </div>
+            <input
+              className="other-option-input"
+              type="text"
+              placeholder="Ej: Toyota, Renault, BMW..."
+              value={customBrandName}
+              onChange={(e) => setCustomBrandName(e.target.value)}
+              autoFocus
+              maxLength={50}
+            />
+            <button
+              className="other-option-confirm"
+              disabled={!customBrandName.trim()}
+              onClick={() => {
+                if (customBrandName.trim()) {
+                  onSelect({ id: '__OTHER__', name: customBrandName.trim(), isCustom: true });
+                  setShowCustomInput(false);
+                  setCustomBrandName("");
+                }
+              }}
+            >
+              Usar esta marca
+              <IonIcon icon={arrowForwardOutline} style={{ marginLeft: '6px' }} />
+            </button>
+          </div>
         )}
       </div>
     </div>

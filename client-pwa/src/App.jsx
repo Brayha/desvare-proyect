@@ -33,6 +33,8 @@ import WaitingQuotes from './pages/WaitingQuotes';
 import DriverOnWay from './pages/DriverOnWay';
 import RatingService from './pages/RatingService';
 import TabLayout from './components/TabLayout/TabLayout';
+import TermsAndConditions from './pages/TermsAndConditions';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 setupIonicReact();
 
@@ -187,6 +189,8 @@ function App() {
             <Route exact path="/rate-service" component={RatingService} />
             
             {/* Tabs (Desvare + Mi cuenta) */}
+            <Route exact path="/terms" component={TermsAndConditions} />
+            <Route exact path="/privacy" component={PrivacyPolicy} />
             <Route path="/tabs" component={TabLayout} />
             
             {/* Redirección inicial */}

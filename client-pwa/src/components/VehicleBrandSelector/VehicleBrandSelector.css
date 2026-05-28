@@ -112,6 +112,89 @@
   margin: 0;
 }
 
+/* ── Opción "Otra marca" ── */
+.other-option-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 4px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--ion-color-medium, #92949c);
+  color: var(--ion-color-medium, #92949c);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.other-option-trigger:active {
+  border-color: var(--ion-color-primary, #3880ff);
+  color: var(--ion-color-primary, #3880ff);
+}
+.other-option-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.other-option-form {
+  margin: 12px 16px 8px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--ion-color-light, #f4f5f8);
+  border: 1.5px solid var(--ion-color-primary, #3880ff);
+}
+.other-option-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.other-option-form-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ion-color-dark, #222428);
+  margin: 0;
+}
+.other-option-close {
+  font-size: 22px;
+  color: var(--ion-color-medium, #92949c);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.other-option-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--ion-color-medium-shade, #808289);
+  background: white;
+  font-size: 15px;
+  color: var(--ion-color-dark, #222428);
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.other-option-input:focus {
+  border-color: var(--ion-color-primary, #3880ff);
+}
+.other-option-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  background: var(--ion-color-primary, #3880ff);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.other-option-confirm:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* Responsive */
 @media (max-width: 576px) {
   .brand-item {

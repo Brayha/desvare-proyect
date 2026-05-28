@@ -37,6 +37,8 @@ import QuoteDetail from './pages/QuoteDetail';
 import QuoteAmount from './pages/QuoteAmount';
 import DriverServiceHistory from './pages/DriverServiceHistory';
 import DriverServiceDetail from './pages/DriverServiceDetail';
+import TermsAndConditions from './pages/TermsAndConditions';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 setupIonicReact();
 
@@ -64,6 +66,8 @@ function App() {
           <Route exact path="/quote-amount" component={QuoteAmount} />
           <Route exact path="/driver-service-history" component={DriverServiceHistory} />
           <Route exact path="/driver-service-detail/:id" component={DriverServiceDetail} />
+          <Route exact path="/terms" component={TermsAndConditions} />
+          <Route exact path="/privacy" component={PrivacyPolicy} />
           <Route exact path="/">
             <Redirect to="/splash" />
           </Route>

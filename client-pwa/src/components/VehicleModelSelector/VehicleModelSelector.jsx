@@ -6,7 +6,9 @@ import {
   IonSearchbar,
   IonText,
   IonSpinner,
+  IonIcon,
 } from "@ionic/react";
+import { helpCircleOutline, arrowForwardOutline, closeCircleOutline } from "ionicons/icons";
 import { getVehicleImage } from "../../utils/vehicleImages";
 import "./VehicleModelSelector.css";
 
@@ -28,8 +30,11 @@ const VehicleModelSelector = ({
   selectedBrand,
   onSelect,
   loading,
+  isCustomBrand,
 }) => {
   const [searchText, setSearchText] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(isCustomBrand || false);
+  const [customModelName, setCustomModelName] = useState("");
 
   // Filtrar modelos por búsqueda
   const filteredModels =
@@ -48,12 +53,57 @@ const VehicleModelSelector = ({
     );
   }
 
-  if (!models || models.length === 0) {
+  // Si la marca es custom o no hay modelos disponibles, mostrar directamente el formulario custom
+  if (isCustomBrand || (!loading && (!models || models.length === 0))) {
     return (
-      <div className="vehicle-model-empty">
-        <IonText color="medium">
-          <p>No hay modelos disponibles para esta marca</p>
-        </IonText>
+      <div className="vehicle-brand-selector">
+        {selectedCategory && selectedBrand && (
+          <div className="vehicle-list-type">
+            <div className="select-vehicle-added-card-content">
+              <div className="vehicle-added-card-content-image-container">
+                <img
+                  src={getVehicleImage(selectedCategory.id)}
+                  alt={selectedCategory.name}
+                  style={{ width: "48px", height: "48px", objectFit: "contain" }}
+                />
+              </div>
+              <div className="vehicle-added-card-content-text">
+                <h3 className="vehicle-brand-name">{selectedBrand.name}</h3>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="filter-container">
+          <div className="other-option-form" style={{ marginTop: '8px' }}>
+            <div className="other-option-form-header">
+              <IonText><p className="other-option-form-title">
+                {isCustomBrand ? 'Escribe el modelo o referencia' : 'No hay modelos — escribe el tuyo'}
+              </p></IonText>
+            </div>
+            <input
+              className="other-option-input"
+              type="text"
+              placeholder="Ej: Corolla, Civic, 208, Actros..."
+              value={customModelName}
+              onChange={(e) => setCustomModelName(e.target.value)}
+              autoFocus
+              maxLength={60}
+            />
+            <button
+              className="other-option-confirm"
+              disabled={!customModelName.trim()}
+              onClick={() => {
+                if (customModelName.trim()) {
+                  onSelect({ id: '__OTHER__', name: customModelName.trim(), isCustom: true });
+                  setCustomModelName("");
+                }
+              }}
+            >
+              Usar este modelo
+              <IonIcon icon={arrowForwardOutline} style={{ marginLeft: '6px' }} />
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -86,7 +136,7 @@ const VehicleModelSelector = ({
           className="brand-searchbar"
         />
 
-        {filteredModels.length === 0 ? (
+        {filteredModels.length === 0 && !showCustomInput ? (
           <div className="vehicle-model-empty">
             <IonText color="medium">
               <p>No se encontraron modelos con "{searchText}"</p>
@@ -114,6 +164,48 @@ const VehicleModelSelector = ({
               </IonItem>
             ))}
           </IonList>
+        )}
+
+        {/* Opción: No encuentro el modelo */}
+        {!showCustomInput ? (
+          <div className="other-option-trigger" onClick={() => setShowCustomInput(true)}>
+            <IonIcon icon={helpCircleOutline} className="other-option-icon" />
+            <span>No encuentro el modelo / referencia</span>
+          </div>
+        ) : (
+          <div className="other-option-form">
+            <div className="other-option-form-header">
+              <IonText><p className="other-option-form-title">Escribe el modelo o referencia</p></IonText>
+              <IonIcon
+                icon={closeCircleOutline}
+                className="other-option-close"
+                onClick={() => { setShowCustomInput(false); setCustomModelName(""); }}
+              />
+            </div>
+            <input
+              className="other-option-input"
+              type="text"
+              placeholder="Ej: Corolla, Civic, 208, Actros..."
+              value={customModelName}
+              onChange={(e) => setCustomModelName(e.target.value)}
+              autoFocus
+              maxLength={60}
+            />
+            <button
+              className="other-option-confirm"
+              disabled={!customModelName.trim()}
+              onClick={() => {
+                if (customModelName.trim()) {
+                  onSelect({ id: '__OTHER__', name: customModelName.trim(), isCustom: true });
+                  setShowCustomInput(false);
+                  setCustomModelName("");
+                }
+              }}
+            >
+              Usar este modelo
+              <IonIcon icon={arrowForwardOutline} style={{ marginLeft: '6px' }} />
+            </button>
+          </div>
         )}
       </div>
     </div>

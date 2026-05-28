@@ -1,10 +1,25 @@
 require('dotenv').config();
+const Sentry = require('@sentry/node');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const rateLimit = require('express-rate-limit');
 const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote, notifyClientServiceCompleted, notifyClientDriverArriving } = require('./services/notifications');
+
+// ── Sentry (monitoreo de errores en producción) ──────────────────────────────
+// Inicializar ANTES de crear la app Express para capturar todos los errores.
+// SENTRY_DSN se configura en las variables de entorno del servidor.
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 0.1, // Captura el 10% de transacciones para performance
+  });
+  console.log('✅ Sentry inicializado para monitoreo de errores');
+}
+// ────────────────────────────────────────────────────────────────────────────
 
 const app = express();
 const server = http.createServer(app);
@@ -47,6 +62,54 @@ app.use(cors(corsOptions));
 // Aumentar límite para soportar imágenes en base64
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// ── Rate Limiting ────────────────────────────────────────────────────────────
+// Protege contra bots, ataques de spam y abuso de la API.
+// Los límites son generosos para no afectar usuarios reales en ningún escenario.
+
+// API general: 120 peticiones por minuto por IP (2 req/seg — muy cómodo para uso normal)
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas peticiones. Intenta de nuevo en un momento.' },
+  skip: (req) => req.path === '/' // Omitir ruta de health check
+});
+
+// Auth: 15 intentos por 15 minutos por IP (protege contra fuerza bruta en login)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de autenticación. Espera 15 minutos.' }
+});
+
+// Creación de solicitudes: 10 solicitudes por minuto por IP (evita spam de requests)
+const requestCreationLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes creadas. Espera un momento.' }
+});
+
+// Registro de conductores: 5 intentos por hora por IP (evita registros masivos falsos)
+const driverRegisterLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de registro. Intenta más tarde.' }
+});
+
+app.use('/api/', apiLimiter);
+app.use('/api/auth', authLimiter);
+app.use('/api/requests/new', requestCreationLimiter);
+app.use('/api/drivers/register-initial', driverRegisterLimiter);
+app.use('/api/drivers/register-complete', driverRegisterLimiter);
+// ────────────────────────────────────────────────────────────────────────────
 
 // Configuración de Socket.IO
 const io = new Server(server, {
@@ -1056,6 +1119,18 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// ── Sentry: capturar errores no manejados (debe ser el último middleware) ────
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.expressErrorHandler());
+}
+
+// Handler genérico de errores 500
+app.use((err, req, res, next) => {
+  console.error('❌ Error no manejado:', err.message);
+  res.status(500).json({ error: 'Error interno del servidor.' });
+});
+// ────────────────────────────────────────────────────────────────────────────
 
 // Iniciar servidor
 const PORT = process.env.PORT || 5000;

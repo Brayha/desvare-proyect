@@ -246,9 +246,9 @@ const VehicleWizardModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicleData.category]);
 
-  // Cargar modelos cuando se selecciona marca
+  // Cargar modelos cuando se selecciona marca (omitir si la marca es custom)
   useEffect(() => {
-    if (vehicleData.brand && vehicleData.category) {
+    if (vehicleData.brand && vehicleData.category && !vehicleData.brand.isCustom) {
       loadModels(vehicleData.brand.id, vehicleData.category.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -370,13 +370,13 @@ const VehicleWizardModal = ({
           break;
         case 'brand':
           if (!vehicleData.brand) {
-            showWarning('Selecciona una marca');
+            showWarning('Selecciona una marca o escribe la tuya');
             return;
           }
           break;
         case 'model':
           if (!vehicleData.model) {
-            showWarning('Selecciona un modelo');
+            showWarning('Selecciona un modelo o escribe el tuyo');
             return;
           }
           break;
@@ -732,6 +732,7 @@ const VehicleWizardModal = ({
             selectedCategory={vehicleData.category}
             selectedBrand={vehicleData.brand}
             isLoading={isLoading}
+            isCustomBrand={vehicleData.brand?.isCustom || false}
           />
         );
 

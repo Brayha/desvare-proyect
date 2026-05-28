@@ -5383,7 +5383,7 @@
       },
       {
         "id": "JAC_HFC6729",
-        "name": "HFC6729 (Buseta Urbana)",
+        "name": "Bus Urbano HFC6729 (Buseta Urbana)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2025"
@@ -8944,7 +8944,7 @@
       },
       {
         "id": "VO_FMX_VOLQ",
-        "name": "FMX 500 6x4 (Volqueta/Fuera de Carretera)",
+        "name": "FMX 500 6x4 (Volqueta)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2018-2026"
@@ -11089,28 +11089,28 @@
       },
       {
         "id": "HI_XZU730",
-        "name": "XZU730 (Microbus/Escolar)",
+        "name": "Serie 300 XZU730 (Microbus/Escolar)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
       },
       {
         "id": "HI_FC9J",
-        "name": "FC9J (Buseta)",
+        "name": "Serie 400 FC9J (Buseta)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
       },
       {
         "id": "HI_AK8J",
-        "name": "AK8J (Busetón)",
+        "name": "Serie 500 AK8J (Busetón)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
       },
       {
         "id": "HI_GD8J",
-        "name": "GD8J (Bus Padrón)",
+        "name": "Serie 700 GD8J (Bus Padrón)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2018-2026"
@@ -11173,7 +11173,7 @@
       },
       {
         "id": "HI_700_VOLQ",
-        "name": "Serie 700 Volqueta 8x4 (Volqueta)",
+        "name": "Serie 700 Volqueta 8x4 (Volqueta Pesada)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2018-2026"
@@ -11266,49 +11266,49 @@
       },
       {
         "id": "SC_R450_TRACO",
-        "name": "R 450 (Tractocamión/Mula)",
+        "name": "Serie R 450 (Tractocamión/Mula)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2018-2026"
       },
       {
         "id": "SC_R500_TRACO",
-        "name": "R 500 (Tractocamión/Mula)",
+        "name": "Serie R 500 (Tractocamión/Mula)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2018-2026"
       },
       {
         "id": "SC_S540_TRACO",
-        "name": "S 540 (Tractocamión Lujo)",
+        "name": "Serie S 540 (Tractocamión Lujo)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2020-2026"
       },
       {
         "id": "SC_G410_PES",
-        "name": "G 410 (Camión Pesado)",
+        "name": "Serie G 410 (Camión Pesado)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2018-2026"
       },
       {
         "id": "SC_P360_MED",
-        "name": "P 360 (Camión Mediano)",
+        "name": "Serie P 360 (Camión Mediano)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
       },
       {
         "id": "SC_G450_VOLQ",
-        "name": "G 450 6x4 (Volqueta)",
+        "name": "Serie G 450 6x4 (Volqueta)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2018-2026"
       },
       {
         "id": "SC_G500_VOLQ",
-        "name": "G 500 8x4 (Volqueta Pesada)",
+        "name": "Serie G 500 8x4 (Volqueta Pesada)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2020-2026"
@@ -11415,7 +11415,7 @@
       },
       {
         "id": "IZ_ELF_LIG",
-        "name": "Elf NKR (Camión Ligero)",
+        "name": "Elf NKR 150 (Camión Ligero)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
@@ -11436,7 +11436,7 @@
       },
       {
         "id": "IZ_FTR_MED",
-        "name": "FTR (Camión Mediano)",
+        "name": "FTR 800 (Camión Mediano)",
         "category": "CAMIONES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
@@ -12052,7 +12052,7 @@
       },
       {
         "id": "FAW_BUS_URB",
-        "name": "CA6100 (Bus Padrón Urbano)",
+        "name": "Bus Urbano CA6100 (Bus Padrón Urbano)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2025"
@@ -14718,28 +14718,28 @@
       },
       {
         "id": "YT_ZK5120C",
-        "name": "ZK5120C Eléctrico (Bus Padrón)",
+        "name": "ZK 5120 Eléctrico 12m (Bus Padrón)",
         "category": "BUSES",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
       },
       {
         "id": "YT_ZK5180C",
-        "name": "ZK5180C Eléctrico (Bus Articulado)",
+        "name": "ZK 5180 Eléctrico 18m (Bus Articulado)",
         "category": "BUSES",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
       },
       {
         "id": "YT_ZK6116",
-        "name": "ZK6116HNG (Bus Padrón GNV)",
+        "name": "ZK 6116 GNV (Bus Padrón Gas Natural)",
         "category": "BUSES",
         "tipo_combustible": "Gas Natural",
         "anos_populares": "2018-2026"
       },
       {
         "id": "YT_ZK6838",
-        "name": "ZK6838 (Buseta Diésel)",
+        "name": "ZK 6838 (Buseta Diésel)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
@@ -14748,21 +14748,21 @@
     "ZHONGTONG": [
       {
         "id": "ZT_LCK6850EVG",
-        "name": "LCK6850 EVG Eléctrico (Busetón 9m)",
+        "name": "LCK 6850 Eléctrico 9m (Busetón)",
         "category": "BUSES",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
       },
       {
         "id": "ZT_LCK6122EVG",
-        "name": "LCK6122 EVG Eléctrico (Bus Padrón 12m)",
+        "name": "LCK 6122 Eléctrico 12m (Bus Padrón)",
         "category": "BUSES",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
       },
       {
         "id": "ZT_LCK6950HGN",
-        "name": "LCK6950 HGN (Busetón GNV)",
+        "name": "LCK 6950 GNV (Busetón Gas Natural)",
         "category": "BUSES",
         "tipo_combustible": "Gas Natural",
         "anos_populares": "2022-2026"
@@ -14778,28 +14778,28 @@
     "KING_LONG": [
       {
         "id": "KL_XMQ6120",
-        "name": "XMQ6120 (Bus Padrón Urbano)",
+        "name": "XMQ 6120 (Bus Padrón Urbano)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
       },
       {
         "id": "KL_XMQ6900",
-        "name": "XMQ6900 (Busetón Urbano)",
+        "name": "XMQ 6900 (Busetón Urbano)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
       },
       {
         "id": "KL_XMQ6119EV",
-        "name": "XMQ6119 EV Eléctrico (Bus Padrón)",
+        "name": "XMQ 6119 Eléctrico (Bus Padrón)",
         "category": "BUSES",
         "tipo_combustible": "Eléctrico",
         "anos_populares": "2022-2026"
       },
       {
         "id": "KL_INTERMUNICIPAL",
-        "name": "XMQ6127 (Intermunicipal)",
+        "name": "XMQ 6127 (Intermunicipal)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2018-2026"
@@ -14808,14 +14808,14 @@
     "HIGER": [
       {
         "id": "HG_KLQ6109",
-        "name": "KLQ6109 (Bus Padrón Urbano)",
+        "name": "KLQ 6109 (Bus Padrón Urbano)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
       },
       {
         "id": "HG_KLQ6896",
-        "name": "KLQ6896 (Busetón Urbano)",
+        "name": "KLQ 6896 (Busetón Urbano)",
         "category": "BUSES",
         "tipo_combustible": "Diésel",
         "anos_populares": "2015-2026"
