@@ -725,6 +725,15 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
                   : 'Guardar y continuar'}
             </button>
 
+            {otpPurpose === PURPOSE.NEW_REGISTER && (
+              <p className="am-terms">
+                Al crear tu cuenta aceptas nuestros{' '}
+                <a href="/terms" target="_blank" rel="noopener noreferrer">términos y condiciones</a>
+                {' '}y la{' '}
+                <a href="/privacy" target="_blank" rel="noopener noreferrer">política de privacidad</a>.
+              </p>
+            )}
+
             <button
               className="am-btn-ghost"
               onClick={() => { setPinConfirm(['', '', '', '']); setPinError(''); setStep(S.PIN_CREATE); }}

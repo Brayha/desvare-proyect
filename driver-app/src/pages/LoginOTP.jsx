@@ -4,6 +4,7 @@ import { IonPage, IonContent, IonSpinner, IonText } from '@ionic/react';
 import { authAPI } from '../services/api';
 import { PhoneInput } from '../components/PhoneInput/PhoneInput';
 import DesvareLogoWhite from '../assets/img/Desvare.svg';
+import LegalNotice from '../components/LegalNotice/LegalNotice';
 import './LoginOTP.css';
 
 /**
@@ -185,6 +186,7 @@ const LoginOTP = () => {
                 >
                   {isLoading ? <IonSpinner name="crescent" /> : 'Continuar'}
                 </button>
+                <LegalNotice />
               </div>
             </>
           )}

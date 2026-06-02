@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom";
 import { IonPage, IonContent, IonSpinner, IonText } from "@ionic/react";
 import { Lock, ArrowLeft, Key, User, Message } from "iconsax-react";
 import { authAPI } from "../services/api";
+import LegalNotice from "../components/LegalNotice/LegalNotice";
 import "./VerifyOTP.css";
 
 /**
@@ -510,6 +511,7 @@ const VerifyOTP = () => {
             >
               {isLoading ? <IonSpinner name="crescent" /> : "Guardar clave"}
             </button>
+            {otpPurpose === "NEW_DRIVER" && <LegalNotice />}
           </div>
         </IonContent>
       </IonPage>
@@ -580,6 +582,8 @@ const VerifyOTP = () => {
           >
             {isLoading ? <IonSpinner name="crescent" /> : "Verificar código"}
           </button>
+
+          {otpPurpose === "NEW_DRIVER" && <LegalNotice />}
 
           <div className="verify-otp-resend">
             {canResend ? (
