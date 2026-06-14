@@ -91,9 +91,15 @@ Mi consulta es: `;
   };
 
   const handleLogout = () => {
+    // Limpiar todos los estados de sesión y servicio activo
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("hasSeenLocationModal");
+    localStorage.removeItem("activeService");
+    localStorage.removeItem("lastQuotedRequest");
+    localStorage.removeItem("pendingRequestDetail");
+    localStorage.removeItem("pendingDriverLocation");
+    localStorage.removeItem("lastCancellation");
     socketService.disconnect();
     history.push("/login");
   };

@@ -46,6 +46,8 @@ export const authAPI = {
   // Estado del conductor
   getDriverStatus: (userId) => api.get(`/api/drivers/status/${userId}`),
   toggleDriverOnline: (data) => api.put('/api/drivers/toggle-online', data),
+  // Perfil
+  updateProfile: (userId, data) => api.put(`/api/drivers/profile/${userId}`, data),
 };
 
 // API de solicitudes
@@ -54,6 +56,8 @@ export const requestAPI = {
   getRequest: (requestId) => api.get(`/api/requests/${requestId}`),
   getNearbyRequests: (driverId) => api.get(`/api/requests/nearby/${driverId}`),
   cancelQuote: (requestId, driverId, data) => api.delete(`/api/requests/${requestId}/quote/${driverId}`, { data }),
+  getDriverServices: (driverId) => api.get(`/api/requests/driver/${driverId}`),
+  cancelByDriver: (requestId, data) => api.post(`/api/requests/${requestId}/cancel-by-driver`, data),
 };
 
 // API de ciudades

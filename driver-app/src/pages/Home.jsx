@@ -159,8 +159,8 @@ const Home = () => {
     // Cargar solicitudes iniciales
     loadRequests(parsedUser._id);
 
-    // Escuchar nuevas solicitudes
-    socketService.onRequestReceived((request) => {
+    // Guardar referencias a callbacks para poder eliminarlos exactamente al desmontar
+    const handleRequestReceived = (request) => {
       console.log('📥 Nueva solicitud recibida:', request);
       
       // Normalizar la solicitud para asegurar que tenga todos los campos necesarios
@@ -208,10 +208,11 @@ const Home = () => {
           }
         ]
       });
-    });
+    };
+    socketService.onRequestReceived(handleRequestReceived);
 
     // Escuchar cancelaciones
-    socketService.onRequestCancelled((data) => {
+    const handleRequestCancelled = (data) => {
       console.log('🚫 EVENTO CANCELACIÓN RECIBIDO');
       console.log('📝 RequestId recibido:', data.requestId);
       console.log('📝 Razón:', data.reason);
@@ -286,11 +287,12 @@ const Home = () => {
       console.log('ℹ️ Cancelación de solicitud en bandeja (no activa) - Removiendo silenciosamente');
       
       // NO mostrar toast, NO redirigir, quedarse en Home esperando nuevas solicitudes
-    });
+    };
+    socketService.onRequestCancelled(handleRequestCancelled);
 
     // Escuchar cuando tu cotización es aceptada
     // También se recibe con isResume:true cuando el conductor reconecta tras push notification
-    socketService.onServiceAccepted((data) => {
+    const handleServiceAccepted = (data) => {
       const isResume = data.isResume === true;
       console.log(isResume ? '🔄 Reanudando servicio activo:' : '🎉 ¡Tu cotización fue aceptada!', data);
       
@@ -330,10 +332,11 @@ const Home = () => {
       setTimeout(() => {
         window.location.replace('/active-service');
       }, 400);
-    });
+    };
+    socketService.onServiceAccepted(handleServiceAccepted);
 
     // Escuchar cuando otro conductor tomó el servicio
-    socketService.onServiceTaken((data) => {
+    const handleServiceTaken = (data) => {
       console.log('❌ Servicio tomado por otro conductor:', data.requestId);
       
       setRequests((prev) => prev.filter(
@@ -345,10 +348,11 @@ const Home = () => {
         duration: 3000,
         color: 'medium',
       });
-    });
+    };
+    socketService.onServiceTaken(handleServiceTaken);
 
     // Escuchar cuando una cotización expira
-    socketService.onQuoteExpired((data) => {
+    const handleQuoteExpired = (data) => {
       console.log('⏰ Cotización expirada:', data);
       
       setRequests((prev) => prev.filter(
@@ -371,19 +375,20 @@ const Home = () => {
         duration: 3000,
         color: 'medium',
       });
-    });
+    };
+    socketService.onQuoteExpired(handleQuoteExpired);
 
     return () => {
-      // Solo limpiar listeners — NO desconectar el socket.
+      // Solo limpiar listeners exactos — NO desconectar el socket.
       // El socket es un singleton compartido; desconectarlo aquí mata el GPS
       // en ActiveService cuando el conductor navega durante un servicio activo.
       socketService.offReconnect(handleDriverReconnect);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      socketService.offRequestReceived();
-      socketService.offRequestCancelled();
-      socketService.offServiceAccepted();
-      socketService.offServiceTaken();
-      socketService.offQuoteExpired();
+      socketService.offRequestReceived(handleRequestReceived);
+      socketService.offRequestCancelled(handleRequestCancelled);
+      socketService.offServiceAccepted(handleServiceAccepted);
+      socketService.offServiceTaken(handleServiceTaken);
+      socketService.offQuoteExpired(handleQuoteExpired);
     };
   }, [history, present, presentAlert]);
 

@@ -323,6 +323,11 @@ userSchema.methods.canAcceptServices = function() {
   return this.driverProfile.status === 'approved' && this.driverProfile.isOnline;
 };
 
+// Índice para queries de conductores activos (nearby, push notifications)
+userSchema.index({ userType: 1, 'driverProfile.status': 1, 'driverProfile.isOnline': 1 });
+// Índice para login por teléfono
+userSchema.index({ phone: 1 });
+
 module.exports = mongoose.model('User', userSchema);
 
 

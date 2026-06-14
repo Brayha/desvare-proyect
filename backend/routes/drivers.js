@@ -15,6 +15,7 @@ const { notifyAccountApproved, notifyAccountRejected } = require('../services/no
 const { sendOTP, verifyOTP } = require('../services/sms');
 const { notifyAdminNewDriver, notifyDriverApproved } = require('../services/emailService');
 const { requireAuth, requireDriver } = require('../middleware/auth');
+const { requireAdmin } = require('../middleware/adminAuth');
 
 // Configurar multer para manejar archivos en memoria
 const upload = multer({
@@ -207,7 +208,7 @@ router.post('/login-pin', async (req, res) => {
     const jwt = require('jsonwebtoken');
     const token = jwt.sign(
       { id: driver._id, userType: 'driver' },
-      process.env.JWT_SECRET || 'desvare-secret-key-2024',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 
@@ -382,7 +383,7 @@ router.post('/verify-otp', async (req, res) => {
     const jwt = require('jsonwebtoken');
     const token = jwt.sign(
       { id: driver._id, userType: 'driver' },
-      process.env.JWT_SECRET || 'desvare-secret-key-2024',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 
@@ -756,6 +757,11 @@ router.put('/toggle-online', requireAuth, requireDriver, async (req, res) => {
       });
     }
 
+    // Ownership: el conductor solo puede cambiar su propio estado
+    if (req.user._id.toString() !== userId?.toString()) {
+      return res.status(403).json({ error: 'No puedes cambiar el estado de otro conductor.' });
+    }
+
     const driver = await User.findById(userId);
     if (!driver || driver.userType !== 'driver') {
       return res.status(404).json({ error: 'Conductor no encontrado' });
@@ -804,7 +810,7 @@ router.put('/toggle-online', requireAuth, requireDriver, async (req, res) => {
  * PUT /api/drivers/admin/approve/:userId
  * Aprueba un conductor (solo admin)
  */
-router.put('/admin/approve/:userId', async (req, res) => {
+router.put('/admin/approve/:userId', requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -846,7 +852,7 @@ router.put('/admin/approve/:userId', async (req, res) => {
  * PUT /api/drivers/admin/reject/:userId
  * Rechaza un conductor (solo admin)
  */
-router.put('/admin/reject/:userId', async (req, res) => {
+router.put('/admin/reject/:userId', requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
     const { reason } = req.body;
@@ -906,6 +912,11 @@ router.patch('/toggle-availability', requireAuth, requireDriver, async (req, res
       return res.status(400).json({ 
         error: 'driverId e isOnline son requeridos' 
       });
+    }
+
+    // Ownership: el conductor solo puede cambiar su propio estado
+    if (req.user._id.toString() !== driverId?.toString()) {
+      return res.status(403).json({ error: 'No puedes cambiar el estado de otro conductor.' });
     }
 
     const driver = await User.findById(driverId);
@@ -1052,6 +1063,37 @@ router.delete('/fcm-token', async (req, res) => {
       error: 'Error al eliminar FCM token',
       details: error.message
     });
+  }
+});
+
+// ========================================
+// PUT /api/drivers/profile/:id - Actualizar perfil del conductor
+// ========================================
+router.put('/profile/:id', requireAuth, requireDriver, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, city, address } = req.body;
+
+    if (req.user._id.toString() !== id) {
+      return res.status(403).json({ error: 'No puedes editar el perfil de otro conductor.' });
+    }
+
+    const driver = await User.findById(id);
+    if (!driver || driver.userType !== 'driver') {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    if (name) driver.name = name;
+    if (email) driver.email = email;
+    if (city) driver.driverProfile.city = city;
+    if (address) driver.driverProfile.address = address;
+
+    await driver.save();
+
+    res.json({ message: 'Perfil actualizado', driver: { id: driver._id, name: driver.name, email: driver.email } });
+  } catch (error) {
+    console.error('❌ Error al actualizar perfil:', error);
+    res.status(500).json({ error: 'Error al actualizar perfil', details: error.message });
   }
 });
 

@@ -30,7 +30,7 @@ const RequestAuth = () => {
     const storedRoute = localStorage.getItem("requestData");
     if (!storedRoute) {
       showError("Selecciona primero tu destino");
-      history.replace("/request-service");
+      history.replace("/tabs/desvare");
       return;
     }
 
@@ -38,7 +38,7 @@ const RequestAuth = () => {
       setRouteData(JSON.parse(storedRoute));
     } catch {
       showError("Error al cargar datos de la ruta");
-      history.replace("/request-service");
+      history.replace("/tabs/desvare");
       return;
     }
 

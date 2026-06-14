@@ -194,6 +194,16 @@ const ActiveService = () => {
       // Limpiar estado local
       localStorage.removeItem("activeService");
 
+      // Restaurar al conductor como disponible en localStorage
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          const u = JSON.parse(storedUser);
+          if (u.driverProfile) u.driverProfile.isOnline = true;
+          localStorage.setItem("user", JSON.stringify(u));
+        }
+      } catch { /* no crítico */ }
+
       present({
         message: "⚠️ El cliente canceló el servicio",
         duration: 4000,

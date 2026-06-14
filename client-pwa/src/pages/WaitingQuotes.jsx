@@ -274,13 +274,14 @@ const WaitingQuotes = () => {
             ...q,
             location: normalizeQuoteLocation(q.location),
           }));
+          // Actualizar siempre: si la lista quedó vacía por cancelaciones, limpiar UI
+          setQuotesReceived(freshQuotes);
           if (freshQuotes.length > 0) {
-            setQuotesReceived(freshQuotes);
             showSuccess(
               `${freshQuotes.length} cotización${freshQuotes.length > 1 ? "es" : ""} disponible${freshQuotes.length > 1 ? "s" : ""}`
             );
-            console.log(`✅ WaitingQuotes - ${freshQuotes.length} cotizaciones refrescadas`);
           }
+          console.log(`✅ WaitingQuotes - ${freshQuotes.length} cotizaciones refrescadas`);
         } catch (err) {
           console.warn("⚠️ Error al refrescar cotizaciones:", err.message);
         }
@@ -851,7 +852,7 @@ const WaitingQuotes = () => {
   return (
     <IonPage>
       <IonContent className="waiting-quotes-page" fullscreen>
-      <div className="logo-content" onClick={() => history.replace("/home")}>
+      <div className="logo-content" onClick={handleCancelRequest}>
           <img src={logo} alt="logo" />
         </div>
         {/* Pull to Refresh */}

@@ -321,8 +321,14 @@ const requestSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// Crear índice geoespacial para búsquedas por proximidad
+// Índices geoespaciales
 requestSchema.index({ 'origin.coordinates': '2dsphere' });
 requestSchema.index({ 'destination.coordinates': '2dsphere' });
+
+// Índices de consulta frecuente
+requestSchema.index({ clientId: 1 });
+requestSchema.index({ assignedDriverId: 1 });
+requestSchema.index({ status: 1, expiresAt: 1 });
+requestSchema.index({ 'trackingData.isActive': 1, 'trackingData.clientId': 1 });
 
 module.exports = mongoose.model('Request', requestSchema);

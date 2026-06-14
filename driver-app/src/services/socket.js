@@ -118,68 +118,72 @@ class SocketService {
     }
   }
 
+  // Patrón: on(callback) registra SOLO ese callback; off(callback) elimina SOLO ese callback.
+  // Esto permite que múltiples páginas (ej. Home + QuoteDetail en el stack de Ionic)
+  // tengan sus propios listeners sin pisarse entre sí.
+
   onRequestReceived(callback) {
     if (this.socket) {
-      this.socket.off('request:received');
+      this.socket.off('request:received', callback);
       this.socket.on('request:received', callback);
     }
   }
 
-  offRequestReceived() {
-    if (this.socket) {
-      this.socket.off('request:received');
+  offRequestReceived(callback) {
+    if (this.socket && callback) {
+      this.socket.off('request:received', callback);
     }
   }
 
   onRequestCancelled(callback) {
     if (this.socket) {
-      this.socket.off('request:cancelled');
+      this.socket.off('request:cancelled', callback);
       this.socket.on('request:cancelled', callback);
     }
   }
 
-  offRequestCancelled() {
-    if (this.socket) {
-      this.socket.off('request:cancelled');
+  offRequestCancelled(callback) {
+    if (this.socket && callback) {
+      this.socket.off('request:cancelled', callback);
     }
   }
 
   onServiceAccepted(callback) {
     if (this.socket) {
-      this.socket.off('service:accepted');
+      this.socket.off('service:accepted', callback);
       this.socket.on('service:accepted', callback);
     }
   }
 
-  offServiceAccepted() {
-    if (this.socket) {
-      this.socket.off('service:accepted');
+  offServiceAccepted(callback) {
+    if (this.socket && callback) {
+      this.socket.off('service:accepted', callback);
     }
   }
 
   onServiceTaken(callback) {
     if (this.socket) {
-      this.socket.off('service:taken');
+      this.socket.off('service:taken', callback);
       this.socket.on('service:taken', callback);
     }
   }
 
-  offServiceTaken() {
-    if (this.socket) {
-      this.socket.off('service:taken');
+  offServiceTaken(callback) {
+    if (this.socket && callback) {
+      this.socket.off('service:taken', callback);
     }
   }
 
   onQuoteExpired(callback) {
     if (this.socket) {
-      this.socket.off('quote:expired');
+      this.socket.off('quote:expired', callback);
       this.socket.on('quote:expired', callback);
     }
   }
 
-  offQuoteExpired() {
-    if (this.socket) {
-      this.socket.off('quote:expired');
+  offQuoteExpired(callback) {
+    if (this.socket && callback) {
+      this.socket.off('quote:expired', callback);
     }
   }
 

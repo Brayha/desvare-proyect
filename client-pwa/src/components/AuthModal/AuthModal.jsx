@@ -4,6 +4,7 @@ import { Call, Lock, Profile, Sms, Message } from 'iconsax-react';
 import { authAPI } from '../../services/api';
 import { useToast } from '@hooks/useToast';
 import { useAuth } from '../../contexts/AuthContext';
+import socketService from '../../services/socket';
 import './AuthModal.css';
 import logo from '../../assets/img/Desvare.svg';
 
@@ -114,6 +115,8 @@ const AuthModal = ({ isOpen, onDismiss, onSuccess }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     await authLogin(user);
+    // Actualizar el JWT en el socket para que las validaciones de ownership funcionen
+    socketService.updateAuth();
     if (onSuccess) onSuccess(user);
     handleReset();
   };

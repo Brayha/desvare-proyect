@@ -217,11 +217,11 @@ const DriverOnWay = () => {
     const locationPollInterval = setInterval(pollDriverLocation, LOCATION_POLL_INTERVAL_MS);
 
     // POLLING DE ESTADO: fallback para service:started y service:completed cuando el socket falla.
-    // Reutiliza el mismo endpoint /location que ya devuelve el campo status.
-    //   in_progress → conductor ingresó el código → mostrar tarjeta "vamos al destino"
-    //   completed   → conductor terminó → redirigir a calificación
+    // Flags para evitar múltiples alertas/redirects en bucle
+    let statusHandled = false;
+
     const pollServiceStatus = async () => {
-      if (!activeRequestId) return;
+      if (!activeRequestId || statusHandled) return;
       try {
         const token = localStorage.getItem("token");
         const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`, {
@@ -235,8 +235,7 @@ const DriverOnWay = () => {
         if (status === 'in_progress') {
           setServiceStarted(true);
         } else if (status === 'completed') {
-          // Guardar datos para RatingService (igual que el handler de socket).
-          // Sin esto, RatingService redirige a /home por no encontrar completedService.
+          statusHandled = true;
           const completedServiceData = {
             requestId: activeRequestId,
             driver: parsedData?.driver,
@@ -250,7 +249,7 @@ const DriverOnWay = () => {
           showSuccess('¡Servicio completado!');
           setTimeout(() => window.location.replace('/rate-service'), 1000);
         } else if (status === 'cancelled') {
-          // Fallback para cuando el socket no llegó (iOS background / red inestable)
+          statusHandled = true;
           localStorage.removeItem('activeService');
           localStorage.removeItem('currentRequestId');
           presentAlert({

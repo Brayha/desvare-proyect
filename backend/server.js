@@ -366,6 +366,11 @@ io.on('connection', (socket) => {
   
   // Actualizar estado de disponibilidad del conductor
   socket.on('driver:availability-changed', ({ driverId, isOnline }) => {
+    // Ownership: solo el conductor autenticado puede cambiar su propio estado
+    if (socket.user && socket.user._id.toString() !== driverId?.toString()) {
+      console.warn(`⛔ [Socket] driver:availability-changed rechazado — socket.user=${socket.user._id} ≠ driverId=${driverId}`);
+      return;
+    }
     const driverData = connectedDrivers.get(driverId);
     if (driverData) {
       driverData.isOnline = isOnline;
@@ -384,6 +389,11 @@ io.on('connection', (socket) => {
 
   // Registro de cliente
   socket.on('client:register', async (clientId) => {
+    // Ownership: el cliente autenticado solo puede registrarse con su propio ID
+    if (socket.user && socket.user._id.toString() !== clientId?.toString()) {
+      console.warn(`⛔ [Socket] client:register rechazado — socket.user=${socket.user._id} ≠ clientId=${clientId}`);
+      return;
+    }
     connectedClients.set(clientId, socket.id);
     console.log(`👤 Cliente registrado: ${clientId} (socketId: ${socket.id})`);
 

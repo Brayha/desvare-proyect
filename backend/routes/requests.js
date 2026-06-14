@@ -124,6 +124,11 @@ router.post('/:id/quote', requireAuth, requireDriver, async (req, res) => {
     const { id } = req.params;
     const { driverId, driverName, amount, location } = req.body;
 
+    // Ownership: solo el conductor autenticado puede cotizar en su nombre
+    if (req.user._id.toString() !== driverId?.toString()) {
+      return res.status(403).json({ error: 'No puedes cotizar en nombre de otro conductor.' });
+    }
+
     // Validar campos requeridos
     if (!driverId || !driverName || !amount) {
       return res.status(400).json({ 
@@ -339,6 +344,11 @@ router.post('/:id/accept', requireAuth, async (req, res) => {
       });
     }
 
+    // Ownership: solo el cliente autenticado puede aceptar en su nombre
+    if (req.user._id.toString() !== clientId?.toString()) {
+      return res.status(403).json({ error: 'No puedes aceptar cotizaciones de otra persona.' });
+    }
+
     // Buscar la solicitud
     const request = await Request.findById(id);
     if (!request) {
@@ -481,6 +491,11 @@ router.delete('/:requestId/quote/:driverId', requireAuth, requireDriver, async (
     const { requestId, driverId } = req.params;
     const { reason, customReason } = req.body;
 
+    // Ownership: solo el conductor autenticado puede cancelar su propia cotización
+    if (req.user._id.toString() !== driverId?.toString()) {
+      return res.status(403).json({ error: 'No puedes cancelar cotizaciones de otro conductor.' });
+    }
+
     console.log(`🚫 Conductor ${driverId} cancelando cotización para solicitud ${requestId}`);
     console.log(`📝 Razón: ${reason}, Custom: ${customReason}`);
 
@@ -568,10 +583,39 @@ router.delete('/:requestId/quote/:driverId', requireAuth, requireDriver, async (
   }
 });
 
+// GET /api/requests/driver/:driverId - Historial de servicios del conductor
+router.get('/driver/:driverId', requireAuth, requireDriver, async (req, res) => {
+  try {
+    const { driverId } = req.params;
+
+    if (req.user._id.toString() !== driverId) {
+      return res.status(403).json({ error: 'Solo puedes ver tu propio historial.' });
+    }
+
+    const requests = await Request.find({
+      $or: [{ assignedDriverId: driverId }, { completedBy: driverId }],
+      status: { $in: ['completed', 'cancelled'] },
+    })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    res.json({ requests });
+  } catch (error) {
+    console.error('❌ Error obteniendo historial del conductor:', error);
+    res.status(500).json({ error: 'Error obteniendo historial', details: error.message });
+  }
+});
+
 // GET /api/requests/client/:id - Obtener solicitudes de un cliente
-router.get('/client/:id', async (req, res) => {
+router.get('/client/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Si hay token, verificar que el cliente solo accede a sus propias solicitudes
+    if (req.user && req.user._id.toString() !== id) {
+      return res.status(403).json({ error: 'No puedes ver solicitudes de otro cliente.' });
+    }
 
     // Buscar todas las solicitudes del cliente
     const requests = await Request.find({ clientId: id })
@@ -777,6 +821,11 @@ router.get('/:id', async (req, res) => {
 router.get('/nearby/:driverId', requireAuth, requireDriver, async (req, res) => {
   try {
     const { driverId } = req.params;
+
+    // Ownership: el conductor solo puede consultar solicitudes para sí mismo
+    if (req.user._id.toString() !== driverId) {
+      return res.status(403).json({ error: 'No puedes consultar solicitudes de otro conductor.' });
+    }
     
     // Buscar al conductor para obtener su ubicación y capacidades
     const driver = await User.findById(driverId);
@@ -941,6 +990,11 @@ router.post('/:id/complete', requireAuth, requireDriver, async (req, res) => {
   try {
     const { id } = req.params;
     const { driverId, completedAt } = req.body;
+
+    // Ownership: solo el conductor autenticado puede completar su propio servicio
+    if (req.user._id.toString() !== driverId?.toString()) {
+      return res.status(403).json({ error: 'No puedes completar servicios de otro conductor.' });
+    }
     
     console.log(`✅ Completando servicio ${id} por conductor ${driverId}`);
     
@@ -948,6 +1002,11 @@ router.post('/:id/complete', requireAuth, requireDriver, async (req, res) => {
     
     if (!request) {
       return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    // Verificar que el servicio esté en un estado completable
+    if (!['accepted', 'in_progress'].includes(request.status)) {
+      return res.status(400).json({ error: `No se puede completar un servicio en estado '${request.status}'.` });
     }
     
     // Verificar que el conductor que completa es el asignado
@@ -998,6 +1057,69 @@ router.post('/:id/complete', requireAuth, requireDriver, async (req, res) => {
 });
 
 // ========================================
+// POST /api/requests/:id/cancel-by-driver - Cancelar servicio (conductor asignado)
+// Fallback REST para cuando el socket no está disponible
+// ========================================
+router.post('/:id/cancel-by-driver', requireAuth, requireDriver, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { driverId, reason, customReason } = req.body;
+
+    // Ownership
+    if (req.user._id.toString() !== driverId?.toString()) {
+      return res.status(403).json({ error: 'No puedes cancelar servicios de otro conductor.' });
+    }
+
+    const request = await Request.findById(id);
+    if (!request) return res.status(404).json({ error: 'Solicitud no encontrada' });
+
+    if (!['accepted', 'in_progress'].includes(request.status)) {
+      return res.status(400).json({ error: `No se puede cancelar una solicitud en estado '${request.status}'.` });
+    }
+
+    if (request.assignedDriverId?.toString() !== driverId?.toString()) {
+      return res.status(403).json({ error: 'Solo el conductor asignado puede cancelar el servicio.' });
+    }
+
+    // Actualizar solicitud
+    request.status = 'cancelled';
+    request.cancelledAt = new Date();
+    request.cancelledBy = 'driver';
+    request.cancellationReason = reason || null;
+    request.cancellationCustomReason = customReason || null;
+    request.updatedAt = new Date();
+    request.trackingData = { ...request.trackingData, isActive: false };
+    await request.save();
+
+    // Liberar al conductor
+    await User.findByIdAndUpdate(driverId, {
+      'driverProfile.isOnline': true,
+      'driverProfile.currentServiceId': null,
+    });
+
+    // Notificar al cliente por socket si está disponible
+    if (global.io && global.connectedClients && request.clientId) {
+      const clientSocketId = global.connectedClients.get(request.clientId.toString());
+      if (clientSocketId) {
+        global.io.to(clientSocketId).emit('service:cancelled', {
+          requestId: id,
+          cancelledBy: 'driver',
+          reason,
+          message: 'El conductor canceló el servicio',
+        });
+      }
+    }
+
+    console.log(`🚫 Conductor ${driverId} canceló servicio ${id} vía REST`);
+    res.json({ message: 'Servicio cancelado exitosamente' });
+
+  } catch (error) {
+    console.error('❌ Error al cancelar servicio por conductor:', error);
+    res.status(500).json({ error: 'Error al cancelar servicio', details: error.message });
+  }
+});
+
+// ========================================
 // POST /api/requests/:id/rate - Calificar servicio (cliente autenticado)
 // ========================================
 router.post('/:id/rate', requireAuth, async (req, res) => {
@@ -1018,6 +1140,11 @@ router.post('/:id/rate', requireAuth, async (req, res) => {
     
     if (!request) {
       return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+
+    // Ownership: solo el cliente dueño del servicio puede calificarlo
+    if (request.clientId && req.user._id.toString() !== request.clientId.toString()) {
+      return res.status(403).json({ error: 'No puedes calificar servicios de otro cliente.' });
     }
     
     // Verificar que el servicio esté completado
