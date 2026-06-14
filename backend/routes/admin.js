@@ -76,7 +76,7 @@ router.post('/login', async (req, res) => {
         role: 'admin',
         email: admin.email 
       },
-      process.env.JWT_SECRET || 'desvare-secret-key-2024',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 

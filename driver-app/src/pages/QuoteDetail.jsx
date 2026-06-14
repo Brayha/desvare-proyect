@@ -72,8 +72,7 @@ const QuoteDetail = () => {
   // Escuchar eventos de socket que afectan al estado de esta cotización mientras
   // el conductor espera respuesta aquí (puede no estar en Home).
   useEffect(() => {
-    // 1. El cliente ACEPTÓ mi cotización → ir a ActiveService
-    socketService.onServiceAccepted((data) => {
+    const handleServiceAccepted = (data) => {
       console.log('🎉 [QuoteDetail] Cotización aceptada por el cliente:', data);
 
       const parsedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -85,7 +84,6 @@ const QuoteDetail = () => {
       localStorage.setItem('activeService', JSON.stringify(serviceToSave));
       localStorage.removeItem('lastQuotedRequest');
 
-      // Marcar conductor como OCUPADO (consistente con Home.onServiceAccepted)
       const updatedUser = { ...parsedUser };
       if (updatedUser.driverProfile) updatedUser.driverProfile.isOnline = false;
       localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -99,71 +97,45 @@ const QuoteDetail = () => {
       setTimeout(() => {
         window.location.replace('/active-service');
       }, 400);
-    });
+    };
 
-    // 2. El CLIENTE CANCELÓ la búsqueda (antes de aceptar a nadie)
-    socketService.onRequestCancelled((data) => {
+    const handleRequestCancelled = (data) => {
       console.log('🚫 [QuoteDetail] Solicitud cancelada por el cliente:', data);
-
-      // Solo reaccionar si es la solicitud que estamos viendo
       if (data.requestId?.toString() !== requestId?.toString()) return;
 
       localStorage.removeItem('lastQuotedRequest');
+      present({ message: 'El cliente canceló la búsqueda', duration: 3000, color: 'warning' });
+      setTimeout(() => window.location.replace('/home'), 400);
+    };
 
-      present({
-        message: 'El cliente canceló la búsqueda',
-        duration: 3000,
-        color: 'warning',
-      });
-
-      setTimeout(() => {
-        window.location.replace('/home');
-      }, 400);
-    });
-
-    // 3. Otro conductor fue seleccionado (service:taken) — ya no hay nada que esperar
-    socketService.onServiceTaken((data) => {
+    const handleServiceTaken = (data) => {
       console.log('⚠️ [QuoteDetail] Servicio tomado por otro conductor:', data);
-
       if (data.requestId?.toString() !== requestId?.toString()) return;
 
       localStorage.removeItem('lastQuotedRequest');
+      present({ message: 'El cliente eligió a otro conductor', duration: 3000, color: 'medium' });
+      setTimeout(() => window.location.replace('/home'), 400);
+    };
 
-      present({
-        message: 'El cliente eligió a otro conductor',
-        duration: 3000,
-        color: 'medium',
-      });
-
-      setTimeout(() => {
-        window.location.replace('/home');
-      }, 400);
-    });
-
-    // 4. La cotización expiró (backend emite quote:expired al conductor afectado)
-    socketService.onQuoteExpired((data) => {
+    const handleQuoteExpired = (data) => {
       console.log('⏰ [QuoteDetail] Cotización expirada:', data);
-
       if (data.requestId?.toString() !== requestId?.toString()) return;
 
       localStorage.removeItem('lastQuotedRequest');
+      present({ message: 'La cotización expiró sin respuesta del cliente', duration: 3000, color: 'medium' });
+      setTimeout(() => window.location.replace('/home'), 400);
+    };
 
-      present({
-        message: 'La cotización expiró sin respuesta del cliente',
-        duration: 3000,
-        color: 'medium',
-      });
-
-      setTimeout(() => {
-        window.location.replace('/home');
-      }, 400);
-    });
+    socketService.onServiceAccepted(handleServiceAccepted);
+    socketService.onRequestCancelled(handleRequestCancelled);
+    socketService.onServiceTaken(handleServiceTaken);
+    socketService.onQuoteExpired(handleQuoteExpired);
 
     return () => {
-      socketService.offServiceAccepted();
-      socketService.offRequestCancelled();
-      socketService.offServiceTaken();
-      socketService.offQuoteExpired();
+      socketService.offServiceAccepted(handleServiceAccepted);
+      socketService.offRequestCancelled(handleRequestCancelled);
+      socketService.offServiceTaken(handleServiceTaken);
+      socketService.offQuoteExpired(handleQuoteExpired);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);

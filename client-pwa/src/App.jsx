@@ -32,6 +32,8 @@ import RequestConfirmation from './pages/RequestConfirmation';
 import WaitingQuotes from './pages/WaitingQuotes';
 import DriverOnWay from './pages/DriverOnWay';
 import RatingService from './pages/RatingService';
+import ServiceHistory from './pages/ServiceHistory';
+import ServiceDetail from './pages/ServiceDetail';
 import TabLayout from './components/TabLayout/TabLayout';
 
 // Carga diferida: nombres sin "Privacy" evitan bloqueo por ad blockers al importar el bundle
@@ -197,6 +199,8 @@ function App() {
             }} />
             <Route exact path="/driver-on-way" component={DriverOnWay} />
             <Route exact path="/rate-service" component={RatingService} />
+            <Route exact path="/service-history" component={ServiceHistory} />
+            <Route exact path="/service-detail/:id" component={ServiceDetail} />
             
             {/* Tabs (Desvare + Mi cuenta) */}
             <Route exact path="/terms" render={() => (

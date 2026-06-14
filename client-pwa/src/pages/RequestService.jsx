@@ -162,12 +162,11 @@ const RequestService = () => {
           });
         }
 
-        // ✅ Limpiar currentRequestId antiguo para evitar conflictos
-        if (currentRequestId) {
+        // Limpiar currentRequestId solo si NO hay un servicio activo en curso
+        const activeStatus = localStorage.getItem("activeServiceStatus");
+        if (currentRequestId && !activeStatus) {
           localStorage.removeItem("currentRequestId");
-          console.log(
-            "🗑️ RequestId antiguo eliminado (usuario canceló búsqueda)",
-          );
+          console.log("🗑️ RequestId antiguo eliminado (usuario canceló búsqueda)");
         }
 
         showSuccess(
@@ -406,8 +405,9 @@ const RequestService = () => {
       console.log("✅ Solicitud enviada correctamente");
       showSuccess("✅ Buscando conductores...");
 
-      // Guardar requestId en localStorage para WaitingQuotes
+      // Guardar requestId y estado en localStorage para WaitingQuotes y reanudación
       localStorage.setItem("currentRequestId", requestId);
+      localStorage.setItem("activeServiceStatus", "quoting");
       console.log("💾 RequestId guardado en localStorage:", requestId);
 
       // Esperar un momento para asegurar que localStorage se sincroniza

@@ -771,6 +771,14 @@ io.on('connection', (socket) => {
 
   // Cliente acepta una cotización
   socket.on('service:accept', async (data) => {
+    if (!socket.user) {
+      console.warn(`⚠️ service:accept rechazado: socket anónimo`);
+      return;
+    }
+    if (socket.user._id.toString() !== data.clientId?.toString()) {
+      console.warn(`⚠️ service:accept rechazado: ${socket.user._id} intentó aceptar como ${data.clientId}`);
+      return;
+    }
     console.log('✅ Cliente aceptó cotización:', data);
     console.log(`👤 Cliente: ${data.clientId}`);
     console.log(`🚗 Conductor aceptado: ${data.acceptedDriverId}`);
@@ -929,6 +937,14 @@ io.on('connection', (socket) => {
   // Completar Servicio
   // ========================================
   socket.on('service:complete', async (data) => {
+    if (!socket.user) {
+      console.warn(`⚠️ service:complete rechazado: socket anónimo`);
+      return;
+    }
+    if (socket.user._id.toString() !== data.driverId?.toString()) {
+      console.warn(`⚠️ service:complete rechazado: ${socket.user._id} intentó completar como ${data.driverId}`);
+      return;
+    }
     console.log('✅ Servicio completado:', data);
     console.log(`🚗 Conductor: ${data.driverName}`);
     console.log(`📦 Request ID: ${data.requestId}`);
@@ -1005,6 +1021,13 @@ io.on('connection', (socket) => {
   // TRACKING EN TIEMPO REAL - Ubicación del Conductor
   // ========================================
   socket.on('driver:location-update', async (data) => {
+    if (!socket.user) {
+      return; // Silent drop: ubicaciones anónimas no son válidas
+    }
+    if (socket.user._id.toString() !== data.driverId?.toString()) {
+      console.warn(`⚠️ driver:location-update rechazado: ${socket.user._id} intentó emitir como ${data.driverId}`);
+      return;
+    }
     const { requestId, driverId, location, heading, speed, accuracy } = data;
 
     // Contador de updates para este socket (se reinicia si el socket reconecta)
@@ -1209,6 +1232,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor.' });
 });
 // ────────────────────────────────────────────────────────────────────────────
+
+// Prevenir crashes del proceso por errores no capturados
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ UnhandledRejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('❌ UncaughtException:', err.message);
+});
 
 // Iniciar servidor
 const PORT = process.env.PORT || 5000;

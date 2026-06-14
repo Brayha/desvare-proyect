@@ -584,6 +584,7 @@ const WaitingQuotes = () => {
     // localStorage.removeItem("requestData"); ← NO eliminar, mantener origen/destino/vehículo
     // localStorage.removeItem("currentRequestId"); ← NO eliminar AQUÍ, RequestService lo limpiará
     localStorage.removeItem("activeService");
+    localStorage.removeItem("activeServiceStatus");
     localStorage.removeItem("quotesReceived");
 
     // ✅ Limpiar estado de cotizaciones en memoria
@@ -777,6 +778,7 @@ const WaitingQuotes = () => {
             serviceDetails: data.request.serviceDetails,
           })
         );
+        localStorage.setItem("activeServiceStatus", "accepted");
 
         // ✅ CRÍTICO: Limpiar todo el estado de búsqueda del localStorage
         localStorage.removeItem("quotesReceived");
@@ -872,6 +874,10 @@ const WaitingQuotes = () => {
             quote={notification.quote}
             duration={notification.duration}
             onClose={() => closeNotification(notification.id)}
+            onViewDetail={(quote) => {
+              closeNotification(notification.id);
+              handleQuoteClick(quote);
+            }}
           />
         ))}
 

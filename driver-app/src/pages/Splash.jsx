@@ -6,11 +6,12 @@ import './Splash.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
+// clearSession NO elimina activeService: si el token expiró pero el conductor
+// tiene un servicio en curso, queremos que vea el estado al reconectarse.
 const clearSession = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
   localStorage.removeItem('hasSeenLocationModal');
-  localStorage.removeItem('activeService');
 };
 
 const Splash = () => {

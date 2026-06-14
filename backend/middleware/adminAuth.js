@@ -16,7 +16,7 @@ const requireAdmin = async (req, res, next) => {
     }
 
     // Verificar token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'desvare-secret-key-2024');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Verificar que es admin
     if (decoded.role !== 'admin') {

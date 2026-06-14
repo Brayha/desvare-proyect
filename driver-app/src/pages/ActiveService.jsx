@@ -25,7 +25,8 @@ import {
 } from "@ionic/react";
 import { Routing, Call, Location, UserTick } from "iconsax-react";
 import RequestDetailMap from "../components/RequestDetailMap";
-import socketService from "../services/socket"; // ✅ Importar socketService
+import socketService from "../services/socket";
+import { requestAPI } from "../services/api";
 import "./ActiveService.css"; // ✅ Reutilizar mismo CSS
 
 // Importar iconos SVG de vehículos
@@ -728,20 +729,12 @@ const ActiveService = () => {
                 driverName: user?.name,
               });
 
-              // 3. Si el socket no está disponible, usar REST como fallback
+              // 3. Si el socket no está disponible, usar requestAPI como fallback
               if (!cancelled) {
-                const token = localStorage.getItem("token");
-                await fetch(
-                  `${API_URL}/api/requests/${serviceData.requestId}/cancel-by-driver`,
-                  {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      ...(token && { Authorization: `Bearer ${token}` }),
-                    },
-                    body: JSON.stringify({ driverId: user?._id, reason }),
-                  },
-                ).catch(() => {});
+                await requestAPI.cancelByDriver(serviceData.requestId, {
+                  driverId: user?._id,
+                  reason,
+                }).catch(() => {});
               }
 
               // 4. Limpiar localStorage y estado del conductor

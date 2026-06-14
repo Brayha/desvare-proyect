@@ -14,7 +14,7 @@ const { uploadDriverDocument, uploadMultipleDocuments } = require('../services/s
 const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
 const { sendOTP, verifyOTP } = require('../services/sms');
 const { notifyAdminNewDriver, notifyDriverApproved } = require('../services/emailService');
-const { requireAuth, requireDriver } = require('../middleware/auth');
+const { requireAuth, requireDriver, optionalAuth } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/adminAuth');
 
 // Configurar multer para manejar archivos en memoria
@@ -121,12 +121,16 @@ router.post('/register-initial', async (req, res) => {
  * Actualiza el nombre y email del conductor tras verificar OTP.
  * El PIN se guarda aparte con /set-driver-pin.
  */
-router.post('/complete-initial-registration', async (req, res) => {
+router.post('/complete-initial-registration', optionalAuth, async (req, res) => {
   try {
     const { userId, name, email } = req.body;
 
     if (!userId || !name) {
       return res.status(400).json({ error: 'userId y name son requeridos' });
+    }
+
+    if (req.user && req.user._id.toString() !== userId) {
+      return res.status(403).json({ error: 'No puedes modificar el perfil de otro conductor.' });
     }
 
     const driver = await User.findById(userId);
@@ -247,11 +251,15 @@ router.post('/login-pin', async (req, res) => {
  * Crea o actualiza el PIN de 4 dígitos del conductor
  * Se usa después de verificar OTP (registro nuevo o recuperación)
  */
-router.post('/set-driver-pin', async (req, res) => {
+router.post('/set-driver-pin', optionalAuth, async (req, res) => {
   try {
     const { userId, pin } = req.body;
     if (!userId || !pin) return res.status(400).json({ error: 'userId y pin son requeridos' });
     if (!/^\d{4}$/.test(pin)) return res.status(400).json({ error: 'El PIN debe ser de 4 dígitos numéricos' });
+
+    if (req.user && req.user._id.toString() !== userId) {
+      return res.status(403).json({ error: 'No puedes establecer el PIN de otro conductor.' });
+    }
 
     const driver = await User.findById(userId);
     if (!driver || driver.userType !== 'driver') {
@@ -423,7 +431,7 @@ router.post('/verify-otp', async (req, res) => {
  * POST /api/drivers/register-complete
  * Completa el registro con datos básicos del conductor
  */
-router.post('/register-complete', async (req, res) => {
+router.post('/register-complete', optionalAuth, async (req, res) => {
   try {
     const {
       userId,
@@ -441,6 +449,10 @@ router.post('/register-complete', async (req, res) => {
       return res.status(400).json({
         error: 'userId, entityType y city son requeridos'
       });
+    }
+
+    if (req.user && req.user._id.toString() !== userId) {
+      return res.status(403).json({ error: 'No puedes completar el registro de otro conductor.' });
     }
 
     const driver = await User.findById(userId);
@@ -551,7 +563,7 @@ router.post('/register-complete', async (req, res) => {
  * POST /api/drivers/upload-documents
  * Sube todos los documentos del conductor de una vez
  */
-router.post('/upload-documents', async (req, res) => {
+router.post('/upload-documents', optionalAuth, async (req, res) => {
   try {
     const {
       userId,
@@ -559,6 +571,10 @@ router.post('/upload-documents', async (req, res) => {
     } = req.body;
 
     console.log(`📤 Subiendo documentos para conductor ${userId}`);
+
+    if (req.user && req.user._id.toString() !== userId) {
+      return res.status(403).json({ error: 'No puedes subir documentos de otro conductor.' });
+    }
 
     if (!userId || !documents || !Array.isArray(documents)) {
       return res.status(400).json({
@@ -636,7 +652,7 @@ router.post('/upload-documents', async (req, res) => {
  * POST /api/drivers/set-capabilities
  * Configura qué tipos de vehículos puede recoger el conductor
  */
-router.post('/set-capabilities', async (req, res) => {
+router.post('/set-capabilities', optionalAuth, async (req, res) => {
   try {
     const {
       userId,
@@ -645,6 +661,10 @@ router.post('/set-capabilities', async (req, res) => {
     } = req.body;
 
     console.log(`⚙️ Configurando capacidades para conductor ${userId}`);
+
+    if (req.user && req.user._id.toString() !== userId) {
+      return res.status(403).json({ error: 'No puedes modificar las capacidades de otro conductor.' });
+    }
 
     if (!userId || !vehicleCapabilities || !Array.isArray(vehicleCapabilities)) {
       return res.status(400).json({

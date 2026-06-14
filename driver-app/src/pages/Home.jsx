@@ -622,7 +622,9 @@ const Home = () => {
   // Refrescar solicitudes
   const handleRefresh = async (event) => {
     console.log('🔄 Pull to refresh activado en driver-app');
-    await loadRequests(user._id);
+    if (user?._id) {
+      await loadRequests(user._id);
+    }
     
     present({
       message: `${requests.length} solicitudes actualizadas`,
@@ -630,7 +632,7 @@ const Home = () => {
       color: 'success',
     });
     
-    event.detail.complete();
+    event?.detail?.complete();
   };
 
   // Manejar solicitud de permisos de ubicación desde el modal (diferente al banner)
@@ -728,7 +730,7 @@ const Home = () => {
             // Leer user una sola vez fuera del map, no N veces por cada solicitud
             const currentUser = JSON.parse(localStorage.getItem('user'));
             return requests.map((request) => {
-              const myQuote = request.quotes?.find(q => q.driverId === currentUser?._id);
+              const myQuote = request.quotes?.find(q => q.driverId?.toString() === currentUser?._id?.toString());
               return (
                 <RequestCard
                   key={request.requestId}

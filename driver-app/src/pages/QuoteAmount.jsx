@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   IonPage,
@@ -40,6 +40,17 @@ const QuoteAmount = () => {
   const [amount, setAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
   const [loading, setLoading] = useState(false);
+  const [initError, setInitError] = useState(false);
+
+  // Si después de 4 segundos no hay datos, redirigir al home
+  useEffect(() => {
+    if (!request || !driverLocation) {
+      const timer = setTimeout(() => {
+        setInitError(true);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [request, driverLocation]);
 
   const handleAmountChange = (e) => {
     const value = e.detail.value;
@@ -156,10 +167,17 @@ const QuoteAmount = () => {
       <IonPage>
         <IonContent className="ion-padding ion-text-center">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '15px' }}>
-            <IonSpinner name="crescent" />
-            <IonText color="medium">
-              <p>Cargando...</p>
-            </IonText>
+            {initError ? (
+              <>
+                <IonText color="danger"><p>No se pudieron cargar los datos de la solicitud.</p></IonText>
+                <IonButton onClick={() => history.replace('/home')}>Volver al inicio</IonButton>
+              </>
+            ) : (
+              <>
+                <IonSpinner name="crescent" />
+                <IonText color="medium"><p>Cargando...</p></IonText>
+              </>
+            )}
           </div>
         </IonContent>
       </IonPage>

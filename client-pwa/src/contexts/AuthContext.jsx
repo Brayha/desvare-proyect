@@ -125,6 +125,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('requestData');
     localStorage.removeItem('vehicleData');
     localStorage.removeItem('currentRequestId');
+    localStorage.removeItem('activeService');
+    localStorage.removeItem('activeServiceStatus');
+    localStorage.removeItem('completedService');
+    localStorage.removeItem('quotesReceived');
     
     // Limpiar estado
     setUser(null);

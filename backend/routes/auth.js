@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { sendOTP, verifyOTP } = require('../services/sms');
+const { optionalAuth } = require('../middleware/auth');
 
 // POST /api/auth/register - Registrar nuevo usuario
 router.post('/register', async (req, res) => {
@@ -217,12 +218,17 @@ router.post('/login-pin', async (req, res) => {
 });
 
 // POST /api/auth/set-pin - Guardar o actualizar clave de 4 dígitos (post-OTP)
-router.post('/set-pin', async (req, res) => {
+router.post('/set-pin', optionalAuth, async (req, res) => {
   try {
     const { userId, pin } = req.body;
 
     if (!userId || !pin || String(pin).length !== 4 || !/^\d{4}$/.test(pin)) {
       return res.status(400).json({ error: 'userId y pin de exactamente 4 dígitos son requeridos' });
+    }
+
+    // Si hay token, validar ownership
+    if (req.user && req.user._id.toString() !== userId) {
+      return res.status(403).json({ error: 'No puedes establecer el PIN de otro usuario.' });
     }
 
     const user = await User.findById(userId);
@@ -259,7 +265,7 @@ router.post('/set-pin', async (req, res) => {
 });
 
 // POST /api/auth/complete-registration - Completar registro: nombre, email y PIN
-router.post('/complete-registration', async (req, res) => {
+router.post('/complete-registration', optionalAuth, async (req, res) => {
   try {
     const { userId, name, email, pin } = req.body;
 
@@ -268,6 +274,11 @@ router.post('/complete-registration', async (req, res) => {
     }
     if (!pin || String(pin).length !== 4 || !/^\d{4}$/.test(pin)) {
       return res.status(400).json({ error: 'pin de exactamente 4 dígitos es requerido' });
+    }
+
+    // Si hay token, validar ownership
+    if (req.user && req.user._id.toString() !== userId) {
+      return res.status(403).json({ error: 'No puedes modificar el registro de otro usuario.' });
     }
 
     const user = await User.findById(userId);

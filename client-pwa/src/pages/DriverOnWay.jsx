@@ -133,13 +133,17 @@ const DriverOnWay = () => {
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
+    // Flag para evitar que los socket handlers se disparen más de una vez
+    let socketHandled = false;
+
     // ✅ Escuchar cuando el conductor completa el servicio
     socketService.onServiceCompleted((data) => {
+      if (socketHandled) return;
+      socketHandled = true;
       console.log('✅ Servicio completado por el conductor:', data);
       
       showSuccess('¡Servicio completado! El conductor llegó al destino.');
       
-      // Guardar datos del servicio completado para la pantalla de calificación
       const completedServiceData = {
         requestId: data.requestId || parsedData.requestId,
         driver: parsedData.driver,
@@ -150,15 +154,10 @@ const DriverOnWay = () => {
       };
       
       localStorage.setItem('completedService', JSON.stringify(completedServiceData));
-      console.log('💾 Datos del servicio completado guardados para calificación');
-      
-      // Limpiar servicio activo
       localStorage.removeItem('activeService');
+      localStorage.removeItem('activeServiceStatus');
+      localStorage.removeItem('currentRequestId');
       
-      // window.location.replace desmonta DriverOnWay completamente (incluye los
-      // setInterval de polling). Con history.replace el componente queda vivo y
-      // el polling volvería a detectar "completed" redirigiendo al cliente de vuelta
-      // a /rate-service después de haber calificado.
       setTimeout(() => {
         window.location.replace('/rate-service');
       }, 1500);
@@ -181,10 +180,12 @@ const DriverOnWay = () => {
 
     // El conductor canceló el servicio: informar al cliente y redirigir
     socketService.onServiceCancelled((data) => {
+      if (socketHandled) return;
+      socketHandled = true;
       console.log('🚫 El conductor canceló el servicio:', data);
 
-      // Limpiar servicio activo (conservar requestData y vehicleData para prellenar)
       localStorage.removeItem('activeService');
+      localStorage.removeItem('activeServiceStatus');
       localStorage.removeItem('currentRequestId');
 
       const reason = data.reason || 'Sin motivo especificado';

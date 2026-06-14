@@ -157,9 +157,9 @@ const VehicleWizardModal = ({
   useEffect(() => {
     if (isOpen) {
       // LIMPIAR localStorage corrupto para evitar errores de data vieja
-      // Solo limpiamos vehicleData si ya existe routeData (estamos en flujo de servicio)
-      const routeData = localStorage.getItem('routeData');
-      if (routeData && !userId) {
+      // Solo limpiamos vehicleData si ya existe requestData (estamos en flujo de servicio)
+      const requestData = localStorage.getItem('requestData');
+      if (requestData && !userId) {
         // Usuario no logueado con ruta activa: limpiar vehicleData viejo
         localStorage.removeItem('vehicleData');
         console.log('🧹 localStorage.vehicleData limpiado (prevenir data corrupta)');

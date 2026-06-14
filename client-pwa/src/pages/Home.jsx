@@ -70,7 +70,7 @@ const Home = () => {
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
 
-  /* Registrar cliente con socket si está autenticado */
+  /* Registrar cliente con socket + reanudar servicio activo si existe */
   useEffect(() => {
     const userData = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -78,7 +78,18 @@ const Home = () => {
       const parsedUser = JSON.parse(userData);
       socketService.registerClient(parsedUser.id);
     }
-  }, []);
+
+    // Si hay un servicio en curso, redirigir a la pantalla correcta
+    const currentRequestId = localStorage.getItem("currentRequestId");
+    const activeServiceStatus = localStorage.getItem("activeServiceStatus");
+    if (currentRequestId) {
+      if (activeServiceStatus === "accepted" || activeServiceStatus === "in_progress") {
+        history.replace("/driver-on-way");
+      } else if (activeServiceStatus === "pending" || activeServiceStatus === "quoting") {
+        history.replace("/waiting-quotes");
+      }
+    }
+  }, [history]);
 
   /* Detectar scroll para cambiar navbar */
   const handleScroll = (e) => {
