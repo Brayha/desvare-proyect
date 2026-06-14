@@ -6,15 +6,62 @@
   --padding-end: 0;
 }
 
+.request-service-page::part(scroll) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Mapa a pantalla completa */
 .fullscreen-map {
   display: flex;
   width: 100%;
   height: 100%;
+  min-height: 0;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: stretch;
+  gap: 12px;
   padding: 10px;
+  box-sizing: border-box;
+  /* Separación inferior: barra de gestos iOS / navegación Android */
+  padding-bottom: max(calc(10px + env(safe-area-inset-bottom, 0px)), 16px);
+}
+
+/* El mapa crece y deja espacio fijo para la caja inferior */
+.fullscreen-map .map-picker-container,
+.fullscreen-map .map-loading {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  width: 100%;
+}
+
+/* Botón re-centrar: dentro del mapa, no sobre la caja de abajo */
+.fullscreen-map .map-recenter-btn {
+  bottom: 16px;
+}
+
+/* ── Estado 3: con vehículo agregado ─────────────────────────────────────────
+   El mapa queda fijo arriba y el contenido de abajo hace scroll.
+   Estados 1 y 2 no se ven afectados.
+   ─────────────────────────────────────────────────────────────────────────── */
+.fullscreen-map--with-vehicle {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mapa con altura fija en estado 3 */
+.fullscreen-map--with-vehicle .map-picker-container {
+  flex: none;
+  height: 50svh;
+  min-height: 550px;
+  max-height: 500px;
+}
+
+/* Caja inferior: ocupa el ancho completo y no encoge */
+.fullscreen-map--with-vehicle .search-bottom-bar-container-wrapper {
+  flex-shrink: 0;
+  width: 100%;
 }
 
 /* Header flotante sobre el mapa */
@@ -77,10 +124,14 @@
 
 .search-bottom-bar-container-wrapper {
   padding: 0;
-  margin-top: -40px;
+  margin-top: 0;
+  flex-shrink: 0;
   z-index: 100;
   width: 100%;
   max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .search-bottom-bar-container {
@@ -263,7 +314,7 @@
   color: white;
 }
 
-/* Cargando ubicación */
+/* Cargando ubicación (dentro de .fullscreen-map usa flex; fuera mantiene altura completa) */
 .map-loading {
   display: flex;
   flex-direction: column;
@@ -272,6 +323,7 @@
   height: 100%;
   gap: 16px;
   background: var(--ion-background-color);
+  border-radius: 10px;
 }
 
 .map-loading p {
@@ -438,7 +490,7 @@
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
   width: 100%;
   padding: 10px;
-  gap: 15px;
+  gap: 10px;
 }
 
 .route-header {
@@ -446,6 +498,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-left: 10px;
 }
 
 .route-header h3 {
@@ -471,6 +524,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 6px 0;
 }
 
 .route-icon {
@@ -481,14 +535,33 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .route-icon.origin-marker {
-  background: rgba(56, 128, 255, 0.15);
+  background: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
 .route-icon.destination-marker {
-  background: rgba(235, 68, 90, 0.15);
+  background: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Línea punteada entre origen y destino */
+.route-icon.origin-marker::after {
+  content: '';
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 22px;
+  border-left: 2px dashed #CBD5E1;
+  z-index: 0;
 }
 
 .route-location-info {
@@ -518,12 +591,10 @@
 }
 
 .route-stats-info {
-  border-radius: 15px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 0;
+  border-top: 1px solid #e5e7eb;
   display: flex;
-  padding: 10px;
+  padding: 0;
   align-items: center;
   gap: var(--Padding-4, 4px);
   align-self: stretch;
@@ -534,6 +605,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: 10px;
   gap: 2px;
   flex: 1;
 }
@@ -662,13 +734,15 @@
 
 .vehicle-added-card {
   display: flex;
-  padding: 5px;
+  padding: 20px 10px 10px 10px;
+  gap: 10px;
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
   border-radius: 20px;
   border: 1px solid #e5e7eb;
-  background: #f7f7f7;
+  background: white;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
 .vehicle-added-card-content-buttons {
@@ -776,7 +850,7 @@
   overflow: hidden;
   color: #9ca3af;
   text-overflow: ellipsis;
-  font-size: 12px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 600;
   line-height: normal;
@@ -788,9 +862,9 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  color: #4b5563;
+  color: var(--ion-color-dark);
   text-overflow: ellipsis;
-  font-size: 14px;
+  font-size: 16px;
   font-style: normal;
   font-weight: 500;
   line-height: 20px; /* 142.857% */

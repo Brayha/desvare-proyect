@@ -88,7 +88,7 @@ const registerFCMToken = async (userId) => {
       console.log('✅ Token FCM obtenido:', token);
 
       // Guardar el token en el backend
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
       const response = await fetch(`${API_URL}/api/auth/fcm-token`, {
         method: 'POST',
         headers: {
@@ -199,7 +199,7 @@ export const unregisterFCMToken = async (userId) => {
       return;
     }
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
     await fetch(`${API_URL}/api/auth/fcm-token`, {
       method: 'DELETE',
       headers: {

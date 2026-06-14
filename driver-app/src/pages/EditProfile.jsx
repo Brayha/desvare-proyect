@@ -18,7 +18,7 @@ import { authAPI, citiesAPI } from "../services/api";
 import { Input } from "../components/Input/Input";
 import "./EditProfile.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 const DOCUMENT_LABELS = {
   selfie: { label: "Selfie", key: "selfie", type: "single" },

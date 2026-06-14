@@ -1,299 +1,220 @@
-# 🚗 Desvare App - MVP
+# Desvare App — Documentación del Proyecto
 
-Sistema de cotizaciones en tiempo real para conductores y clientes.
+Sistema de cotizaciones en tiempo real para clientes y conductores de grúas y servicios vehiculares.
 
-## 📖 Descripción
+---
 
-Desvare es una plataforma que conecta clientes que necesitan cotizaciones con conductores disponibles en tiempo real. Los clientes solicitan cotizaciones desde una PWA y los conductores responden desde su app móvil.
-
-## 🏗️ Arquitectura
-
-El proyecto está dividido en 3 partes:
+## Arquitectura General
 
 ```
 desvare-proyect/
-├── backend/           # API REST + Socket.IO (Node.js + Express)
+├── backend/           # API REST + Socket.IO (Node.js + Express + MongoDB)
 ├── client-pwa/        # PWA para clientes (React + Ionic + Vite)
-├── driver-app/        # App móvil para conductores (Ionic React)
-└── README.md          # Este archivo
+├── driver-app/        # App para conductores (Ionic React + Capacitor → Android)
+├── admin-dashboard/   # Dashboard administrativo (React + Vite)
+└── README.md
 ```
 
-## 🚀 Tecnologías
+| Capa | Stack |
+|---|---|
+| Backend | Node.js, Express, MongoDB Atlas, Socket.IO, JWT |
+| Frontend | React 18, Ionic Framework, Vite |
+| Mapas | Mapbox GL, Google Maps API |
+| Notificaciones | Firebase Cloud Messaging (PWA), Capacitor Push (Android) |
+| Monitoreo | Sentry |
 
-### Backend
-- Node.js + Express
-- MongoDB Atlas
-- Socket.IO (tiempo real)
-- JWT (autenticación)
+---
 
-### Frontend (PWA y App)
-- React 18
-- Ionic Framework
-- Vite
-- Socket.IO Client
-- Axios
+## Escenario 1 — Pruebas locales en el Mac (apuntando a producción)
 
-## 📦 Instalación Completa
+Este es el flujo para **desarrollar y probar cambios** en cualquiera de las tres apps sin necesitar correr el backend localmente. Todo se conecta al backend real de producción (`https://api.desvare.app`).
 
-### 1. Clonar y configurar
+### Cómo funciona
 
-```bash
-# Ya estás en el directorio del proyecto
-cd desvare-proyect
+```
+Tu Mac (localhost)                  Producción
+┌─────────────────────┐             ┌────────────────────────┐
+│ PWA  :5173          │──────────→  │ api.desvare.app        │
+│ Driver App  :5174   │──────────→  │ (Backend DigitalOcean) │
+│ Admin Dashboard :5175+│─────────→ │                        │
+└─────────────────────┘             └────────────────────────┘
 ```
 
-### 2. Instalar Backend
+El conductor puede usar tanto la driver-app corriendo en local (`:5174`) como la **app ya publicada en Play Store** — ambas apuntan al mismo backend de producción y se ven entre sí.
 
-```bash
-cd backend
-npm install
-cp .env.example .env
-```
+### Configuración de los .env (ya configurados)
 
-**IMPORTANTE**: Edita `backend/.env` y configura tu conexión a MongoDB Atlas:
+**`client-pwa/.env`**
 ```env
-MONGODB_URI=tu_conexion_mongodb_atlas_aqui
-JWT_SECRET=un_secreto_super_seguro
+VITE_API_URL=https://api.desvare.app
+VITE_SOCKET_URL=https://api.desvare.app
+VITE_MAPBOX_TOKEN=pk.eyJ1IjoiZGVzdmFyZSI...
+VITE_GOOGLE_MAPS_API_KEY=AIzaSyBnF2Os...
+VITE_FIREBASE_API_KEY=AIzaSyBnF2Os...
+VITE_FIREBASE_AUTH_DOMAIN=desvare-production.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=desvare-production
+VITE_FIREBASE_STORAGE_BUCKET=desvare-production.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=200097542658
+VITE_FIREBASE_APP_ID=1:200097542658:web:22e41ad8dbef3c6889ed1b
+VITE_FIREBASE_VAPID_KEY=BMr5Hz6cXWdWtiPI8q...
 ```
 
-### 3. Instalar PWA de Clientes
-
-```bash
-cd ../client-pwa
-npm install
-cp .env.example .env
+**`driver-app/.env`**
+```env
+VITE_API_URL=https://api.desvare.app
+VITE_SOCKET_URL=https://api.desvare.app
+VITE_MAPBOX_TOKEN=pk.eyJ1IjoiZGVzdmFyZSI...
+VITE_DEV_MODE=true
 ```
 
-### 4. Instalar App de Conductores
-
-```bash
-cd ../driver-app
-npm install
-cp .env.example .env
+**`admin-dashboard/.env`**
+```env
+VITE_API_URL=https://api.desvare.app
+VITE_SOCKET_URL=https://api.desvare.app
 ```
 
-## 🏃 Ejecutar el Sistema Completo
+### Pasos para levantar todo
 
-### Terminal 1 - Backend
-```bash
-cd backend
-npm run dev
-```
-El backend correrá en `http://localhost:5000`
-
-### Terminal 2 - PWA de Clientes
+**Terminal 1 — PWA Cliente:**
 ```bash
 cd client-pwa
 npm run dev
+# → http://localhost:5173
 ```
-La PWA correrá en `http://localhost:5173`
 
-### Terminal 3 - App de Conductores
+**Terminal 2 — App Conductores:**
 ```bash
 cd driver-app
 npm run dev
-```
-La app correrá en `http://localhost:5174` (o el siguiente puerto disponible)
-
-## 🎯 Flujo de Uso
-
-### 1. Registro de Usuarios
-
-**Cliente (PWA):**
-1. Abre `http://localhost:5173`
-2. Haz clic en "Regístrate aquí"
-3. Completa el formulario
-4. Serás redirigido a la página principal
-
-**Conductor (App):**
-1. Abre `http://localhost:5174`
-2. Haz clic en "Regístrate aquí"
-3. Completa el formulario
-4. Serás redirigido a la página principal
-
-### 2. Flujo de Cotización
-
-1. **Cliente solicita cotización:**
-   - En la PWA, presiona "Buscar Cotización"
-   - La solicitud se envía a todos los conductores conectados
-
-2. **Conductor recibe solicitud:**
-   - La app muestra una alerta con la nueva solicitud
-   - El conductor ve el nombre del cliente
-   - Presiona "Cotizar" para responder
-
-3. **Conductor envía cotización:**
-   - Ingresa el monto en el modal
-   - Presiona "Enviar Cotización"
-   - La cotización se envía al cliente instantáneamente
-
-4. **Cliente recibe cotización:**
-   - La PWA muestra una notificación
-   - Se agrega a la lista de cotizaciones recibidas
-   - Muestra: nombre del conductor, monto y hora
-
-## 🔌 Comunicación en Tiempo Real
-
-El sistema usa Socket.IO para comunicación bidireccional:
-
-```
-Cliente → Backend → Conductor
-   ↓
-Buscar Cotización
-
-Conductor → Backend → Cliente
-      ↓
-Enviar Cotización
+# → http://localhost:5174
 ```
 
-### Eventos Socket.IO:
-
-**Cliente emite:**
-- `client:register` - Registra cliente en el sistema
-- `request:new` - Nueva solicitud de cotización
-
-**Conductor emite:**
-- `driver:register` - Registra conductor en el sistema
-- `quote:send` - Envía cotización
-
-**Backend emite:**
-- `request:received` → A conductores (nueva solicitud)
-- `quote:received` → A cliente específico (cotización recibida)
-
-## 📡 API Endpoints
-
-### Autenticación
-- `POST /api/auth/register` - Registrar usuario
-- `POST /api/auth/login` - Iniciar sesión
-
-### Solicitudes
-- `POST /api/requests/new` - Crear solicitud
-- `POST /api/requests/:id/quote` - Agregar cotización
-- `GET /api/requests/client/:id` - Obtener solicitudes de cliente
-
-## 🗄️ Base de Datos (MongoDB)
-
-### Colecciones:
-
-**users**
-```javascript
-{
-  email: String,
-  password: String (hash),
-  name: String,
-  userType: "client" | "driver",
-  createdAt: Date
-}
+**Terminal 3 — Dashboard Admin:**
+```bash
+cd admin-dashboard
+npm run dev
+# → http://localhost:5175 (o el siguiente puerto libre)
 ```
 
-**requests**
-```javascript
-{
-  clientId: ObjectId,
-  clientName: String,
-  status: "pending" | "quoted" | "accepted" | "rejected" | "completed",
-  quotes: [{
-    driverId: ObjectId,
-    driverName: String,
-    amount: Number,
-    timestamp: Date
-  }],
-  createdAt: Date
-}
-```
+### Probar el flujo completo
 
-## 📱 Compilar App Móvil para Android
+1. Abre Chrome con modo iPhone 14 Pro (F12 → icono de teléfono).
+2. Abre dos pestañas:
+   - `http://localhost:5173` → simula el **cliente**
+   - `http://localhost:5174` → simula el **conductor** (o usa la app de Play Store)
+3. En la PWA: busca origen y destino → agrega tu vehículo → pulsa **"Buscar Cotizaciones"**.
+4. En la app del conductor: recibe la solicitud en la bandeja → cotiza.
+5. En la PWA: acepta la cotización.
+6. En el admin: `http://localhost:5175` puedes ver las solicitudes y gestionar conductores.
 
-### Desde driver-app:
+---
+
+## Escenario 2 — Lanzamiento a producción real
+
+Cuando los cambios estén probados y listos para usuarios reales.
+
+### PWA Cliente → Vercel
+
+El deploy es automático al hacer push a `main`. Las variables de entorno están configuradas en el dashboard de Vercel (Settings → Environment Variables). No se requiere acción manual.
 
 ```bash
-# Instalar Capacitor
-npm install @capacitor/core @capacitor/cli @capacitor/android
+git add .
+git commit -m "feat: descripción del cambio"
+git push origin main
+# Vercel hace el deploy automáticamente en desvare.app
+```
 
-# Inicializar
-npx cap init
+### Dashboard Admin → Vercel
 
-# Build
+Igual que la PWA — deploy automático desde `main`. URL: `admin.desvare.app`
+
+### App Conductores → Play Store (APK/AAB)
+
+> **Crítico:** Vite bake las variables en el build. Antes de compilar, el `driver-app/.env` debe tener `VITE_DEV_MODE=false` y apuntar a producción (ya lo hace por defecto).
+
+```bash
+cd driver-app
+
+# 1. Asegúrate de que el .env tenga:
+#    VITE_API_URL=https://api.desvare.app
+#    VITE_DEV_MODE=false
+
+# 2. Compilar
 npm run build
 
-# Agregar Android
-npx cap add android
+# 3. Sincronizar con Capacitor
+npx cap sync android
 
-# Sincronizar
-npx cap sync
-
-# Abrir en Android Studio
+# 4. Abrir Android Studio y generar el AAB firmado
 npx cap open android
+# En Android Studio: Build → Generate Signed Bundle / APK → Android App Bundle
 ```
 
-## 🌐 Deploy en Producción
+Luego sube el `.aab` a [Google Play Console](https://play.google.com/console) → Desvare Conductor → Producción → Nueva versión.
 
-### Backend (DigitalOcean)
+### Backend → DigitalOcean
 
-1. Crear Droplet en DigitalOcean
-2. Instalar Node.js
-3. Clonar repositorio
-4. Configurar variables de entorno
-5. Instalar PM2: `npm install -g pm2`
-6. Ejecutar: `pm2 start server.js`
-7. Configurar Nginx como reverse proxy
-8. Configurar dominio: desvare.app
-
-### PWA (Vercel / Netlify)
+El backend ya está corriendo en producción. Para redesplegar cambios:
 
 ```bash
-cd client-pwa
-npm run build
-# Deploy en Vercel o Netlify
+# SSH al servidor
+cd /ruta/del/proyecto/backend
+git pull origin main
+npm install
+pm2 restart server
 ```
 
-### App Móvil (Google Play Store)
+---
 
-1. Compilar APK desde Android Studio
-2. Firmar APK
-3. Subir a Google Play Console
+## Variables de entorno — referencia completa
 
-## 🔧 Configuración de CORS
+### client-pwa
 
-En producción, actualiza las URLs en `backend/.env`:
+| Variable | Descripción | Dónde obtenerla |
+|---|---|---|
+| `VITE_API_URL` | URL del backend | `https://api.desvare.app` (prod) / `http://localhost:5000` (local backend) |
+| `VITE_SOCKET_URL` | URL del socket | Igual que API_URL |
+| `VITE_MAPBOX_TOKEN` | Token de mapas | [account.mapbox.com](https://account.mapbox.com) |
+| `VITE_GOOGLE_MAPS_API_KEY` | Geocoding y Places | Google Cloud Console → Credenciales → Browser key |
+| `VITE_FIREBASE_*` | Notificaciones push web | Firebase Console → Configuración del proyecto → App web |
+| `VITE_FIREBASE_VAPID_KEY` | Clave push web | Firebase → Cloud Messaging → Certificados web push |
+| `VITE_SENTRY_DSN` | Monitoreo de errores | sentry.io → tu proyecto → Settings → DSN |
 
-```env
-CLIENT_URL=https://desvare.app
-DRIVER_URL=https://driver.desvare.app
-```
+### driver-app
 
-## 🐛 Troubleshooting
+| Variable | Descripción | Valor |
+|---|---|---|
+| `VITE_API_URL` | URL del backend | `https://api.desvare.app` |
+| `VITE_SOCKET_URL` | URL del socket | `https://api.desvare.app` |
+| `VITE_MAPBOX_TOKEN` | Token de mapas | [account.mapbox.com](https://account.mapbox.com) |
+| `VITE_DEV_MODE` | Omite permisos nativos en browser | `true` en local, `false` al compilar APK |
+| `VITE_SENTRY_DSN` | Monitoreo de errores | sentry.io |
 
-### Backend no conecta a MongoDB
-- Verifica tu string de conexión en `.env`
-- Asegúrate de que tu IP esté en whitelist de MongoDB Atlas
+---
 
-### Socket.IO no conecta
-- Verifica que todas las URLs en `.env` sean correctas
-- Revisa que el backend esté corriendo
-- Abre la consola del navegador para ver errores
+## Troubleshooting
 
-### Apps no cargan
-- Ejecuta `npm install` en cada directorio
-- Verifica que los puertos 5000, 5173, 5174 estén disponibles
-- Reinicia los servidores
+### Error CORS al conectar con el backend
+- Verifica que `VITE_API_URL` en el `.env` apunte a `https://api.desvare.app`.
+- Reinicia el servidor de desarrollo después de cambiar el `.env`.
 
-## 📝 Próximos Pasos (Roadmap)
+### El mapa no carga
+- Verifica que `VITE_MAPBOX_TOKEN` esté definido y sea válido.
+- Revisa la consola del navegador: un error 401 de Mapbox indica token incorrecto.
 
-- [ ] Agregar notificaciones push nativas
-- [ ] Implementar sistema de pagos
-- [ ] Historial de viajes
-- [ ] Rating y reseñas
-- [ ] Mapa con ubicación en tiempo real
-- [ ] Chat entre cliente y conductor
-- [ ] Panel de administración
+### El conductor no recibe solicitudes
+- Confirma que PWA y app del conductor apuntan al mismo backend.
+- Verifica que el conductor esté en estado "Activo" en la app.
 
-## 👥 Equipo
+### La app Android no conecta
+- El `.env` debe tener `VITE_API_URL=https://api.desvare.app` antes de compilar.
+- Un build con URL incorrecta requiere recompilar desde cero.
 
-Desarrollado para el MVP de Desvare App.
+### Error 401 al aceptar cotización
+- El token JWT expiró. Cierra sesión y vuelve a ingresar.
 
-## 📄 Licencia
+---
 
-Todos los derechos reservados.
+## Equipo
 
-
+Desarrollado por el equipo de Desvare. Todos los derechos reservados.

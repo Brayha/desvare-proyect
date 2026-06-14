@@ -24,9 +24,11 @@ class SocketService {
       return this.socket;
     }
 
-    // Crear nueva conexión
+    // Crear nueva conexión (enviando el JWT en el handshake para autenticar el socket)
     console.log('🔌 Creando nueva conexión Socket.IO...');
+    const token = localStorage.getItem('token') || '';
     this.socket = io(SOCKET_URL, {
+      auth: { token },
       transports: ['polling', 'websocket'],
       autoConnect: true,
       reconnection: true,
@@ -57,6 +59,18 @@ class SocketService {
     });
 
     return this.socket;
+  }
+
+  // Actualizar el token JWT del socket (llamar después de login/refresh de token)
+  updateAuth() {
+    const token = localStorage.getItem('token') || '';
+    if (this.socket) {
+      this.socket.auth = { token };
+      // Reconectar para que el servidor aplique el nuevo token en el handshake
+      if (this.socket.connected) {
+        this.socket.disconnect().connect();
+      }
+    }
   }
 
   // Registrar callback que se ejecuta cada vez que el socket reconecta

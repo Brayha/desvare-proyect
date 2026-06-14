@@ -533,8 +533,8 @@ const Home = () => {
                 © {new Date().getFullYear()} Desvare. Todos los derechos reservados.
               </p>
               <div className="lp-footer__legal">
-                <a href="#" className="lp-footer__link">Términos y condiciones</a>
-                <a href="#" className="lp-footer__link">Política de privacidad</a>
+                <a href="/terms" className="lp-footer__link">Términos y condiciones</a>
+                <a href="/privacy" className="lp-footer__link">Política de privacidad</a>
               </div>
             </div>
           </div>

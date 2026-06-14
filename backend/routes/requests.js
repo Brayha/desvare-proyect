@@ -601,7 +601,7 @@ router.get('/client/:id', async (req, res) => {
 
 // GET /api/requests/:id/quotes - Obtener cotizaciones activas de una solicitud
 // Usado por WaitingQuotes al recargar la página para recuperar cotizaciones ya recibidas
-router.get('/:id/quotes', async (req, res) => {
+router.get('/:id/quotes', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -660,7 +660,7 @@ router.get('/:id/quotes', async (req, res) => {
 
 // GET /api/requests/:id/location - Última ubicación conocida del conductor (polling REST)
 // Usado por DriverOnWay como fallback cuando el socket no entrega la ubicación (iOS, background)
-router.get('/:id/location', async (req, res) => {
+router.get('/:id/location', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -801,14 +801,34 @@ router.get('/nearby/:driverId', requireAuth, requireDriver, async (req, res) => 
       });
     }
 
-    // Obtener solicitudes pendientes y cotizadas por este conductor (no expiradas)
+    // Obtener solicitudes pendientes y cotizadas (no expiradas), filtrando por proximidad si hay coordenadas
     const now = new Date();
-    const requests = await Request.find({
-      status: { $in: ['pending', 'quoted'] }, // ✅ Solo pending y quoted (excluye accepted, cancelled, completed)
-      expiresAt: { $gt: now } // No expiradas
-    })
-    .sort({ createdAt: -1 }) // Más recientes primero
-    .limit(50); // Limitar a 50 solicitudes
+    const { lat, lng } = req.query;
+    const driverLat = parseFloat(lat);
+    const driverLng = parseFloat(lng);
+
+    const baseFilter = {
+      status: { $in: ['pending', 'quoted'] },
+      expiresAt: { $gt: now },
+    };
+
+    // Si el conductor envió su ubicación, filtrar por radio de 50 km usando índice 2dsphere
+    const RADIUS_KM = 50;
+    const EARTH_RADIUS_KM = 6371;
+    if (!isNaN(driverLat) && !isNaN(driverLng)) {
+      baseFilter['origin.coordinates'] = {
+        $geoWithin: {
+          $centerSphere: [[driverLng, driverLat], RADIUS_KM / EARTH_RADIUS_KM],
+        },
+      };
+      console.log(`📍 Filtrando solicitudes en radio ${RADIUS_KM}km alrededor de (${driverLat.toFixed(4)}, ${driverLng.toFixed(4)})`);
+    } else {
+      console.log(`⚠️ /nearby sin coordenadas del conductor — devolviendo todas las solicitudes activas`);
+    }
+
+    const requests = await Request.find(baseFilter)
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     console.log(`🔍 Solicitudes encontradas antes de formatear: ${requests.length}`);
     
@@ -944,6 +964,17 @@ router.post('/:id/complete', requireAuth, requireDriver, async (req, res) => {
     request.updatedAt = new Date();
     
     await request.save();
+    
+    // Liberar al conductor: volver a estado disponible y limpiar el servicio activo
+    try {
+      await User.findByIdAndUpdate(driverId, {
+        'driverProfile.isOnline': true,
+        'driverProfile.currentServiceId': null,
+      });
+      console.log(`✅ Conductor ${driverId} liberado y puesto en línea tras completar servicio`);
+    } catch (driverUpdateErr) {
+      console.error('⚠️ No se pudo liberar conductor tras completar:', driverUpdateErr.message);
+    }
     
     console.log(`✅ Servicio ${id} marcado como completado`);
     

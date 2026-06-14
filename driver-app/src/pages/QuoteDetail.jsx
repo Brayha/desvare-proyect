@@ -39,7 +39,7 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 // ============================================
 // API URL Configuration
 // ============================================
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 const QuoteDetail = () => {
   const { requestId } = useParams();
@@ -197,8 +197,10 @@ const QuoteDetail = () => {
       const userData = localStorage.getItem("user");
       if (userData) {
         const parsedUser = JSON.parse(userData);
+        const token = localStorage.getItem("token");
         const response = await fetch(
           `${API_URL}/api/drivers/profile/${parsedUser._id}`,
+          { headers: { ...(token && { Authorization: `Bearer ${token}` }) } },
         );
         const data = await response.json();
 

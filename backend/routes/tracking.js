@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Request = require('../models/Request');
+const User = require('../models/User');
 
 /**
  * POST /api/tracking/location
@@ -40,17 +41,32 @@ router.post('/location', async (req, res) => {
       'trackingData.lastDriverLocation.updatedAt': new Date(),
     });
 
-    // Emitir evento Socket.IO a todos los clientes conectados
-    // (el cliente PWA escucha 'driver:location-update' para mover el marcador en el mapa)
+    // Emitir evento Socket.IO solo al cliente de ESTE servicio (no broadcast global)
     if (global.io) {
-      global.io.emit('driver:location-update', {
+      const locationPayload = {
         requestId,
         driverId,
         location: { lat: latNum, lng: lngNum },
         heading:  headingNum,
         speed:    speedNum,
         accuracy: accuracy || 0,
-      });
+      };
+
+      // Buscar el socket del cliente de este servicio específico
+      const request = await Request.findById(requestId)
+        .select('trackingData.clientId')
+        .lean();
+      const clientId = request?.trackingData?.clientId;
+      const clientSocketId = clientId
+        ? global.connectedClients?.get(clientId.toString())
+        : null;
+
+      if (clientSocketId) {
+        global.io.to(clientSocketId).emit('driver:location-update', locationPayload);
+      } else {
+        // Fallback: emitir solo a la sala del servicio si existe, o loguear sin broadcast
+        console.log(`⚠️ [GPS Nativo] Cliente de servicio ${requestId} no conectado al socket`);
+      }
     }
 
     res.json({ success: true });

@@ -27,7 +27,7 @@ import './Home.css';
 // ============================================
 // API URL Configuration
 // ============================================
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 const Home = () => {
   const history = useHistory();
@@ -79,7 +79,10 @@ const Home = () => {
     // Solo si NO tiene selfie, cargarlo del backend
     const loadProfileImage = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/drivers/profile/${parsedUser._id}`);
+        const profileToken = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/api/drivers/profile/${parsedUser._id}`, {
+          headers: { ...(profileToken && { Authorization: `Bearer ${profileToken}` }) },
+        });
         if (response.ok) {
           const data = await response.json();
           const selfie = data.driver?.documents?.selfie;
@@ -455,14 +458,25 @@ const Home = () => {
   const loadRequests = async (driverId) => {
     try {
       setLoadingRequests(true);
-      const response = await fetch(`${API_URL}/api/requests/nearby/${driverId}`);
+      const token = localStorage.getItem('token');
+
+      // Enviar coordenadas del conductor para que el backend filtre por proximidad
+      const locationParams = driverLocation
+        ? `?lat=${driverLocation.lat}&lng=${driverLocation.lng}`
+        : '';
+
+      const response = await fetch(`${API_URL}/api/requests/nearby/${driverId}${locationParams}`, {
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+      });
       const data = await response.json();
       
       if (response.ok) {
         let fetchedRequests = data.requests || [];
 
-        // Si el backend no devolvió la última solicitud cotizada (en DEV sin GPS real),
-        // verificar su estado real antes de reinyectarla para evitar mostrar canceladas.
+        // Si el backend no devolvió la solicitud que ya cotizamos
+        // (puede pasar cuando el GPS no está disponible o la solicitud ya no es "nearby"),
+        // la reinyectamos desde localStorage para que el conductor siempre la vea.
+        // Los eventos de socket (aceptación, cancelación, expiración) la limpian cuando corresponde.
         const lastQuotedRaw = localStorage.getItem('lastQuotedRequest');
         if (lastQuotedRaw) {
           try {
@@ -480,21 +494,11 @@ const Home = () => {
                 return r;
               });
             } else {
-              // No la devolvió el backend: consultar estado real antes de inyectar
-              try {
-                const statusRes = await requestAPI.getRequest(lastQuoted.requestId);
-                const realStatus = statusRes.data?.request?.status;
-                if (realStatus === 'cancelled' || realStatus === 'expired' || realStatus === 'completed') {
-                  localStorage.removeItem('lastQuotedRequest');
-                  console.log(`🗑️ lastQuotedRequest limpiado: estado = ${realStatus}`);
-                } else {
-                  fetchedRequests = [lastQuoted, ...fetchedRequests];
-                  console.log('📋 Solicitud cotizada inyectada (activa, sin GPS en DEV)');
-                }
-              } catch {
-                // Si no se puede verificar, inyectar igual (evitar regresión en DEV)
-                fetchedRequests = [lastQuoted, ...fetchedRequests];
-              }
+              // No la devolvió el backend → inyectarla directamente sin llamada extra.
+              // Los eventos de socket se encargan de limpiar lastQuotedRequest cuando
+              // la solicitud es aceptada, cancelada o expirada.
+              fetchedRequests = [lastQuoted, ...fetchedRequests];
+              console.log('📋 Solicitud cotizada reinyectada desde localStorage');
             }
           } catch (_) {
             localStorage.removeItem('lastQuotedRequest');
@@ -527,9 +531,13 @@ const Home = () => {
         return;
       }
 
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/drivers/toggle-availability`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
         body: JSON.stringify({
           driverId: user._id,
           isOnline: newStatus

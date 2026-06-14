@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://api.desvare.app';
 
 class SocketService {
   constructor() {
@@ -23,7 +23,9 @@ class SocketService {
     }
 
     console.log('🔌 Creando nueva conexión Socket.IO...');
+    const token = localStorage.getItem('token') || '';
     this.socket = io(SOCKET_URL, {
+      auth: { token },
       transports: ['polling', 'websocket'], // polling primero: más compatible con iOS y proxies de redes móviles
       autoConnect: true,
       reconnection: true,
@@ -60,6 +62,17 @@ class SocketService {
     });
 
     return this.socket;
+  }
+
+  // Actualizar el token JWT del socket (llamar después de login/refresh de token)
+  updateAuth() {
+    const token = localStorage.getItem('token') || '';
+    if (this.socket) {
+      this.socket.auth = { token };
+      if (this.socket.connected) {
+        this.socket.disconnect().connect();
+      }
+    }
   }
 
   // Registrar un callback que se ejecuta cada vez que el socket reconecta
@@ -171,13 +184,27 @@ class SocketService {
   }
 
   // Notificar al backend que el código fue validado correctamente.
-  // El backend emite service:started al cliente para cambiar su vista.
+  // El backend verifica el código y emite service:started al cliente si es correcto.
   notifyCodeValidated(data) {
     if (this.socket && this.socket.connected) {
       this.socket.emit('service:code-validated', data);
       console.log('🔑 Evento service:code-validated enviado al backend');
     } else {
       console.warn('⚠️ Socket desconectado al validar código');
+    }
+  }
+
+  // Escuchar rechazo de código inválido desde el servidor
+  onCodeInvalid(callback) {
+    if (this.socket) {
+      this.socket.off('service:code-invalid');
+      this.socket.on('service:code-invalid', callback);
+    }
+  }
+
+  offCodeInvalid() {
+    if (this.socket) {
+      this.socket.off('service:code-invalid');
     }
   }
 

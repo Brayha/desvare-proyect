@@ -372,9 +372,9 @@
    TÉRMINOS Y CONDICIONES
    ====================================== */
 .am-terms {
-  font-size: 11px;
-  line-height: 1.6;
-  color: #9CA3AF;
+  font-size: 14px;
+  line-height: auto;
+  color: var(--ion-color-dark);
   text-align: center;
   margin: 0;
 }
@@ -382,7 +382,7 @@
 .am-terms a {
   color: #0055FF;
   text-decoration: underline;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* ======================================

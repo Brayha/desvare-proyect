@@ -488,7 +488,10 @@ const RequestService = () => {
       <IonContent className="request-service-page">
         {/* Header flotante: logo centrado + botón de perfil si está logueado */}
         <div className="map-header-overlay">
-          <div className="map-header-logo" onClick={() => history.replace("/home")}>
+          <div
+            className="map-header-logo"
+            onClick={() => history.replace("/home")}
+          >
             <img src={logo} alt="Desvare" />
           </div>
           {isLoggedIn && (
@@ -497,15 +500,26 @@ const RequestService = () => {
               onClick={() => history.push("/tabs/my-account")}
               aria-label="Mi cuenta"
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="#0055ff"/>
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+                  fill="#0055ff"
+                />
               </svg>
             </button>
           )}
         </div>
 
         {/* Mapa a pantalla completa */}
-        <div className="fullscreen-map">
+        <div
+          className={`fullscreen-map${vehicleData?.vehicleSnapshot && destination ? " fullscreen-map--with-vehicle" : ""}`}
+        >
           {geoLoading ? (
             <div className="map-loading">
               <IonSpinner name="crescent" color="primary" />
@@ -550,8 +564,8 @@ const RequestService = () => {
                   <div className="search-button-content">
                     <h2>¿A dónde quieres llevar tu vehículo?</h2>
                     <p>
-                     Tu taller de confianza, casa o
-                      una dirección en específica?
+                      Tu taller de confianza, casa o una dirección en
+                      específica?
                     </p>
                   </div>
 
@@ -566,6 +580,7 @@ const RequestService = () => {
           {/* Tarjeta inferior con información de ruta - solo si hay destino */}
           {origin && destination && (
             <div className="search-bottom-bar-container-wrapper">
+              {/* Caja 1: Origen, destino y datos de la ruta */}
               <div className="confirm-route-card">
                 <div className="route-header">
                   <h3>Confirma el trayecto</h3>
@@ -578,7 +593,10 @@ const RequestService = () => {
                 <div className="route-locations">
                   {/* Origen */}
                   <div className="route-location-item">
-                    <div className="route-icon origin-marker">
+                    <div
+                      className="route-icon origin-marker"
+                      style={{ alignSelf: "flex-start", marginTop: 4 }}
+                    >
                       <Location size="20" color="#3880ff" variant="Bold" />
                     </div>
                     <div className="route-location-info">
@@ -627,94 +645,82 @@ const RequestService = () => {
                     </div>
                   </div>
                 )}
-
-                {/* Botón de agregar vehículo - Solo si NO hay vehículo */}
-                {!vehicleData?.vehicleSnapshot && (
-                  <Button
-                    variant="primary"
-                    size="large"
-                    fullWidth
-                    className="add-vehicle-button-blue"
-                    onClick={handleOpenVehicleWizard}
-                  >
-                    Agrega tu vehículo
-                  </Button>
-                )}
-
-                {/* {!vehicleData && (
-                  <div
-                    className="search-button"
-                    onClick={handleOpenVehicleWizard}
-                  >
-                    <div className="search-button-content">
-                      <h2>Agrega tu vehículo</h2>
-                      <p>Moto, carro, camioneta, bus o camión?</p>
-                    </div>
-
-                    <div className="add-button">
-                      <IonIcon icon={add} />
-                    </div>
-                  </div>
-                )} */}
-
-                {/* Card vehículo agregado - Solo si hay vehículo */}
-                {vehicleData?.vehicleSnapshot && (
-                  <div className="vehicle-added-card">
-                    <div
-                      className="vehicle-added-card-content"
-                      onClick={handleOpenVehicleWizard}
-                    >
-                      <div className="vehicle-added-card-content-image-container">
-                        <img
-                          src={getVehicleImageFromVehicle(
-                            vehicleData.vehicleSnapshot,
-                          )}
-                          alt={
-                            vehicleData.vehicleSnapshot.category?.name ||
-                            "Vehículo"
-                          }
-                        />
-                        <div className="vehicle-added-card-content-text">
-                          <h3 className="marca">
-                            {vehicleData.vehicleSnapshot.brand.name}
-                          </h3>
-                          <p className="modelo">
-                            {vehicleData.vehicleSnapshot.model.name}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="vehicle-added-card-content-buttons">
-                        <div className="placa">
-                          <p>{vehicleData.vehicleSnapshot.licensePlate}</p>
-                        </div>
-                        <Refresh size="20" color="#9CA3AF" variant="Linear" />
-                      </div>
-                    </div>
-                    <div className="problem-card">
-                      <h4>Problema</h4>
-                      <p>{vehicleData.serviceDetails.problem}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Botón Buscar Cotizaciones - Solo si hay vehículo */}
-                {vehicleData?.vehicleSnapshot && (
-                  <Button
-                    variant="primary"
-                    size="large"
-                    fullWidth
-                    className="add-vehicle-button-blue"
-                    onClick={handleConfirmRoute}
-                    disabled={!routeInfo || isSendingRequest}
-                    loading={isSendingRequest}
-                  >
-                    {isSendingRequest
-                      ? "Enviando solicitud..."
-                      : "Buscar Cotizaciones"}
-                  </Button>
-                )}
               </div>
+
+              {/* Caja 2: Datos del vehículo - Solo si hay vehículo (Estado 3) */}
+              {vehicleData?.vehicleSnapshot && (
+                <div className="vehicle-added-card">
+                  <div className="route-header">
+                    <h3>Vehiculo a recoger</h3>
+                  </div>
+
+                  <div
+                    className="vehicle-added-card-content"
+                    onClick={handleOpenVehicleWizard}
+                  >
+                    <div className="vehicle-added-card-content-image-container">
+                      <img
+                        src={getVehicleImageFromVehicle(
+                          vehicleData.vehicleSnapshot,
+                        )}
+                        alt={
+                          vehicleData.vehicleSnapshot.category?.name ||
+                          "Vehículo"
+                        }
+                      />
+                      <div className="vehicle-added-card-content-text">
+                        <h3 className="marca">
+                          {vehicleData.vehicleSnapshot.brand.name}
+                        </h3>
+                        <p className="modelo">
+                          {vehicleData.vehicleSnapshot.model.name}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="vehicle-added-card-content-buttons">
+                      <div className="placa">
+                        <p>{vehicleData.vehicleSnapshot.licensePlate}</p>
+                      </div>
+                      <Refresh size="20" color="#9CA3AF" variant="Linear" />
+                    </div>
+                  </div>
+                  <div className="problem-card">
+                    <h4>Problema</h4>
+                    <p>{vehicleData.serviceDetails.problem}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Botón independiente: "Agrega tu vehículo" - Estado 2 */}
+              {!vehicleData?.vehicleSnapshot && (
+                <Button
+                  variant="primary"
+                  size="large"
+                  fullWidth
+                  className="add-vehicle-button-blue"
+                  onClick={handleOpenVehicleWizard}
+                >
+                  Agrega tu vehículo
+                </Button>
+              )}
+
+              {/* Botón independiente: "Buscar Cotizaciones" - Estado 3 */}
+              {vehicleData?.vehicleSnapshot && (
+                <Button
+                  variant="primary"
+                  size="large"
+                  fullWidth
+                  className="add-vehicle-button-blue"
+                  onClick={handleConfirmRoute}
+                  disabled={!routeInfo || isSendingRequest}
+                  loading={isSendingRequest}
+                >
+                  {isSendingRequest
+                    ? "Enviando solicitud..."
+                    : "Buscar Cotizaciones"}
+                </Button>
+              )}
             </div>
           )}
         </div>

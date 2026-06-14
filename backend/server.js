@@ -116,6 +116,34 @@ const io = new Server(server, {
   cors: corsOptions
 });
 
+// ── Middleware de autenticación JWT para Socket.IO ────────────────────────────
+// El token se envía en el handshake: io(URL, { auth: { token } })
+// Si el token es válido → socket.user contiene los datos del usuario.
+// Si no hay token o es inválido → socket.user = null (clientes anónimos permitidos).
+const jwt = require('jsonwebtoken');
+const User = require('./models/User');
+
+io.use(async (socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) {
+    socket.user = null; // Conexión anónima (cliente sin cuenta)
+    return next();
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id)
+      .select('_id userType name driverProfile.status')
+      .lean();
+    socket.user = user || null;
+    next();
+  } catch {
+    // Token inválido o expirado → conexión sin autenticación, no rechazar
+    socket.user = null;
+    next();
+  }
+});
+// ────────────────────────────────────────────────────────────────────────────
+
 // 🆕 EXPORTAR io para usarlo en las rutas
 global.io = io;
 
@@ -253,6 +281,12 @@ io.on('connection', (socket) => {
 
   // Registro de conductor
   socket.on('driver:register', async (driverId) => {
+    // Validar que el socket autenticado corresponde al conductor que se registra
+    if (socket.user && socket.user._id.toString() !== driverId.toString()) {
+      console.warn(`⛔ [Socket] driver:register rechazado — socket.user=${socket.user._id} ≠ driverId=${driverId}`);
+      return;
+    }
+
     try {
       const User = require('./models/User');
       const driver = await User.findById(driverId);
@@ -483,6 +517,12 @@ io.on('connection', (socket) => {
 
   // Conductor envía respuesta
   socket.on('quote:send', async (data) => {
+    // Validar que el socket autenticado es el conductor que envía la cotización
+    if (socket.user && socket.user._id.toString() !== data.driverId?.toString()) {
+      console.warn(`⛔ [Socket] quote:send rechazado — socket.user=${socket.user._id} ≠ driverId=${data.driverId}`);
+      return;
+    }
+
     console.log('💰 Cotización recibida del conductor:', data);
     console.log('📍 Ubicación del conductor:', data.location);
     
@@ -582,6 +622,15 @@ io.on('connection', (socket) => {
 
   // Cancelación de solicitud (puede ser iniciada por el cliente o el conductor)
   socket.on('request:cancel', async (data) => {
+    // Validar que el socket autenticado corresponde al que cancela
+    if (socket.user) {
+      const cancellerIdFromData = data.cancelledBy === 'driver' ? data.driverId : data.clientId;
+      if (cancellerIdFromData && socket.user._id.toString() !== cancellerIdFromData.toString()) {
+        console.warn(`⛔ [Socket] request:cancel rechazado — socket.user=${socket.user._id} ≠ cancellerId=${cancellerIdFromData}`);
+        return;
+      }
+    }
+
     const cancelledBy = data.cancelledBy === 'driver' ? 'conductor' : 'cliente';
     console.log(`🚫 Solicitud cancelada por ${cancelledBy}:`, data.requestId);
     console.log('📝 Razón:', data.reason, data.customReason || '');
@@ -819,31 +868,50 @@ io.on('connection', (socket) => {
   // Código de seguridad validado → servicio en curso
   // ========================================
   socket.on('service:code-validated', async (data) => {
-    console.log(`🔑 Código validado para servicio ${data.requestId} — notificando cliente ${data.clientId}`);
+    console.log(`🔑 Verificando código para servicio ${data.requestId}`);
 
-    // Persistir status en MongoDB para que el polling REST del cliente detecte el cambio
-    // aunque el socket esté caído (iOS Safari)
     try {
       const Request = require('./models/Request');
+      const request = await Request.findById(data.requestId).select('securityCode status clientId');
+
+      if (!request) {
+        socket.emit('service:code-invalid', { message: 'Solicitud no encontrada' });
+        return;
+      }
+
+      // Verificar código en el servidor
+      const submittedCode = data.submittedCode?.toString();
+      const correctCode = request.securityCode?.toString();
+
+      if (!submittedCode || submittedCode !== correctCode) {
+        console.warn(`⛔ Código incorrecto para servicio ${data.requestId} (enviado: ${submittedCode})`);
+        socket.emit('service:code-invalid', { message: 'Código de seguridad incorrecto' });
+        return;
+      }
+
+      console.log(`✅ Código correcto para servicio ${data.requestId} — notificando cliente ${data.clientId}`);
+
+      // Persistir status en MongoDB para que el polling REST del cliente detecte el cambio
       await Request.findByIdAndUpdate(data.requestId, {
         status: 'in_progress',
         updatedAt: new Date()
       });
       console.log(`💾 Status actualizado a 'in_progress' en MongoDB para servicio ${data.requestId}`);
-    } catch (err) {
-      console.error('❌ Error actualizando status in_progress:', err.message);
-    }
 
-    const clientSocketId = connectedClients.get(data.clientId);
-    if (clientSocketId) {
-      io.to(clientSocketId).emit('service:started', {
-        requestId: data.requestId,
-        driverName: data.driverName,
-        message: '¡El código fue ingresado! Tu vehículo ya está en la grúa.',
-      });
-      console.log(`✅ Cliente ${data.clientId} notificado de inicio de servicio (socket)`);
-    } else {
-      console.log(`⚠️ Cliente ${data.clientId} no conectado al validar código — status ya persistido en DB`);
+      const clientSocketId = connectedClients.get(data.clientId);
+      if (clientSocketId) {
+        io.to(clientSocketId).emit('service:started', {
+          requestId: data.requestId,
+          driverName: data.driverName,
+          message: '¡El código fue ingresado! Tu vehículo ya está en la grúa.',
+        });
+        console.log(`✅ Cliente ${data.clientId} notificado de inicio de servicio (socket)`);
+      } else {
+        console.log(`⚠️ Cliente ${data.clientId} no conectado al validar código — status ya persistido en DB`);
+      }
+    } catch (err) {
+      console.error('❌ Error verificando código:', err.message);
+      socket.emit('service:code-invalid', { message: 'Error al verificar código' });
     }
   });
 

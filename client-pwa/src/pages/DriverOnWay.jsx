@@ -19,7 +19,7 @@ import "./DriverOnWay.css";
 
 import logo from "../assets/img/Desvare.svg";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 // Intervalo de polling REST cuando el socket no entrega la ubicación
 // (común en iOS Safari y cuando la app va a background)
@@ -81,7 +81,10 @@ const DriverOnWay = () => {
     const pollDriverLocation = async () => {
       if (!activeRequestId) return;
       try {
-        const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`);
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`, {
+          headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+        });
         if (!res.ok) return;
         const data = await res.json();
         if (data.location?.lat != null && data.location?.lng != null) {
@@ -220,7 +223,10 @@ const DriverOnWay = () => {
     const pollServiceStatus = async () => {
       if (!activeRequestId) return;
       try {
-        const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`);
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API_URL}/api/requests/${activeRequestId}/location`, {
+          headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+        });
         if (!res.ok) return;
         const data = await res.json();
         const status = data.status;

@@ -5,7 +5,7 @@
 
 import { PushNotifications } from '@capacitor/push-notifications';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 // Control para evitar registrar listeners múltiples veces
 let listenersRegistered = false;

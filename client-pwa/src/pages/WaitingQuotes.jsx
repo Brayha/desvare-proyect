@@ -27,7 +27,7 @@ import logo from "../assets/img/Desvare.svg";
 // ============================================
 // API URL Configuration
 // ============================================
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 // Normaliza la ubicación de una cotización al formato { lat, lng } que usa el mapa.
 // El backend guarda en GeoJSON { type:'Point', coordinates:[lng,lat] } pero el socket
@@ -205,7 +205,10 @@ const WaitingQuotes = () => {
       // El endpoint devuelve quotes ya normalizadas a { lat, lng } desde el backend,
       // pero pasamos también por normalizeQuoteLocation como doble seguro.
       try {
-        const res = await fetch(`${API_URL}/api/requests/${currentRequestId}/quotes`);
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API_URL}/api/requests/${currentRequestId}/quotes`, {
+          headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+        });
         if (res.ok) {
           const resData = await res.json();
           const existingQuotes = (resData.quotes || []).map((q) => ({
@@ -226,11 +229,14 @@ const WaitingQuotes = () => {
       return true;
     };
 
-    // Inicializar datos
-    const success = initializeData();
+    // Inicializar datos y luego registrar listeners usando IIFE async.
+    // Esto evita la race condition donde el socket podría emitir una cotización
+    // mientras initializeData() todavía está cargando datos de la API.
+    (async () => {
+    const success = await initializeData();
 
     // Solo registrar listener si la inicialización fue exitosa
-    if (success) {
+    if (success && isMounted) {
       console.log("👂 Registrando listener de cotizaciones");
 
       // Obtener el requestId actual para validación
@@ -258,7 +264,10 @@ const WaitingQuotes = () => {
         const currentRequestId = localStorage.getItem("currentRequestId");
         if (!currentRequestId) return;
         try {
-          const res = await fetch(`${API_URL}/api/requests/${currentRequestId}/quotes`);
+          const token = localStorage.getItem("token");
+          const res = await fetch(`${API_URL}/api/requests/${currentRequestId}/quotes`, {
+            headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+          });
           if (!res.ok) return;
           const resData = await res.json();
           const freshQuotes = (resData.quotes || []).map((q) => ({
@@ -380,6 +389,7 @@ const WaitingQuotes = () => {
         }
       });
     }
+    })(); // Cierre del IIFE async
 
     // Cleanup function
     return () => {
@@ -596,8 +606,10 @@ const WaitingQuotes = () => {
 
       if (currentRequestId) {
         // Llamar al backend para obtener cotizaciones actualizadas
+        const token = localStorage.getItem("token");
         const response = await fetch(
-          `${API_URL}/api/requests/${currentRequestId}`
+          `${API_URL}/api/requests/${currentRequestId}`,
+          { headers: { ...(token && { Authorization: `Bearer ${token}` }) } },
         );
         const data = await response.json();
 
@@ -709,11 +721,15 @@ const WaitingQuotes = () => {
       });
 
       // Llamar al endpoint de aceptación
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${API_URL}/api/requests/${currentRequestId}/accept`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
           body: JSON.stringify({
             clientId: user.id,
             driverId: quote.driverId,

@@ -22,7 +22,7 @@ import { Logout, Verify, MessageQuestion, Moneys } from "iconsax-react";
 // ============================================
 // API URL Configuration
 // ============================================
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 const Profile = () => {
   const history = useHistory();

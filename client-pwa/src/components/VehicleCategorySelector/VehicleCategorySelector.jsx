@@ -10,6 +10,15 @@ import {
 import { getVehicleImage } from "../../utils/vehicleImages";
 import "./VehicleCategorySelector.css";
 
+const CATEGORY_DESCRIPTIONS = {
+  MOTOS: 'Motocicletas de gasolina y eléctricas',
+  AUTOS: 'Sedanes, hatchbacks, cupés y deportivos',
+  CAMIONETAS: 'SUVs, pickups y furgonetas',
+  CAMIONES: 'Camiones, volquetas, mulas y tractocamiones',
+  BUSES: 'Buses urbanos, busetas y microbuses',
+  ELECTRICOS: 'Vehículos 100% eléctricos',
+};
+
 /**
  * VehicleCategorySelector - Selector de categoría de vehículo
  * Muestra un grid con las categorías disponibles y sus iconos
@@ -23,9 +32,12 @@ const VehicleCategorySelector = ({
   selectedCategory,
   onSelect,
 }) => {
-  // Obtener imagen SVG según la categoría
   const getCategoryImage = (categoryId) => {
     return getVehicleImage(categoryId);
+  };
+
+  const getCategoryDescription = (categoryId) => {
+    return CATEGORY_DESCRIPTIONS[categoryId?.toUpperCase()] || 'Selecciona esta categoría';
   };
 
   if (!categories || categories.length === 0) {
@@ -53,7 +65,7 @@ const VehicleCategorySelector = ({
             <div className="vehicle-added-card-content-text">
               <h3 className="vehicle-brand-name">{category.name}</h3>
               <p className="vehicle-brand-subtext">
-                Motos a gasolina y electricas
+                {getCategoryDescription(category.id)}
               </p>
             </div>
           </div>

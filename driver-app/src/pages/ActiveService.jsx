@@ -40,7 +40,7 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 // ============================================
 // API URL Configuration
 // ============================================
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 const ActiveService = () => {
   const history = useHistory();
@@ -210,9 +210,22 @@ const ActiveService = () => {
     socketService.onServiceCancelled(handleServiceCancelled);
     socketService.onRequestCancelled(handleServiceCancelled);
 
+    // Cuando el servidor rechaza el código de seguridad, informar al conductor
+    const handleCodeInvalid = (data) => {
+      setCodeValidated(false);
+      present({
+        message: data?.message || '❌ Código incorrecto. Intenta de nuevo.',
+        duration: 2500,
+        color: 'danger',
+        position: 'top',
+      });
+    };
+    socketService.onCodeInvalid(handleCodeInvalid);
+
     return () => {
       socketService.offServiceCancelled();
       socketService.offRequestCancelled();
+      socketService.offCodeInvalid();
     };
   }, [serviceData, history, present]);
 
@@ -398,8 +411,10 @@ const ActiveService = () => {
       const userData = localStorage.getItem("user");
       if (userData) {
         const parsedUser = JSON.parse(userData);
+        const token = localStorage.getItem("token");
         const response = await fetch(
           `${API_URL}/api/drivers/profile/${parsedUser._id}`,
+          { headers: { ...(token && { Authorization: `Bearer ${token}` }) } },
         );
         const data = await response.json();
 
@@ -467,8 +482,10 @@ const ActiveService = () => {
   const loadCompleteRequestData = async (parsedData) => {
     try {
       console.log("🔄 Obteniendo datos completos del request del backend...");
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${API_URL}/api/requests/${parsedData.requestId}`,
+        { headers: { ...(token && { Authorization: `Bearer ${token}` }) } },
       );
       const data = await response.json();
 
@@ -616,6 +633,7 @@ const ActiveService = () => {
                 clientId: serviceData.clientId?.toString(),
                 driverName:
                   driverUser?.name || serviceData.driverName || "Conductor",
+                submittedCode: inputCode,
               });
               console.log("📡 service:code-validated emitido al backend");
             } else {
@@ -702,11 +720,15 @@ const ActiveService = () => {
 
               // 3. Si el socket no está disponible, usar REST como fallback
               if (!cancelled) {
+                const token = localStorage.getItem("token");
                 await fetch(
                   `${API_URL}/api/requests/${serviceData.requestId}/cancel-by-driver`,
                   {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                      "Content-Type": "application/json",
+                      ...(token && { Authorization: `Bearer ${token}` }),
+                    },
                     body: JSON.stringify({ driverId: user?._id, reason }),
                   },
                 ).catch(() => {});
@@ -767,11 +789,15 @@ const ActiveService = () => {
               });
 
               // 1. Actualizar en el backend
+              const token = localStorage.getItem("token");
               const response = await fetch(
                 `${API_URL}/api/requests/${serviceData.requestId}/complete`,
                 {
                   method: "POST",
-                  headers: { "Content-Type": "application/json" },
+                  headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                  },
                   body: JSON.stringify({
                     driverId: user._id,
                     completedAt: completedAt,

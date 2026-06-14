@@ -14,6 +14,7 @@ const { uploadDriverDocument, uploadMultipleDocuments } = require('../services/s
 const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
 const { sendOTP, verifyOTP } = require('../services/sms');
 const { notifyAdminNewDriver, notifyDriverApproved } = require('../services/emailService');
+const { requireAuth, requireDriver } = require('../middleware/auth');
 
 // Configurar multer para manejar archivos en memoria
 const upload = multer({
@@ -745,7 +746,7 @@ router.get('/status/:userId', async (req, res) => {
  * PUT /api/drivers/toggle-online
  * Activa o desactiva el conductor para recibir servicios
  */
-router.put('/toggle-online', async (req, res) => {
+router.put('/toggle-online', requireAuth, requireDriver, async (req, res) => {
   try {
     const { userId, isOnline, fcmToken } = req.body;
 
@@ -897,7 +898,7 @@ router.put('/admin/reject/:userId', async (req, res) => {
  * PATCH /api/drivers/toggle-availability
  * Cambiar estado Ocupado/Activo del conductor
  */
-router.patch('/toggle-availability', async (req, res) => {
+router.patch('/toggle-availability', requireAuth, requireDriver, async (req, res) => {
   try {
     const { driverId, isOnline } = req.body;
 

@@ -20,7 +20,7 @@ import logo from "../assets/img/Desvare.svg";
 // ============================================
 // API URL Configuration
 // ============================================
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 const RatingService = () => {
   const history = useHistory();
@@ -77,11 +77,15 @@ const RatingService = () => {
         comment,
       });
 
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${API_URL}/api/requests/${serviceData.requestId}/rate`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
           body: JSON.stringify({
             stars: rating,
             comment: comment.trim() || null,

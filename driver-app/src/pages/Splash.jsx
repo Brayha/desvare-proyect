@@ -4,7 +4,7 @@ import { IonPage, IonContent } from '@ionic/react';
 import DesvareLogoWhite from '../assets/img/Desvare-white.svg';
 import './Splash.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 const clearSession = () => {
   localStorage.removeItem('token');

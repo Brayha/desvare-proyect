@@ -1,7 +1,7 @@
-import { IonApp, IonRouterOutlet, setupIonicReact, useIonToast } from '@ionic/react';
+import { useEffect, useCallback, lazy, Suspense } from 'react';
+import { IonApp, IonRouterOutlet, setupIonicReact, useIonToast, IonPage, IonContent, IonSpinner } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
-import { useEffect, useCallback } from 'react';
 import socketService from './services/socket';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import NotificationPermissionPrompt from './components/NotificationPermissionPrompt/NotificationPermissionPrompt';
@@ -33,8 +33,18 @@ import WaitingQuotes from './pages/WaitingQuotes';
 import DriverOnWay from './pages/DriverOnWay';
 import RatingService from './pages/RatingService';
 import TabLayout from './components/TabLayout/TabLayout';
-import TermsAndConditions from './pages/TermsAndConditions';
-import PrivacyPolicy from './pages/PrivacyPolicy';
+
+// Carga diferida: nombres sin "Privacy" evitan bloqueo por ad blockers al importar el bundle
+const LegalTerms = lazy(() => import('./pages/LegalTerms'));
+const LegalPrivacy = lazy(() => import('./pages/LegalPrivacy'));
+
+const LegalPageFallback = () => (
+  <IonPage>
+    <IonContent className="ion-padding ion-text-center">
+      <IonSpinner name="crescent" />
+    </IonContent>
+  </IonPage>
+);
 
 setupIonicReact();
 
@@ -189,8 +199,16 @@ function App() {
             <Route exact path="/rate-service" component={RatingService} />
             
             {/* Tabs (Desvare + Mi cuenta) */}
-            <Route exact path="/terms" component={TermsAndConditions} />
-            <Route exact path="/privacy" component={PrivacyPolicy} />
+            <Route exact path="/terms" render={() => (
+              <Suspense fallback={<LegalPageFallback />}>
+                <LegalTerms />
+              </Suspense>
+            )} />
+            <Route exact path="/privacy" render={() => (
+              <Suspense fallback={<LegalPageFallback />}>
+                <LegalPrivacy />
+              </Suspense>
+            )} />
             <Route path="/tabs" component={TabLayout} />
             
             {/* Redirección inicial */}
