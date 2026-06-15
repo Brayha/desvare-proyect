@@ -117,6 +117,12 @@ const io = new Server(server, {
   cors: corsOptions
 });
 
+// ── Escalado horizontal: Redis adapter (opcional, env-gated) ──────────────────
+// Si REDIS_URL está definida, los eventos de Socket.IO se propagan entre todos
+// los procesos del backend vía Redis Pub/Sub. Sin la variable, no cambia nada.
+const { setupRedisAdapter } = require('./services/redisAdapter');
+setupRedisAdapter(io);
+
 // ── Middleware de autenticación JWT para Socket.IO ────────────────────────────
 // El token se envía en el handshake: io(URL, { auth: { token } })
 // Si el token es válido → socket.user contiene los datos del usuario.
@@ -396,6 +402,9 @@ io.on('connection', (socket) => {
       return;
     }
     connectedClients.set(clientId, socket.id);
+    // Sala por cliente: permite entrega por room (necesaria para multi-proceso)
+    // sin depender del socketId concreto. Aditivo e inofensivo en un solo proceso.
+    socket.join(`client:${clientId}`);
     console.log(`👤 Cliente registrado: ${clientId} (socketId: ${socket.id})`);
 
     // Reconstruir activeServices si el cliente tiene un servicio en curso
@@ -433,6 +442,8 @@ io.on('connection', (socket) => {
     if (clientId) {
       // Actualizar socketId en connectedClients
       connectedClients.set(clientId, socket.id);
+      // Re-asegurar la sala del cliente (en iOS el socket puede cambiar de id)
+      socket.join(`client:${clientId}`);
 
       // También actualizar activeServices con el socketId actual
       // Esto es crítico para iOS: el socket puede cambiar de ID entre heartbeats

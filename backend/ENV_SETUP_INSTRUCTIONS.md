@@ -22,7 +22,58 @@ DO_SPACES_REGION=fra1
 # ============================================
 FIREBASE_PROJECT_ID=desvare-production
 FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
+
+# ============================================
+# REDIS (Escalado horizontal de Socket.IO) — OPCIONAL
+# ============================================
+# Solo necesaria si vas a correr VARIOS procesos del backend (PM2 cluster,
+# o varios droplets). Si NO la defines, todo funciona igual con un solo proceso.
+REDIS_URL=redis://127.0.0.1:6379
 ```
+
+## 🧩 Redis (opcional) — para correr varios procesos del backend
+
+> **¿Lo necesitas ya?** Solo cuando quieras aprovechar varios núcleos de CPU
+> (PM2 en modo cluster) o varios servidores. Con un solo proceso, **deja
+> `REDIS_URL` sin definir** y el backend se comporta exactamente igual que hoy.
+
+### 1. Instalar Redis en el mismo droplet (Ubuntu)
+
+```bash
+sudo apt update
+sudo apt install -y redis-server
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+# Verificar:
+redis-cli ping   # debe responder: PONG
+```
+
+### 2. Definir la variable en el `.env` del servidor
+
+```env
+REDIS_URL=redis://127.0.0.1:6379
+```
+
+### 3. (Cuando vayas a multi-proceso) correr en cluster con PM2
+
+```bash
+pm2 start server.js -i max --name desvare-backend
+```
+
+> ⚠️ **Importante antes de activar cluster:** con varios procesos, Socket.IO
+> necesita *sticky sessions* (o forzar `transports: ['websocket']`). La
+> propagación de eventos entre procesos ya queda resuelta por el Redis adapter,
+> pero el cutover de cluster debe **probarse en staging** antes de producción,
+> porque algunas emisiones del servidor aún usan `socketId` directo en lugar de
+> salas (ver nota técnica en el código). Mientras corras **un solo proceso**,
+> nada de esto te afecta.
+
+Al arrancar deberías ver en los logs:
+- `✅ Redis (pub) conectado` y `✅ Redis (sub) conectado`
+- `✅ Socket.IO Redis adapter ACTIVADO (listo para múltiples procesos).`
+
+Si Redis está caído, verás el error pero el servidor **sigue funcionando** en
+modo de un solo proceso (la entrega local no se interrumpe).
 
 ## ⚠️ IMPORTANTE - Seguridad
 
