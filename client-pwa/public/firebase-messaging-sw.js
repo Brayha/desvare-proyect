@@ -103,12 +103,73 @@ self.addEventListener('notificationclose', (event) => {
   // fetch('/api/analytics/notification-dismissed', { ... });
 });
 
-// Health check del Service Worker
-self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activado y listo para recibir notificaciones');
-});
+// ============================================================
+// CACHÉ OFFLINE (app shell + assets estáticos)
+// ============================================================
+// Sube la versión cuando cambie la estrategia para forzar limpieza de cachés viejas.
+const CACHE_VERSION = 'desvare-cache-v1';
+
+// Recursos mínimos para que la PWA abra sin red.
+const APP_SHELL = [
+  '/',
+  '/manifest.json',
+  '/favicon.ico',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/notification-sound.mp3'
+];
 
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Instalado correctamente');
+  console.log('[Service Worker] Instalando + precache del app shell');
   self.skipWaiting(); // Activar inmediatamente
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) =>
+      // addAll falla si un solo recurso falla; lo hacemos tolerante.
+      Promise.allSettled(APP_SHELL.map((url) => cache.add(url)))
+    )
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Activado; limpiando cachés viejas');
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Solo GET y solo mismo origen. NO interceptamos API, Firebase, Mapbox, etc.
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Navegaciones (cargar la app): network-first con fallback al app shell.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() => caches.match('/'))
+    );
+    return;
+  }
+
+  // Assets estáticos (JS/CSS/fuentes/imágenes con hash): stale-while-revalidate.
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      const networkFetch = fetch(request)
+        .then((response) => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            const copy = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => cached);
+      return cached || networkFetch;
+    })
+  );
 });
