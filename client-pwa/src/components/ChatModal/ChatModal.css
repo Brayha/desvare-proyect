@@ -105,7 +105,7 @@
 .chat-footer {
   background: #fff;
   border-top: 1px solid #e5e7eb;
-  padding: 8px 12px max(env(safe-area-inset-bottom, 0px), 8px);
+  padding: 16px max(env(safe-area-inset-bottom, 0px), 8px);
 }
 
 .chat-input-row {
@@ -120,8 +120,8 @@
   border: none;
   border-radius: 20px;
   padding: 10px 16px;
-  font-size: 14px;
-  color: #111827;
+  font-size: 16px;
+  color: var(--ion-color-dark);
   resize: none;
   outline: none;
   max-height: 100px;

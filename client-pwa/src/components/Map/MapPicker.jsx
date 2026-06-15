@@ -300,6 +300,10 @@ const MapPicker = ({
         onLoad={() => {
           console.log('🗺️ Mapa cargado completamente');
           setIsMapLoaded(true);
+          // Forzar recálculo del canvas para que ocupe todo el contenedor padre
+          if (mapRef.current) {
+            mapRef.current.resize();
+          }
         }}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}

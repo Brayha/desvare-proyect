@@ -17,7 +17,7 @@
   flex: none;
   height: 500px;
   min-height: 500px;
-  max-height: 500px;
+  max-height: min(500px, 55svh);
   width: 100%;
   overflow: hidden;
   border-radius: 16px;
@@ -129,7 +129,7 @@
 }
 
 .dow-actions--three {
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
 }
 
 .dow-btn-call {
@@ -209,6 +209,61 @@
   font-size: 18px;
   font-weight: 800;
   color: #0055ff;
+}
+
+/* ── Card de ayuda / soporte ── */
+.dow-help-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.dow-help-card:active {
+  opacity: 0.75;
+}
+
+.dow-help-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.dow-help-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.dow-help-title {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dow-help-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dow-help-whatsapp-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.4);
+  pointer-events: none; /* El click lo maneja el padre */
 }
 
 /* ── Código de seguridad dentro de dow-section ── */

@@ -775,6 +775,7 @@ const WaitingQuotes = () => {
           "activeService",
           JSON.stringify({
             requestId: currentRequestId,
+            clientName: user.name,
             driver: data.request.assignedDriver,
             securityCode: data.request.securityCode,
             amount: quote.amount,

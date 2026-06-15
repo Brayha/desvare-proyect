@@ -314,9 +314,26 @@ const DriverOnWay = () => {
   };
 
   const handleWhatsApp = () => {
-    const supportNumber = import.meta.env.VITE_SUPPORT_WHATSAPP || '573000000000';
-    const message = encodeURIComponent('Hola, necesito ayuda con mi servicio de grúa en Desvare.');
-    window.open(`https://wa.me/${supportNumber}?text=${message}`, '_blank');
+    const phone = '573505790415';
+    const clientName = serviceData?.clientName || 'Cliente';
+    // vehicleSnapshot tiene brand.name / model.name / licensePlate directamente
+    const vs    = serviceData?.vehicleSnapshot;
+    const brand = vs?.brand?.name || '';
+    const model = vs?.model?.name || '';
+    const plate = vs?.licensePlate || 'Sin placa';
+    const requestId = serviceData?.requestId || '';
+
+    const vehicle = [brand, model].filter(Boolean).join(' ') || 'No especificado';
+
+    const message = encodeURIComponent(
+      `Hola, tengo un problema con mi servicio en curso.\n\n` +
+      `👤 Cliente: ${clientName}\n` +
+      `🚗 Vehículo: ${vehicle}\n` +
+      `🔢 Placa: ${plate}\n` +
+      `🆔 ID Servicio: ${requestId}`
+    );
+
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
 
   // Generar estrellas dinámicamente basadas en el rating
@@ -628,10 +645,6 @@ const DriverOnWay = () => {
                   <span className="dow-chat-badge">{unreadCount}</span>
                 )}
               </IonButton>
-              <IonButton expand="block" fill="outline" onClick={handleWhatsApp} className="dow-btn-whatsapp">
-                <IonIcon icon={logoWhatsapp} slot="start" />
-                Ayuda
-              </IonButton>
             </div>
 
             {/* 4. Código de seguridad (solo Fase 1) */}
@@ -649,7 +662,7 @@ const DriverOnWay = () => {
                   <p>Cuando tu vehículo esté sobre la grúa, dale este código al conductor para habilitarle el destino</p>
                 </div>
               </div>
-            )}
+            )} 
 
             {/* 5. Origen y destino — usando estilos de RequestService */}
             <div className="dow-section">
@@ -690,6 +703,17 @@ const DriverOnWay = () => {
                 </div>
                 <p className="dow-payment-amount">{formatAmount(serviceData.amount || 0)}</p>
               </div>
+            </div>
+
+            <div className="dow-section dow-help-card" onClick={handleWhatsApp}>
+              <span className="dow-help-icon">🆘</span>
+              <div className="dow-help-text">
+                <p className="dow-help-title">¿Necesitas ayuda?</p>
+                <p className="dow-help-subtitle">Contacta al soporte de Desvare</p>
+              </div>
+              <button className="dow-help-whatsapp-btn" aria-label="Abrir WhatsApp de soporte">
+                <IonIcon icon={logoWhatsapp} />
+              </button>
             </div>
 
             {/* 7. Cancelar (solo Fase 1) */}
