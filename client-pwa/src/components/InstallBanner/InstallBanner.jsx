@@ -91,7 +91,7 @@ const InstallBanner = ({ variant = 'home' }) => {
           <p className="ib-title">Instala Desvare</p>
           <p className="ib-sub">
             {variant === 'waiting'
-              ? 'Recibe cotizaciones aunque bloquees tu pantalla'
+              ? 'No te pierdas ninguna cotización: te avisamos al instante, aunque bloquees la pantalla'
               : 'Recibe cotizaciones al instante · Gratis'}
           </p>
         </div>

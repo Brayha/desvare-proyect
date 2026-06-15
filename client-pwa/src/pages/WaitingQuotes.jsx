@@ -17,11 +17,18 @@ import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import { useNotification } from "../hooks/useNotification";
 import QuoteDetailSheet from "../components/QuoteDetailSheet/QuoteDetailSheet";
+import InstallBanner from "../components/InstallBanner/InstallBanner";
 import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
 import "./WaitingQuotes.css";
 
 import logo from "../assets/img/Desvare.svg";
+
+// Detecta si la PWA ya está instalada (corriendo en modo standalone).
+// Si ya está instalada, no tiene sentido invitar a instalarla.
+const isStandalonePWA = () =>
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
 
 // ============================================
 // API URL Configuration
@@ -891,23 +898,28 @@ const WaitingQuotes = () => {
             }
           />
 
-          {/* Card flotante superior - Notificación SMS (solo sin cotizaciones) */}
-          {quotesReceived.length === 0 && (
-            <div className="floating-card-top">
-              <div className="sms-notification-card">
-                <Notification
-                  size="28"
-                  variant="Bold"
-                  className="sms-icon"
-                  color="#0055ff"
-                />
-                <IonText className="sms-text">
-                  Cuando lleguen las cotizaciones te notificaremos vía mensaje
-                  de texto
-                </IonText>
+          {/* Card flotante superior (solo sin cotizaciones).
+              - App NO instalada → invitar a instalar la PWA (aprovecha la espera).
+              - App ya instalada → mensaje de notificación por SMS. */}
+          {quotesReceived.length === 0 &&
+            (isStandalonePWA() ? (
+              <div className="floating-card-top">
+                <div className="sms-notification-card">
+                  <Notification
+                    size="28"
+                    variant="Bold"
+                    className="sms-icon"
+                    color="#0055ff"
+                  />
+                  <IonText className="sms-text">
+                    Cuando lleguen las cotizaciones te notificaremos vía mensaje
+                    de texto
+                  </IonText>
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <InstallBanner variant="waiting" />
+            ))}
 
           {/* Card flotante inferior — sin cotizaciones: spinner */}
           {quotesReceived.length === 0 && (
