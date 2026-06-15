@@ -24,10 +24,13 @@ import {
   useIonAlert,
 } from "@ionic/react";
 import { Routing, Call, Location, UserTick } from "iconsax-react";
+import { chatbubbleEllipses } from "ionicons/icons";
+import { IonIcon } from "@ionic/react";
 import RequestDetailMap from "../components/RequestDetailMap";
 import socketService from "../services/socket";
 import { requestAPI } from "../services/api";
-import "./ActiveService.css"; // ✅ Reutilizar mismo CSS
+import ChatModal from "../components/ChatModal/ChatModal";
+import "./ActiveService.css";
 
 // Importar iconos SVG de vehículos
 import carIcon from "../assets/img/vehicles/car.svg";
@@ -64,6 +67,8 @@ const ActiveService = () => {
 
   // ✅ Estado para controlar las 2 fases
   const [codeValidated, setCodeValidated] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // 🗺️ Función para abrir navegación en apps externas
   const openNavigation = (destinationCoords, destinationAddress) => {
@@ -233,10 +238,20 @@ const ActiveService = () => {
     };
     socketService.onCodeInvalid(handleCodeInvalid);
 
+    // Badge de mensajes no leídos
+    const handleIncomingChat = () => {
+      setChatOpen((open) => {
+        if (!open) setUnreadCount((n) => n + 1);
+        return open;
+      });
+    };
+    socketService.onChatMessage(handleIncomingChat);
+
     return () => {
       socketService.offServiceCancelled();
       socketService.offRequestCancelled();
       socketService.offCodeInvalid();
+      socketService.offChatMessage(handleIncomingChat);
     };
   }, [serviceData, history, present]);
 
@@ -975,12 +990,23 @@ const ActiveService = () => {
                 </IonText> */}
               </div>
               {/* Botones de Acción */}
-              <button
-                className="call-button-active-service"
-                onClick={handleCall}
-              >
-                <Call size="24" variant="Bulk" color="green" />
-              </button>
+              <div className="as-action-btns">
+                <button
+                  className="call-button-active-service"
+                  onClick={handleCall}
+                >
+                  <Call size="24" variant="Bulk" color="green" />
+                </button>
+                <button
+                  className="call-button-active-service as-chat-btn"
+                  onClick={() => { setChatOpen(true); setUnreadCount(0); }}
+                >
+                  <IonIcon icon={chatbubbleEllipses} style={{ fontSize: 22, color: '#0055ff' }} />
+                  {unreadCount > 0 && (
+                    <span className="as-chat-badge">{unreadCount}</span>
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="amount-card">
@@ -1267,6 +1293,15 @@ const ActiveService = () => {
           )}
         </div>
       </div>
+
+      {/* ── Chat en tiempo real ── */}
+      <ChatModal
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+        requestId={serviceData?.requestId}
+        currentUserId={JSON.parse(localStorage.getItem('user') || '{}')?.id || JSON.parse(localStorage.getItem('user') || '{}')?._id}
+        otherName={serviceData?.clientName || 'Cliente'}
+      />
     </IonContent>
   );
 };

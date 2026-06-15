@@ -1,5 +1,224 @@
 .driver-on-way-page {
-  --background: #f5f5f5;
+  --background: #f0f2f5;
+}
+
+/* ============================================================
+   LAYOUT PRINCIPAL — mapa fijo arriba + card con scroll abajo
+   ============================================================ */
+.dow-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 10px;
+}
+
+.dow-map-container {
+  position: relative;
+  flex: none;
+  height: 500px;
+  min-height: 500px;
+  max-height: 500px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dow-map-container .map-picker-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Card de info debajo del mapa */
+.dow-info-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-bottom: 20px;
+  background: #f0f2f5;
+}
+
+/* Sección con fondo blanco */
+.dow-section {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+/* ── 1. Barra de estado ── */
+.dow-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.dow-status-bar--waiting {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.dow-status-bar--progress {
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  border: 1.5px solid #43a047;
+}
+
+.dow-status-icon {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dow-status-title {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.dow-status-bar--progress .dow-status-title {
+  color: #2e7d32;
+}
+
+.dow-status-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ── 2. Fila del conductor ── */
+.dow-driver-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  padding: 12px 14px;
+  margin-top: 10px;
+}
+
+.dow-driver-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dow-driver-name {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 3. Botones de acción ── */
+.dow-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.dow-actions--three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.dow-btn-call {
+  --background: #16a34a;
+  --border-radius: 12px;
+  --color: #fff;
+  font-weight: 600;
+}
+
+.dow-btn-chat {
+  --border-radius: 12px;
+  --border-color: #0055ff;
+  --color: #0055ff;
+  font-weight: 600;
+  position: relative;
+}
+
+.dow-chat-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #eb445a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 5px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 14px;
+  pointer-events: none;
+}
+
+.dow-btn-whatsapp {
+  --border-radius: 12px;
+  --border-color: #25d366;
+  --color: #25d366;
+  font-weight: 600;
+}
+
+/* ── Confirm route card dentro de DriverOnWay ── */
+.dow-section .confirm-route-card {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 12px 14px;
+}
+
+/* ── 6. Pago ── */
+.dow-payment-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.dow-payment-info {
+  flex: 1;
+}
+
+.dow-payment-label {
+  margin: 0 0 2px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dow-payment-value {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.dow-payment-amount {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0055ff;
+}
+
+/* ── Código de seguridad dentro de dow-section ── */
+.dow-section .code-box {
+  padding: 14px 16px;
+}
+
+/* ── Cancelar dentro de dow-section ── */
+.dow-section .cancel-service-button {
+  margin: 0;
 }
 
 /* Deshabilitar swipe-back de Ionic en la vista de tracking */

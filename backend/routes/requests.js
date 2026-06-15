@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Request = require('../models/Request');
 const User = require('../models/User');
+const ChatMessage = require('../models/ChatMessage');
 const { sendPushNotification } = require('../services/notifications');
 const { requireAuth, requireDriver, optionalAuth } = require('../middleware/auth');
 
@@ -1246,6 +1247,32 @@ router.post('/:id/rate', requireAuth, async (req, res) => {
       error: 'Error al registrar calificación',
       details: error.message 
     });
+  }
+});
+
+// GET /api/requests/:id/chat — Historial de mensajes (admin + partes del servicio)
+router.get('/:id/chat', requireAuth, async (req, res) => {
+  try {
+    const request = await Request.findById(req.params.id).lean();
+    if (!request) return res.status(404).json({ error: 'Solicitud no encontrada' });
+
+    const userId = req.user._id.toString();
+    const isAdmin = req.user.userType === 'admin';
+    const isClient = request.clientId?.toString() === userId;
+    const isDriver = request.assignedDriverId?.toString() === userId;
+
+    if (!isAdmin && !isClient && !isDriver) {
+      return res.status(403).json({ error: 'No tienes acceso a este chat' });
+    }
+
+    const messages = await ChatMessage.find({ requestId: req.params.id })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    res.json({ messages });
+  } catch (error) {
+    console.error('❌ Error obteniendo historial de chat:', error);
+    res.status(500).json({ error: 'Error obteniendo historial de chat' });
   }
 });
 

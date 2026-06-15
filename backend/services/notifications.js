@@ -333,6 +333,30 @@ const notifyClientDriverArriving = async (fcmToken, data) => {
   );
 };
 
+/**
+ * Notifica a la contraparte cuando llega un nuevo mensaje de chat
+ * @param {string} fcmToken - Token FCM del destinatario
+ * @param {Object} data - { requestId, senderName, senderType, message }
+ * @returns {Promise<string>}
+ */
+const notifyNewChatMessage = async (fcmToken, data) => {
+  const truncated = data.message?.length > 60
+    ? data.message.slice(0, 60) + '...'
+    : data.message;
+
+  return await sendPushNotification(
+    fcmToken,
+    `💬 ${data.senderName}`,
+    truncated,
+    {
+      type: 'CHAT_MESSAGE',
+      requestId: data.requestId || '',
+      senderType: data.senderType || '',
+      url: data.senderType === 'client' ? '/active-service' : '/driver-on-way',
+    }
+  );
+};
+
 module.exports = {
   sendPushNotification,
   sendMultipleNotifications,
@@ -344,5 +368,6 @@ module.exports = {
   notifyClientNewQuote,
   notifyClientServiceCompleted,
   notifyClientDriverArriving,
+  notifyNewChatMessage,
 };
 

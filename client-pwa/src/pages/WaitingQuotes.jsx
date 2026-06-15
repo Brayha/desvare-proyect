@@ -16,7 +16,6 @@ import { Notification } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import { useNotification } from "../hooks/useNotification";
-import QuoteNotification from "../components/QuoteNotification/QuoteNotification";
 import QuoteDetailSheet from "../components/QuoteDetailSheet/QuoteDetailSheet";
 import socketService from "../services/socket";
 // import { formatDistance, formatDuration } from "../utils/mapbox"; // Para uso futuro
@@ -97,8 +96,7 @@ const WaitingQuotes = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
   const [presentAlert] = useIonAlert();
-  const { activeNotifications, showQuoteNotification, closeNotification } =
-    useNotification();
+  const { playSound, vibrate } = useNotification();
 
   const [user, setUser] = useState(null);
   const [routeData, setRouteData] = useState(null);
@@ -119,6 +117,15 @@ const WaitingQuotes = () => {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
+  const [activeQuoteIndex, setActiveQuoteIndex] = useState(null);
+
+  const formatAmount = (amount) =>
+    new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
 
   useEffect(() => {
     let isMounted = true; // Flag para evitar actualizaciones si el componente se desmonta
@@ -345,15 +352,15 @@ const WaitingQuotes = () => {
             console.log("ℹ️ Cotización duplicada ignorada (ya cargada desde BD):", normalizedQuote.driverId);
             return prev;
           }
-          return [...prev, normalizedQuote];
+          const newList = [...prev, normalizedQuote];
+          // Mostrar la nueva cotización en la card inferior
+          setActiveQuoteIndex(newList.length - 1);
+          return newList;
         });
 
-        // ✅ Mostrar notificación visual + sonido + vibración
-        showQuoteNotification(normalizedQuote, {
-          playSound: true,
-          vibrate: true,
-          duration: 5000,
-        });
+        // Sonido + vibración (sin toast visual)
+        playSound();
+        vibrate();
       });
 
       // ✅ Escuchar cancelaciones de cotizaciones
@@ -591,6 +598,7 @@ const WaitingQuotes = () => {
     setQuotesReceived([]);
     setSelectedQuote(null);
     setSheetOpen(false);
+    setActiveQuoteIndex(null);
 
     showSuccess("Solicitud cancelada");
 
@@ -867,20 +875,6 @@ const WaitingQuotes = () => {
           />
         </IonRefresher>
 
-        {/* ✅ Notificaciones visuales cuando llega una cotización */}
-        {activeNotifications.map((notification) => (
-          <QuoteNotification
-            key={notification.id}
-            quote={notification.quote}
-            duration={notification.duration}
-            onClose={() => closeNotification(notification.id)}
-            onViewDetail={(quote) => {
-              closeNotification(notification.id);
-              handleQuoteClick(quote);
-            }}
-          />
-        ))}
-
         {/* Mapa fullscreen - Sin header ni footer */}
         <div className="map-container-fullscreen-no-header">
           <MapPicker
@@ -889,9 +883,14 @@ const WaitingQuotes = () => {
             onRouteCalculated={() => {}}
             quotes={quotesReceived}
             onQuoteClick={handleQuoteClick}
+            focusedQuoteLocation={
+              activeQuoteIndex !== null
+                ? quotesReceived[activeQuoteIndex]?.location ?? null
+                : null
+            }
           />
 
-          {/* Card flotante superior - Notificación SMS */}
+          {/* Card flotante superior - Notificación SMS (solo sin cotizaciones) */}
           {quotesReceived.length === 0 && (
             <div className="floating-card-top">
               <div className="sms-notification-card">
@@ -909,7 +908,7 @@ const WaitingQuotes = () => {
             </div>
           )}
 
-          {/* Card flotante inferior - Spinner y botón cancelar */}
+          {/* Card flotante inferior — sin cotizaciones: spinner */}
           {quotesReceived.length === 0 && (
             <div className="floating-card-bottom">
               <div className="search-status-card">
@@ -917,7 +916,7 @@ const WaitingQuotes = () => {
                   <IonText className="search-text">
                     <h3>Buscando cotizaciones...</h3>
                     <p>
-                      Las grúas estan revisando tu servicio y pronto llegaran
+                      Las grúas están revisando tu servicio y pronto llegarán
                       sus cotizaciones
                     </p>
                   </IonText>
@@ -930,11 +929,85 @@ const WaitingQuotes = () => {
                   onClick={handleCancelRequest}
                   className="cancel-request-button"
                 >
-                  <p>Cancelar busqueda</p>
+                  <p>Cancelar búsqueda</p>
                 </button>
               </div>
             </div>
           )}
+
+          {/* Card flotante inferior — con cotizaciones: preview estilo Airbnb */}
+          {quotesReceived.length > 0 && activeQuoteIndex !== null && (() => {
+            const q = quotesReceived[activeQuoteIndex];
+            return (
+              <div className="floating-card-bottom">
+                {/* Navegación entre cotizaciones */}
+                <div className="quote-slider-nav">
+                  <button
+                    className="quote-nav-btn"
+                    disabled={activeQuoteIndex === 0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveQuoteIndex((i) => Math.max(0, i - 1));
+                    }}
+                  >
+                    ‹
+                  </button>
+                  <span className="quote-nav-counter">
+                    {activeQuoteIndex + 1} de {quotesReceived.length} cotizaci{quotesReceived.length === 1 ? 'ón' : 'ones'}
+                  </span>
+                  <button
+                    className="quote-nav-btn"
+                    disabled={activeQuoteIndex === quotesReceived.length - 1}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveQuoteIndex((i) => Math.min(quotesReceived.length - 1, i + 1));
+                    }}
+                  >
+                    ›
+                  </button>
+                </div>
+
+                {/* Tarjeta clickeable → abre modal de detalle */}
+                <div
+                  className="quote-preview-card"
+                  onClick={() => handleQuoteClick(q)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && handleQuoteClick(q)}
+                >
+                  <div className="quote-preview-driver">
+                    <div className="quote-preview-avatar">
+                      {q.driverPhoto ? (
+                        <img src={q.driverPhoto} alt={q.driverName} />
+                      ) : (
+                        <span>{q.driverName?.charAt(0)?.toUpperCase() || 'C'}</span>
+                      )}
+                    </div>
+                    <div className="quote-preview-info">
+                      <p className="quote-preview-name">{q.driverName}</p>
+                      <p className="quote-preview-rating">
+                        ⭐ {q.driverRating ? Number(q.driverRating).toFixed(1) : '5.0'}
+                        {q.driverServiceCount > 0 && (
+                          <span className="quote-preview-services"> · {q.driverServiceCount} servicios</span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="quote-preview-right">
+                      <p className="quote-preview-amount">{formatAmount(q.amount)}</p>
+                      <p className="quote-preview-hint">Ver detalle →</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleCancelRequest}
+                  className="cancel-request-button"
+                >
+                  <p>Cancelar búsqueda</p>
+                </button>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Sheet Modal con detalles de cotización */}

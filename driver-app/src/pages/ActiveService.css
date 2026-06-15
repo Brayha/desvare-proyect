@@ -138,6 +138,12 @@
   width: 100%;
 }
 
+.as-action-btns {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .call-button-active-service {
   display: flex;
   align-items: center;
@@ -151,6 +157,28 @@
   width: 24px;
   height: 24px;
   color: #9ca3af;
+}
+
+.as-chat-btn {
+  position: relative;
+  width: 28px;
+  height: 28px;
+}
+
+.as-chat-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background: #eb445a;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 4px;
+  min-width: 14px;
+  text-align: center;
+  line-height: 12px;
+  pointer-events: none;
 }
 
 .quote-title-send-quote {

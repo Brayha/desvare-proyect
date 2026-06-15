@@ -267,6 +267,32 @@ class SocketService {
       this.socket.off('driver:location-update');
     }
   }
+
+  // ========================================
+  // 💬 CHAT EN TIEMPO REAL
+  // ========================================
+
+  sendChatMessage(data) {
+    if (this.socket) {
+      this.socket.emit('chat:message', data);
+    }
+  }
+
+  onChatMessage(callback) {
+    if (this.socket) {
+      this.socket.on('chat:message', callback);
+    }
+  }
+
+  offChatMessage(callback) {
+    if (this.socket) {
+      if (callback) {
+        this.socket.off('chat:message', callback);
+      } else {
+        this.socket.off('chat:message');
+      }
+    }
+  }
 }
 
 export default new SocketService();

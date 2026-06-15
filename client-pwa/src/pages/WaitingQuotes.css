@@ -143,6 +143,141 @@
   }
 }
 
+/* ============================================
+   QUOTE CARD INFERIOR — Estilo Airbnb
+   ============================================ */
+
+/* Barra de navegación entre cotizaciones */
+.quote-slider-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.quote-nav-btn {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 22px;
+  line-height: 1;
+  color: #111;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  transition: background 0.15s;
+  padding: 0;
+}
+
+.quote-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.quote-nav-btn:not(:disabled):active {
+  background: #f3f4f6;
+}
+
+.quote-nav-counter {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+/* Tarjeta clickeable con info del conductor */
+.quote-preview-card {
+  background: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: 1px solid #f3f4f6;
+  animation: slideUpFade 0.3s ease-out;
+}
+
+.quote-preview-card:active {
+  transform: scale(0.985);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+.quote-preview-driver {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quote-preview-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.quote-preview-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.quote-preview-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.quote-preview-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 3px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quote-preview-rating {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.quote-preview-services {
+  color: #9ca3af;
+}
+
+.quote-preview-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.quote-preview-amount {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0055ff;
+  margin: 0 0 3px 0;
+}
+
+.quote-preview-hint {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+}
+
 /* Badge de cotizaciones recibidas */
 .quotes-badge {
   position: absolute;

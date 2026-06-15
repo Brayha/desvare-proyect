@@ -46,7 +46,7 @@ const QuoteDetailSheet = ({
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    
+
     return (
       <>
         {"⭐".repeat(fullStars)}
@@ -87,7 +87,8 @@ const QuoteDetailSheet = ({
   const estimatedTime = quote.location ? "15 min" : "Calculando...";
 
   // ✅ Usar datos reales del conductor
-  const driverPhoto = quote.driverPhoto || "https://ionicframework.com/docs/img/demos/avatar.svg";
+  const driverPhoto =
+    quote.driverPhoto || "https://ionicframework.com/docs/img/demos/avatar.svg";
   const driverRating = quote.driverRating || 5;
   const driverServiceCount = quote.driverServiceCount || 0;
 
@@ -155,12 +156,13 @@ const QuoteDetailSheet = ({
             <div className="driver-header">
               <div className="driver-avatar">
                 {quote.driverPhoto ? (
-                  <img 
-                    src={driverPhoto} 
+                  <img
+                    src={driverPhoto}
                     alt={quote.driverName}
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.parentElement.textContent = quote.driverName?.charAt(0) || "C";
+                      e.target.style.display = "none";
+                      e.target.parentElement.textContent =
+                        quote.driverName?.charAt(0) || "C";
                     }}
                   />
                 ) : (
@@ -219,6 +221,25 @@ const QuoteDetailSheet = ({
               {/* <Refresh2 size="20" variant="Outline" color="#667eea" /> */}
             </div>
           </div>
+
+
+
+        <button
+          expand="block"
+          size="large"
+          onClick={() => onAccept(quote)}
+          disabled={isAccepting}
+          className="accept-button"
+        >
+          {isAccepting ? (
+            <>
+              <IonSpinner name="crescent" />
+              <span style={{ marginLeft: "8px" }}>Aceptando...</span>
+            </>
+          ) : (
+            `Aceptar por ${formatAmount(quote.amount)}`
+          )}
+        </button>
         </div>
 
         {/* Reviews Slider con Swiper */}
@@ -251,35 +272,6 @@ const QuoteDetailSheet = ({
                 </SwiperSlide>
               ))}
             </Swiper>
-          </div>
-
-          <div className="button-actions">
-            <button
-              expand="block"
-              size="large"
-              onClick={() => onAccept(quote)}
-              disabled={isAccepting}
-              className="accept-button"
-            >
-              {isAccepting ? (
-                <>
-                  <IonSpinner name="crescent" />
-                  <span style={{ marginLeft: "8px" }}>Aceptando...</span>
-                </>
-              ) : (
-                `Aceptar por ${formatAmount(quote.amount)}`
-              )}
-            </button>
-
-            <button
-              expand="block"
-              fill="clear"
-              onClick={onDismiss}
-              disabled={isAccepting}
-              className="cancel-button"
-            >
-              Cancelar
-            </button>
           </div>
         </div>
       </IonContent>

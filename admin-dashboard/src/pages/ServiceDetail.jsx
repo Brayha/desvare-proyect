@@ -4,7 +4,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { servicesAPI } from '../services/adminAPI';
-import { ArrowLeft2, Call, Sms, Location, Clock, DollarCircle, Star1 } from 'iconsax-react';
+import { ArrowLeft2, Call, Sms, Location, Clock, DollarCircle, Star1, Messages2 } from 'iconsax-react';
 import './ServiceDetail.css';
 
 const ServiceDetail = () => {
@@ -12,9 +12,12 @@ const ServiceDetail = () => {
   const history = useHistory();
   const [service, setService] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
 
   useEffect(() => {
     loadServiceDetail();
+    loadChatHistory();
   }, [id]);
 
   const loadServiceDetail = async () => {
@@ -26,6 +29,18 @@ const ServiceDetail = () => {
       console.error('❌ Error cargando detalle:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadChatHistory = async () => {
+    try {
+      setChatLoading(true);
+      const response = await servicesAPI.getChatHistory(id);
+      setChatMessages(response.data.messages || []);
+    } catch (error) {
+      console.error('❌ Error cargando chat:', error);
+    } finally {
+      setChatLoading(false);
     }
   };
 
@@ -357,6 +372,42 @@ const ServiceDetail = () => {
               </div>
             </div>
           )}
+
+          {/* ── Historial del Chat ── */}
+          <div className="detail-section">
+            <h3 className="chat-audit-title">
+              <Messages2 size="20" color="#0055ff" variant="Bold" />
+              Historial del Chat
+              <span className="chat-audit-count">{chatMessages.length} mensajes</span>
+            </h3>
+
+            {chatLoading ? (
+              <div className="chat-audit-loading">
+                <IonSpinner name="dots" />
+              </div>
+            ) : chatMessages.length === 0 ? (
+              <p className="chat-audit-empty">No hubo conversación en este servicio.</p>
+            ) : (
+              <div className="chat-audit-list">
+                {chatMessages.map((msg, i) => (
+                  <div
+                    key={msg._id || i}
+                    className={`chat-audit-bubble ${msg.senderType === 'client' ? 'chat-audit-bubble--client' : 'chat-audit-bubble--driver'}`}
+                  >
+                    <div className="chat-audit-bubble-header">
+                      <span className="chat-audit-sender">
+                        {msg.senderType === 'client' ? '👤' : '🚛'} {msg.senderName}
+                      </span>
+                      <span className="chat-audit-time">
+                        {formatDate(msg.createdAt)}
+                      </span>
+                    </div>
+                    <p className="chat-audit-text">{msg.message}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </IonContent>
     </IonPage>

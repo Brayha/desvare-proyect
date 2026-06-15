@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
 const User = require('../models/User');
 const Request = require('../models/Request');
+const ChatMessage = require('../models/ChatMessage');
 const { requireAdmin } = require('../middleware/adminAuth');
 const { notifyDriverApproved } = require('../services/emailService');
 const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
@@ -1201,6 +1202,20 @@ router.get('/reports/export', async (req, res) => {
   } catch (error) {
     console.error('❌ Error exportando reporte:', error);
     res.status(500).json({ error: 'Error al exportar reporte' });
+  }
+});
+
+// GET /api/admin/services/:id/chat — Historial del chat del servicio para auditoría
+router.get('/services/:id/chat', requireAdmin, async (req, res) => {
+  try {
+    const messages = await ChatMessage.find({ requestId: req.params.id })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    res.json({ messages });
+  } catch (error) {
+    console.error('❌ Error obteniendo chat para admin:', error);
+    res.status(500).json({ error: 'Error obteniendo historial de chat' });
   }
 });
 

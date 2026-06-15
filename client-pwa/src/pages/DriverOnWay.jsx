@@ -10,11 +10,12 @@ import {
   IonSpinner,
   useIonAlert,
 } from "@ionic/react";
-import { call } from "ionicons/icons";
-import { Moneys, Refresh2 } from "iconsax-react";
+import { call, logoWhatsapp, chatbubbleEllipses } from "ionicons/icons";
+import { Location, Moneys } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import socketService from "../services/socket";
+import ChatModal from "../components/ChatModal/ChatModal";
 import "./DriverOnWay.css";
 
 import logo from "../assets/img/Desvare.svg";
@@ -34,9 +35,11 @@ const DriverOnWay = () => {
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverHeading, setDriverHeading] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastLocationSource, setLastLocationSource] = useState(null);
+  const [_lastLocationSource, setLastLocationSource] = useState(null);
   // true cuando el conductor ingresó el código y el vehículo ya está en la grúa
   const [serviceStarted, setServiceStarted] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -277,6 +280,15 @@ const DriverOnWay = () => {
     pollServiceStatus(); // inmediato al montar
     const statusPollInterval = setInterval(pollServiceStatus, 10000);
 
+    // Contador de mensajes no leídos
+    const handleIncomingChat = () => {
+      setChatOpen((open) => {
+        if (!open) setUnreadCount((n) => n + 1);
+        return open;
+      });
+    };
+    socketService.onChatMessage(handleIncomingChat);
+
     return () => {
       console.log("🧹 DriverOnWay - Cleanup");
       clearInterval(heartbeatInterval);
@@ -288,6 +300,7 @@ const DriverOnWay = () => {
       socketService.offServiceStarted();
       socketService.offServiceCancelled();
       socketService.offLocationUpdate();
+      socketService.offChatMessage(handleIncomingChat);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -298,6 +311,12 @@ const DriverOnWay = () => {
     } else {
       showError("No se pudo obtener el teléfono del conductor");
     }
+  };
+
+  const handleWhatsApp = () => {
+    const supportNumber = import.meta.env.VITE_SUPPORT_WHATSAPP || '573000000000';
+    const message = encodeURIComponent('Hola, necesito ayuda con mi servicio de grúa en Desvare.');
+    window.open(`https://wa.me/${supportNumber}?text=${message}`, '_blank');
   };
 
   // Generar estrellas dinámicamente basadas en el rating
@@ -524,161 +543,180 @@ const DriverOnWay = () => {
 
   return (
     <IonPage>
-      <IonContent className="driver-on-way-page" fullscreen>
-        <div className="logo-content" onClick={() => history.replace("/home")}>
-          <img src={logo} alt="logo" />
-        </div>
-        {/* Mapa con tracking en tiempo real */}
-        <div className="map-container-tracking">
-          <MapPicker
-            origin={serviceData.origin}
-            destination={null}
-            onRouteCalculated={() => {}}
-            quotes={[]}
-            onQuoteClick={null}
-            driverLocation={driverLocation} // 🆕 Ubicación en tiempo real
-            driverHeading={driverHeading}   // 🆕 Dirección del vehículo
-            driverPhoto={serviceData.driver?.photo} // 🆕 Foto del conductor
-            driverName={serviceData.driver?.name}   // 🆕 Nombre del conductor
-          />
+      <IonContent className="driver-on-way-page" fullscreen scrollY={true}>
+        <div className="dow-layout">
+          {/* ── Mapa fijo arriba ── */}
+          <div className="dow-map-container">
+            <div className="logo-content" onClick={() => history.replace("/home")}>
+              <img src={logo} alt="logo" />
+            </div>
+            <MapPicker
+              origin={serviceData.origin}
+              destination={serviceStarted ? serviceData.destination : null}
+              onRouteCalculated={() => {}}
+              quotes={[]}
+              onQuoteClick={null}
+              driverLocation={driverLocation}
+              driverHeading={driverHeading}
+              driverPhoto={serviceData.driver?.photo}
+              driverName={serviceData.driver?.name}
+            />
+          </div>
 
-          {/* Información del servicio */}
-          <div className="service-info-section">
-            {/* Overlay con info del conductor */}
-            <div className="confirm-driver-info-section">
-              <div className="confirm-driver-info-header">
-                <div className="confirm-driver-info-header-compact">
-                  <div className="driver-avatar-small">
-                    {serviceData.driver?.photo ? (
-                      <img 
-                        src={serviceData.driver.photo} 
-                        alt={serviceData.driver?.name} 
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.parentElement.textContent = serviceData.driver?.name?.charAt(0) || "C";
-                        }}
-                      />
-                    ) : (
-                      serviceData.driver?.name?.charAt(0) || "C"
-                    )}
-                  </div>
-                  <div className="confirm-driver-info-details">
-                    <h3>{serviceData.driver?.name}</h3>
-                    <div className="confirm-driver-info-meta">
-                      <span className="stars-rating">
-                        {renderStars(serviceData.driver?.rating || 5)}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="vehicle-plate-confirmed-driver-on-way">
-                    {formatLicensePlate(serviceData.driver?.towTruck?.licensePlate)}
-                  </p>
+          {/* ── Card inferior con toda la info ── */}
+          <div className="dow-info-card">
+
+            {/* 1. Header de estado */}
+            {serviceStarted ? (
+              <div className="dow-status-bar dow-status-bar--progress">
+                <span className="dow-status-icon">🚛</span>
+                <div>
+                  <p className="dow-status-title">¡Tu vehículo ya está en la grúa!</p>
+                  <p className="dow-status-subtitle">Vamos hacia el destino</p>
                 </div>
               </div>
+            ) : (
+              <div className="dow-status-bar dow-status-bar--waiting">
+                <span className="dow-status-icon">🛣️</span>
+                <div>
+                  <p className="dow-status-title">El conductor está en camino</p>
+                  <p className="dow-status-subtitle">Espera, pronto llegará a tu ubicación</p>
+                </div>
+              </div>
+            )}
 
-              <IonButton
-                expand="block"
-                onClick={handleCall}
-                className="call-button"
-              >
+            {/* 2. Info del conductor */}
+            <div className="dow-driver-row">
+              <div className="driver-avatar-small">
+                {serviceData.driver?.photo ? (
+                  <img
+                    src={serviceData.driver.photo}
+                    alt={serviceData.driver?.name}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.textContent = serviceData.driver?.name?.charAt(0) || 'C';
+                    }}
+                  />
+                ) : (
+                  serviceData.driver?.name?.charAt(0)?.toUpperCase() || 'C'
+                )}
+              </div>
+              <div className="dow-driver-info">
+                <p className="dow-driver-name">{serviceData.driver?.name}</p>
+                <span className="stars-rating">{renderStars(serviceData.driver?.rating || 5)}</span>
+              </div>
+              <p className="vehicle-plate-confirmed-driver-on-way">
+                {formatLicensePlate(serviceData.driver?.towTruck?.licensePlate)}
+              </p>
+            </div>
+
+            {/* 3. Botones de acción */}
+            <div className="dow-actions dow-actions--three">
+              <IonButton expand="block" onClick={handleCall} className="dow-btn-call">
                 <IonIcon icon={call} slot="start" />
                 Llamar
               </IonButton>
-              {/* <IonButton
+              <IonButton
                 expand="block"
                 fill="outline"
-                onClick={handleChat}
-                className="chat-button"
+                onClick={() => { setChatOpen(true); setUnreadCount(0); }}
+                className="dow-btn-chat"
               >
                 <IonIcon icon={chatbubbleEllipses} slot="start" />
                 Chat
-              </IonButton> */}
+                {unreadCount > 0 && (
+                  <span className="dow-chat-badge">{unreadCount}</span>
+                )}
+              </IonButton>
+              <IonButton expand="block" fill="outline" onClick={handleWhatsApp} className="dow-btn-whatsapp">
+                <IonIcon icon={logoWhatsapp} slot="start" />
+                Ayuda
+              </IonButton>
+            </div>
 
-              <div className="quote-summary-container">
-                <div className="box-items">
-                  <div className="info-items">
-                    <div className="info-item">
-                      <p>Valor</p>
-                      <h4>{formatAmount(serviceData.amount || 0)}</h4>
+            {/* 4. Código de seguridad (solo Fase 1) */}
+            {!serviceStarted && (
+              <div className="dow-section">
+                <div className="code-box">
+                  <div className="box-info">
+                    <h4>🔒 Código de Seguridad</h4>
+                    <div className="code-digits">
+                      {serviceData.securityCode?.split('').map((digit, i) => (
+                        <div key={i} className="digit">{digit}</div>
+                      ))}
                     </div>
                   </div>
-                  <div className="info-items">
-                    <div className="info-item">
-                      <p>Método de pago</p>
-                      <h4>{serviceData.paymentMethod || "Efectivo"}</h4>
+                  <p>Cuando tu vehículo esté sobre la grúa, dale este código al conductor para habilitarle el destino</p>
+                </div>
+              </div>
+            )}
+
+            {/* 5. Origen y destino — usando estilos de RequestService */}
+            <div className="dow-section">
+              <div className="confirm-route-card">
+                <div className="route-header">
+                  <h3>Trayecto del servicio</h3>
+                </div>
+                <div className="route-locations">
+                  <div className="route-location-item">
+                    <div className="route-icon origin-marker" style={{ alignSelf: 'flex-start', marginTop: 4 }}>
+                      <Location size="20" color="#3880ff" variant="Bold" />
+                    </div>
+                    <div className="route-location-info">
+                      <p className="location-type">Origen</p>
+                      <p className="location-address">{serviceData.origin?.address || 'Punto de recogida'}</p>
+                    </div>
+                  </div>
+                  <div className="route-location-item">
+                    <div className="route-icon destination-marker">
+                      <Location size="20" color="#eb445a" variant="Bold" />
+                    </div>
+                    <div className="route-location-info">
+                      <p className="location-type">Destino</p>
+                      <p className="location-address">{serviceData.destination?.address || 'Destino del servicio'}</p>
                     </div>
                   </div>
                 </div>
-                
-                {/* ── FASE 1: Esperando código (conductor en camino) ── */}
-                {!serviceStarted && (
-                  <div className="code-box">
-                    <div className="box-info">
-                      <h4>🔒 Código de Seguridad</h4>
-                      <div className="code-digits">
-                        {serviceData.securityCode
-                          ?.split("")
-                          .map((digit, index) => (
-                            <div key={index} className="digit">
-                              {digit}
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                    <p>
-                      Cuando tu vehículo esté sobre la grúa, dale este código al
-                      conductor para habilitarle el destino
-                    </p>
-                  </div>
-                )}
-
-                {/* ── FASE 2: Código validado → vamos al destino ── */}
-                {serviceStarted && (
-                  <div className="service-in-progress-box">
-                    <div className="sip-header">
-                      <span className="sip-icon">🚛</span>
-                      <div>
-                        <p className="sip-title">¡Tu vehículo ya está en la grúa!</p>
-                        <p className="sip-subtitle">Vamos hacia el destino</p>
-                      </div>
-                    </div>
-
-                    <div className="sip-route">
-                      {/* Origen: completado */}
-                      <div className="sip-route-item sip-route-item--done">
-                        <span className="sip-dot sip-dot--done">✓</span>
-                        <span>
-                          {serviceData.origin?.address || 'Punto de recogida'}
-                        </span>
-                      </div>
-                      <div className="sip-route-line" />
-                      {/* Destino: activo */}
-                      <div className="sip-route-item">
-                        <span className="sip-dot sip-dot--dest">📍</span>
-                        <span>
-                          {serviceData.destination?.address || 'Destino del servicio'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
-
-              {/* Botón cancelar solo antes de que inicie el servicio */}
-              {!serviceStarted && (
-              <IonButton
-                expand="block"
-                fill="clear"
-                color="danger"
-                onClick={handleCancelService}
-                className="cancel-service-button"
-              >
-                Cancelar Servicio
-              </IonButton>
-              )}
             </div>
+
+            {/* 6. Pago */}
+            <div className="dow-section">
+              <div className="dow-payment-row">
+                <Moneys size="22" color="#22C55E" variant="Bold" />
+                <div className="dow-payment-info">
+                  <p className="dow-payment-label">Método de pago</p>
+                  <p className="dow-payment-value">Efectivo</p>
+                </div>
+                <p className="dow-payment-amount">{formatAmount(serviceData.amount || 0)}</p>
+              </div>
+            </div>
+
+            {/* 7. Cancelar (solo Fase 1) */}
+            {!serviceStarted && (
+              <div className="dow-section">
+                <IonButton
+                  expand="block"
+                  fill="clear"
+                  color="danger"
+                  onClick={handleCancelService}
+                  className="cancel-service-button"
+                >
+                  Cancelar Servicio
+                </IonButton>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* ── Chat en tiempo real ── */}
+        <ChatModal
+          isOpen={chatOpen}
+          onClose={() => setChatOpen(false)}
+          requestId={serviceData?.requestId}
+          currentUserId={JSON.parse(localStorage.getItem('user') || '{}')?.id}
+          otherName={serviceData?.driver?.name || 'Conductor'}
+        />
       </IonContent>
     </IonPage>
   );

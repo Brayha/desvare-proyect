@@ -6,7 +6,8 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
-const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote, notifyClientServiceCompleted, notifyClientDriverArriving } = require('./services/notifications');
+const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote, notifyClientServiceCompleted, notifyClientDriverArriving, notifyNewChatMessage } = require('./services/notifications');
+const ChatMessage = require('./models/ChatMessage');
 
 // ── Sentry (monitoreo de errores en producción) ──────────────────────────────
 // Inicializar ANTES de crear la app Express para capturar todos los errores.
@@ -1203,6 +1204,109 @@ io.on('connection', (socket) => {
   });
 
   // Desconexión
+  // ── Chat en tiempo real ──────────────────────────────────────────────────
+  socket.on('chat:message', async (data) => {
+    if (!socket.user) {
+      console.warn('⚠️ chat:message rechazado: socket anónimo');
+      return;
+    }
+
+    const { requestId, message } = data;
+
+    if (!requestId || !message?.trim()) {
+      socket.emit('chat:error', { error: 'requestId y message son requeridos' });
+      return;
+    }
+
+    if (message.trim().length > 500) {
+      socket.emit('chat:error', { error: 'El mensaje no puede superar 500 caracteres' });
+      return;
+    }
+
+    try {
+      const Request = require('./models/Request');
+      const request = await Request.findById(requestId).lean();
+      if (!request) {
+        socket.emit('chat:error', { error: 'Solicitud no encontrada' });
+        return;
+      }
+
+      const userId = socket.user._id.toString();
+      const isClient = request.clientId?.toString() === userId;
+      const isDriver = request.assignedDriverId?.toString() === userId;
+
+      if (!isClient && !isDriver) {
+        console.warn(`⚠️ chat:message rechazado: ${userId} no es parte del servicio ${requestId}`);
+        return;
+      }
+
+      const senderType = isClient ? 'client' : 'driver';
+      const senderName = socket.user.name || (isClient ? 'Cliente' : 'Conductor');
+
+      // Guardar en MongoDB
+      const chatMsg = await ChatMessage.create({
+        requestId,
+        senderId: socket.user._id,
+        senderType,
+        senderName,
+        message: message.trim(),
+      });
+
+      const payload = {
+        _id: chatMsg._id,
+        requestId,
+        senderId: socket.user._id,
+        senderType,
+        senderName,
+        message: chatMsg.message,
+        createdAt: chatMsg.createdAt,
+      };
+
+      // Emitir al emisor como confirmación
+      socket.emit('chat:message', payload);
+
+      // Enrutar al destinatario usando activeServices
+      const activeService = activeServices.get(requestId.toString());
+      if (activeService) {
+        const targetSocketId = isClient
+          ? activeService.driverSocketId
+          : activeService.clientSocketId;
+
+        if (targetSocketId) {
+          io.to(targetSocketId).emit('chat:message', payload);
+          console.log(`💬 Mensaje de chat ${senderType}→${isClient ? 'driver' : 'client'} en servicio ${requestId}`);
+        } else {
+          // Destinatario offline → push notification
+          try {
+            const User = require('./models/User');
+            const targetId = isClient ? request.assignedDriverId : request.clientId;
+            const targetUser = await User.findById(targetId)
+              .select('fcmToken driverProfile.fcmToken')
+              .lean();
+
+            const targetFcmToken = isClient
+              ? targetUser?.driverProfile?.fcmToken
+              : targetUser?.fcmToken;
+
+            if (targetFcmToken) {
+              await notifyNewChatMessage(targetFcmToken, {
+                requestId,
+                senderName,
+                senderType,
+                message: chatMsg.message,
+              });
+            }
+          } catch (pushErr) {
+            console.warn('⚠️ Error enviando push de chat (no crítico):', pushErr.message);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('❌ Error procesando chat:message:', err.message);
+      socket.emit('chat:error', { error: 'Error al enviar el mensaje' });
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('🔌 Cliente desconectado:', socket.id);
     // Limpiar mapas
