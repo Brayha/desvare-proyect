@@ -18,7 +18,6 @@ import {
   useIonToast,
 } from '@ionic/react';
 import { requestAPI } from '../services/api';
-import socketService from '../services/socket';
 import './QuoteAmount.css';
 import { arrowBack } from 'ionicons/icons';
 
@@ -112,15 +111,11 @@ const QuoteAmount = () => {
 
       console.log('📤 Enviando cotización al servidor:', quoteData);
 
+      // Canal ÚNICO: el backend persiste la cotización, emite el evento
+      // Socket.IO `quote:received` al cliente y dispara la push notification.
+      // (Antes también se emitía `quote:send` por socket → duplicaba evento + push.)
       await requestAPI.addQuote(request.requestId, quoteData);
       console.log('✅ Cotización enviada correctamente (REST)');
-
-      // Notificar al cliente en tiempo real vía socket
-      socketService.sendQuote({
-        requestId: request.requestId,
-        clientId: request.clientId,
-        ...quoteData,
-      });
 
       // Guardar la solicitud cotizada en localStorage para que Home la muestre
       // con el badge correcto aunque el backend no la devuelva en /nearby (DEV sin GPS)

@@ -526,109 +526,14 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Conductor envía respuesta
-  socket.on('quote:send', async (data) => {
-    // Validar que el socket autenticado es el conductor que envía la cotización
-    if (socket.user && socket.user._id.toString() !== data.driverId?.toString()) {
-      console.warn(`⛔ [Socket] quote:send rechazado — socket.user=${socket.user._id} ≠ driverId=${data.driverId}`);
-      return;
-    }
-
-    console.log('💰 Cotización recibida del conductor:', data);
-    console.log('📍 Ubicación del conductor:', data.location);
-    
-    try {
-      // Buscar información completa del conductor
-      const User = require('./models/User');
-      const driver = await User.findById(data.driverId);
-      
-      if (!driver) {
-        console.error('❌ Conductor no encontrado:', data.driverId);
-        return;
-      }
-      
-      // 🔍 DEBUG: Ver estructura completa del conductor
-      console.log('🔍 DEBUG - Conductor encontrado:', {
-        id: driver._id,
-        name: driver.name,
-        userType: driver.userType,
-        tieneDriverProfile: !!driver.driverProfile
-      });
-      
-      if (driver.driverProfile) {
-        console.log('🔍 DEBUG - driverProfile:', {
-          status: driver.driverProfile.status,
-          tieneDocuments: !!driver.driverProfile.documents,
-          rating: driver.driverProfile.rating,
-          totalServices: driver.driverProfile.totalServices
-        });
-        
-        if (driver.driverProfile.documents) {
-          console.log('🔍 DEBUG - documents:', {
-            tieneSelfie: !!driver.driverProfile.documents.selfie,
-            selfie: driver.driverProfile.documents.selfie
-          });
-        } else {
-          console.log('❌ DEBUG - NO tiene documents');
-        }
-      } else {
-        console.log('❌ DEBUG - NO tiene driverProfile');
-      }
-      
-      // Enviar al cliente específico con TODA la información
-      const clientSocketId = connectedClients.get(data.clientId);
-      if (clientSocketId) {
-        const quoteData = {
-          requestId: data.requestId,
-          driverId: data.driverId,
-          driverName: data.driverName,
-          amount: data.amount,
-          location: data.location,
-          // ✅ NUEVOS CAMPOS: Información del conductor
-          driverPhoto: driver.driverProfile?.documents?.selfie || null,
-          driverRating: driver.driverProfile?.rating || 5,
-          driverServiceCount: driver.driverProfile?.totalServices || 0,
-          timestamp: new Date()
-        };
-        
-        console.log('📤 Enviando cotización al cliente:', {
-          requestId: quoteData.requestId,
-          driverId: quoteData.driverId,
-          driverName: quoteData.driverName,
-          amount: quoteData.amount,
-          driverPhoto: quoteData.driverPhoto ? `✅ ${quoteData.driverPhoto.substring(0, 50)}...` : '❌ Sin foto',
-          driverRating: quoteData.driverRating,
-          driverServiceCount: quoteData.driverServiceCount
-        });
-        io.to(clientSocketId).emit('quote:received', quoteData);
-      } else {
-        console.log('⚠️ Cliente no conectado (socket), intentando push notification al cliente...');
-      }
-
-      // Push notification al cliente (cubre app en background o pantalla bloqueada)
-      try {
-        const clientUser = await User.findById(data.clientId).select('fcmToken').lean();
-        if (clientUser?.fcmToken) {
-          await notifyClientNewQuote(clientUser.fcmToken, {
-            requestId: data.requestId || '',
-            driverName: data.driverName || '',
-            amount: data.amount || 0,
-          });
-          console.log(`📲 Push notification enviada al cliente por nueva cotización`);
-        } else {
-          console.log('ℹ️ Cliente sin FCM token registrado, no se envía push');
-        }
-      } catch (pushErr) {
-        console.warn('⚠️ Error enviando push notification al cliente (no crítico):', pushErr.message);
-        if (pushErr.isInvalidToken) {
-          await User.findByIdAndUpdate(data.clientId, { $unset: { fcmToken: 1 } });
-          console.log('🗑️ Token FCM inválido eliminado de MongoDB (server.js - cotización)');
-        }
-      }
-
-    } catch (error) {
-      console.error('❌ Error al procesar cotización:', error);
-    }
+  // ⚠️ DEPRECADO: `quote:send` ya NO procesa la cotización.
+  // El canal único es el endpoint REST POST /api/requests/:id/quote, que
+  // persiste la cotización en MongoDB, emite `quote:received` al cliente y
+  // envía la push notification. Mantener este handler como no-op evita
+  // duplicar evento + push cuando una versión antigua de la driver-app
+  // (APK ya instalada) aún emite este evento por socket.
+  socket.on('quote:send', (data) => {
+    console.log('ℹ️ [Socket] quote:send recibido pero IGNORADO (canal deprecado; se usa REST). requestId:', data?.requestId);
   });
 
   // Cancelación de solicitud (puede ser iniciada por el cliente o el conductor)

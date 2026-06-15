@@ -31,27 +31,25 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || 'Desvare';
   const notificationOptions = {
     body: payload.notification?.body || 'Tienes una nueva notificación',
-    icon: '/icons/icon-192.png', // Asegúrate de tener este icon
-    badge: '/icons/badge-72.png', // Badge pequeño para barra notificaciones
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/badge-72.png', // Badge monocromático para la barra de notificaciones
     tag: payload.data?.type || 'default', // Agrupar notificaciones del mismo tipo
     data: {
-      url: payload.data?.url || '/tabs/desvare',
+      url: payload.data?.url || '/waiting-quotes',
       quoteId: payload.data?.quoteId || null,
       requestId: payload.data?.requestId || null,
       type: payload.data?.type || 'general'
     },
-    vibrate: [200, 100, 200], // Patrón de vibración
+    vibrate: [200, 100, 200], // Patrón de vibración (ignorado en iOS)
     requireInteraction: payload.data?.type === 'QUOTE_RECEIVED' ? true : false, // Requiere acción del usuario para cotizaciones
     actions: payload.data?.type === 'QUOTE_RECEIVED' ? [
       {
         action: 'view',
-        title: 'Ver Cotización',
-        icon: '/icons/view-icon.png'
+        title: 'Ver Cotización'
       },
       {
         action: 'dismiss',
-        title: 'Cerrar',
-        icon: '/icons/close-icon.png'
+        title: 'Cerrar'
       }
     ] : []
   };
@@ -73,7 +71,7 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   // Obtener la URL de destino desde los datos
-  const urlToOpen = event.notification.data?.url || '/tabs/desvare';
+  const urlToOpen = event.notification.data?.url || '/waiting-quotes';
   const fullUrl = self.location.origin + urlToOpen;
 
   // Abrir o enfocar la ventana de la PWA

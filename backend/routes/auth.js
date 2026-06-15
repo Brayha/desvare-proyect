@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { sendOTP, verifyOTP } = require('../services/sms');
-const { optionalAuth } = require('../middleware/auth');
+const { optionalAuth, requireAuth } = require('../middleware/auth');
 
 // POST /api/auth/register - Registrar nuevo usuario
 router.post('/register', async (req, res) => {
@@ -559,20 +559,22 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 // POST /api/auth/fcm-token - Guardar/actualizar token FCM para notificaciones push
-router.post('/fcm-token', async (req, res) => {
+router.post('/fcm-token', requireAuth, async (req, res) => {
   try {
-    const { userId, fcmToken, platform } = req.body;
+    const { fcmToken, platform } = req.body;
+    // El userId SIEMPRE se deriva del JWT, nunca del body (evita IDOR / token poisoning)
+    const userId = req.user._id;
 
     // Validar campos requeridos
-    if (!userId || !fcmToken) {
+    if (!fcmToken) {
       return res.status(400).json({ 
-        error: 'userId y fcmToken son requeridos' 
+        error: 'fcmToken es requerido' 
       });
     }
 
     console.log(`📱 Guardando FCM token para usuario ${userId} (${platform || 'unknown'})`);
 
-    // Buscar usuario
+    // Buscar usuario (documento mongoose para poder guardar)
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ 
@@ -608,15 +610,10 @@ router.post('/fcm-token', async (req, res) => {
 });
 
 // DELETE /api/auth/fcm-token - Eliminar token FCM (logout)
-router.delete('/fcm-token', async (req, res) => {
+router.delete('/fcm-token', requireAuth, async (req, res) => {
   try {
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ 
-        error: 'userId es requerido' 
-      });
-    }
+    // El userId se deriva del JWT, nunca del body
+    const userId = req.user._id;
 
     console.log(`🗑️ Eliminando FCM token para usuario ${userId}`);
 

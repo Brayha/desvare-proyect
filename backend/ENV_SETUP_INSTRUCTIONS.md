@@ -20,7 +20,7 @@ DO_SPACES_REGION=fra1
 # ============================================
 # FIREBASE (Notificaciones Push)
 # ============================================
-FIREBASE_PROJECT_ID=app-desvare
+FIREBASE_PROJECT_ID=desvare-production
 FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
 ```
 

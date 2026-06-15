@@ -264,7 +264,7 @@ router.post('/:id/quote', requireAuth, requireDriver, async (req, res) => {
                 quoteId: request.quotes[request.quotes.length - 1]._id.toString(),
                 driverId: driverId,
                 amount: amount.toString(),
-                url: '/tabs/desvare' // URL para abrir al hacer click
+                url: '/waiting-quotes' // Ruta real del cliente para ver cotizaciones
               }
             );
             console.log('✅ Push notification enviada al cliente');
@@ -296,7 +296,7 @@ router.post('/:id/quote', requireAuth, requireDriver, async (req, res) => {
                 quoteId: request.quotes[request.quotes.length - 1]._id.toString(),
                 driverId: driverId,
                 amount: amount.toString(),
-                url: '/tabs/desvare'
+                url: '/waiting-quotes' // Ruta real del cliente para ver cotizaciones
               }
             );
             console.log('✅ Push notification enviada (cliente offline)');

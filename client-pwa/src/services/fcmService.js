@@ -141,26 +141,15 @@ export const onMessageListener = (callback) => {
 
   return onMessage(messaging, (payload) => {
     console.log('📬 Notificación recibida en foreground:', payload);
-    
-    // Ejecutar callback con los datos de la notificación
+
+    // Reenviar el payload al consumidor. El consumidor (App.jsx) se encarga
+    // de la UI (toast), sonido y vibración. NO duplicar sonido/vibración aquí.
     if (callback && typeof callback === 'function') {
       callback({
         title: payload.notification?.title,
         body: payload.notification?.body,
         data: payload.data
       });
-    }
-
-    // Mostrar notificación visual incluso si la app está abierta
-    if (payload.notification) {
-      // Reproducir sonido
-      const audio = new Audio('/notification-sound.mp3');
-      audio.play().catch(err => console.log('No se pudo reproducir sonido:', err));
-
-      // Vibrar (si el dispositivo lo soporta)
-      if ('vibrate' in navigator) {
-        navigator.vibrate([200, 100, 200]);
-      }
     }
   });
 };
