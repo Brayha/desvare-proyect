@@ -12,7 +12,6 @@ import {
   useIonAlert,
 } from "@ionic/react";
 import { chevronDownCircleOutline } from "ionicons/icons";
-import { Notification } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
 import { useNotification } from "../hooks/useNotification";
@@ -898,28 +897,12 @@ const WaitingQuotes = () => {
             }
           />
 
-          {/* Card flotante superior (solo sin cotizaciones).
-              - App NO instalada → invitar a instalar la PWA (aprovecha la espera).
-              - App ya instalada → mensaje de notificación por SMS. */}
-          {quotesReceived.length === 0 &&
-            (isStandalonePWA() ? (
-              <div className="floating-card-top">
-                <div className="sms-notification-card">
-                  <Notification
-                    size="28"
-                    variant="Bold"
-                    className="sms-icon"
-                    color="#0055ff"
-                  />
-                  <IonText className="sms-text">
-                    Cuando lleguen las cotizaciones te notificaremos vía mensaje
-                    de texto
-                  </IonText>
-                </div>
-              </div>
-            ) : (
-              <InstallBanner variant="waiting" />
-            ))}
+          {/* Card flotante superior (solo sin cotizaciones y si la app NO está
+              instalada): invita a instalar la PWA aprovechando la espera.
+              Si ya está instalada, no se muestra nada (recibe push). */}
+          {quotesReceived.length === 0 && !isStandalonePWA() && (
+            <InstallBanner variant="waiting" />
+          )}
 
           {/* Card flotante inferior — sin cotizaciones: spinner */}
           {quotesReceived.length === 0 && (
