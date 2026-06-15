@@ -6,7 +6,7 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
-const { notifyNewRequest, notifyQuoteAccepted, notifyClientNewQuote, notifyClientServiceCompleted, notifyClientDriverArriving, notifyNewChatMessage } = require('./services/notifications');
+const { notifyNewRequest, notifyQuoteAccepted, notifyClientServiceCompleted, notifyClientDriverArriving, notifyNewChatMessage } = require('./services/notifications');
 const ChatMessage = require('./models/ChatMessage');
 
 // ── Sentry (monitoreo de errores en producción) ──────────────────────────────
@@ -751,22 +751,12 @@ io.on('connection', (socket) => {
       console.log(`⚠️ Conductor ${data.acceptedDriverId} no está conectado`);
     }
 
-    // Push notification al conductor aceptado (cubre app en background o cerrada)
+    // Push notification al conductor aceptado en todos sus dispositivos
     try {
-      const User = require('./models/User');
-      const acceptedDriver = await User.findById(data.acceptedDriverId)
-        .select('driverProfile.fcmToken name')
-        .lean();
-
-      if (acceptedDriver?.driverProfile?.fcmToken) {
-        await notifyQuoteAccepted(acceptedDriver.driverProfile.fcmToken, {
-          requestId: data.requestId || '',
-          amount: data.amount || 0,
-        });
-        console.log(`📲 Push notification enviada al conductor ${acceptedDriver.name}`);
-      } else {
-        console.log(`ℹ️ Conductor ${data.acceptedDriverId} no tiene FCM token`);
-      }
+      await notifyQuoteAccepted(data.acceptedDriverId, {
+        requestId: data.requestId || '',
+        amount: data.amount || 0,
+      });
     } catch (pushErr) {
       console.warn('⚠️ Error enviando push notification al conductor (no crítico):', pushErr.message);
     }
@@ -884,26 +874,14 @@ io.on('connection', (socket) => {
       console.log(`✅ Cliente ${data.clientId} notificado de servicio completado (socket)`);
     } else {
       console.log(`⚠️ Cliente ${data.clientId} no conectado por socket - enviando push notification...`);
-      // Push notification como fallback cuando el cliente está en background o cerró la app
+      // Push a todos los dispositivos del cliente (background o app cerrada)
       try {
-        const User = require('./models/User');
-        const clientUser = await User.findById(data.clientId).select('fcmToken').lean();
-        if (clientUser?.fcmToken) {
-          await notifyClientServiceCompleted(clientUser.fcmToken, {
-            requestId: data.requestId || '',
-            driverName: data.driverName || 'Tu conductor',
-          });
-          console.log(`📲 Push notification de servicio completado enviada al cliente ${data.clientId}`);
-        } else {
-          console.log(`ℹ️ Cliente ${data.clientId} sin FCM token registrado`);
-        }
+        await notifyClientServiceCompleted(data.clientId, {
+          requestId: data.requestId || '',
+          driverName: data.driverName || 'Tu conductor',
+        });
       } catch (pushErr) {
         console.warn('⚠️ Error enviando push de servicio completado (no crítico):', pushErr.message);
-        if (pushErr.isInvalidToken) {
-          const User = require('./models/User');
-          await User.findByIdAndUpdate(data.clientId, { $unset: { fcmToken: 1 } });
-          console.log('🗑️ Token FCM inválido eliminado de MongoDB (server.js - completado)');
-        }
       }
     }
     
@@ -996,24 +974,14 @@ io.on('connection', (socket) => {
             const driverInfo = connectedDrivers.get(driverId);
             const driverName = driverInfo?.name || 'Tu conductor';
 
-            // 1. Notificación FCM (funciona aunque el cliente no esté en la app)
-            const clientUser = await User.findById(req.clientId).select('fcmToken').lean();
-            if (clientUser?.fcmToken) {
-              try {
-                await notifyClientDriverArriving(clientUser.fcmToken, {
-                  requestId,
-                  driverName,
-                  distanceMeters: Math.round(dist),
-                });
-                console.log(`🔔 Notificación "conductor llegando" enviada al cliente (${Math.round(dist)}m)`);
-              } catch (e) {
-                console.warn('⚠️ FCM driver:arriving error:', e.message);
-                if (e.isInvalidToken) {
-                  await User.findByIdAndUpdate(req.clientId, { $unset: { fcmToken: 1 } });
-                  console.log('🗑️ Token FCM inválido eliminado de MongoDB (driver:arriving)');
-                }
-              }
-            }
+            // 1. Notificación FCM a todos los dispositivos del cliente
+            //    (sendPushToUser purga internamente los tokens inválidos)
+            await notifyClientDriverArriving(req.clientId, {
+              requestId,
+              driverName,
+              distanceMeters: Math.round(dist),
+            });
+            console.log(`🔔 Notificación "conductor llegando" enviada al cliente (${Math.round(dist)}m)`);
 
             // 2. Evento socket (si el cliente está conectado, se actualiza la UI inmediatamente)
             const clientSocketId = service?.clientSocketId || connectedClients.get(req.clientId?.toString());
@@ -1181,26 +1149,15 @@ io.on('connection', (socket) => {
           io.to(targetSocketId).emit('chat:message', payload);
           console.log(`💬 Mensaje de chat ${senderType}→${isClient ? 'driver' : 'client'} en servicio ${requestId}`);
         } else {
-          // Destinatario offline → push notification
+          // Destinatario offline → push a todos sus dispositivos
           try {
-            const User = require('./models/User');
             const targetId = isClient ? request.assignedDriverId : request.clientId;
-            const targetUser = await User.findById(targetId)
-              .select('fcmToken driverProfile.fcmToken')
-              .lean();
-
-            const targetFcmToken = isClient
-              ? targetUser?.driverProfile?.fcmToken
-              : targetUser?.fcmToken;
-
-            if (targetFcmToken) {
-              await notifyNewChatMessage(targetFcmToken, {
-                requestId,
-                senderName,
-                senderType,
-                message: chatMsg.message,
-              });
-            }
+            await notifyNewChatMessage(targetId, {
+              requestId,
+              senderName,
+              senderType,
+              message: chatMsg.message,
+            });
           } catch (pushErr) {
             console.warn('⚠️ Error enviando push de chat (no crítico):', pushErr.message);
           }

@@ -582,13 +582,22 @@ router.post('/fcm-token', requireAuth, async (req, res) => {
       });
     }
 
-    // Guardar/actualizar token FCM
+    // upsert del token en el array multi-dispositivo (dedupe por token + cap de tamaño)
+    const upsertToken = (list = []) => {
+      const filtered = list.filter((t) => t.token !== fcmToken);
+      filtered.push({ token: fcmToken, platform: platform || 'web', updatedAt: new Date() });
+      // Mantener solo los N más recientes
+      return filtered
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+        .slice(0, 10);
+    };
+
     if (user.userType === 'driver') {
-      // Para conductores, guardar en driverProfile
-      user.driverProfile.fcmToken = fcmToken;
+      user.driverProfile.fcmTokens = upsertToken(user.driverProfile.fcmTokens);
+      user.driverProfile.fcmToken = fcmToken; // legacy: último token
     } else {
-      // Para clientes, guardar directamente en user
-      user.fcmToken = fcmToken;
+      user.fcmTokens = upsertToken(user.fcmTokens);
+      user.fcmToken = fcmToken; // legacy: último token
     }
 
     await user.save();
@@ -610,12 +619,15 @@ router.post('/fcm-token', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/auth/fcm-token - Eliminar token FCM (logout)
+// Si se envía fcmToken en el body, elimina SOLO ese dispositivo.
+// Si no, limpia todos los tokens del usuario (logout total).
 router.delete('/fcm-token', requireAuth, async (req, res) => {
   try {
     // El userId se deriva del JWT, nunca del body
     const userId = req.user._id;
+    const { fcmToken } = req.body || {};
 
-    console.log(`🗑️ Eliminando FCM token para usuario ${userId}`);
+    console.log(`🗑️ Eliminando FCM token para usuario ${userId}${fcmToken ? ' (un dispositivo)' : ' (todos)'}`);
 
     const user = await User.findById(userId);
     if (!user) {
@@ -624,11 +636,16 @@ router.delete('/fcm-token', requireAuth, async (req, res) => {
       });
     }
 
-    // Eliminar token FCM
-    if (user.userType === 'driver') {
-      user.driverProfile.fcmToken = null;
+    const target = user.userType === 'driver' ? user.driverProfile : user;
+
+    if (fcmToken) {
+      // Eliminar solo el token de este dispositivo
+      target.fcmTokens = (target.fcmTokens || []).filter((t) => t.token !== fcmToken);
+      if (target.fcmToken === fcmToken) target.fcmToken = null;
     } else {
-      user.fcmToken = null;
+      // Logout total: limpiar todos los tokens
+      target.fcmTokens = [];
+      target.fcmToken = null;
     }
 
     await user.save();

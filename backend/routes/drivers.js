@@ -1014,13 +1014,15 @@ router.get('/profile/:id', async (req, res) => {
  * POST /api/drivers/fcm-token
  * Registra o actualiza el FCM token del conductor para notificaciones push
  */
-router.post('/fcm-token', async (req, res) => {
+router.post('/fcm-token', requireAuth, async (req, res) => {
   try {
-    const { driverId, fcmToken, platform } = req.body;
+    const { fcmToken, platform } = req.body;
+    // driverId derivado del JWT (evita IDOR / token poisoning)
+    const driverId = req.user._id;
 
-    if (!driverId || !fcmToken) {
+    if (!fcmToken) {
       return res.status(400).json({
-        error: 'driverId y fcmToken son requeridos'
+        error: 'fcmToken es requerido'
       });
     }
 
@@ -1029,8 +1031,13 @@ router.post('/fcm-token', async (req, res) => {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
-    // Actualizar FCM token
-    driver.driverProfile.fcmToken = fcmToken;
+    // upsert del token en el array multi-dispositivo (dedupe + cap)
+    const list = (driver.driverProfile.fcmTokens || []).filter((t) => t.token !== fcmToken);
+    list.push({ token: fcmToken, platform: platform || 'android', updatedAt: new Date() });
+    driver.driverProfile.fcmTokens = list
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      .slice(0, 10);
+    driver.driverProfile.fcmToken = fcmToken; // legacy: último token
     driver.driverProfile.platform = platform || 'android';
     await driver.save();
 
@@ -1054,21 +1061,25 @@ router.post('/fcm-token', async (req, res) => {
  * DELETE /api/drivers/fcm-token
  * Elimina el FCM token del conductor (cuando se desloguea)
  */
-router.delete('/fcm-token', async (req, res) => {
+router.delete('/fcm-token', requireAuth, async (req, res) => {
   try {
-    const { driverId } = req.body;
-
-    if (!driverId) {
-      return res.status(400).json({ error: 'driverId es requerido' });
-    }
+    const driverId = req.user._id;
+    const { fcmToken } = req.body || {};
 
     const driver = await User.findById(driverId);
     if (!driver || driver.userType !== 'driver') {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
-    // Eliminar FCM token
-    driver.driverProfile.fcmToken = null;
+    if (fcmToken) {
+      // Eliminar solo este dispositivo
+      driver.driverProfile.fcmTokens = (driver.driverProfile.fcmTokens || []).filter((t) => t.token !== fcmToken);
+      if (driver.driverProfile.fcmToken === fcmToken) driver.driverProfile.fcmToken = null;
+    } else {
+      // Logout total
+      driver.driverProfile.fcmTokens = [];
+      driver.driverProfile.fcmToken = null;
+    }
     await driver.save();
 
     console.log(`🗑️ Token FCM eliminado para conductor ${driver.name}`);

@@ -4,6 +4,9 @@
 
 const admin = require('firebase-admin');
 const path = require('path');
+const User = require('../models/User');
+
+const MAX_TOKENS_PER_USER = 10;
 
 // Inicializar Firebase Admin SDK
 let firebaseApp = null;
@@ -193,11 +196,11 @@ const notifyNewRequest = async (drivers, requestData) => {
  * @param {Object} serviceData - Datos del servicio
  * @returns {Promise<string>}
  */
-const notifyQuoteAccepted = async (fcmToken, serviceData) => {
-  return await sendPushNotification(
-    fcmToken,
+const notifyQuoteAccepted = async (userId, serviceData) => {
+  return await sendPushToUser(
+    userId,
     '✅ ¡Cotización Aprobada!',
-    `Tu cotización de $${serviceData.amount?.toLocaleString()} fue aceptada`,
+    `Tu cotización de $${Number(serviceData.amount || 0).toLocaleString('es-CO')} fue aceptada`,
     {
       type: 'QUOTE_ACCEPTED',
       requestId: serviceData.requestId || '',
@@ -263,9 +266,9 @@ const notifyAccountRejected = async (fcmToken, reason) => {
  * @param {Object} serviceData
  * @returns {Promise<string>}
  */
-const notifyClientServiceCompleted = async (fcmToken, serviceData) => {
-  return await sendPushNotification(
-    fcmToken,
+const notifyClientServiceCompleted = async (userId, serviceData) => {
+  return await sendPushToUser(
+    userId,
     '✅ ¡Servicio completado!',
     `${serviceData.driverName} llegó al destino. ¿Cómo te fue?`,
     {
@@ -316,12 +319,12 @@ const notifyClientNewQuote = async (fcmToken, quoteData) => {
  * @param {number} data.distanceMeters - Distancia aproximada al origen
  * @returns {Promise<string>}
  */
-const notifyClientDriverArriving = async (fcmToken, data) => {
+const notifyClientDriverArriving = async (userId, data) => {
   const minutes = data.distanceMeters <= 200 ? 1 : Math.ceil(data.distanceMeters / 300);
   const eta = minutes <= 1 ? 'en menos de 1 minuto' : `en aproximadamente ${minutes} min`;
 
-  return await sendPushNotification(
-    fcmToken,
+  return await sendPushToUser(
+    userId,
     '🚛 ¡Tu grúa está llegando!',
     `${data.driverName} llega ${eta}. Prepárate.`,
     {
@@ -339,13 +342,13 @@ const notifyClientDriverArriving = async (fcmToken, data) => {
  * @param {Object} data - { requestId, senderName, senderType, message }
  * @returns {Promise<string>}
  */
-const notifyNewChatMessage = async (fcmToken, data) => {
+const notifyNewChatMessage = async (userId, data) => {
   const truncated = data.message?.length > 60
     ? data.message.slice(0, 60) + '...'
     : data.message;
 
-  return await sendPushNotification(
-    fcmToken,
+  return await sendPushToUser(
+    userId,
     `💬 ${data.senderName}`,
     truncated,
     {
@@ -357,9 +360,99 @@ const notifyNewChatMessage = async (fcmToken, data) => {
   );
 };
 
+// ============================================================
+// MULTI-DISPOSITIVO: envío a todos los tokens de un usuario
+// ============================================================
+
+/**
+ * Reúne todos los tokens FCM de un usuario (array nuevo + legacy, cliente + driver).
+ * @param {Object} user - documento lean de User
+ * @returns {Array<string>} tokens únicos
+ */
+const collectUserTokens = (user) => {
+  const tokens = new Set();
+  if (user.fcmToken) tokens.add(user.fcmToken);
+  (user.fcmTokens || []).forEach((t) => t?.token && tokens.add(t.token));
+  if (user.driverProfile?.fcmToken) tokens.add(user.driverProfile.fcmToken);
+  (user.driverProfile?.fcmTokens || []).forEach((t) => t?.token && tokens.add(t.token));
+  return [...tokens];
+};
+
+/**
+ * Elimina un token FCM inválido de todos los lugares donde pueda estar guardado.
+ * @param {string} userId
+ * @param {string} badToken
+ */
+const removeInvalidToken = async (userId, badToken) => {
+  try {
+    await User.updateOne(
+      { _id: userId },
+      { $pull: { fcmTokens: { token: badToken }, 'driverProfile.fcmTokens': { token: badToken } } }
+    );
+    await User.updateOne({ _id: userId, fcmToken: badToken }, { $unset: { fcmToken: 1 } });
+    await User.updateOne(
+      { _id: userId, 'driverProfile.fcmToken': badToken },
+      { $unset: { 'driverProfile.fcmToken': 1 } }
+    );
+    console.log('🗑️ Token FCM inválido eliminado del usuario', userId.toString());
+  } catch (e) {
+    console.warn('⚠️ No se pudo limpiar token inválido:', e.message);
+  }
+};
+
+/**
+ * Envía una push notification a TODOS los dispositivos de un usuario.
+ * Centraliza la obtención de tokens y la limpieza de los inválidos.
+ * @param {string} userId
+ * @param {string} title
+ * @param {string} body
+ * @param {Object} data
+ * @returns {Promise<{successCount:number, failureCount:number}>}
+ */
+const sendPushToUser = async (userId, title, body, data = {}) => {
+  if (!userId) return { successCount: 0, failureCount: 0 };
+
+  let user;
+  try {
+    user = await User.findById(userId)
+      .select('fcmToken fcmTokens driverProfile.fcmToken driverProfile.fcmTokens')
+      .lean();
+  } catch (e) {
+    console.warn('⚠️ Error buscando usuario para push:', e.message);
+    return { successCount: 0, failureCount: 0 };
+  }
+  if (!user) return { successCount: 0, failureCount: 0 };
+
+  const tokens = collectUserTokens(user);
+  if (tokens.length === 0) {
+    console.log('ℹ️ Usuario sin tokens FCM, no se envía push:', userId.toString());
+    return { successCount: 0, failureCount: 0 };
+  }
+
+  let successCount = 0;
+  let failureCount = 0;
+  for (const token of tokens) {
+    try {
+      await sendPushNotification(token, title, body, data);
+      successCount++;
+    } catch (err) {
+      failureCount++;
+      if (err.isInvalidToken) {
+        await removeInvalidToken(userId, token);
+      }
+    }
+  }
+  console.log(`📲 Push a usuario ${userId}: ${successCount} ok, ${failureCount} fallidas`);
+  return { successCount, failureCount };
+};
+
 module.exports = {
   sendPushNotification,
   sendMultipleNotifications,
+  sendPushToUser,
+  collectUserTokens,
+  removeInvalidToken,
+  MAX_TOKENS_PER_USER,
   notifyNewRequest,
   notifyQuoteAccepted,
   notifyServiceCancelled,

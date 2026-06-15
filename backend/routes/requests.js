@@ -3,7 +3,7 @@ const router = express.Router();
 const Request = require('../models/Request');
 const User = require('../models/User');
 const ChatMessage = require('../models/ChatMessage');
-const { sendPushNotification } = require('../services/notifications');
+const { sendPushToUser } = require('../services/notifications');
 const { requireAuth, requireDriver, optionalAuth } = require('../middleware/auth');
 
 // POST /api/requests/new - Crear nueva solicitud de cotización
@@ -248,70 +248,28 @@ router.post('/:id/quote', requireAuth, requireDriver, async (req, res) => {
           driverServiceCount: quoteData.driverServiceCount
         });
         io.to(clientSocketId).emit('quote:received', quoteData);
-        
-        // 🆕 Enviar push notification al cliente (si tiene token FCM)
-        try {
-          const client = await User.findById(request.clientId);
-          if (client?.fcmToken) {
-            console.log('📱 Enviando push notification al cliente...');
-            await sendPushNotification(
-              client.fcmToken,
-              '💰 Nueva Cotización Recibida',
-              `${driverName} te cotizó $${amount.toLocaleString()}`,
-              {
-                type: 'QUOTE_RECEIVED',
-                requestId: request._id.toString(),
-                quoteId: request.quotes[request.quotes.length - 1]._id.toString(),
-                driverId: driverId,
-                amount: amount.toString(),
-                url: '/waiting-quotes' // Ruta real del cliente para ver cotizaciones
-              }
-            );
-            console.log('✅ Push notification enviada al cliente');
-          } else {
-            console.log('ℹ️ Cliente no tiene token FCM registrado (no recibirá push)');
-          }
-        } catch (pushError) {
-          console.error('⚠️ Error enviando push notification (no crítico):', pushError.message);
-          if (pushError.isInvalidToken) {
-            await User.findByIdAndUpdate(request.clientId, { $unset: { fcmToken: 1 } });
-            console.log('🗑️ Token FCM inválido eliminado de MongoDB (cliente online)');
-          }
-        }
       } else {
         console.log('⚠️ Cliente no conectado vía Socket.IO (ID:', request.clientId.toString(), ')');
-        
-        // 🆕 Si no está conectado vía Socket.IO, intentar push notification
-        try {
-          const client = await User.findById(request.clientId);
-          if (client?.fcmToken) {
-            console.log('📱 Cliente offline - Enviando solo push notification...');
-            await sendPushNotification(
-              client.fcmToken,
-              '💰 Nueva Cotización Recibida',
-              `${driverName} te cotizó $${amount.toLocaleString()}`,
-              {
-                type: 'QUOTE_RECEIVED',
-                requestId: request._id.toString(),
-                quoteId: request.quotes[request.quotes.length - 1]._id.toString(),
-                driverId: driverId,
-                amount: amount.toString(),
-                url: '/waiting-quotes' // Ruta real del cliente para ver cotizaciones
-              }
-            );
-            console.log('✅ Push notification enviada (cliente offline)');
-          }
-        } catch (pushError) {
-          console.error('⚠️ Error enviando push notification:', pushError.message);
-          if (pushError.isInvalidToken) {
-            await User.findByIdAndUpdate(request.clientId, { $unset: { fcmToken: 1 } });
-            console.log('🗑️ Token FCM inválido eliminado de MongoDB (cliente offline)');
-          }
-        }
       }
     } else {
       console.log('⚠️ Socket.IO no disponible');
     }
+
+    // 🆕 Push notification al cliente en TODOS sus dispositivos (cubre app en
+    // background, pantalla bloqueada o cerrada). Se envía siempre, haya o no socket.
+    await sendPushToUser(
+      request.clientId,
+      '💰 Nueva Cotización Recibida',
+      `${driverName} te cotizó $${Number(amount).toLocaleString('es-CO')}`,
+      {
+        type: 'QUOTE_RECEIVED',
+        requestId: request._id.toString(),
+        quoteId: request.quotes[request.quotes.length - 1]._id.toString(),
+        driverId: driverId.toString(),
+        amount: amount.toString(),
+        url: '/waiting-quotes'
+      }
+    );
 
     res.json({
       message: 'Cotización agregada exitosamente',

@@ -53,7 +53,13 @@ const userSchema = new mongoose.Schema({
   // ========================================
   // NOTIFICACIONES PUSH (CLIENTES)
   // ========================================
-  fcmToken: String, // Firebase Cloud Messaging token para clientes
+  fcmToken: String, // [LEGACY] último token FCM (se mantiene por compatibilidad)
+  // Multi-dispositivo: un cliente puede tener la PWA en varios dispositivos.
+  fcmTokens: [{
+    token: { type: String, required: true },
+    platform: String, // 'web', 'android', 'ios'
+    updatedAt: { type: Date, default: Date.now }
+  }],
   
   // Estado general del usuario (para suspensiones)
   isActive: {
@@ -211,7 +217,13 @@ const userSchema = new mongoose.Schema({
     // ========================================
     // NOTIFICACIONES PUSH
     // ========================================
-    fcmToken: String, // Firebase Cloud Messaging token
+    fcmToken: String, // [LEGACY] último token FCM (se mantiene por compatibilidad)
+    // Multi-dispositivo para conductores.
+    fcmTokens: [{
+      token: { type: String, required: true },
+      platform: String,
+      updatedAt: { type: Date, default: Date.now }
+    }],
     
     // ========================================
     // NOTAS ADMINISTRATIVAS
