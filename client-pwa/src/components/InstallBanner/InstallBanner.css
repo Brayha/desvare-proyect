@@ -18,7 +18,7 @@
 /* Variante WaitingQuotes: flotante superior (reemplaza card SMS) */
 .ib-banner--waiting {
   position: absolute;
-  top: 10%;
+  top: max(calc(env(safe-area-inset-top, 0px) + 16px), 9%);
   left: 16px;
   right: 16px;
   animation: ib-slideDown 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -145,4 +145,216 @@
 .ib-share-icon {
   font-size: 15px;
   color: #0055ff;
+}
+
+/* ============================================
+   CARD GRANDE (variante 'waiting')
+   ============================================ */
+
+.ib-card {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+  border-radius: 24px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 16px 40px rgba(0, 36, 100, 0.22);
+  border: 1px solid rgba(0, 85, 255, 0.1);
+  overflow: hidden;
+}
+
+/* Brillo decorativo superior */
+.ib-card::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(0, 97, 255, 0.16) 0%, rgba(0, 97, 255, 0) 70%);
+  pointer-events: none;
+}
+
+.ib-card-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(17, 24, 39, 0.06);
+  color: #9ca3af;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.ib-card-close:active {
+  background: rgba(17, 24, 39, 0.12);
+  color: #374151;
+  transform: scale(0.92);
+}
+
+/* Cabecera: ícono + textos */
+.ib-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.ib-card-icon-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ib-card-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: #0055ff;
+  padding: 8px;
+  box-shadow: 0 8px 20px rgba(0, 85, 255, 0.35);
+  animation: ib-float 3s ease-in-out infinite;
+}
+
+@keyframes ib-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.ib-card-headtext {
+  flex: 1;
+  min-width: 0;
+}
+
+.ib-card-pill {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-bottom: 5px;
+}
+
+.ib-card-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 3px 0;
+  line-height: 1.2;
+}
+
+.ib-card-sub {
+  font-size: 12.5px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Lista de beneficios */
+.ib-card-benefits {
+  list-style: none;
+  margin: 0 0 16px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ib-card-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.ib-card-bullet {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #eef4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+/* Botón CTA grande */
+.ib-card-cta {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 15px;
+  background: linear-gradient(135deg, #0061ff 0%, #0040c8 100%);
+  color: #fff;
+  font-size: 15.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  box-shadow: 0 10px 24px rgba(0, 85, 255, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ib-card-cta:active {
+  transform: scale(0.97);
+  box-shadow: 0 6px 16px rgba(0, 85, 255, 0.35);
+}
+
+.ib-card-cta-icon {
+  flex-shrink: 0;
+}
+
+/* Pasos numerados */
+.ib-card-steps {
+  list-style: none;
+  margin: 14px 0 0 0;
+  padding: 14px;
+  background: #f0f5ff;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  animation: ib-fadeIn 0.3s ease;
+}
+
+.ib-card-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ib-card-step-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0055ff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.ib-card-step-text {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.45;
 }
