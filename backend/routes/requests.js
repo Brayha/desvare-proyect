@@ -349,21 +349,42 @@ router.post('/:id/accept', requireAuth, async (req, res) => {
     // Generar código de seguridad de 4 dígitos
     const securityCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-    // Marcar la cotización aceptada como 'accepted' y las demás como 'expired'
-    request.quotes.forEach(q => {
+    // 🔒 Aceptación ATÓMICA: solo UNA petición puede "ganar" la solicitud.
+    // El filtro { status: { $ne: 'accepted' } } garantiza que si dos accepts
+    // llegan casi a la vez (doble-tap o carrera), el segundo recibe claimed=null.
+    const claimed = await Request.findOneAndUpdate(
+      { _id: id, status: { $ne: 'accepted' } },
+      {
+        $set: {
+          status: 'accepted',
+          assignedDriverId: driverId,
+          securityCode,
+          updatedAt: new Date(),
+        },
+      },
+      { new: true }
+    );
+
+    if (!claimed) {
+      return res.status(409).json({
+        error: 'Esta solicitud ya fue aceptada',
+      });
+    }
+
+    // Ya ganamos la aceptación: marcar la cotización aceptada y expirar las demás.
+    claimed.quotes.forEach(q => {
       if (q.driverId.toString() === driverId) {
         q.status = 'accepted';
       } else if (q.status === 'pending') {
         q.status = 'expired';
       }
     });
+    await claimed.save();
 
-    // Actualizar solicitud
-    request.status = 'accepted';
-    request.assignedDriverId = driverId;
-    request.securityCode = securityCode;
-    request.updatedAt = new Date();
-    await request.save();
+    // Reflejar el estado actualizado en `request` para el resto del handler.
+    request.status = claimed.status;
+    request.assignedDriverId = claimed.assignedDriverId;
+    request.quotes = claimed.quotes;
 
     // Cambiar conductor a OCUPADO automáticamente
     driver.driverProfile.isOnline = false;
