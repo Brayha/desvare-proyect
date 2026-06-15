@@ -14,8 +14,10 @@ import { call, logoWhatsapp, chatbubbleEllipses } from "ionicons/icons";
 import { Location, Moneys } from "iconsax-react";
 import { MapPicker } from "../components/Map/MapPicker";
 import { useToast } from "@hooks/useToast";
+import { useNotification } from "@hooks/useNotification";
 import socketService from "../services/socket";
 import ChatModal from "../components/ChatModal/ChatModal";
+import ChatBanner from "../components/ChatModal/ChatBanner";
 import "./DriverOnWay.css";
 
 import logo from "../assets/img/Desvare.svg";
@@ -29,6 +31,7 @@ const LOCATION_POLL_INTERVAL_MS = 8000;
 const DriverOnWay = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
+  const { playSound, vibrate } = useNotification();
   const [presentAlert] = useIonAlert();
 
   const [serviceData, setServiceData] = useState(null);
@@ -40,6 +43,7 @@ const DriverOnWay = () => {
   const [serviceStarted, setServiceStarted] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [chatBanner, setChatBanner] = useState(null);
 
   useEffect(() => {
     console.log("🔄 DriverOnWay - Inicializando...");
@@ -280,10 +284,15 @@ const DriverOnWay = () => {
     pollServiceStatus(); // inmediato al montar
     const statusPollInterval = setInterval(pollServiceStatus, 10000);
 
-    // Contador de mensajes no leídos
-    const handleIncomingChat = () => {
+    // Banner + sonido cuando llega un mensaje con el modal cerrado
+    const handleIncomingChat = (msg) => {
       setChatOpen((open) => {
-        if (!open) setUnreadCount((n) => n + 1);
+        if (!open) {
+          setUnreadCount((n) => n + 1);
+          setChatBanner({ senderName: msg.senderName, text: msg.message });
+          playSound();
+          vibrate();
+        }
         return open;
       });
     };
@@ -732,6 +741,13 @@ const DriverOnWay = () => {
             )}
           </div>
         </div>
+
+        {/* ── Banner de mensaje entrante ── */}
+        <ChatBanner
+          message={chatBanner}
+          onTap={() => { setChatBanner(null); setChatOpen(true); setUnreadCount(0); }}
+          onDismiss={() => setChatBanner(null)}
+        />
 
         {/* ── Chat en tiempo real ── */}
         <ChatModal

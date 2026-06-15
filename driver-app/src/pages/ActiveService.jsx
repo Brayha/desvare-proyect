@@ -30,6 +30,7 @@ import RequestDetailMap from "../components/RequestDetailMap";
 import socketService from "../services/socket";
 import { requestAPI } from "../services/api";
 import ChatModal from "../components/ChatModal/ChatModal";
+import ChatBanner from "../components/ChatModal/ChatBanner";
 import "./ActiveService.css";
 
 // Importar iconos SVG de vehículos
@@ -69,6 +70,7 @@ const ActiveService = () => {
   const [codeValidated, setCodeValidated] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [chatBanner, setChatBanner] = useState(null);
 
   // 🗺️ Función para abrir navegación en apps externas
   const openNavigation = (destinationCoords, destinationAddress) => {
@@ -238,10 +240,18 @@ const ActiveService = () => {
     };
     socketService.onCodeInvalid(handleCodeInvalid);
 
-    // Badge de mensajes no leídos
-    const handleIncomingChat = () => {
+    // Banner + sonido cuando llega un mensaje con el modal cerrado
+    const handleIncomingChat = (msg) => {
       setChatOpen((open) => {
-        if (!open) setUnreadCount((n) => n + 1);
+        if (!open) {
+          setUnreadCount((n) => n + 1);
+          setChatBanner({ senderName: msg.senderName, text: msg.message });
+          try {
+            const audio = new Audio('/notification-sound.mp3');
+            audio.play().catch(() => {});
+          } catch (_) {}
+          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+        }
         return open;
       });
     };
@@ -1293,6 +1303,13 @@ const ActiveService = () => {
           )}
         </div>
       </div>
+
+      {/* ── Banner de mensaje entrante ── */}
+      <ChatBanner
+        message={chatBanner}
+        onTap={() => { setChatBanner(null); setChatOpen(true); setUnreadCount(0); }}
+        onDismiss={() => setChatBanner(null)}
+      />
 
       {/* ── Chat en tiempo real ── */}
       <ChatModal
