@@ -903,6 +903,7 @@ const WaitingQuotes = () => {
           {quotesReceived.length === 0 && !isStandalonePWA() && (
             <InstallBanner variant="waiting" />
           )}
+          
 
           {/* Card flotante inferior — sin cotizaciones: spinner */}
           {quotesReceived.length === 0 && (
