@@ -396,11 +396,12 @@ const sendWebPushNotification = async (subscription, title, body, data = {}) => 
     return null;
   }
 
+  // Formato compatible con firebase-messaging-sw.js (onBackgroundMessage espera payload.notification)
   const payload = JSON.stringify({
-    title,
-    body,
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72.png',
+    notification: {
+      title,
+      body
+    },
     data: {
       ...data,
       timestamp: Date.now().toString()
