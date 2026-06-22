@@ -56,13 +56,45 @@ export const initializePushNotifications = async (driverId) => {
     // Así no se pierde el evento 'registration' por race condition
     setupNotificationListeners(driverId);
 
-    // 6. Registrar con FCM (dispara el evento 'registration' con el token)
-    await PushNotifications.register();
-    console.log('✅ Registro FCM iniciado');
+    // 6. Registrar con FCM (dispara el evento 'registration' con el token).
+    //    IMPORTANTE: register() puede fallar de forma transitoria (Google Play
+    //    Services, red, token aún no disponible). Eso NO significa que el permiso
+    //    esté denegado, por lo que va en su propio try/catch y NO debe cambiar el
+    //    valor de retorno (que refleja únicamente el estado del permiso).
+    try {
+      await PushNotifications.register();
+      console.log('✅ Registro FCM iniciado');
+    } catch (regErr) {
+      console.error('⚠️ register() FCM falló (el permiso SÍ está concedido, se reintentará):', regErr);
+    }
 
     return true;
   } catch (error) {
     console.error('❌ Error inicializando push notifications:', error);
+    // Fallback: el banner debe reflejar el estado REAL del permiso. Si el permiso
+    // está concedido a pesar del error, no mostramos el banner por equivocación.
+    try {
+      const status = await PushNotifications.checkPermissions();
+      return status.receive === 'granted';
+    } catch {
+      return false;
+    }
+  }
+};
+
+/**
+ * Devuelve true si el permiso de notificaciones está concedido a nivel de SO.
+ * Se usa para decidir si mostrar el banner "Notificaciones desactivadas" sin
+ * depender del resultado del registro FCM (que puede fallar de forma transitoria).
+ * @returns {Promise<boolean>}
+ */
+export const isPushPermissionGranted = async () => {
+  // En navegador (DEV) no aplica: no mostramos el banner.
+  if (import.meta.env.VITE_DEV_MODE === 'true') return true;
+  try {
+    const status = await PushNotifications.checkPermissions();
+    return status.receive === 'granted';
+  } catch {
     return false;
   }
 };

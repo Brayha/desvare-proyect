@@ -125,7 +125,10 @@ const PermissionsSetup = () => {
               return;
             }
           } catch {
-            // Plugin no disponible: asumir que todo está bien y pasar a Home
+            // Si no se puede verificar la batería, NO saltar a Home: dejar que el
+            // usuario vea el slide de batería para no perder el permiso de GPS en
+            // segundo plano. (Antes esto saltaba a Home y se brincaba el slide.)
+            return;
           }
         }
         // Todos los permisos necesarios están concedidos → ir a Home directamente

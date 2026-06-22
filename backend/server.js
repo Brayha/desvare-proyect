@@ -25,6 +25,12 @@ if (process.env.SENTRY_DSN) {
 const app = express();
 const server = http.createServer(app);
 
+// El backend corre detrás de un proxy (Nginx / DigitalOcean), por lo que el
+// header X-Forwarded-For viene poblado. Sin esto, express-rate-limit lanza
+// ERR_ERL_UNEXPECTED_X_FORWARDED_FOR y la IP real del cliente no se identifica
+// correctamente (todos compartirían el rate-limit de la IP del proxy).
+app.set('trust proxy', 1);
+
 // Configuración de CORS
 // Soporta múltiples URLs separadas por coma en las variables de entorno
 const getAllowedOrigins = () => {

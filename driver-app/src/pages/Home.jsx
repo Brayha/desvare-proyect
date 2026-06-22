@@ -12,11 +12,11 @@ import {
   IonSpinner,
 } from '@ionic/react';
 import { Geolocation } from '@capacitor/geolocation';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { requestAPI } from '../services/api';
 import socketService from '../services/socket';
 import { useDriverLocation } from '../hooks/useDriverLocation';
-import { initializePushNotifications } from '../services/pushNotifications';
+import { initializePushNotifications, isPushPermissionGranted } from '../services/pushNotifications';
 import ServiceHeader from '../components/ServiceHeader';
 import RequestCard from '../components/RequestCard';
 import LocationBanner from '../components/LocationBanner';
@@ -28,6 +28,10 @@ import './Home.css';
 // API URL Configuration
 // ============================================
 const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
+
+// Plugin nativo para verificar/solicitar la exención de optimización de batería.
+// Necesario para que el GPS en segundo plano funcione con la pantalla bloqueada.
+const LocationTracking = registerPlugin('LocationTracking');
 
 const Home = () => {
   const history = useHistory();
@@ -45,6 +49,8 @@ const Home = () => {
   const [cancellationData, setCancellationData] = useState(null);
   // Estado para banner de notificaciones denegadas
   const [notifDenied, setNotifDenied] = useState(false);
+  // Estado para banner de optimización de batería (GPS en segundo plano)
+  const [batteryNotExempt, setBatteryNotExempt] = useState(false);
 
   // Hook de geolocalización del conductor
   const { 
@@ -147,14 +153,26 @@ const Home = () => {
         if (currentUser.driverProfile?.isOnline) {
           socketService.notifyAvailabilityChange(parsedUser._id, true);
         }
+        // Re-verificar el permiso de notificaciones: si el conductor lo activó
+        // desde Ajustes del sistema y volvió a la app, el banner debe ocultarse.
+        isPushPermissionGranted().then((granted) => setNotifDenied(!granted));
+        // Re-verificar la exención de batería al volver de Ajustes del sistema.
+        checkBatteryExemption();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // 🔔 Inicializar push notifications
+    // 🔔 Inicializar push notifications.
+    // El banner se decide por el estado REAL del permiso (no por el resultado del
+    // registro FCM, que puede fallar de forma transitoria sin que el permiso esté
+    // denegado).
     initializePushNotifications(parsedUser._id).then((granted) => {
-      if (granted === false) setNotifDenied(true);
+      setNotifDenied(granted === false);
     });
+
+    // 🔋 Verificar exención de optimización de batería (GPS en segundo plano).
+    // Red de seguridad por si el conductor se saltó el slide del onboarding.
+    checkBatteryExemption();
 
     // Cargar solicitudes iniciales
     loadRequests(parsedUser._id);
@@ -400,6 +418,35 @@ const Home = () => {
       setShowLocationModal(true);
     }
   }, [locationError]);
+
+  // Verificar si la app está exenta de la optimización de batería (solo Android nativo).
+  // Si no lo está, mostramos un banner para que el conductor lo active y el GPS
+  // siga funcionando con la pantalla bloqueada o en otra app.
+  const checkBatteryExemption = async () => {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
+      setBatteryNotExempt(false);
+      return;
+    }
+    try {
+      const { isIgnoring } = await LocationTracking.checkBatteryOptimization();
+      setBatteryNotExempt(!isIgnoring);
+    } catch (err) {
+      console.warn('⚠️ No se pudo verificar la optimización de batería:', err?.message);
+      setBatteryNotExempt(false);
+    }
+  };
+
+  // Solicitar la exención de batería desde el banner (abre el diálogo nativo)
+  const handleRequestBatteryOptimization = async () => {
+    try {
+      await LocationTracking.requestBatteryOptimization();
+      // Tras volver del diálogo nativo, re-verificar el estado real
+      setTimeout(() => checkBatteryExemption(), 800);
+    } catch (err) {
+      console.error('Error solicitando exención de batería:', err);
+      present({ message: 'Ve a Ajustes → Batería para permitir el uso sin restricciones', duration: 4000, color: 'warning' });
+    }
+  };
 
   // Solicitar permiso de notificaciones desde el banner
   const handleRequestNotifPermission = async () => {
@@ -688,6 +735,20 @@ const Home = () => {
               <span className="location-subtitle">No recibirás avisos de nuevos servicios</span>
             </div>
             <button className="location-action-btn" onClick={handleRequestNotifPermission}>
+              <span>Activar</span>
+            </button>
+          </div>
+        )}
+
+        {/* Banner de optimización de batería (GPS en segundo plano) */}
+        {batteryNotExempt && (
+          <div className="location-banner location-banner-error">
+            <span style={{ fontSize: 24, flexShrink: 0 }}>🔋</span>
+            <div className="location-text">
+              <span className="location-title">Activa el GPS en segundo plano</span>
+              <span className="location-subtitle">Sin esto, tu ubicación se detiene al bloquear el teléfono</span>
+            </div>
+            <button className="location-action-btn" onClick={handleRequestBatteryOptimization}>
               <span>Activar</span>
             </button>
           </div>
