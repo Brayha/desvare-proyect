@@ -33,7 +33,8 @@
     "nodemailer": "^8.0.9",
     "sharp": "^0.34.5",
     "socket.io": "^4.6.1",
-    "twilio": "^5.12.1"
+    "twilio": "^5.12.1",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

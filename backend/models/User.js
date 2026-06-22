@@ -60,6 +60,16 @@ const userSchema = new mongoose.Schema({
     platform: String, // 'web', 'android', 'ios'
     updatedAt: { type: Date, default: Date.now }
   }],
+  // Web Push nativo (iOS Safari y otros) — guarda el objeto subscription completo
+  webPushSubscriptions: [{
+    endpoint: { type: String, required: true },
+    keys: {
+      p256dh: String,
+      auth: String
+    },
+    platform: { type: String, default: 'ios-safari' },
+    updatedAt: { type: Date, default: Date.now }
+  }],
   
   // Estado general del usuario (para suspensiones)
   isActive: {

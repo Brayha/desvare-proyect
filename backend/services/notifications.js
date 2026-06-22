@@ -1,12 +1,25 @@
 /**
- * Servicio de notificaciones push con Firebase Cloud Messaging
+ * Servicio de notificaciones push con Firebase Cloud Messaging y Web Push nativo (iOS)
  */
 
 const admin = require('firebase-admin');
+const webPush = require('web-push');
 const path = require('path');
 const User = require('../models/User');
 
 const MAX_TOKENS_PER_USER = 10;
+
+// Configurar web-push con VAPID keys para iOS Safari
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webPush.setVapidDetails(
+    'mailto:soporte@desvare.app',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+  console.log('✅ Web Push (VAPID) configurado para iOS Safari');
+} else {
+  console.warn('⚠️ VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY no configuradas — Web Push iOS no disponible');
+}
 
 // Inicializar Firebase Admin SDK
 let firebaseApp = null;
@@ -361,6 +374,77 @@ const notifyNewChatMessage = async (userId, data) => {
 };
 
 // ============================================================
+// WEB PUSH NATIVO (iOS Safari)
+// ============================================================
+
+/**
+ * Envía una notificación usando Web Push nativo (sin Firebase) a una suscripción.
+ * Usado principalmente para iOS Safari donde FCM no puede registrarse.
+ * @param {Object} subscription - Objeto { endpoint, keys: { p256dh, auth } }
+ * @param {string} title
+ * @param {string} body
+ * @param {Object} data
+ */
+const sendWebPushNotification = async (subscription, title, body, data = {}) => {
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    console.warn('⚠️ VAPID keys no configuradas, saltando Web Push');
+    return null;
+  }
+
+  if (!subscription?.endpoint) {
+    console.warn('⚠️ Suscripción Web Push inválida');
+    return null;
+  }
+
+  const payload = JSON.stringify({
+    title,
+    body,
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/badge-72.png',
+    data: {
+      ...data,
+      timestamp: Date.now().toString()
+    }
+  });
+
+  try {
+    await webPush.sendNotification(subscription, payload);
+    console.log(`✅ Web Push enviado a: ${subscription.endpoint.slice(0, 50)}...`);
+    return true;
+  } catch (error) {
+    if (error.statusCode === 410 || error.statusCode === 404) {
+      error.isInvalidSubscription = true;
+      console.warn('⚠️ Suscripción Web Push expirada/inválida (será eliminada):', error.statusCode);
+    } else {
+      console.error('❌ Error enviando Web Push:', error.message);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Reúne todas las suscripciones Web Push de un usuario.
+ */
+const collectWebPushSubscriptions = (user) => {
+  return (user.webPushSubscriptions || []).filter(s => s?.endpoint);
+};
+
+/**
+ * Elimina una suscripción Web Push inválida del usuario.
+ */
+const removeInvalidWebPushSubscription = async (userId, endpoint) => {
+  try {
+    await User.updateOne(
+      { _id: userId },
+      { $pull: { webPushSubscriptions: { endpoint } } }
+    );
+    console.log('🗑️ Suscripción Web Push inválida eliminada para usuario', userId.toString());
+  } catch (e) {
+    console.warn('⚠️ No se pudo limpiar suscripción Web Push inválida:', e.message);
+  }
+};
+
+// ============================================================
 // MULTI-DISPOSITIVO: envío a todos los tokens de un usuario
 // ============================================================
 
@@ -402,7 +486,7 @@ const removeInvalidToken = async (userId, badToken) => {
 
 /**
  * Envía una push notification a TODOS los dispositivos de un usuario.
- * Centraliza la obtención de tokens y la limpieza de los inválidos.
+ * Maneja tanto FCM tokens (Android/Chrome) como Web Push subscriptions (iOS Safari).
  * @param {string} userId
  * @param {string} title
  * @param {string} body
@@ -415,7 +499,7 @@ const sendPushToUser = async (userId, title, body, data = {}) => {
   let user;
   try {
     user = await User.findById(userId)
-      .select('fcmToken fcmTokens driverProfile.fcmToken driverProfile.fcmTokens')
+      .select('fcmToken fcmTokens driverProfile.fcmToken driverProfile.fcmTokens webPushSubscriptions')
       .lean();
   } catch (e) {
     console.warn('⚠️ Error buscando usuario para push:', e.message);
@@ -423,14 +507,11 @@ const sendPushToUser = async (userId, title, body, data = {}) => {
   }
   if (!user) return { successCount: 0, failureCount: 0 };
 
-  const tokens = collectUserTokens(user);
-  if (tokens.length === 0) {
-    console.log('ℹ️ Usuario sin tokens FCM, no se envía push:', userId.toString());
-    return { successCount: 0, failureCount: 0 };
-  }
-
   let successCount = 0;
   let failureCount = 0;
+
+  // --- FCM tokens (Android / Chrome / Desktop) ---
+  const tokens = collectUserTokens(user);
   for (const token of tokens) {
     try {
       await sendPushNotification(token, title, body, data);
@@ -442,16 +523,39 @@ const sendPushToUser = async (userId, title, body, data = {}) => {
       }
     }
   }
-  console.log(`📲 Push a usuario ${userId}: ${successCount} ok, ${failureCount} fallidas`);
+
+  // --- Web Push subscriptions (iOS Safari) ---
+  const webPushSubs = collectWebPushSubscriptions(user);
+  for (const sub of webPushSubs) {
+    try {
+      await sendWebPushNotification(sub, title, body, data);
+      successCount++;
+    } catch (err) {
+      failureCount++;
+      if (err.isInvalidSubscription) {
+        await removeInvalidWebPushSubscription(userId, sub.endpoint);
+      }
+    }
+  }
+
+  if (tokens.length === 0 && webPushSubs.length === 0) {
+    console.log('ℹ️ Usuario sin tokens ni suscripciones push:', userId.toString());
+  } else {
+    console.log(`📲 Push a usuario ${userId}: ${successCount} ok, ${failureCount} fallidas (FCM: ${tokens.length}, WebPush: ${webPushSubs.length})`);
+  }
+
   return { successCount, failureCount };
 };
 
 module.exports = {
   sendPushNotification,
+  sendWebPushNotification,
   sendMultipleNotifications,
   sendPushToUser,
   collectUserTokens,
+  collectWebPushSubscriptions,
   removeInvalidToken,
+  removeInvalidWebPushSubscription,
   MAX_TOKENS_PER_USER,
   notifyNewRequest,
   notifyQuoteAccepted,

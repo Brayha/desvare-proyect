@@ -1,11 +1,12 @@
 /**
  * Servicio de Firebase Cloud Messaging para Client PWA
- * Maneja el registro de tokens y recepción de notificaciones push
+ * Maneja el registro de tokens (FCM para Android/Chrome) y Web Push nativo (iOS Safari)
  */
 
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { firebaseConfig, VAPID_KEY, isFirebaseConfigured } from '../config/firebase.config';
+import { isIOSSafari, registerWebPushSubscription } from './webPushService';
 
 // Inicializar Firebase
 let app;
@@ -25,9 +26,11 @@ try {
 }
 
 /**
- * Solicita permiso de notificaciones y registra el token FCM
+ * Solicita permiso de notificaciones y registra el token/suscripción adecuada.
+ * - iOS Safari: usa Web Push nativo (sin Firebase)
+ * - Android / Chrome / otros: usa Firebase FCM
  * @param {string} userId - ID del usuario para asociar el token
- * @returns {Promise<string|null>} Token FCM o null si falla
+ * @returns {Promise<string|null>} Token FCM, 'web-push-ios' (éxito iOS), o null si falla
  */
 export const requestNotificationPermission = async (userId) => {
   try {
@@ -37,7 +40,14 @@ export const requestNotificationPermission = async (userId) => {
       return null;
     }
 
-    // Verificar si ya tiene permisos
+    // iOS Safari: usar Web Push nativo (FCM no funciona en iOS)
+    if (isIOSSafari()) {
+      console.log('🍎 iOS Safari detectado — usando Web Push nativo (sin Firebase)');
+      const success = await registerWebPushSubscription(userId);
+      return success ? 'web-push-ios' : null;
+    }
+
+    // Verificar si ya tiene permisos (no-iOS)
     if (Notification.permission === 'granted') {
       console.log('✅ Permisos de notificación ya concedidos');
       return await registerFCMToken(userId);

@@ -618,6 +618,68 @@ router.post('/fcm-token', requireAuth, async (req, res) => {
   }
 });
 
+// POST /api/auth/web-push-subscription - Guardar suscripción Web Push nativa (iOS Safari)
+router.post('/web-push-subscription', requireAuth, async (req, res) => {
+  try {
+    const { subscription, platform } = req.body;
+    const userId = req.user._id;
+
+    if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+      return res.status(400).json({ error: 'Suscripción Web Push inválida. Se requiere endpoint y keys.' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    const subs = user.webPushSubscriptions || [];
+    // Deduplicar por endpoint
+    const filtered = subs.filter(s => s.endpoint !== subscription.endpoint);
+    filtered.push({
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth
+      },
+      platform: platform || 'ios-safari',
+      updatedAt: new Date()
+    });
+    // Máximo 5 suscripciones por usuario
+    user.webPushSubscriptions = filtered.slice(-5);
+
+    await user.save();
+    console.log(`✅ Web Push subscription guardada para ${user.name} (${platform || 'ios-safari'})`);
+    res.json({ success: true, message: 'Suscripción Web Push registrada' });
+
+  } catch (error) {
+    console.error('❌ Error guardando Web Push subscription:', error);
+    res.status(500).json({ error: 'Error al guardar suscripción', details: error.message });
+  }
+});
+
+// DELETE /api/auth/web-push-subscription - Eliminar suscripción Web Push (logout)
+router.delete('/web-push-subscription', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { endpoint } = req.body || {};
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    if (endpoint) {
+      user.webPushSubscriptions = (user.webPushSubscriptions || []).filter(s => s.endpoint !== endpoint);
+    } else {
+      user.webPushSubscriptions = [];
+    }
+
+    await user.save();
+    res.json({ success: true, message: 'Suscripción Web Push eliminada' });
+
+  } catch (error) {
+    console.error('❌ Error eliminando Web Push subscription:', error);
+    res.status(500).json({ error: 'Error al eliminar suscripción', details: error.message });
+  }
+});
+
 // DELETE /api/auth/fcm-token - Eliminar token FCM (logout)
 // Si se envía fcmToken en el body, elimina SOLO ese dispositivo.
 // Si no, limpia todos los tokens del usuario (logout total).
