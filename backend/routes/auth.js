@@ -574,35 +574,40 @@ router.post('/fcm-token', requireAuth, async (req, res) => {
 
     console.log(`📱 Guardando FCM token para usuario ${userId} (${platform || 'unknown'})`);
 
-    // Buscar usuario (documento mongoose para poder guardar)
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ 
-        error: 'Usuario no encontrado' 
-      });
+    const plat = platform || 'web';
+
+    // El prefijo de los campos depende del tipo de usuario.
+    const userDoc = await User.findById(userId).select('userType').lean();
+    if (!userDoc) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
+    const prefix = userDoc.userType === 'driver' ? 'driverProfile.' : '';
+    const tokensField = `${prefix}fcmTokens`;
+    const legacyField = `${prefix}fcmToken`;
 
-    // upsert del token en el array multi-dispositivo (dedupe por token + cap de tamaño)
-    const upsertToken = (list = []) => {
-      const filtered = list.filter((t) => t.token !== fcmToken);
-      filtered.push({ token: fcmToken, platform: platform || 'web', updatedAt: new Date() });
-      // Mantener solo los N más recientes
-      return filtered
-        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-        .slice(0, 10);
-    };
+    // Actualización ATÓMICA para evitar VersionError por guardados concurrentes
+    // (antes cargar→modificar→save() chocaba el __v con peticiones simultáneas).
+    // MongoDB no permite $pull y $push del mismo array a la vez → dos pasos:
+    //   1) dedupe del token.
+    await User.updateOne(
+      { _id: userId },
+      { $pull: { [tokensField]: { token: fcmToken } } }
+    );
+    //   2) insertar, capar a 10 y actualizar legacy.
+    await User.updateOne(
+      { _id: userId },
+      {
+        $push: {
+          [tokensField]: {
+            $each: [{ token: fcmToken, platform: plat, updatedAt: new Date() }],
+            $slice: -10
+          }
+        },
+        $set: { [legacyField]: fcmToken }
+      }
+    );
 
-    if (user.userType === 'driver') {
-      user.driverProfile.fcmTokens = upsertToken(user.driverProfile.fcmTokens);
-      user.driverProfile.fcmToken = fcmToken; // legacy: último token
-    } else {
-      user.fcmTokens = upsertToken(user.fcmTokens);
-      user.fcmToken = fcmToken; // legacy: último token
-    }
-
-    await user.save();
-
-    console.log(`✅ Token FCM guardado exitosamente para ${user.name} (${user.userType})`);
+    console.log(`✅ Token FCM guardado exitosamente para usuario ${userId} (${userDoc.userType})`);
 
     res.json({ 
       success: true,
@@ -628,26 +633,37 @@ router.post('/web-push-subscription', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Suscripción Web Push inválida. Se requiere endpoint y keys.' });
     }
 
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    // Actualización ATÓMICA (evita VersionError por guardados concurrentes).
+    // Paso 1: dedupe por endpoint.
+    const exists = await User.updateOne(
+      { _id: userId },
+      { $pull: { webPushSubscriptions: { endpoint: subscription.endpoint } } }
+    );
+    if (exists.matchedCount === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    // Paso 2: insertar y capar a las 5 más recientes.
+    await User.updateOne(
+      { _id: userId },
+      {
+        $push: {
+          webPushSubscriptions: {
+            $each: [{
+              endpoint: subscription.endpoint,
+              keys: {
+                p256dh: subscription.keys.p256dh,
+                auth: subscription.keys.auth
+              },
+              platform: platform || 'ios-safari',
+              updatedAt: new Date()
+            }],
+            $slice: -5
+          }
+        }
+      }
+    );
 
-    const subs = user.webPushSubscriptions || [];
-    // Deduplicar por endpoint
-    const filtered = subs.filter(s => s.endpoint !== subscription.endpoint);
-    filtered.push({
-      endpoint: subscription.endpoint,
-      keys: {
-        p256dh: subscription.keys.p256dh,
-        auth: subscription.keys.auth
-      },
-      platform: platform || 'ios-safari',
-      updatedAt: new Date()
-    });
-    // Máximo 5 suscripciones por usuario
-    user.webPushSubscriptions = filtered.slice(-5);
-
-    await user.save();
-    console.log(`✅ Web Push subscription guardada para ${user.name} (${platform || 'ios-safari'})`);
+    console.log(`✅ Web Push subscription guardada para usuario ${userId} (${platform || 'ios-safari'})`);
     res.json({ success: true, message: 'Suscripción Web Push registrada' });
 
   } catch (error) {
@@ -662,16 +678,15 @@ router.delete('/web-push-subscription', requireAuth, async (req, res) => {
     const userId = req.user._id;
     const { endpoint } = req.body || {};
 
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
-
-    if (endpoint) {
-      user.webPushSubscriptions = (user.webPushSubscriptions || []).filter(s => s.endpoint !== endpoint);
-    } else {
-      user.webPushSubscriptions = [];
+    // Actualización ATÓMICA (evita VersionError).
+    const update = endpoint
+      ? { $pull: { webPushSubscriptions: { endpoint } } }
+      : { $set: { webPushSubscriptions: [] } };
+    const result = await User.updateOne({ _id: userId }, update);
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    await user.save();
     res.json({ success: true, message: 'Suscripción Web Push eliminada' });
 
   } catch (error) {
@@ -691,28 +706,34 @@ router.delete('/fcm-token', requireAuth, async (req, res) => {
 
     console.log(`🗑️ Eliminando FCM token para usuario ${userId}${fcmToken ? ' (un dispositivo)' : ' (todos)'}`);
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ 
-        error: 'Usuario no encontrado' 
-      });
+    const userDoc = await User.findById(userId).select('userType').lean();
+    if (!userDoc) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
+    const prefix = userDoc.userType === 'driver' ? 'driverProfile.' : '';
+    const tokensField = `${prefix}fcmTokens`;
+    const legacyField = `${prefix}fcmToken`;
 
-    const target = user.userType === 'driver' ? user.driverProfile : user;
-
+    // Actualización ATÓMICA (evita VersionError).
     if (fcmToken) {
-      // Eliminar solo el token de este dispositivo
-      target.fcmTokens = (target.fcmTokens || []).filter((t) => t.token !== fcmToken);
-      if (target.fcmToken === fcmToken) target.fcmToken = null;
+      // Eliminar solo el token de este dispositivo y limpiar el legacy si coincide.
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { [tokensField]: { token: fcmToken } } }
+      );
+      await User.updateOne(
+        { _id: userId, [legacyField]: fcmToken },
+        { $set: { [legacyField]: null } }
+      );
     } else {
-      // Logout total: limpiar todos los tokens
-      target.fcmTokens = [];
-      target.fcmToken = null;
+      // Logout total: limpiar todos los tokens.
+      await User.updateOne(
+        { _id: userId },
+        { $set: { [tokensField]: [], [legacyField]: null } }
+      );
     }
 
-    await user.save();
-
-    console.log(`✅ Token FCM eliminado para ${user.name}`);
+    console.log(`✅ Token FCM eliminado para usuario ${userId}`);
 
     res.json({ 
       success: true,

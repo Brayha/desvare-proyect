@@ -1026,26 +1026,43 @@ router.post('/fcm-token', requireAuth, async (req, res) => {
       });
     }
 
-    const driver = await User.findById(driverId);
-    if (!driver || driver.userType !== 'driver') {
+    const plat = platform || 'android';
+
+    // Actualización ATÓMICA para evitar VersionError por guardados concurrentes.
+    // (El patrón anterior cargar→modificar→save() chocaba el __v cuando llegaban
+    //  dos peticiones casi simultáneas, p.ej. el registro FCM al entrar a Home.)
+    // MongoDB no permite $pull y $push del mismo array en una sola operación,
+    // por lo que se hace en dos pasos atómicos:
+    //   1) Quitar el token si ya existía (dedupe).
+    const filter = { _id: driverId, userType: 'driver' };
+    const pullResult = await User.updateOne(filter, {
+      $pull: { 'driverProfile.fcmTokens': { token: fcmToken } }
+    });
+
+    if (pullResult.matchedCount === 0) {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
-    // upsert del token en el array multi-dispositivo (dedupe + cap)
-    const list = (driver.driverProfile.fcmTokens || []).filter((t) => t.token !== fcmToken);
-    list.push({ token: fcmToken, platform: platform || 'android', updatedAt: new Date() });
-    driver.driverProfile.fcmTokens = list
-      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-      .slice(0, 10);
-    driver.driverProfile.fcmToken = fcmToken; // legacy: último token
-    driver.driverProfile.platform = platform || 'android';
-    await driver.save();
+    //   2) Insertarlo de nuevo, capar el array a los 10 más recientes y
+    //      actualizar el token legacy.
+    await User.updateOne(filter, {
+      $push: {
+        'driverProfile.fcmTokens': {
+          $each: [{ token: fcmToken, platform: plat, updatedAt: new Date() }],
+          $slice: -10
+        }
+      },
+      $set: {
+        'driverProfile.fcmToken': fcmToken, // legacy: último token
+        'driverProfile.platform': plat
+      }
+    });
 
-    console.log(`✅ Token FCM registrado para conductor ${driver.name} (${platform || 'android'})`);
+    console.log(`✅ Token FCM registrado para conductor ${driverId} (${plat})`);
 
     res.json({
       message: 'Token FCM registrado exitosamente',
-      driverId: driver._id
+      driverId
     });
 
   } catch (error) {
@@ -1066,23 +1083,31 @@ router.delete('/fcm-token', requireAuth, async (req, res) => {
     const driverId = req.user._id;
     const { fcmToken } = req.body || {};
 
-    const driver = await User.findById(driverId);
-    if (!driver || driver.userType !== 'driver') {
+    const filter = { _id: driverId, userType: 'driver' };
+
+    // Actualización ATÓMICA (evita VersionError, igual que en el POST).
+    let result;
+    if (fcmToken) {
+      // Eliminar solo este dispositivo del array y limpiar el legacy si coincide.
+      result = await User.updateOne(filter, {
+        $pull: { 'driverProfile.fcmTokens': { token: fcmToken } }
+      });
+      await User.updateOne(
+        { _id: driverId, 'driverProfile.fcmToken': fcmToken },
+        { $set: { 'driverProfile.fcmToken': null } }
+      );
+    } else {
+      // Logout total: vaciar todos los tokens.
+      result = await User.updateOne(filter, {
+        $set: { 'driverProfile.fcmTokens': [], 'driverProfile.fcmToken': null }
+      });
+    }
+
+    if (result.matchedCount === 0) {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
-    if (fcmToken) {
-      // Eliminar solo este dispositivo
-      driver.driverProfile.fcmTokens = (driver.driverProfile.fcmTokens || []).filter((t) => t.token !== fcmToken);
-      if (driver.driverProfile.fcmToken === fcmToken) driver.driverProfile.fcmToken = null;
-    } else {
-      // Logout total
-      driver.driverProfile.fcmTokens = [];
-      driver.driverProfile.fcmToken = null;
-    }
-    await driver.save();
-
-    console.log(`🗑️ Token FCM eliminado para conductor ${driver.name}`);
+    console.log(`🗑️ Token FCM eliminado para conductor ${driverId}`);
 
     res.json({
       message: 'Token FCM eliminado exitosamente'
