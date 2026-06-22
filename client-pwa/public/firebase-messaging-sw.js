@@ -1,8 +1,8 @@
 // Service Worker para Firebase Cloud Messaging (Web Push)
 // Este archivo DEBE estar en /public/ para ser accesible
 
-importScripts('https://www.gstatic.com/firebasejs/10.15.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.15.0/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging-compat.js');
 
 // Configuración de Firebase — proyecto desvare-production
 // Debe coincidir EXACTAMENTE con las variables VITE_FIREBASE_* del .env
