@@ -22,6 +22,19 @@ import logo from "../assets/img/Desvare.svg";
 // ============================================
 const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
+/** Limpia todo el estado de servicio del localStorage */
+const clearServiceState = () => {
+  [
+    "completedService",
+    "activeService",
+    "activeServiceStatus",
+    "currentRequestId",
+    "requestData",
+    "vehicleData",
+    "quotesReceived",
+  ].forEach((key) => localStorage.removeItem(key));
+};
+
 const RatingService = () => {
   const history = useHistory();
   const { showSuccess, showError } = useToast();
@@ -58,8 +71,8 @@ const RatingService = () => {
 
   const handleSkip = () => {
     console.log("⏭️ Usuario decidió saltar la calificación");
-    localStorage.removeItem("completedService");
-    history.replace("/home");
+    clearServiceState();
+    history.replace("/tabs/desvare");
   };
 
   const handleSubmit = async () => {
@@ -101,14 +114,14 @@ const RatingService = () => {
       const data = await response.json();
       console.log("✅ Calificación enviada:", data);
 
-      // Limpiar localStorage
-      localStorage.removeItem("completedService");
+      // Limpiar todo el estado del servicio
+      clearServiceState();
 
       showSuccess("¡Gracias por tu calificación! 🎉");
 
-      // Redirigir al home
+      // Redirigir al mapa listo para un nuevo servicio
       setTimeout(() => {
-        history.replace("/home");
+        history.replace("/tabs/desvare");
       }, 1500);
     } catch (error) {
       console.error("❌ Error al enviar calificación:", error);

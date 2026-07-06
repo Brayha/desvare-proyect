@@ -490,7 +490,7 @@ const RequestService = () => {
         <div className="map-header-overlay">
           <div
             className="map-header-logo"
-            onClick={() => history.replace("/home")}
+            onClick={() => history.push("/home")}
           >
             <img src={logo} alt="Desvare" />
           </div>

@@ -1,7 +1,7 @@
 import { useEffect, useCallback, lazy, Suspense } from 'react';
 import { IonApp, IonRouterOutlet, setupIonicReact, useIonToast, IonPage, IonContent, IonSpinner } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Redirect, useHistory } from 'react-router-dom';
 import socketService from './services/socket';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import NotificationPermissionPrompt from './components/NotificationPermissionPrompt/NotificationPermissionPrompt';
@@ -54,6 +54,59 @@ setupIonicReact();
 const InitialRedirect = () => {
   console.log('🏠 InitialRedirect → Redirigiendo a /home');
   return <Redirect to="/home" />;
+};
+
+/**
+ * PedirRedirect — punto de entrada desde desvare.co y cualquier campaña externa.
+ * Evalúa el estado del cliente y lo lleva a la pantalla correcta sin fricción.
+ *
+ *  1. Servicio activo aceptado   → /driver-on-way
+ *  2. Esperando cotizaciones     → /waiting-quotes
+ *  3. GPS ya concedido           → /tabs/desvare  (mapa directo)
+ *  4. Primera vez / sin permiso  → /location-permission
+ */
+const PedirRedirect = () => {
+  const history = useHistory();
+
+  useEffect(() => {
+    const activeServiceStatus = localStorage.getItem('activeServiceStatus');
+    const hasActiveService    = !!localStorage.getItem('activeService');
+    const currentRequestId    = localStorage.getItem('currentRequestId');
+
+    if (activeServiceStatus === 'accepted' || activeServiceStatus === 'in_progress' || hasActiveService) {
+      history.replace('/driver-on-way');
+      return;
+    }
+
+    if ((activeServiceStatus === 'pending' || activeServiceStatus === 'quoting') && currentRequestId) {
+      history.replace('/waiting-quotes');
+      return;
+    }
+
+    // Sin servicio activo → resolver permiso GPS
+    const resolveGps = async () => {
+      try {
+        if (navigator.permissions?.query) {
+          const result = await navigator.permissions.query({ name: 'geolocation' });
+          if (result.state === 'granted') {
+            localStorage.setItem('locationPermission', 'granted');
+            history.replace('/tabs/desvare');
+          } else {
+            history.replace('/location-permission');
+          }
+        } else {
+          const cached = localStorage.getItem('locationPermission');
+          history.replace(cached === 'granted' ? '/tabs/desvare' : '/location-permission');
+        }
+      } catch {
+        history.replace('/location-permission');
+      }
+    };
+
+    resolveGps();
+  }, [history]);
+
+  return null;
 };
 
 const NotificationPromptGate = () => {
@@ -186,6 +239,7 @@ function App() {
         <IonReactRouter>
           <IonRouterOutlet>
             {/* Páginas sin tabs */}
+            <Route exact path="/pedir" component={PedirRedirect} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <Route exact path="/home" component={Home} />

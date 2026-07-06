@@ -79,15 +79,23 @@ const Home = () => {
       socketService.registerClient(parsedUser.id);
     }
 
-    // Si hay un servicio en curso, redirigir a la pantalla correcta
-    const currentRequestId = localStorage.getItem("currentRequestId");
+    // Reanudar servicio activo si existe — revisa tanto activeService como currentRequestId
     const activeServiceStatus = localStorage.getItem("activeServiceStatus");
-    if (currentRequestId) {
-      if (activeServiceStatus === "accepted" || activeServiceStatus === "in_progress") {
-        history.replace("/driver-on-way");
-      } else if (activeServiceStatus === "pending" || activeServiceStatus === "quoting") {
-        history.replace("/waiting-quotes");
-      }
+    const hasActiveService    = !!localStorage.getItem("activeService");
+    const currentRequestId    = localStorage.getItem("currentRequestId");
+
+    if (activeServiceStatus === "accepted" || activeServiceStatus === "in_progress") {
+      // El cliente aceptó una cotización → está esperando o en seguimiento
+      history.replace("/driver-on-way");
+    } else if (
+      (activeServiceStatus === "pending" || activeServiceStatus === "quoting") &&
+      currentRequestId
+    ) {
+      // El cliente está esperando cotizaciones
+      history.replace("/waiting-quotes");
+    } else if (hasActiveService && !activeServiceStatus) {
+      // activeService existe pero no hay status explícito → asumir en curso
+      history.replace("/driver-on-way");
     }
   }, [history]);
 

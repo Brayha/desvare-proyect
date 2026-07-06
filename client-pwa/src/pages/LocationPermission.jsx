@@ -26,6 +26,8 @@ const LocationPermission = () => {
   const handleRequestPermission = async () => {
     try {
       await requestLocation();
+      // Persistir el permiso para no volver a mostrar esta pantalla
+      localStorage.setItem("locationPermission", "granted");
       setPermissionGranted(true);
 
       // Esperar 1 segundo para mostrar el éxito y luego navegar
