@@ -34,6 +34,7 @@ import socketService from "../services/socket";
 import { useAuth } from "../contexts/AuthContext";
 import { getVehicleImageFromVehicle } from "../utils/vehicleImages";
 import { Button } from "../components/Button/Button";
+import { goToMarketingSite } from "../utils/appNavigation";
 import "./RequestService.css";
 import logo from "../assets/img/Desvare.svg";
 
@@ -490,7 +491,7 @@ const RequestService = () => {
         <div className="map-header-overlay">
           <div
             className="map-header-logo"
-            onClick={() => history.push("/home")}
+            onClick={() => goToMarketingSite()}
           >
             <img src={logo} alt="Desvare" />
           </div>

@@ -24,6 +24,7 @@ import { vehicleAPI } from "../services/vehicleAPI";
 import { getVehicleImage } from "../utils/vehicleImages";
 import "./MyAccount.css";
 import logo from "../assets/img/Desvare.svg";
+import { goToMarketingSite } from "../utils/appNavigation";
 import {
   Setting2,
   Verify,
@@ -85,7 +86,7 @@ const MyAccount = () => {
 
     // Forzar recarga completa para limpiar estado
     // Usamos window.location para asegurar un inicio limpio
-    window.location.href = "/home";
+    goToMarketingSite();
   };
 
   // Función para eliminar vehículo

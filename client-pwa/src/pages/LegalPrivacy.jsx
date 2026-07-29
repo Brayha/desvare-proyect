@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
       <IonHeader mode="ios">
         <IonToolbar mode="ios">
           <IonButtons slot="start">
-            <IonBackButton defaultHref="/home" text="Volver" />
+            <IonBackButton defaultHref="/pedir" text="Volver" />
           </IonButtons>
           <IonTitle>Política de Privacidad</IonTitle>
         </IonToolbar>

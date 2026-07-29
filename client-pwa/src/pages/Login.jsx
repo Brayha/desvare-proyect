@@ -4,6 +4,7 @@ import { IonPage, IonContent } from '@ionic/react';
 import AuthModal from '../components/AuthModal/AuthModal';
 import mapBg from '../assets/img/map-home-responsive.webp';
 import logo from '../assets/img/Desvare.svg';
+import { goToMarketingSite } from '../utils/appNavigation';
 import './Login.css';
 
 /**
@@ -35,7 +36,7 @@ const Login = () => {
   const handleDismiss = () => {
     setIsModalOpen(false);
     // Si cierra el modal sin autenticarse, volver al home
-    setTimeout(() => history.replace('/home'), 250);
+    setTimeout(() => goToMarketingSite(), 250);
   };
 
   return (

@@ -53,7 +53,7 @@ const RatingService = () => {
 
     if (!completedServiceData) {
       showError("No se encontraron datos del servicio completado");
-      history.push("/home");
+      history.replace("/pedir");
       return;
     }
 

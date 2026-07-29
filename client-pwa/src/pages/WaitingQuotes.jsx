@@ -177,20 +177,20 @@ const WaitingQuotes = () => {
 
       if (!storedRouteData) {
         if (isMounted) {
-          console.log("❌ No hay datos de ruta, redirigiendo a /home");
+          console.log("❌ No hay datos de ruta, redirigiendo a /pedir");
           showError("No se encontraron datos de la ruta");
-          history.push("/home");
+          history.push("/pedir");
         }
         return false;
       }
 
       if (!currentRequestId) {
         if (isMounted) {
-          console.log("❌ No hay requestId, redirigiendo a /home");
+          console.log("❌ No hay requestId, redirigiendo a /pedir");
           showError(
             "No se encontró la solicitud. Por favor, intenta de nuevo."
           );
-          history.push("/home");
+          history.push("/pedir");
         }
         return false;
       }

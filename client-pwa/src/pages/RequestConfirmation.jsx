@@ -46,7 +46,7 @@ const RequestConfirmation = () => {
     const storedRouteData = localStorage.getItem('requestData');
     if (!storedRouteData) {
       showError("No se encontraron datos de la ruta");
-      history.push('/home');
+      history.push('/pedir');
       return;
     }
 
@@ -103,9 +103,9 @@ const RequestConfirmation = () => {
       // Limpiar datos de ruta del localStorage
       localStorage.removeItem('requestData');
 
-      // Redirigir al Home para ver cotizaciones
+      // Redirigir al flujo de cotización
       setTimeout(() => {
-        history.push('/home');
+        history.push('/pedir');
       }, 1500);
 
     } catch (error) {

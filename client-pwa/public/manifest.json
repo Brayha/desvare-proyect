@@ -2,7 +2,7 @@
   "name": "Desvare - Servicio de Grúas",
   "short_name": "Desvare",
   "description": "Solicita servicio de grúa de forma rápida y segura. Recibe cotizaciones en tiempo real de conductores cercanos.",
-  "start_url": "/",
+  "start_url": "/pedir",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0055ff",

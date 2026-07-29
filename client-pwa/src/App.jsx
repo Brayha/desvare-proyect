@@ -25,8 +25,8 @@ import '@ionic/react/css/display.css';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Home from './pages/Home';
 import LocationPermission from './pages/LocationPermission';
+import { resolveAppEntryPath, goToMarketingSite } from './utils/appNavigation';
 import RequestAuth from './pages/RequestAuth';
 import RequestConfirmation from './pages/RequestConfirmation';
 import WaitingQuotes from './pages/WaitingQuotes';
@@ -50,63 +50,60 @@ const LegalPageFallback = () => (
 
 setupIonicReact();
 
-// Componente para redirección inteligente - Todos van al Home primero
+// Entrada raíz de la PWA → flujo de cotización
 const InitialRedirect = () => {
-  console.log('🏠 InitialRedirect → Redirigiendo a /home');
-  return <Redirect to="/home" />;
+  console.log('🚀 InitialRedirect → Redirigiendo a /pedir');
+  return <Redirect to="/pedir" />;
+};
+
+/** /home ya no existe en la PWA — redirige al sitio marketing (desvare.co). */
+const MarketingRedirect = () => {
+  useEffect(() => {
+    goToMarketingSite();
+  }, []);
+
+  return (
+    <IonPage>
+      <IonContent className="ion-padding ion-text-center">
+        <IonSpinner name="crescent" />
+      </IonContent>
+    </IonPage>
+  );
 };
 
 /**
- * PedirRedirect — punto de entrada desde desvare.co y cualquier campaña externa.
- * Evalúa el estado del cliente y lo lleva a la pantalla correcta sin fricción.
+ * PedirRedirect — punto de entrada desde desvare.co y campañas externas.
  *
  *  1. Servicio activo aceptado   → /driver-on-way
  *  2. Esperando cotizaciones     → /waiting-quotes
- *  3. GPS ya concedido           → /tabs/desvare  (mapa directo)
+ *  3. GPS ya concedido (caché)   → /tabs/desvare
  *  4. Primera vez / sin permiso  → /location-permission
  */
 const PedirRedirect = () => {
   const history = useHistory();
 
   useEffect(() => {
-    const activeServiceStatus = localStorage.getItem('activeServiceStatus');
-    const hasActiveService    = !!localStorage.getItem('activeService');
-    const currentRequestId    = localStorage.getItem('currentRequestId');
+    let cancelled = false;
 
-    if (activeServiceStatus === 'accepted' || activeServiceStatus === 'in_progress' || hasActiveService) {
-      history.replace('/driver-on-way');
-      return;
-    }
-
-    if ((activeServiceStatus === 'pending' || activeServiceStatus === 'quoting') && currentRequestId) {
-      history.replace('/waiting-quotes');
-      return;
-    }
-
-    // Sin servicio activo → resolver permiso GPS
-    const resolveGps = async () => {
-      try {
-        if (navigator.permissions?.query) {
-          const result = await navigator.permissions.query({ name: 'geolocation' });
-          if (result.state === 'granted') {
-            localStorage.setItem('locationPermission', 'granted');
-            history.replace('/tabs/desvare');
-          } else {
-            history.replace('/location-permission');
-          }
-        } else {
-          const cached = localStorage.getItem('locationPermission');
-          history.replace(cached === 'granted' ? '/tabs/desvare' : '/location-permission');
-        }
-      } catch {
-        history.replace('/location-permission');
+    (async () => {
+      const path = await resolveAppEntryPath();
+      if (!cancelled) {
+        history.replace(path);
       }
-    };
+    })();
 
-    resolveGps();
+    return () => {
+      cancelled = true;
+    };
   }, [history]);
 
-  return null;
+  return (
+    <IonPage>
+      <IonContent className="ion-padding ion-text-center">
+        <IonSpinner name="crescent" />
+      </IonContent>
+    </IonPage>
+  );
 };
 
 const NotificationPromptGate = () => {
@@ -242,7 +239,7 @@ function App() {
             <Route exact path="/pedir" component={PedirRedirect} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
-            <Route exact path="/home" component={Home} />
+            <Route exact path="/home" component={MarketingRedirect} />
             <Route exact path="/location-permission" component={LocationPermission} />
             <Route exact path="/request-auth" component={RequestAuth} />
             <Route exact path="/request-confirmation" component={RequestConfirmation} />

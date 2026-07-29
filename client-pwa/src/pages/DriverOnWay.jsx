@@ -18,6 +18,7 @@ import { useNotification } from "@hooks/useNotification";
 import socketService from "../services/socket";
 import ChatModal from "../components/ChatModal/ChatModal";
 import ChatBanner from "../components/ChatModal/ChatBanner";
+import { goToMarketingSite } from "../utils/appNavigation";
 import "./DriverOnWay.css";
 
 import logo from "../assets/img/Desvare.svg";
@@ -53,7 +54,7 @@ const DriverOnWay = () => {
 
     if (!activeServiceData) {
       showError("No se encontraron datos del servicio");
-      history.push("/home");
+      history.replace("/pedir");
       return;
     }
 
@@ -213,7 +214,7 @@ const DriverOnWay = () => {
             text: 'Ir al inicio',
             role: 'cancel',
             handler: () => {
-              history.replace('/home');
+              history.replace('/pedir');
             },
           },
         ],
@@ -272,7 +273,7 @@ const DriverOnWay = () => {
               {
                 text: 'Ir al inicio',
                 role: 'cancel',
-                handler: () => history.replace('/home'),
+                handler: () => history.replace('/pedir'),
               },
             ],
           });
@@ -545,7 +546,7 @@ const DriverOnWay = () => {
     showSuccess("Servicio cancelado");
 
     // ✅ Forzar navegación limpia sin conflictos de estado
-    window.location.href = "/home";
+    window.location.replace("/pedir");
   };
 
   if (isLoading || !serviceData) {
@@ -573,7 +574,7 @@ const DriverOnWay = () => {
         <div className="dow-layout">
           {/* ── Mapa fijo arriba ── */}
           <div className="dow-map-container">
-            <div className="logo-content" onClick={() => history.replace("/home")}>
+            <div className="logo-content" onClick={() => goToMarketingSite()}>
               <img src={logo} alt="logo" />
             </div>
             <MapPicker
