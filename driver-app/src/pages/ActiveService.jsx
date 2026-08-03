@@ -23,7 +23,7 @@ import {
   useIonToast,
   useIonAlert,
 } from "@ionic/react";
-import { Routing, Call, Location, UserTick } from "iconsax-react";
+import { Call, Location, UserTick } from "iconsax-react";
 import { chatbubbleEllipses } from "ionicons/icons";
 import { IonIcon } from "@ionic/react";
 import RequestDetailMap from "../components/RequestDetailMap";
@@ -31,6 +31,12 @@ import socketService from "../services/socket";
 import { requestAPI } from "../services/api";
 import ChatModal from "../components/ChatModal/ChatModal";
 import ChatBanner from "../components/ChatModal/ChatBanner";
+import {
+  extractLatLng,
+  openExternalUrl,
+  openGoogleMapsNavigation,
+  buildNavigationUrls,
+} from "../utils/openNavigation";
 import "./ActiveService.css";
 
 // Importar iconos SVG de vehículos
@@ -72,9 +78,11 @@ const ActiveService = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [chatBanner, setChatBanner] = useState(null);
 
-  // 🗺️ Función para abrir navegación en apps externas
-  const openNavigation = (destinationCoords, destinationAddress) => {
-    if (!destinationCoords || !destinationCoords.coordinates) {
+  // 🗺️ Abrir navegación externa (soporta {coordinates:[lng,lat]} y {lat,lng})
+  const openNavigation = (location) => {
+    const coords = extractLatLng(location);
+
+    if (!coords) {
       present({
         message: "No hay coordenadas disponibles para navegar",
         duration: 2000,
@@ -83,33 +91,22 @@ const ActiveService = () => {
       return;
     }
 
-    const [lng, lat] = destinationCoords.coordinates;
-
-    // URLs para cada app de navegación
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-    const wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
-    const appleMapsUrl = `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+    const urls = buildNavigationUrls(coords.lat, coords.lng);
 
     presentAlert({
       header: "Abrir en:",
       message: "Selecciona tu app de navegación preferida",
       buttons: [
         {
-          text: "🗺️ Google Maps",
+          text: "Google Maps",
           handler: () => {
-            window.open(googleMapsUrl, "_system");
+            openGoogleMapsNavigation(coords);
           },
         },
         {
-          text: "🚗 Waze",
+          text: "Waze",
           handler: () => {
-            window.open(wazeUrl, "_system");
-          },
-        },
-        {
-          text: "🍎 Apple Maps",
-          handler: () => {
-            window.open(appleMapsUrl, "_system");
+            openExternalUrl(urls.waze);
           },
         },
         {
@@ -585,23 +582,26 @@ const ActiveService = () => {
     // FASE 1: Navegar al origen (recogida)
     // FASE 2: Navegar al destino
     const targetLocation = codeValidated
-      ? serviceData?.destination?.coordinates
-      : serviceData?.origin?.coordinates;
+      ? serviceData?.destination
+      : serviceData?.origin;
+    const coords = extractLatLng(targetLocation);
 
-    if (targetLocation) {
-      const [lng, lat] = targetLocation;
-      const destination = codeValidated ? "destino" : "punto de recogida";
-
-      // Abrir Google Maps con navegación
-      const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-      window.open(mapsUrl, "_blank");
-
+    if (!coords) {
       present({
-        message: `🧭 Navegando al ${destination}...`,
+        message: "No hay coordenadas disponibles para navegar",
         duration: 2000,
-        color: "success",
+        color: "warning",
       });
+      return;
     }
+
+    const destination = codeValidated ? "destino" : "punto de recogida";
+    openGoogleMapsNavigation(coords);
+    present({
+      message: `Navegando al ${destination}...`,
+      duration: 2000,
+      color: "success",
+    });
   };
 
   const getVehicleIcon = (iconEmoji) => {
@@ -1049,9 +1049,7 @@ const ActiveService = () => {
                 </div>
                 <button
                   className="go-to-navigation-button"
-                  onClick={() =>
-                    openNavigation(serviceData.origin, serviceData.origin.address)
-                  }
+                  onClick={() => openNavigation(serviceData.origin)}
                 >
                   Abrir ruta al cliente
                 </button>
@@ -1076,12 +1074,7 @@ const ActiveService = () => {
                 </div>
                 <button
                   className="go-to-navigation-button"
-                  onClick={() =>
-                    openNavigation(
-                      serviceData.destination,
-                      serviceData.destination.address,
-                    )
-                  }
+                  onClick={() => openNavigation(serviceData.destination)}
                 >
                   Abrir ruta al destino
                 </button>

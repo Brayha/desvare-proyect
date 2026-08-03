@@ -1,0 +1,140 @@
+---
+import {
+  cotizarUrl,
+  PWA_LOGIN_URL,
+  DRIVER_APP_URL,
+  TERMS_URL,
+  PRIVACY_URL,
+} from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <img src="/Desvare.svg" alt="Desvare" width="110" height="33" class="footer__logo" />
+        <p class="footer__tagline">
+          La forma más fácil de pedir grúa en Bogotá y Cundinamarca.
+        </p>
+      </div>
+
+      <nav class="footer__links" aria-label="Links del footer">
+        <div class="footer__col">
+          <p class="footer__col-title">Producto</p>
+          <a href="#como-funciona" class="footer__link">Cómo funciona</a>
+          <a href="#conductores" class="footer__link">Para conductores</a>
+          <a
+            href={cotizarUrl('footer')}
+            class="footer__link"
+            data-track="cotizar"
+            data-track-label="footer"
+          >
+            Cotizar grúa
+          </a>
+        </div>
+        <div class="footer__col">
+          <p class="footer__col-title">Cuenta</p>
+          <a href={PWA_LOGIN_URL} class="footer__link">Iniciar sesión</a>
+          <a href={DRIVER_APP_URL} class="footer__link" target="_blank" rel="noopener">App conductores</a>
+        </div>
+      </nav>
+    </div>
+
+    <div class="footer__bottom">
+      <p class="footer__copy">© {year} Desvare. Todos los derechos reservados.</p>
+      <div class="footer__legal">
+        <a href={TERMS_URL} class="footer__link">Términos y condiciones</a>
+        <a href={PRIVACY_URL} class="footer__link">Política de privacidad</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: 64px 0 32px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+
+  .footer__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+
+  .footer__logo {
+    height: 28px;
+    width: auto;
+    margin-bottom: 12px;
+  }
+
+  .footer__tagline {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    max-width: 280px;
+  }
+
+  .footer__links {
+    display: flex;
+    gap: 64px;
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer__col-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .footer__link {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    transition: color var(--transition);
+  }
+
+  .footer__link:hover {
+    color: var(--primary);
+  }
+
+  .footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .footer__copy {
+    font-size: 0.8125rem;
+    color: var(--text-light);
+  }
+
+  .footer__legal {
+    display: flex;
+    gap: 24px;
+  }
+
+  @media (max-width: 720px) {
+    .footer__top {
+      flex-direction: column;
+    }
+
+    .footer__links {
+      gap: 32px;
+    }
+  }
+</style>

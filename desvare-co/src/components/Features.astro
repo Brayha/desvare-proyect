@@ -1,0 +1,110 @@
+---
+import { features } from '../data/site';
+---
+
+<section class="features reveal" aria-labelledby="features-title">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label">Por qué elegirnos</p>
+      <h2 id="features-title" class="section-title">Todo lo que necesitas</h2>
+    </div>
+
+    <div class="features__grid">
+      {features.map((f) => (
+        <article class="features__card">
+          <div class="features__icon" aria-hidden="true">
+            {f.icon === 'tag' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" fill="currentColor"/>
+              </svg>
+            )}
+            {f.icon === 'bolt' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L4.09 12.11c-.37.42-.09 1.06.46 1.06H11v8.17c0 .68.82.99 1.27.49L21 12.11c.37-.42.09-1.06-.46-1.06H14V2.83C14 2.15 13.18 1.84 12.73 2.34L13 2z" fill="currentColor"/>
+              </svg>
+            )}
+            {f.icon === 'shield' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5L12 2z" fill="currentColor"/>
+                <path d="M10 13l-2-2-1.5 1.5L10 16l6-6-1.5-1.5L10 13z" fill="#fff"/>
+              </svg>
+            )}
+            {f.icon === 'map' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z" fill="currentColor"/>
+              </svg>
+            )}
+          </div>
+          <h3 class="features__title">{f.title}</h3>
+          <p class="features__desc">{f.desc}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .features {
+    padding: 96px 0;
+    background: var(--bg);
+  }
+
+  .features__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .features__card {
+    padding: 28px 24px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  }
+
+  .features__card:hover {
+    border-color: transparent;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+  }
+
+  .features__icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+  }
+
+  .features__title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .features__desc {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  @media (max-width: 960px) {
+    .features__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .features {
+      padding: 64px 0;
+    }
+
+    .features__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

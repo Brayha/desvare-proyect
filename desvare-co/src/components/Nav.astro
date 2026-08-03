@@ -1,0 +1,109 @@
+---
+import { cotizarUrl, PWA_LOGIN_URL } from '../data/site';
+---
+
+<header class="nav" role="navigation" aria-label="Navegación principal">
+  <div class="nav__inner container">
+    <a href="/" class="nav__logo" aria-label="Desvare - Inicio">
+      <img src="/Desvare.svg" alt="Desvare" width="120" height="36" />
+    </a>
+
+    <nav class="nav__links" aria-label="Secciones">
+      <a href="#como-funciona" class="nav__link">Cómo funciona</a>
+      <a href="#conductores" class="nav__link">Conductores</a>
+      <a href="#faq" class="nav__link">FAQ</a>
+    </nav>
+
+    <div class="nav__actions">
+      <a href={PWA_LOGIN_URL} class="btn btn--ghost nav__login">Iniciar sesión</a>
+      <a
+        href={cotizarUrl('nav')}
+        class="btn btn--primary nav__cta"
+        data-track="cotizar"
+        data-track-label="nav"
+      >
+        Cotizar grúa
+      </a>
+    </div>
+
+    <a
+      href={cotizarUrl('nav-mobile')}
+      class="btn btn--primary nav__cta-mobile"
+      data-track="cotizar"
+      data-track-label="nav-mobile"
+    >
+      Cotizar
+    </a>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: var(--nav-h);
+    transition: background var(--transition), box-shadow var(--transition);
+  }
+
+  .nav--solid {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    gap: 16px;
+  }
+
+  .nav__logo img {
+    height: 32px;
+    width: auto;
+  }
+
+  .nav__links {
+    display: flex;
+    gap: 32px;
+  }
+
+  .nav__link {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color var(--transition);
+  }
+
+  .nav__link:hover {
+    color: var(--primary);
+  }
+
+  .nav__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav__cta-mobile {
+    display: none;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 860px) {
+    .nav__links,
+    .nav__actions {
+      display: none;
+    }
+
+    .nav__cta-mobile {
+      display: inline-flex;
+    }
+  }
+</style>

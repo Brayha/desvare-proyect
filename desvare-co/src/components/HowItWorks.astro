@@ -1,0 +1,92 @@
+---
+import { steps } from '../data/site';
+---
+
+<section id="como-funciona" class="how reveal" aria-labelledby="how-title">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label">Simple y rápido</p>
+      <h2 id="how-title" class="section-title">¿Cómo funciona?</h2>
+      <p class="section-desc">En 3 pasos tienes una grúa camino a donde estás en Bogotá.</p>
+    </div>
+
+    <div class="how__steps">
+      {steps.map((step, i) => (
+        <div class="how__step">
+          <div class="how__number" aria-hidden="true">{step.number}</div>
+          <div class="how__content">
+            <h3 class="how__title">{step.title}</h3>
+            <p class="how__desc">{step.desc}</p>
+          </div>
+          {i < steps.length - 1 && <div class="how__connector" aria-hidden="true"></div>}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .how {
+    padding: 96px 0;
+    background: var(--bg-soft);
+  }
+
+  .how__steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    position: relative;
+  }
+
+  .how__step {
+    position: relative;
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    padding: 32px 28px;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+
+  .how__step:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .how__number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--primary-light);
+    line-height: 1;
+    margin-bottom: 16px;
+    letter-spacing: -0.03em;
+  }
+
+  .how__title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .how__desc {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .how__connector {
+    display: none;
+  }
+
+  @media (max-width: 860px) {
+    .how {
+      padding: 64px 0;
+    }
+
+    .how__steps {
+      grid-template-columns: 1fr;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+  }
+</style>
