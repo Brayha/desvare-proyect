@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="es-CO">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0055ff" />
+    <meta name="color-scheme" content="light" />
+
+    <title>Grúa en Bogotá 24 Horas | Cotiza y Compara Precios | Desvare</title>
+    <meta
+      name="description"
+      content="¿Necesitas una grúa en Bogotá? Solicita el servicio, recibe cotizaciones de conductores cercanos, compara precios y sigue tu grúa en tiempo real."
+    />
+    <meta
+      name="keywords"
+      content="grúa Bogotá, servicio de grúa Cundinamarca, grúa urgente, cotizar grúa, remolque vehículo Bogotá, auxilio vial"
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.desvare.co/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.desvare.co/" />
+    <meta property="og:site_name" content="Desvare" />
+    <meta property="og:title" content="Grúa en Bogotá 24 Horas | Cotiza y Compara Precios | Desvare" />
+    <meta
+      property="og:description"
+      content="Servicio de grúa en Bogotá y Cundinamarca. Cotizaciones en tiempo real de conductores cercanos."
+    />
+    <meta property="og:image" content="https://desvare.co/images/og-image.jpg" />
+    <meta property="og:locale" content="es_CO" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Grúa en Bogotá 24 Horas | Cotiza y Compara Precios | Desvare" />
+    <meta
+      name="twitter:description"
+      content="Cotizaciones en tiempo real de conductores cercanos. Compara precios y elige."
+    />
+    <meta name="twitter:image" content="https://desvare.co/images/og-image.jpg" />
+
+    <link rel="icon" href="/icons/icon-192x192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+
+    <link rel="preload" href="/fonts/Gilroy-Bold.woff" as="font" type="font/woff" crossorigin />
+    <link rel="preload" href="/fonts/Gilroy-Regular.woff" as="font" type="font/woff" crossorigin />
+    <link rel="preload" href="/maps/map-desktop.png" as="image" media="(min-width: 1025px)" />
+    <link rel="preload" href="/maps/map-tablet.png" as="image" media="(max-width: 1024px) and (min-width: 641px)" />
+    <link rel="preload" href="/maps/map-mobile.png" as="image" media="(max-width: 640px)" />
+
+    <link rel="stylesheet" href="/css/global.css" />
+    <link rel="stylesheet" href="/css/sections.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Desvare",
+        "description": "Servicio de grúa en Bogotá y Cundinamarca con cotizaciones en tiempo real.",
+        "url": "https://www.desvare.co/",
+        "areaServed": {
+          "@type": "AdministrativeArea",
+          "name": "Cundinamarca",
+          "containsPlace": { "@type": "City", "name": "Bogotá" }
+        },
+        "serviceType": "Servicio de grúa",
+        "priceRange": "$$",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": "120"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Nav -->
+    <header class="nav" role="navigation" aria-label="Navegación principal">
+      <div class="nav__inner container">
+        <a href="/" class="nav__logo" aria-label="Desvare - Inicio">
+          <img src="./images/Desvare.svg" alt="Desvare" width="188" height="38" />
+        </a>
+
+        <nav class="nav__links" aria-label="Secciones">
+          <a href="#como-funciona" class="nav__link">Cómo funciona</a>
+          <a href="#conductores" class="nav__link">Conductores</a>
+          <a href="#faq" class="nav__link">FAQ</a>
+        </nav>
+
+        <div class="nav__actions">
+          <a
+            href="#"
+            class="btn btn--primary nav__cta"
+            data-cotizar="nav"
+            data-track="cotizar"
+            data-track-label="nav"
+          >
+            Cotizar grúa
+          </a>
+        </div>
+
+        <a
+          href="#"
+          class="btn btn--primary nav__cta-mobile"
+          data-cotizar="nav-mobile"
+          data-track="cotizar"
+          data-track-label="nav-mobile"
+        >
+          Cotizar
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section class="hero" aria-label="Solicita cotización de grúa">
+        <div class="hero__map-wrap" aria-hidden="true">
+          <div class="hero__gradient"></div>
+          <div class="hero__prices" id="hero-prices"></div>
+          <div class="hero__user-pin">
+            <span class="hero__user-pulse"></span>
+            <span class="hero__user-dot">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                  fill="#0055ff"
+                />
+                <circle cx="12" cy="9" r="2.5" fill="#fff" />
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="hero__content container">
+          <h1 class="hero__title">
+            Pide tu grúa<br />
+            <span class="hero__title-accent">en minutos</span>
+          </h1>
+          <p class="hero__desc">
+            Cotiza en tiempo real, compara precios de conductores cercanos y recibe ayuda al instante.
+          </p>
+          <div class="hero__actions">
+            <a
+              href="#"
+              class="btn btn--primary btn--large"
+              data-cotizar="hero"
+              data-track="cotizar"
+              data-track-label="hero"
+            >
+              Cotizar servicio de grúa
+            </a>
+          </div>
+          <p class="hero__disclaimer">Gratis · Sin registro previo · Cotizaciones en tiempo real</p>
+        </div>
+      </section>
+
+      <!-- Cómo funciona -->
+      <section id="como-funciona" class="how reveal" aria-labelledby="how-title">
+        <div class="container">
+          <div class="section-header">
+            <p class="section-label">Simple y rápido</p>
+            <h2 id="how-title" class="section-title">¿Cómo funciona?</h2>
+            <p class="section-desc">
+              En 3 pasos tienes varias cotizaciones y una grúa camino a donde estás
+            </p>
+          </div>
+
+          <div class="how__steps">
+            <article class="how__step">
+              <div class="how__card">
+                <div class="how__card-map">
+                  <img src="./images/como-1.webp" alt="Mapa con origen y destino para cotizar grúa" loading="lazy" />
+                </div>
+                <div class="how__card-body">
+                  <p class="how__number">01</p>
+                  <h3 class="how__step-title">Indica origen y destino</h3>
+                  <p class="how__step-desc">
+                    Marca en el mapa dónde estás y a dónde quieres llevar tu vehículo.
+                  </p>
+                </div>
+              </div>
+            </article>
+
+            <article class="how__step">
+              <div class="how__card">
+                <div class="how__card-map">
+                  <img src="./images/como-2.webp" alt="Recibe cotizaciones de conductores cercanos" loading="lazy" />
+                </div>
+                <div class="how__card-body">
+                  <p class="how__number">02</p>
+                  <h3 class="how__step-title">Recibe cotizaciones</h3>
+                  <p class="how__step-desc">
+                    Conductores cercanos te envían precios en tiempo real.
+                  </p>
+                </div>
+              </div>
+            </article>
+
+            <article class="how__step">
+              <div class="how__card how__card--highlight">
+                <div class="how__card-map">
+                  <img src="./images/como-3.webp" alt="Elige y sigue en tiempo real tu grúa" loading="lazy" />
+                </div>
+                <div class="how__card-body">
+                  <p class="how__number">03</p>
+                  <h3 class="how__step-title">Elige y sigue tu grúa</h3>
+                  <p class="how__step-desc">
+                    Acepta la mejor oferta y sigue al conductor en el mapa hasta el destino.
+                  </p>
+                  <div class="how__step-cta">
+                    <a
+                      href="#"
+                      class="link-arrow"
+                      data-cotizar="how-step-3"
+                      data-track="cotizar"
+                      data-track-label="how-step-3"
+                    >
+                      Cotizar servicio
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path
+                          d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="features reveal" aria-labelledby="features-title">
+        <div class="container">
+          <div class="features__layout">
+            <div class="features__photo" aria-hidden="true">
+              <img
+                src="/images/feature-photo.webp"
+                alt="Todo lo que necesitas para cotizar grúa"
+                width="640"
+                height="800"
+                loading="lazy"
+              />
+              <div class="features__photo-overlay"></div>
+            </div>
+
+            <div class="features__content">
+              <div class="features__header">
+                <p class="section-label">Por qué elegirnos</p>
+                <h2 id="features-title" class="section-title">Todo lo que necesitas</h2>
+              </div>
+
+              <div class="features__grid">
+                <article class="features__card">
+                  <div class="features__icon" aria-hidden="true">
+                    <img src="./images/dollar-circle.svg" alt="desvare">
+                  </div>
+                  <h3 class="features__title">Precios transparentes</h3>
+                  <p class="features__desc">
+                    Ves el precio antes de aceptar. Sin sorpresas ni cobros ocultos.
+                  </p>
+                </article>
+
+                <article class="features__card">
+                  <div class="features__icon" aria-hidden="true">
+                    <img src="./images/timer.svg" alt="desvare">
+                  </div>
+                  <h3 class="features__title">Respuesta en minutos</h3>
+                  <p class="features__desc">
+                    Conductores cercanos reciben tu solicitud al instante.
+                  </p>
+                </article>
+
+                <article class="features__card">
+                  <div class="features__icon" aria-hidden="true">
+                   <img src="./images/security-user.svg" alt="desvare">
+                  </div>
+                  <h3 class="features__title">Conductores verificados</h3>
+                  <p class="features__desc">
+                    Verificación de identidad, licencia y estado del vehículo.
+                  </p>
+                </article>
+
+                <article class="features__card">
+                  <div class="features__icon" aria-hidden="true">
+                    <img src="./images/routing-2.svg" alt="desvare">
+                  </div>
+                  <h3 class="features__title">Seguimiento en vivo</h3>
+                  <p class="features__desc">
+                    Sigue en el mapa exactamente dónde está tu grúa.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Conductores -->
+      <section id="conductores" class="drivers reveal" aria-labelledby="drivers-title">
+        <div class="container">
+          <div class="drivers__content">
+            <p class="section-label section-label--light">Para conductores</p>
+            <h2 id="drivers-title" class="section-title section-title--light">
+              ¿Tienes una grúa?<br />Gana más con Desvare
+            </h2>
+            <p class="drivers__desc">
+              Aumenta tus ingresos llegando a más clientes. Nuestra app es completamente gratuita y
+              los pagos son directos.
+            </p>
+
+            <ul class="drivers__benefits" role="list">
+              <li class="drivers__benefit" role="listitem">
+                <span class="drivers__check" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                  </svg>
+                </span>
+                Recibe solicitudes cerca de ti
+              </li>
+              <li class="drivers__benefit" role="listitem">
+                <span class="drivers__check" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                  </svg>
+                </span>
+                Tú decides cuándo y cuánto cobrar
+              </li>
+              <li class="drivers__benefit" role="listitem">
+                <span class="drivers__check" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                  </svg>
+                </span>
+                Pagos directos sin intermediarios
+              </li>
+            </ul>
+
+            <div class="drivers__play-image-wrap">
+              <a href="https://play.google.com/store/apps/details?id=com.desvare.driver" target="_blank" rel="noopener noreferrer">
+                <img src="./images/google-play.svg" alt="Descargar en Google Play" class="drivers__play-image">
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="faq reveal" aria-labelledby="faq-title">
+        <div class="container container--narrow">
+          <div class="section-header">
+            <p class="section-label">Resolvemos tus dudas</p>
+            <h2 id="faq-title" class="section-title">Preguntas frecuentes</h2>
+          </div>
+
+          <div class="faq__list">
+            <details class="faq__item">
+              <summary class="faq__question">
+                ¿Cuánto demora en llegar la grúa?
+                <span class="faq__icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq__answer">
+                <p>
+                  Depende de la disponibilidad de conductores en tu zona. En promedio recibirás la
+                  primera cotización en menos de 5 minutos después de solicitar el servicio.
+                </p>
+              </div>
+            </details>
+
+            <details class="faq__item">
+              <summary class="faq__question">
+                ¿Cómo se calculan los precios?
+                <span class="faq__icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq__answer">
+                <p>
+                  Cada conductor establece su precio según distancia, tipo de vehículo y condiciones
+                  del servicio. Tú comparas todas las cotizaciones y eliges la que más te conviene.
+                </p>
+              </div>
+            </details>
+
+            <details class="faq__item">
+              <summary class="faq__question">
+                ¿Puedo cancelar una solicitud?
+                <span class="faq__icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq__answer">
+                <p>
+                  Sí, puedes cancelar mientras estés esperando cotizaciones, antes de aceptar una
+                  oferta. Una vez aceptada, coordina directamente con el conductor.
+                </p>
+              </div>
+            </details>
+
+            <details class="faq__item">
+              <summary class="faq__question">
+                ¿Los conductores están verificados?
+                <span class="faq__icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq__answer">
+                <p>
+                  Sí. Antes de operar en Desvare, cada conductor pasa verificación de identidad,
+                  licencia y estado del vehículo.
+                </p>
+              </div>
+            </details>
+
+            <details class="faq__item">
+              <summary class="faq__question">
+                ¿En qué zonas operan?
+                <span class="faq__icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq__answer">
+                <p>
+                  Actualmente operamos en Bogotá y Cundinamarca, expandiéndonos a más ciudades de
+                  Colombia.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Final -->
+      <section class="cta-final reveal" aria-labelledby="cta-title">
+        <div class="container container--narrow">
+          <h2 id="cta-title" class="cta-final__title">¿Necesitas una grúa ahora?</h2>
+          <p class="cta-final__desc">
+            En minutos tendrás cotizaciones reales de conductores cerca de ti en Bogotá.
+          </p>
+          <a
+            href="#"
+            class="btn btn--white btn--large"
+            data-cotizar="cta-final"
+            data-track="cotizar"
+            data-track-label="cta-final"
+          >
+            Solicitar grúa ahora
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" fill="currentColor" />
+            </svg>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+      <div class="container">
+        <div class="footer__top">
+          <div class="footer__brand">
+            <img src="./images/Desvare.svg" alt="Desvare" width="139" height="28" class="footer__logo" />
+            <p class="footer__tagline">
+              La forma más fácil de pedir grúa en Bogotá y Cundinamarca.
+            </p>
+          </div>
+
+          <nav class="footer__links" aria-label="Links del footer">
+            <div class="footer__col">
+              <p class="footer__col-title">Producto</p>
+              <a href="#como-funciona" class="footer__link">Cómo funciona</a>
+              <a href="#conductores" class="footer__link">Para conductores</a>
+              <a
+                href="#"
+                class="footer__link"
+                data-cotizar="footer"
+                data-track="cotizar"
+                data-track-label="footer"
+              >
+                Cotizar grúa
+              </a>
+            </div>
+            <div class="footer__col">
+              <p class="footer__col-title">Cuenta</p>
+              <a href="https://desvare.app/login" class="footer__link">Iniciar sesión</a>
+              <a
+                href="https://driver.desvare.app"
+                class="footer__link"
+                target="_blank"
+                rel="noopener"
+              >
+                App conductores
+              </a>
+            </div>
+          </nav>
+        </div>
+
+        <div class="footer__bottom">
+          <p class="footer__copy">© 2026 Desvare. Todos los derechos reservados.</p>
+          <div class="footer__legal">
+            <a href="https://desvare.app/terms" class="footer__link">Términos y condiciones</a>
+            <a href="https://desvare.app/privacy" class="footer__link">Política de privacidad</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>

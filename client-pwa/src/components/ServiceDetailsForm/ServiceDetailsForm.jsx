@@ -30,11 +30,23 @@ const ServiceDetailsForm = ({
 }) => {
   const categoryId = vehicleCategory?.id;
   const [data, setData] = React.useState(initialData);
+  const problemInputRef = React.useRef(null);
 
   // Actualizar datos cuando cambien desde fuera
   React.useEffect(() => {
     setData(initialData);
   }, [initialData]);
+
+  // Llevar al usuario al campo cuando intente continuar sin una descripción válida
+  React.useEffect(() => {
+    if (!errors.problem) return;
+
+    problemInputRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    problemInputRef.current?.setFocus();
+  }, [errors.problem]);
 
   // Handler para cambios en el formulario
   const handleChange = (field, value) => {
@@ -85,10 +97,12 @@ const ServiceDetailsForm = ({
       <div className="service-field ion-margin-top">
         <div className="plate-input-container-header">
           <IonText className="section-emoji-title">
-            <h3>🪝 ¿Cuál es el problema?</h3>
+            <h3>
+              🪝 ¿Cuál es el problema? <span className="required">*</span>
+            </h3>
           </IonText>
           <IonText color="medium" className="section-description">
-            <p>Describe el problema de tú vehiculo, lo más claro posible</p>
+            <p>Describe el problema de tu vehículo, lo más claro posible</p>
           </IonText>
         </div>
         <IonItem
@@ -98,12 +112,26 @@ const ServiceDetailsForm = ({
           }`}
         >
           <IonTextarea
+            ref={problemInputRef}
             value={data?.problem || ""}
             onIonInput={(e) => handleChange("problem", e.detail.value)}
             placeholder="Ej: Se descompuso la batería del carro"
             rows={4}
+            aria-label="Problema del vehículo"
+            aria-invalid={Boolean(errors.problem)}
+            aria-describedby={errors.problem ? "problem-error" : undefined}
           />
         </IonItem>
+        {errors.problem && (
+          <IonText
+            id="problem-error"
+            color="danger"
+            className="service-error"
+            role="alert"
+          >
+            <p>{errors.problem}</p>
+          </IonText>
+        )}
       </div>
 
       {/* Sótano - Para MOTOS, AUTOS y CAMIONETAS */}

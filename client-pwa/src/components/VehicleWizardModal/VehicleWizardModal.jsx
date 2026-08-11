@@ -26,6 +26,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../AuthModal/AuthModal';
 import './VehicleWizardModal.css';
 
+const MIN_PROBLEM_LENGTH = 4;
+
 /**
  * Modal Wizard para crear/seleccionar vehículo y agregar detalles del servicio
  * 
@@ -69,6 +71,7 @@ const VehicleWizardModal = ({
     basement: { isInBasement: false, level: null },
     truckCurrentState: { isLoaded: false, currentWeight: null },
   });
+  const [serviceErrors, setServiceErrors] = useState({});
 
   // Estados de catálogos (dropdowns)
   const [categories, setCategories] = useState([]);
@@ -299,6 +302,28 @@ const VehicleWizardModal = ({
 
   const handleServiceDetailsChange = (details) => {
     setServiceDetails(details);
+
+    if ((details.problem || '').trim().length >= MIN_PROBLEM_LENGTH) {
+      setServiceErrors((currentErrors) => {
+        if (!currentErrors.problem) return currentErrors;
+
+        const nextErrors = { ...currentErrors };
+        delete nextErrors.problem;
+        return nextErrors;
+      });
+    }
+  };
+
+  const validateServiceProblem = () => {
+    if ((serviceDetails.problem || '').trim().length >= MIN_PROBLEM_LENGTH) {
+      return true;
+    }
+
+    setServiceErrors((currentErrors) => ({
+      ...currentErrors,
+      problem: `Describe el problema del vehículo (mínimo ${MIN_PROBLEM_LENGTH} caracteres).`,
+    }));
+    return false;
   };
 
   const handleSelectExistingVehicle = (vehicle) => {
@@ -353,6 +378,7 @@ const VehicleWizardModal = ({
       basement: { isInBasement: false, level: null },
       truckCurrentState: { isLoaded: false, currentWeight: null },
     });
+    setServiceErrors({});
     setIsCreatingNew(true);
     setCurrentStep(0);
   };
@@ -433,6 +459,9 @@ const VehicleWizardModal = ({
           break;
         }
         case 'service':
+          if (!validateServiceProblem()) {
+            return;
+          }
           // Validar sótano si aplica
           if (serviceDetails.basement?.isInBasement && !serviceDetails.basement?.level) {
             showWarning('Indica el nivel del sótano');
@@ -454,6 +483,9 @@ const VehicleWizardModal = ({
           // No validar aquí, el avance es automático al seleccionar
           break;
         case 'service':
+          if (!validateServiceProblem()) {
+            return;
+          }
           // Validar sótano si aplica
           if (serviceDetails.basement?.isInBasement && !serviceDetails.basement?.level) {
             showWarning('Indica el nivel del sótano');
@@ -639,6 +671,7 @@ const VehicleWizardModal = ({
       basement: { isInBasement: false, level: null },
       truckCurrentState: { isLoaded: false, currentWeight: null },
     });
+    setServiceErrors({});
     setCategories([]);
     setBrands([]);
     setModels([]);
@@ -773,6 +806,7 @@ const VehicleWizardModal = ({
               vehicleData={vehicleData}
               onDataChange={handleServiceDetailsChange}
               initialData={serviceDetails}
+              errors={serviceErrors}
             />
 
             {/* Botón "Confirmar" inline */}

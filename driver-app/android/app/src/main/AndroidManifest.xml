@@ -56,6 +56,16 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
+        <!-- Ícono y color por defecto de las notificaciones push (FCM).
+             El ícono DEBE ser una silueta blanca sobre transparente: Android usa
+             solo el canal alfa para dibujar el ícono pequeño en la barra de estado. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_notify" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/desvare_blue" />
+
         <!-- Foreground Service del plugin @capacitor-community/background-geolocation -->
         <!-- Muestra notificación persistente mientras el conductor tiene servicio activo -->
         <service

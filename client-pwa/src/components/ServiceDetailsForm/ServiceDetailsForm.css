@@ -100,6 +100,10 @@
   margin-left: 2px;
 }
 
+.section-emoji-title .required {
+  color: var(--ion-color-danger, #ef4444);
+}
+
 .service-item {
   --background: var(--ion-color-light, #f4f5f8);
   --border-radius: 12px;

@@ -1,56 +1,68 @@
-# desvare.co — Landing marketing
+# desvare.co — Landing marketing (HTML estático)
 
 Sitio estático para [desvare.co](https://www.desvare.co). Convierte visitantes en solicitudes de cotización en [desvare.app/pedir](https://desvare.app/pedir).
 
-## Desarrollo
+Basado en el diseño Figma **Desvare-drive-v2** (desktop + mobile).
+
+## Desarrollo local
 
 ```bash
 cd desvare-co
-npm install
 npm run dev
 ```
 
 Abre [http://localhost:4321](http://localhost:4321).
 
-## Build
-
-```bash
-npm run build
-```
-
-El output queda en `dist/` — listo para subir a tu hosting.
-
 ## Deploy
 
-### Opción A — Hosting Colombia (FTP/cPanel)
+1. Sube **todo el contenido** de la carpeta `public/` a la raíz de tu hosting (`public_html/`).
+2. Verifica que `index.html` quede en la raíz del dominio.
 
-1. `npm run build`
-2. Sube **todo el contenido** de `dist/` a `public_html/` (o la carpeta raíz de tu dominio).
+### Vercel (opcional)
 
-### Opción B — Vercel
-
-1. Nuevo proyecto en Vercel apuntando a la carpeta `desvare-co/`
-2. Build command: `npm run build`
-3. Output directory: `dist`
-4. Dominio custom: `desvare.co`
+- Root directory: `desvare-co/public`
+- Sin build command (sitio estático)
+- Dominio: `desvare.co`
 
 ## Google Analytics
 
-Copia `.env.example` a `.env` y agrega tu ID:
+Edita `public/js/site.js` y agrega tu ID:
 
+```js
+export const GA4_ID = 'G-XXXXXXXXXX';
 ```
-PUBLIC_GA4_ID=G-XXXXXXXXXX
-```
+
+Luego descomenta el bloque de GA4 en `public/index.html` (busca `GA4`).
 
 Los clics en "Cotizar" disparan el evento `click_cotizar`.
 
 ## Estructura
 
 ```
-src/
-├── components/   # Nav, Hero, MapQuotes, secciones
-├── data/site.ts  # URLs, copy, cotizaciones del mapa
-├── layouts/      # Layout base + SEO
-└── pages/        # index.astro
-public/           # Fuentes, imágenes, logo
+public/
+├── index.html          # Landing completa
+├── css/
+│   ├── global.css      # Tokens, reset, utilidades
+│   └── sections.css    # Estilos por sección
+├── js/
+│   ├── site.js         # URLs, copy, datos de cotizaciones
+│   ├── hero-map.js     # Globos de precio animados
+│   └── main.js         # Nav, FAQ, reveal, analytics
+├── fonts/              # Gilroy
+├── maps/               # Capturas Mapbox (hero + pasos)
+├── images/             # Fotos de Figma (features, conductores)
+├── Desvare.svg
+└── icons/
 ```
+
+## Animaciones
+
+- **Hero:** mapa estático + 7 globos de precio con fade in/out (CSS)
+- **Cómo funciona:** mapas estáticos (Fase 3: SVG animados al scroll)
+
+## Próxima fase
+
+Animaciones en las tarjetas de "Cómo funciona":
+- Paso 1: ruta que se dibuja
+- Paso 2: cotizaciones que aparecen
+- Paso 3: grúa moviéndose por la ruta

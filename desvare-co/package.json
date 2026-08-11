@@ -1,14 +1,9 @@
 {
   "name": "desvare-co",
-  "type": "module",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
-  },
-  "dependencies": {
-    "astro": "^5.7.10"
+    "dev": "npx serve public -p 4321",
+    "start": "npx serve public -p 4321"
   }
 }
