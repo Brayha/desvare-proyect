@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { registerServiceWorker } from './services/serviceWorker';
 
 /* Core CSS required for Ionic components */
 import '@ionic/react/css/core.css';
@@ -20,6 +21,14 @@ import './styles/variables.css';
 
 /* App styles */
 import './index.css';
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    registerServiceWorker().catch((error) => {
+      console.error('No se pudo registrar el Service Worker:', error);
+    });
+  });
+}
 
 const container = document.getElementById('root');
 const root = createRoot(container);

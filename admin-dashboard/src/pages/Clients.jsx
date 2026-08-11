@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { IonPage, IonContent, IonSpinner } from '@ionic/react';
+import React, { useState } from 'react';
+import { IonPage, IonContent, IonSpinner, useIonViewWillEnter } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
@@ -14,15 +14,11 @@ const Clients = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    loadClients();
-  }, [statusFilter]);
-
-  const loadClients = async () => {
+  async function loadClients(filter = statusFilter) {
     try {
       setIsLoading(true);
       const response = await clientsAPI.getAll({ 
-        status: statusFilter,
+        status: filter,
         search: searchTerm,
         limit: 50
       });
@@ -32,7 +28,11 @@ const Clients = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
+
+  useIonViewWillEnter(() => {
+    loadClients();
+  });
 
   const getStatusBadge = (isActive) => {
     return (
@@ -44,6 +44,11 @@ const Clients = () => {
 
   const handleSearch = () => {
     loadClients();
+  };
+
+  const handleStatusFilter = (filter) => {
+    setStatusFilter(filter);
+    loadClients(filter);
   };
 
   if (isLoading) {
@@ -87,19 +92,19 @@ const Clients = () => {
             <div className="status-filters">
               <button
                 className={`status-filter ${statusFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('all')}
+                onClick={() => handleStatusFilter('all')}
               >
                 Todos
               </button>
               <button
                 className={`status-filter ${statusFilter === 'active' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('active')}
+                onClick={() => handleStatusFilter('active')}
               >
                 🟢 Activos
               </button>
               <button
                 className={`status-filter ${statusFilter === 'suspended' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('suspended')}
+                onClick={() => handleStatusFilter('suspended')}
               >
                 🔴 Suspendidos
               </button>

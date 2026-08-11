@@ -6,6 +6,7 @@ const admin = require('firebase-admin');
 const webPush = require('web-push');
 const path = require('path');
 const User = require('../models/User');
+const Admin = require('../models/Admin');
 
 const MAX_TOKENS_PER_USER = 10;
 
@@ -548,11 +549,45 @@ const sendPushToUser = async (userId, title, body, data = {}) => {
   return { successCount, failureCount };
 };
 
+/**
+ * Envía una Web Push a todos los administradores activos suscritos.
+ * Las suscripciones inválidas se eliminan de forma automática.
+ */
+const sendPushToActiveAdmins = async (title, body, data = {}) => {
+  const admins = await Admin.find({
+    isActive: true,
+    'webPushSubscriptions.0': { $exists: true },
+  }).select('webPushSubscriptions').lean();
+
+  let successCount = 0;
+  let failureCount = 0;
+
+  for (const adminDoc of admins) {
+    for (const subscription of adminDoc.webPushSubscriptions || []) {
+      try {
+        await sendWebPushNotification(subscription, title, body, data);
+        successCount++;
+      } catch (error) {
+        failureCount++;
+        if (error.isInvalidSubscription) {
+          await Admin.updateOne(
+            { _id: adminDoc._id },
+            { $pull: { webPushSubscriptions: { endpoint: subscription.endpoint } } }
+          );
+        }
+      }
+    }
+  }
+
+  return { successCount, failureCount };
+};
+
 module.exports = {
   sendPushNotification,
   sendWebPushNotification,
   sendMultipleNotifications,
   sendPushToUser,
+  sendPushToActiveAdmins,
   collectUserTokens,
   collectWebPushSubscriptions,
   removeInvalidToken,

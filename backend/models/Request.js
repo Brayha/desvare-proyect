@@ -236,6 +236,11 @@ const requestSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  cancelledBy: {
+    type: String,
+    enum: ['client', 'driver', 'system'],
+    default: null
+  },
   cancellationReason: {
     type: String,
     enum: ['resuelto', 'conductor_no_viene', 'conductor_no_responde', 'otra_grua', 'muy_caro', 'muy_lejos', 'otro', null],

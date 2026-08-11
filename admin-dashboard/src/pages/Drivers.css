@@ -169,3 +169,33 @@
   color: #10B981;
 }
 
+@media (max-width: 600px) {
+  .drivers-filters,
+  .driver-card {
+    padding: 16px;
+  }
+
+  .search-box {
+    flex-wrap: wrap;
+  }
+
+  .search-box input {
+    min-width: 0;
+  }
+
+  .search-box button {
+    width: 100%;
+  }
+
+  .driver-card-header,
+  .driver-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .driver-card-body {
+    grid-template-columns: 1fr;
+  }
+}
+

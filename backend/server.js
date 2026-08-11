@@ -113,6 +113,7 @@ const driverRegisterLimiter = rateLimit({
 
 app.use('/api/', apiLimiter);
 app.use('/api/auth', authLimiter);
+app.use('/api/admin/login', authLimiter);
 app.use('/api/requests/new', requestCreationLimiter);
 app.use('/api/drivers/register-initial', driverRegisterLimiter);
 app.use('/api/drivers/register-complete', driverRegisterLimiter);
@@ -135,6 +136,7 @@ setupRedisAdapter(io);
 // Si no hay token o es inválido → socket.user = null (clientes anónimos permitidos).
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
+const Admin = require('./models/Admin');
 
 io.use(async (socket, next) => {
   const token = socket.handshake.auth?.token;
@@ -144,6 +146,15 @@ io.use(async (socket, next) => {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role === 'admin') {
+      const adminUser = await Admin.findOne({ _id: decoded.id, isActive: true })
+        .select('_id role name email')
+        .lean();
+      socket.admin = adminUser || null;
+      socket.user = null;
+      return next();
+    }
+
     const user = await User.findById(decoded.id)
       .select('_id userType name driverProfile.status')
       .lean();
@@ -291,6 +302,15 @@ function haversineMeters(lat1, lng1, lat2, lng2) {
 
 io.on('connection', (socket) => {
   console.log('🔌 Nuevo cliente conectado:', socket.id);
+
+  if (socket.admin) {
+    socket.join('admin:ops');
+    socket.emit('admin:ready', {
+      adminId: socket.admin._id.toString(),
+      connectedAt: new Date(),
+    });
+    console.log(`🛡️ Admin conectado a admin:ops: ${socket.admin._id}`);
+  }
 
   // Registro de conductor
   socket.on('driver:register', async (driverId) => {
@@ -571,6 +591,19 @@ io.on('connection', (socket) => {
     try {
       const Request = require('./models/Request');
       const User = require('./models/User');
+      const validCancellationReasons = new Set([
+        'resuelto',
+        'conductor_no_viene',
+        'conductor_no_responde',
+        'otra_grua',
+        'muy_caro',
+        'muy_lejos',
+        'otro',
+      ]);
+      const normalizedReason = validCancellationReasons.has(data.reason) ? data.reason : 'otro';
+      const normalizedCustomReason = data.customReason
+        || (normalizedReason === 'otro' ? data.reason : null)
+        || null;
       
       // Actualizar estado de la solicitud en la base de datos + desactivar tracking
       const request = await Request.findByIdAndUpdate(
@@ -578,9 +611,9 @@ io.on('connection', (socket) => {
         {
           status: 'cancelled',
           cancelledAt: new Date(),
-          cancelledBy: data.cancelledBy || 'client',
-          cancellationReason: data.reason,
-          cancellationCustomReason: data.customReason || null,
+          cancelledBy: data.cancelledBy === 'driver' ? 'driver' : 'client',
+          cancellationReason: normalizedReason,
+          cancellationCustomReason: normalizedCustomReason,
           updatedAt: new Date(),
           'trackingData.isActive': false
         },
@@ -598,6 +631,14 @@ io.on('connection', (socket) => {
       }
       
       console.log('✅ Solicitud actualizada a estado "cancelled" en DB');
+      io.to('admin:ops').emit('admin:request-cancelled', {
+        requestId: request._id.toString(),
+        cancelledBy: request.cancelledBy,
+        reason: request.cancellationReason,
+        customReason: request.cancellationCustomReason,
+        status: request.status,
+        cancelledAt: request.cancelledAt,
+      });
       
       // ✅ Si había conductor asignado, liberarlo y ponerlo en ACTIVO
       if (request.assignedDriverId) {
@@ -803,10 +844,17 @@ io.on('connection', (socket) => {
 
     try {
       const Request = require('./models/Request');
-      const request = await Request.findById(data.requestId).select('securityCode status clientId');
+      const request = await Request.findById(data.requestId)
+        .select('securityCode status clientId assignedDriverId');
 
       if (!request) {
         socket.emit('service:code-invalid', { message: 'Solicitud no encontrada' });
+        return;
+      }
+
+      if (!socket.user || request.assignedDriverId?.toString() !== socket.user._id.toString()) {
+        console.warn(`⛔ Validación de código rechazada para servicio ${data.requestId}: conductor no autorizado`);
+        socket.emit('service:code-invalid', { message: 'No estás autorizado para iniciar este servicio' });
         return;
       }
 
@@ -823,11 +871,22 @@ io.on('connection', (socket) => {
       console.log(`✅ Código correcto para servicio ${data.requestId} — notificando cliente ${data.clientId}`);
 
       // Persistir status en MongoDB para que el polling REST del cliente detecte el cambio
+      const startedAt = new Date();
       await Request.findByIdAndUpdate(data.requestId, {
         status: 'in_progress',
-        updatedAt: new Date()
+        startedAt,
+        arrivedAtOriginAt: startedAt,
+        updatedAt: startedAt
       });
       console.log(`💾 Status actualizado a 'in_progress' en MongoDB para servicio ${data.requestId}`);
+      io.to('admin:ops').emit('admin:service-started', {
+        requestId: data.requestId,
+        clientId: request.clientId.toString(),
+        driverId: request.assignedDriverId.toString(),
+        driverName: data.driverName,
+        status: 'in_progress',
+        startedAt,
+      });
 
       const clientSocketId = connectedClients.get(data.clientId);
       if (clientSocketId) {

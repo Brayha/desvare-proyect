@@ -26,39 +26,77 @@
   gap: 24px;
 }
 
-.admin-header-notification {
+.admin-notification-control {
   position: relative;
+}
+
+.admin-notification-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
   background: #F9FAFB;
-  border: none;
+  border: 1px solid #E5E7EB;
   border-radius: 12px;
+  color: #6B7280;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.admin-header-notification:hover {
+.admin-notification-toggle:hover:not(:disabled) {
   background: #F3F4F6;
+  border-color: #D1D5DB;
 }
 
-.notification-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  background: var(--admin-danger);
+.admin-notification-toggle:focus-visible {
+  outline: 3px solid rgba(0, 85, 255, 0.2);
+  outline-offset: 2px;
+}
+
+.admin-notification-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.admin-notification-toggle.is-enabled {
+  background: #ECFDF5;
+  border-color: #A7F3D0;
+  color: #047857;
+}
+
+.admin-notification-state {
+  padding: 2px 5px;
+  background: #E5E7EB;
+  color: #4B5563;
+  font-size: 9px;
+  line-height: 1.2;
+  border-radius: 5px;
+}
+
+.admin-notification-toggle.is-enabled .admin-notification-state {
+  background: #059669;
   color: white;
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: 9px;
+}
+
+.admin-notification-message {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: max-content;
+  max-width: 280px;
+  padding: 8px 10px;
+  background: #111827;
+  color: white;
+  font-size: 12px;
+  line-height: 1.4;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
 }
 
 .admin-header-user {
@@ -116,6 +154,50 @@
   
   .admin-header-user-info {
     display: none;
+  }
+
+  .admin-header-right {
+    gap: 10px;
+  }
+
+  .admin-notification-toggle {
+    max-width: 190px;
+  }
+
+  .admin-notification-toggle > span:first-of-type {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .admin-header-right {
+    align-items: flex-start;
+  }
+
+  .admin-notification-toggle {
+    width: 68px;
+    padding: 0 8px;
+  }
+
+  .admin-notification-toggle > span:first-of-type {
+    display: none;
+  }
+
+  .admin-notification-message {
+    right: -54px;
+    max-width: min(250px, calc(100vw - 40px));
+  }
+
+  .admin-header-user {
+    padding: 2px;
+    background: transparent;
   }
 }
 

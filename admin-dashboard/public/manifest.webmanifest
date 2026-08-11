@@ -1,0 +1,27 @@
+{
+  "name": "Desvare Admin Dashboard",
+  "short_name": "Desvare Admin",
+  "description": "Panel de administración de Desvare",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f7",
+  "theme_color": "#0055ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/desvare-admin.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/desvare-admin.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "prefer_related_applications": false
+}

@@ -33,6 +33,7 @@ ion-content.admin-content::part(scroll) {
   
   .admin-content-wrapper {
     margin-left: 0;
+    padding: 16px 14px calc(92px + env(safe-area-inset-bottom));
   }
 }
 

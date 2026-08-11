@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { IonPage, IonContent, IonSpinner } from '@ionic/react';
+import React, { useState } from 'react';
+import { IonPage, IonContent, IonSpinner, useIonViewWillEnter } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
@@ -15,15 +15,11 @@ const Services = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    loadServices();
-  }, [statusFilter]);
-
-  const loadServices = async () => {
+  async function loadServices(filter = statusFilter) {
     try {
       setIsLoading(true);
       const response = await servicesAPI.getAll({ 
-        status: statusFilter,
+        status: filter,
         search: searchTerm,
         limit: 50,
         sortBy: 'createdAt',
@@ -36,7 +32,11 @@ const Services = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
+
+  useIonViewWillEnter(() => {
+    loadServices();
+  });
 
   const getStatusBadge = (status) => {
     const statusMap = {
@@ -76,6 +76,11 @@ const Services = () => {
 
   const handleSearch = () => {
     loadServices();
+  };
+
+  const handleStatusFilter = (filter) => {
+    setStatusFilter(filter);
+    loadServices(filter);
   };
 
   if (isLoading) {
@@ -119,31 +124,43 @@ const Services = () => {
             <div className="status-filters">
               <button
                 className={`status-filter ${statusFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('all')}
+                onClick={() => handleStatusFilter('all')}
               >
                 Todos
               </button>
               <button
                 className={`status-filter ${statusFilter === 'pending' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('pending')}
+                onClick={() => handleStatusFilter('pending')}
               >
                 ⏳ Pendientes
               </button>
               <button
+                className={`status-filter ${statusFilter === 'quoted' ? 'active' : ''}`}
+                onClick={() => handleStatusFilter('quoted')}
+              >
+                💰 Cotizando
+              </button>
+              <button
+                className={`status-filter ${statusFilter === 'accepted' ? 'active' : ''}`}
+                onClick={() => handleStatusFilter('accepted')}
+              >
+                🚚 Asignados
+              </button>
+              <button
                 className={`status-filter ${statusFilter === 'in_progress' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('in_progress')}
+                onClick={() => handleStatusFilter('in_progress')}
               >
                 🚛 En Curso
               </button>
               <button
                 className={`status-filter ${statusFilter === 'completed' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('completed')}
+                onClick={() => handleStatusFilter('completed')}
               >
                 ✅ Completados
               </button>
               <button
                 className={`status-filter ${statusFilter === 'cancelled' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('cancelled')}
+                onClick={() => handleStatusFilter('cancelled')}
               >
                 ❌ Cancelados
               </button>
@@ -161,8 +178,12 @@ const Services = () => {
               <span className="stat-label">Completados</span>
             </div>
             <div className="stat-card active">
-              <span className="stat-value">{stats.active}</span>
-              <span className="stat-label">En Curso</span>
+              <span className="stat-value">{stats.accepted || 0}</span>
+              <span className="stat-label">Asignados</span>
+            </div>
+            <div className="stat-card active">
+              <span className="stat-value">{stats.inProgress || 0}</span>
+              <span className="stat-label">En Servicio</span>
             </div>
             <div className="stat-card pending">
               <span className="stat-value">{stats.pending}</span>
@@ -197,16 +218,16 @@ const Services = () => {
                     className="table-row"
                     onClick={() => history.push(`/services/${service._id}`)}
                   >
-                    <div className="td service-id">
+                    <div className="td service-id" data-label="ID">
                       #{service._id.slice(-6)}
                     </div>
-                    <div className="td">
+                    <div className="td" data-label="Cliente">
                       <div className="user-info">
                         <span className="user-name">{service.clientId?.name || 'N/A'}</span>
                         <span className="user-phone">{service.clientId?.phone || ''}</span>
                       </div>
                     </div>
-                    <div className="td">
+                    <div className="td" data-label="Conductor">
                       <div className="user-info">
                         <span className="user-name">
                           {service.assignedDriverId?.name || 'Sin asignar'}
@@ -216,7 +237,7 @@ const Services = () => {
                         )}
                       </div>
                     </div>
-                    <div className="td">
+                    <div className="td" data-label="Ruta">
                       <div className="route-info">
                         <span className="route-origin">
                           📍 {service.origin?.address?.substring(0, 30)}...
@@ -228,13 +249,13 @@ const Services = () => {
                         )}
                       </div>
                     </div>
-                    <div className="td">
+                    <div className="td" data-label="Estado">
                       {getStatusBadge(service.status)}
                     </div>
-                    <div className="td service-amount">
+                    <div className="td service-amount" data-label="Monto">
                       {service.totalAmount > 0 ? formatCurrency(service.totalAmount) : '-'}
                     </div>
-                    <div className="td service-date">
+                    <div className="td service-date" data-label="Fecha">
                       {formatDate(service.createdAt)}
                     </div>
                   </div>

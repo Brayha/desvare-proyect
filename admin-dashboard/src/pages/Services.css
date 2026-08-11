@@ -248,6 +248,6 @@
   }
 
   .service-amount {
-    justify-content: flex-start;
+    justify-content: space-between;
   }
 }

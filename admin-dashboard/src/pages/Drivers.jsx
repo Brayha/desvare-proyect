@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { IonPage, IonContent, IonSpinner, IonButton } from '@ionic/react';
+import React, { useState } from 'react';
+import { IonPage, IonContent, IonSpinner, useIonViewWillEnter } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { driversAPI } from '../services/adminAPI';
-import { SearchNormal1, Filter } from 'iconsax-react';
+import { SearchNormal1 } from 'iconsax-react';
 import './Drivers.css';
 
 const Drivers = () => {
@@ -14,15 +14,11 @@ const Drivers = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    loadDrivers();
-  }, [statusFilter]);
-
-  const loadDrivers = async () => {
+  async function loadDrivers(filter = statusFilter) {
     try {
       setIsLoading(true);
       const response = await driversAPI.getAll({ 
-        status: statusFilter,
+        status: filter,
         search: searchTerm,
         limit: 50
       });
@@ -32,7 +28,11 @@ const Drivers = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
+
+  useIonViewWillEnter(() => {
+    loadDrivers();
+  });
 
   const getStatusBadge = (status) => {
     const statusMap = {
@@ -53,6 +53,11 @@ const Drivers = () => {
 
   const handleSearch = () => {
     loadDrivers();
+  };
+
+  const handleStatusFilter = (filter) => {
+    setStatusFilter(filter);
+    loadDrivers(filter);
   };
 
   if (isLoading) {
@@ -94,27 +99,33 @@ const Drivers = () => {
           <div className="status-filters">
             <button
               className={`status-filter ${statusFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('all')}
+              onClick={() => handleStatusFilter('all')}
             >
               Todos
             </button>
             <button
               className={`status-filter ${statusFilter === 'pending_review' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('pending_review')}
+              onClick={() => handleStatusFilter('pending_review')}
             >
               🟡 Pendientes
             </button>
             <button
               className={`status-filter ${statusFilter === 'approved' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('approved')}
+              onClick={() => handleStatusFilter('approved')}
             >
               🟢 Aprobados
             </button>
             <button
               className={`status-filter ${statusFilter === 'rejected' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('rejected')}
+              onClick={() => handleStatusFilter('rejected')}
             >
               🔴 Rechazados
+            </button>
+            <button
+              className={`status-filter ${statusFilter === 'suspended' ? 'active' : ''}`}
+              onClick={() => handleStatusFilter('suspended')}
+            >
+              ⏸️ Suspendidos
             </button>
           </div>
         </div>

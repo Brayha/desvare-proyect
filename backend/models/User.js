@@ -216,6 +216,11 @@ const userSchema = new mongoose.Schema({
     // ========================================
     isOnline: { type: Boolean, default: false },
     lastOnlineAt: Date,
+    currentServiceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Request',
+      default: null
+    },
     
     // ========================================
     // ESTADÍSTICAS Y RATING

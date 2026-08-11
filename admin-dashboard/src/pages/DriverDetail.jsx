@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { IonPage, IonContent, IonSpinner, IonButton } from '@ionic/react';
+import { IonPage, IonContent, IonSpinner, IonButton, IonAlert, IonToast } from '@ionic/react';
 import { useParams, useHistory } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { driversAPI } from '../services/adminAPI';
-import { ArrowLeft2, Trash, LockSlash } from 'iconsax-react';
+import { ArrowLeft2, LockSlash } from 'iconsax-react';
 import './DriverDetail.css';
 
 const DriverDetail = () => {
@@ -15,6 +15,8 @@ const DriverDetail = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [toast, setToast] = useState({ isOpen: false, message: '', color: 'success' });
 
   useEffect(() => {
     loadDriverDetail();
@@ -32,71 +34,61 @@ const DriverDetail = () => {
     }
   };
 
-  const handleApprove = async () => {
-    if (!confirm('¿Estás seguro de aprobar este conductor?')) return;
-    
-    try {
-      setIsProcessing(true);
-      await driversAPI.approve(id);
-      alert('✅ Conductor aprobado exitosamente');
-      loadDriverDetail();
-    } catch (error) {
-      alert('❌ Error al aprobar: ' + (error.response?.data?.error || error.message));
-    } finally {
-      setIsProcessing(false);
-    }
+  const showToast = (message, color = 'success') => {
+    setToast({ isOpen: true, message, color });
   };
 
-  const handleReject = async () => {
-    const reason = prompt('Ingresa la razón del rechazo:');
-    if (!reason) return;
-    
-    try {
-      setIsProcessing(true);
-      await driversAPI.reject(id, reason);
-      alert('✅ Conductor rechazado');
-      loadDriverDetail();
-    } catch (error) {
-      alert('❌ Error al rechazar: ' + (error.response?.data?.error || error.message));
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleActivate = async () => {
-    if (!confirm('¿Estás seguro de activar este conductor?')) return;
-    
-    try {
-      setIsProcessing(true);
-      await driversAPI.activate(id);
-      alert('✅ Conductor activado exitosamente');
-      loadDriverDetail();
-    } catch (error) {
-      alert('❌ Error al activar: ' + (error.response?.data?.error || error.message));
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm('⚠️ ¿Estás seguro de ELIMINAR permanentemente este conductor?\n\nEsta acción NO se puede deshacer.\n\nSe eliminarán:\n- El conductor\n- Sus documentos\n- Su historial de servicios')) {
+  const executeAction = async (action, data = {}) => {
+    const reason = data.reason?.trim();
+    if ((action === 'reject' || action === 'archive') && !reason) {
+      showToast('Debes indicar una razón.', 'warning');
       return;
     }
 
-    const confirmText = prompt('Escribe "ELIMINAR" para confirmar:');
-    if (confirmText !== 'ELIMINAR') {
-      alert('❌ Eliminación cancelada');
-      return;
-    }
-    
     try {
       setIsProcessing(true);
-      await driversAPI.delete(id);
-      alert('✅ Conductor eliminado exitosamente');
-      history.replace('/drivers');
+      if (action === 'approve') {
+        await driversAPI.approve(id);
+        showToast('Conductor aprobado exitosamente.');
+      } else if (action === 'reject') {
+        await driversAPI.reject(id, reason);
+        showToast('Conductor rechazado.');
+      } else if (action === 'activate') {
+        await driversAPI.activate(id);
+        showToast('Conductor activado exitosamente.');
+      } else if (action === 'archive') {
+        await driversAPI.suspend(id, reason);
+        showToast('Conductor suspendido. Su historial se conservó.');
+      }
+      await loadDriverDetail();
     } catch (error) {
-      alert('❌ Error al eliminar: ' + (error.response?.data?.error || error.message));
+      showToast(error.response?.data?.error || error.message || 'No se pudo completar la acción.', 'danger');
+    } finally {
       setIsProcessing(false);
+      setPendingAction(null);
+    }
+  };
+
+  const actionCopy = {
+    approve: {
+      header: 'Aprobar conductor',
+      message: 'El conductor quedará habilitado para operar.',
+      confirmText: 'Aprobar'
+    },
+    reject: {
+      header: 'Rechazar conductor',
+      message: 'Indica la razón del rechazo.',
+      confirmText: 'Rechazar'
+    },
+    activate: {
+      header: 'Activar conductor',
+      message: 'El conductor volverá a quedar habilitado.',
+      confirmText: 'Activar'
+    },
+    archive: {
+      header: 'Suspender conductor',
+      message: 'Se deshabilitará su acceso, pero se conservarán sus documentos y todo su historial.',
+      confirmText: 'Suspender'
     }
   };
 
@@ -169,19 +161,18 @@ const DriverDetail = () => {
 
         {/* Actions */}
         <div className="driver-actions">
-          {(driver.driverProfile.status === 'pending_documents' || 
-            driver.driverProfile.status === 'pending_review') && (
+          {driver.driverProfile.status === 'pending_review' && (
             <>
               <IonButton 
                 color="success" 
-                onClick={handleApprove}
+                onClick={() => setPendingAction('approve')}
                 disabled={isProcessing}
               >
                 ✅ Aprobar Conductor
               </IonButton>
               <IonButton 
                 color="danger" 
-                onClick={handleReject}
+                onClick={() => setPendingAction('reject')}
                 disabled={isProcessing}
               >
                 ❌ Rechazar
@@ -192,7 +183,7 @@ const DriverDetail = () => {
           {(driver.driverProfile.status === 'rejected' || driver.driverProfile.status === 'suspended') && (
             <IonButton 
               color="success" 
-              onClick={handleActivate}
+              onClick={() => setPendingAction('activate')}
               disabled={isProcessing}
             >
               <LockSlash size="20" style={{ marginRight: '8px' }} />
@@ -200,14 +191,16 @@ const DriverDetail = () => {
             </IonButton>
           )}
           
-          <IonButton 
-            color="danger" 
-            onClick={handleDelete}
-            disabled={isProcessing}
-          >
-            <Trash size="20" style={{ marginRight: '8px' }} />
-            Eliminar Conductor
-          </IonButton>
+          {driver.driverProfile.status !== 'suspended' && (
+            <IonButton
+              color="warning"
+              onClick={() => setPendingAction('archive')}
+              disabled={isProcessing}
+            >
+              <LockSlash size="20" style={{ marginRight: '8px' }} />
+              Suspender / Archivar
+            </IonButton>
+          )}
         </div>
 
         {/* Driver Info */}
@@ -474,6 +467,33 @@ const DriverDetail = () => {
             </div>
           </div>
         )}
+        <IonAlert
+          isOpen={Boolean(pendingAction)}
+          onDidDismiss={() => setPendingAction(null)}
+          header={pendingAction ? actionCopy[pendingAction].header : ''}
+          message={pendingAction ? actionCopy[pendingAction].message : ''}
+          inputs={
+            pendingAction === 'reject' || pendingAction === 'archive'
+              ? [{ name: 'reason', type: 'textarea', placeholder: 'Razón' }]
+              : []
+          }
+          buttons={[
+            { text: 'Cancelar', role: 'cancel' },
+            {
+              text: pendingAction ? actionCopy[pendingAction].confirmText : 'Confirmar',
+              role: 'confirm',
+              handler: (data) => executeAction(pendingAction, data)
+            }
+          ]}
+        />
+        <IonToast
+          isOpen={toast.isOpen}
+          message={toast.message}
+          color={toast.color}
+          duration={3000}
+          position="top"
+          onDidDismiss={() => setToast((current) => ({ ...current, isOpen: false }))}
+        />
       </IonContent>
     </IonPage>
   );

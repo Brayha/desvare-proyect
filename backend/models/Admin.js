@@ -27,6 +27,15 @@ const adminSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  webPushSubscriptions: [{
+    endpoint: { type: String, required: true },
+    keys: {
+      p256dh: { type: String, required: true },
+      auth: { type: String, required: true }
+    },
+    platform: { type: String, default: 'web' },
+    updatedAt: { type: Date, default: Date.now }
+  }],
   createdAt: {
     type: Date,
     default: Date.now

@@ -3,7 +3,7 @@ const router = express.Router();
 const Request = require('../models/Request');
 const User = require('../models/User');
 const ChatMessage = require('../models/ChatMessage');
-const { sendPushToUser } = require('../services/notifications');
+const { sendPushToUser, sendPushToActiveAdmins } = require('../services/notifications');
 const { requireAuth, requireDriver, optionalAuth } = require('../middleware/auth');
 
 // POST /api/requests/new - Crear nueva solicitud de cotización
@@ -91,6 +91,25 @@ router.post('/new', optionalAuth, async (req, res) => {
       console.log('🚗 Vehículo:', `${vehicleSnapshot.brand?.name} ${vehicleSnapshot.model?.name} (${vehicleSnapshot.licensePlate})`);
       console.log('📝 Problema:', serviceDetails?.problem);
     }
+
+    const adminRequestPayload = {
+      requestId: request._id.toString(),
+      clientName: request.clientName,
+      origin: request.origin?.address,
+      destination: request.destination?.address,
+      status: request.status,
+      createdAt: request.createdAt,
+    };
+    global.io?.to('admin:ops').emit('admin:request-created', adminRequestPayload);
+    sendPushToActiveAdmins(
+      'Nueva solicitud de servicio',
+      `${request.clientName} solicitó una grúa desde ${request.origin.address}`,
+      {
+        type: 'NEW_SERVICE_REQUEST',
+        requestId: request._id.toString(),
+        url: `/services/${request._id}`,
+      }
+    ).catch(error => console.warn('⚠️ Push admin de nueva solicitud no enviado:', error.message));
 
     res.status(201).json({
       message: 'Solicitud creada exitosamente',
@@ -185,6 +204,14 @@ router.post('/:id/quote', requireAuth, requireDriver, async (req, res) => {
     await request.save();
 
     console.log(`💰 Cotización agregada a solicitud ${id} por ${driverName}`);
+    global.io?.to('admin:ops').emit('admin:request-quoted', {
+      requestId: request._id.toString(),
+      driverId: driverId.toString(),
+      driverName,
+      amount: parseFloat(amount),
+      quotesCount: request.quotes.length,
+      status: request.status,
+    });
 
     // ✅ Emitir evento de Socket.IO al cliente en tiempo real
     const io = global.io;
@@ -350,16 +377,19 @@ router.post('/:id/accept', requireAuth, async (req, res) => {
     const securityCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     // 🔒 Aceptación ATÓMICA: solo UNA petición puede "ganar" la solicitud.
-    // El filtro { status: { $ne: 'accepted' } } garantiza que si dos accepts
-    // llegan casi a la vez (doble-tap o carrera), el segundo recibe claimed=null.
+    // Solo solicitudes abiertas pueden aceptarse; esto también evita reabrir
+    // por accidente servicios completados o cancelados.
+    const acceptedAt = new Date();
     const claimed = await Request.findOneAndUpdate(
-      { _id: id, status: { $ne: 'accepted' } },
+      { _id: id, status: { $in: ['pending', 'quoted'] } },
       {
         $set: {
           status: 'accepted',
           assignedDriverId: driverId,
           securityCode,
-          updatedAt: new Date(),
+          totalAmount: quote.amount,
+          acceptedAt,
+          updatedAt: acceptedAt,
         },
       },
       { new: true }
@@ -380,6 +410,15 @@ router.post('/:id/accept', requireAuth, async (req, res) => {
       }
     });
     await claimed.save();
+    global.io?.to('admin:ops').emit('admin:service-assigned', {
+      requestId: claimed._id.toString(),
+      clientId: claimed.clientId.toString(),
+      driverId: driverId.toString(),
+      driverName: driver.name,
+      amount: claimed.totalAmount,
+      status: claimed.status,
+      acceptedAt: claimed.acceptedAt,
+    });
 
     // Reflejar el estado actualizado en `request` para el resto del handler.
     request.status = claimed.status;
@@ -451,7 +490,11 @@ router.post('/:id/accept', requireAuth, async (req, res) => {
         acceptedQuote: {
           amount: quote.amount,
           timestamp: quote.timestamp
-        }
+        },
+        totalAmount: claimed.totalAmount,
+        acceptedAt: claimed.acceptedAt,
+        vehicleSnapshot: claimed.vehicleSnapshot,
+        serviceDetails: claimed.serviceDetails
       },
       otherDriverIds: otherDriverIds // Para notificar por Socket.IO
     });
@@ -996,6 +1039,15 @@ router.post('/:id/complete', requireAuth, requireDriver, async (req, res) => {
       });
     }
     
+    // Asegurar el monto incluso para solicitudes antiguas aceptadas antes de
+    // que totalAmount se persistiera como parte de la aceptación.
+    if (!request.totalAmount) {
+      const acceptedQuote = request.quotes.find(q => q.status === 'accepted');
+      if (acceptedQuote?.amount) {
+        request.totalAmount = acceptedQuote.amount;
+      }
+    }
+
     // Actualizar estado a completado
     request.status = 'completed';
     request.completedAt = completedAt || new Date();
@@ -1003,6 +1055,14 @@ router.post('/:id/complete', requireAuth, requireDriver, async (req, res) => {
     request.updatedAt = new Date();
     
     await request.save();
+    global.io?.to('admin:ops').emit('admin:service-completed', {
+      requestId: request._id.toString(),
+      clientId: request.clientId.toString(),
+      driverId: driverId.toString(),
+      amount: request.totalAmount,
+      status: request.status,
+      completedAt: request.completedAt,
+    });
     
     // Liberar al conductor: volver a estado disponible y limpiar el servicio activo
     try {
@@ -1061,15 +1121,36 @@ router.post('/:id/cancel-by-driver', requireAuth, requireDriver, async (req, res
       return res.status(403).json({ error: 'Solo el conductor asignado puede cancelar el servicio.' });
     }
 
+    const validCancellationReasons = new Set([
+      'resuelto',
+      'conductor_no_viene',
+      'conductor_no_responde',
+      'otra_grua',
+      'muy_caro',
+      'muy_lejos',
+      'otro',
+    ]);
+    const normalizedReason = validCancellationReasons.has(reason) ? reason : 'otro';
+
     // Actualizar solicitud
     request.status = 'cancelled';
     request.cancelledAt = new Date();
     request.cancelledBy = 'driver';
-    request.cancellationReason = reason || null;
-    request.cancellationCustomReason = customReason || null;
+    request.cancellationReason = normalizedReason;
+    request.cancellationCustomReason = customReason
+      || (normalizedReason === 'otro' ? reason : null)
+      || null;
     request.updatedAt = new Date();
     request.trackingData = { ...request.trackingData, isActive: false };
     await request.save();
+    global.io?.to('admin:ops').emit('admin:request-cancelled', {
+      requestId: request._id.toString(),
+      cancelledBy: request.cancelledBy,
+      reason: request.cancellationReason,
+      customReason: request.cancellationCustomReason,
+      status: request.status,
+      cancelledAt: request.cancelledAt,
+    });
 
     // Liberar al conductor
     await User.findByIdAndUpdate(driverId, {

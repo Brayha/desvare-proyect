@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Notification, User } from 'iconsax-react';
+import { User } from 'iconsax-react';
+import NotificationControl from './NotificationControl';
 import './Header.css';
 
 const Header = ({ title }) => {
@@ -19,10 +20,7 @@ const Header = ({ title }) => {
       </div>
 
       <div className="admin-header-right">
-        <button className="admin-header-notification">
-          <Notification size="24" color="#6B7280" />
-          <span className="notification-badge">3</span>
-        </button>
+        <NotificationControl />
 
         <div className="admin-header-user">
           <div className="admin-header-user-info">

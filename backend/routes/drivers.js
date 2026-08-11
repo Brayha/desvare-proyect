@@ -11,7 +11,11 @@ const router = express.Router();
 const multer = require('multer');
 const User = require('../models/User');
 const { uploadDriverDocument, uploadMultipleDocuments } = require('../services/storage');
-const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
+const {
+  notifyAccountApproved,
+  notifyAccountRejected,
+  sendPushToActiveAdmins,
+} = require('../services/notifications');
 const { sendOTP, verifyOTP } = require('../services/sms');
 const { notifyAdminNewDriver, notifyDriverApproved } = require('../services/emailService');
 const { requireAuth, requireDriver, optionalAuth } = require('../middleware/auth');
@@ -32,6 +36,31 @@ const upload = multer({
     }
   }
 });
+
+const notifyAdminDriverPendingReview = (driver, previousStatus) => {
+  if (previousStatus === 'pending_review' || driver.driverProfile.status !== 'pending_review') {
+    return;
+  }
+
+  const payload = {
+    driverId: driver._id.toString(),
+    name: driver.name,
+    city: driver.driverProfile?.city || '',
+    towTruck: driver.driverProfile?.towTruck || null,
+    status: driver.driverProfile.status,
+  };
+
+  global.io?.to('admin:ops').emit('admin:driver-pending-review', payload);
+  sendPushToActiveAdmins(
+    'Nuevo conductor para revisar',
+    `${driver.name} completó el registro de su grúa`,
+    {
+      type: 'NEW_DRIVER',
+      driverId: driver._id.toString(),
+      url: `/drivers/${driver._id}`,
+    }
+  ).catch(error => console.warn('⚠️ Push admin de nuevo conductor no enviado:', error.message));
+};
 
 // ============================================
 // REGISTRO INICIAL (Paso 1)
@@ -621,6 +650,8 @@ router.post('/upload-documents', optionalAuth, async (req, res) => {
     if (uploadResults['selfie']) docs.selfie = uploadResults['selfie'];
     if (uploadResults['grua-photo']) driver.driverProfile.towTruck.photoUrl = uploadResults['grua-photo'];
 
+    const previousStatus = driver.driverProfile.status;
+
     // Actualizar estado si está completo
     if (driver.isDocumentationComplete()) {
       driver.driverProfile.status = 'pending_review';
@@ -628,6 +659,7 @@ router.post('/upload-documents', optionalAuth, async (req, res) => {
     }
 
     await driver.save();
+    notifyAdminDriverPendingReview(driver, previousStatus);
 
     res.json({
       message: 'Documentos subidos exitosamente',
@@ -687,6 +719,8 @@ router.post('/set-capabilities', optionalAuth, async (req, res) => {
       };
     }
 
+    const previousStatus = driver.driverProfile.status;
+
     // Verificar si la documentación está completa (docs + capacidades)
     if (driver.isDocumentationComplete()) {
       driver.driverProfile.status = 'pending_review';
@@ -694,6 +728,7 @@ router.post('/set-capabilities', optionalAuth, async (req, res) => {
     }
 
     await driver.save();
+    notifyAdminDriverPendingReview(driver, previousStatus);
 
     console.log(`✅ Capacidades configuradas para conductor ${userId}`);
 

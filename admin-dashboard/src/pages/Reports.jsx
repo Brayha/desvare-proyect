@@ -138,9 +138,14 @@ const Reports = () => {
           {/* Tarjetas de resumen — datos reales del periodo */}
           <div className="reports-summary">
             <div className="summary-card">
-              <span className="summary-label">Ingresos — {PERIOD_LABELS[dateRange]}</span>
+              <span className="summary-label">Valor de servicios — {PERIOD_LABELS[dateRange]}</span>
               <span className="summary-value">{formatCurrency(totals.ingresos)}</span>
-              <span className="summary-change neutral">10% comisión: {formatCurrency(totals.ganancias)}</span>
+              <span className="summary-change neutral">
+                Comisión Desvare: {formatCurrency(totals.ganancias)}
+              </span>
+              <span className="summary-change neutral">
+                Valor conductores: {formatCurrency(totals.conductores)}
+              </span>
             </div>
             <div className="summary-card">
               <span className="summary-label">Servicios Completados</span>
@@ -149,9 +154,7 @@ const Reports = () => {
             </div>
             <div className="summary-card">
               <span className="summary-label">Total Solicitudes</span>
-              <span className="summary-value">
-                {(totals.completados || 0) + (totals.cancelados || 0)}
-              </span>
+              <span className="summary-value">{totals.total || 0}</span>
               <span className="summary-change neutral">
                 {totals.completados && (totals.completados + totals.cancelados) > 0
                   ? Math.round((totals.completados / (totals.completados + totals.cancelados)) * 100)

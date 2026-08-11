@@ -1,7 +1,8 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Category, People, Truck, DocumentText, Chart, Setting2, LogoutCurve } from 'iconsax-react';
+import { Category, People, Truck, DocumentText, Chart, LogoutCurve } from 'iconsax-react';
 import { authAPI } from '../services/adminAPI';
+import { disableWebPush } from '../services/webPushService';
 import logo from '../assets/img/Desvare-white.svg';
 import './Sidebar.css';
 
@@ -15,12 +16,17 @@ const Sidebar = () => {
     { path: '/clients', icon: <People size="24" />, label: 'Clientes' },
     { path: '/reports', icon: <Chart size="24" />, label: 'Reportes' },
     { path: '/services', icon: <DocumentText size="24" />, label: 'Servicios' },
-    { path: '/settings', icon: <Setting2 size="24" />, label: 'Configuración' },
   ];
 
-  const handleLogout = () => {
-    authAPI.logout();
-    history.replace('/login');
+  const handleLogout = async () => {
+    try {
+      await disableWebPush();
+    } catch (error) {
+      console.warn('No se pudo eliminar la suscripción remota al salir:', error);
+    } finally {
+      authAPI.logout();
+      history.replace('/login');
+    }
   };
 
   const isActive = (path) => {

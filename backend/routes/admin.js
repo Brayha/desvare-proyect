@@ -108,6 +108,60 @@ router.post('/login', async (req, res) => {
 // ============================================
 router.use(requireAdmin);
 
+// Suscripciones Web Push del dispositivo administrador actual
+router.post('/web-push-subscription', async (req, res) => {
+  try {
+    const { subscription, platform } = req.body;
+
+    if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+      return res.status(400).json({
+        error: 'Suscripción Web Push inválida. Se requiere endpoint y keys.',
+      });
+    }
+
+    await Admin.updateOne(
+      { _id: req.admin._id },
+      { $pull: { webPushSubscriptions: { endpoint: subscription.endpoint } } }
+    );
+    await Admin.updateOne(
+      { _id: req.admin._id },
+      {
+        $push: {
+          webPushSubscriptions: {
+            $each: [{
+              endpoint: subscription.endpoint,
+              keys: subscription.keys,
+              platform: platform || 'web',
+              updatedAt: new Date(),
+            }],
+            $slice: -5,
+          },
+        },
+      }
+    );
+
+    res.json({ success: true, message: 'Suscripción Web Push registrada' });
+  } catch (error) {
+    console.error('❌ Error guardando Web Push de admin:', error);
+    res.status(500).json({ error: 'Error al guardar suscripción' });
+  }
+});
+
+router.delete('/web-push-subscription', async (req, res) => {
+  try {
+    const { endpoint } = req.body || {};
+    const update = endpoint
+      ? { $pull: { webPushSubscriptions: { endpoint } } }
+      : { $set: { webPushSubscriptions: [] } };
+
+    await Admin.updateOne({ _id: req.admin._id }, update);
+    res.json({ success: true, message: 'Suscripción Web Push eliminada' });
+  } catch (error) {
+    console.error('❌ Error eliminando Web Push de admin:', error);
+    res.status(500).json({ error: 'Error al eliminar suscripción' });
+  }
+});
+
 // ============================================
 // DASHBOARD - ESTADÍSTICAS GENERALES
 // ============================================
@@ -123,11 +177,15 @@ router.get('/stats', async (req, res) => {
       totalDrivers,
       activeDrivers,
       approvedDrivers,
-      pendingDrivers,
+      pendingReviewDrivers,
+      pendingDocumentsDrivers,
       rejectedDrivers,
       totalServices,
+      pendingServices,
+      quotedServices,
       completedServices,
-      activeServices,
+      acceptedServices,
+      inProgressServices,
       cancelledServices
     ] = await Promise.all([
       User.countDocuments({ userType: 'client' }),
@@ -145,12 +203,19 @@ router.get('/stats', async (req, res) => {
         userType: 'driver', 
         'driverProfile.status': 'pending_review' 
       }),
+      User.countDocuments({
+        userType: 'driver',
+        'driverProfile.status': 'pending_documents'
+      }),
       User.countDocuments({ 
         userType: 'driver', 
         'driverProfile.status': 'rejected' 
       }),
       Request.countDocuments(),
+      Request.countDocuments({ status: 'pending' }),
+      Request.countDocuments({ status: 'quoted' }),
       Request.countDocuments({ status: 'completed' }),
+      Request.countDocuments({ status: 'accepted' }),
       Request.countDocuments({ status: 'in_progress' }),
       Request.countDocuments({ status: 'cancelled' })
     ]);
@@ -182,13 +247,19 @@ router.get('/stats', async (req, res) => {
         total: totalDrivers,
         active: activeDrivers,
         approved: approvedDrivers,
-        pending: pendingDrivers,
+        pending: pendingReviewDrivers + pendingDocumentsDrivers,
+        pendingReview: pendingReviewDrivers,
+        pendingDocuments: pendingDocumentsDrivers,
         rejected: rejectedDrivers
       },
       services: {
         total: totalServices,
+        pending: pendingServices,
+        quoted: quotedServices,
         completed: completedServices,
-        active: activeServices,
+        accepted: acceptedServices,
+        inProgress: inProgressServices,
+        active: acceptedServices + inProgressServices,
         cancelled: cancelledServices
       },
       revenue: {
@@ -215,8 +286,8 @@ router.get('/stats', async (req, res) => {
  */
 router.get('/services/active', async (req, res) => {
   try {
-    const activeServices = await Request.find({ 
-      status: 'in_progress' 
+    const activeServices = await Request.find({
+      status: { $in: ['accepted', 'in_progress'] }
     })
     .populate('clientId', 'name phone')
     .populate('assignedDriverId', 'name phone driverProfile.isOnline')
@@ -302,7 +373,7 @@ router.get('/drivers/:id', async (req, res) => {
     }
 
     // Obtener servicios del conductor
-    const services = await Request.find({ driverId: driver._id })
+    const services = await Request.find({ assignedDriverId: driver._id })
       .populate('clientId', 'name phone')
       .select('status totalAmount createdAt origin destination')
       .limit(20)
@@ -312,8 +383,8 @@ router.get('/drivers/:id', async (req, res) => {
       driver,
       services: {
         list: services,
-        total: await Request.countDocuments({ driverId: driver._id }),
-        completed: await Request.countDocuments({ driverId: driver._id, status: 'completed' })
+        total: await Request.countDocuments({ assignedDriverId: driver._id }),
+        completed: await Request.countDocuments({ assignedDriverId: driver._id, status: 'completed' })
       }
     });
 
@@ -338,9 +409,23 @@ router.put('/drivers/:id/approve', async (req, res) => {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
+    if (
+      driver.driverProfile.status !== 'pending_review'
+      || !driver.isDocumentationComplete()
+    ) {
+      return res.status(400).json({
+        error: 'El conductor debe completar documentos y capacidades antes de ser aprobado',
+      });
+    }
+
     driver.driverProfile.status = 'approved';
     driver.driverProfile.rejectionReason = undefined;
     await driver.save();
+    global.io?.to('admin:ops').emit('admin:driver-status-changed', {
+      driverId: driver._id.toString(),
+      name: driver.name,
+      status: driver.driverProfile.status,
+    });
 
     console.log(`✅ Conductor ${req.params.id} APROBADO por ${req.admin.email}`);
 
@@ -409,6 +494,11 @@ router.put('/drivers/:id/reject', async (req, res) => {
     driver.driverProfile.status = 'rejected';
     driver.driverProfile.rejectionReason = reason;
     await driver.save();
+    global.io?.to('admin:ops').emit('admin:driver-status-changed', {
+      driverId: driver._id.toString(),
+      name: driver.name,
+      status: driver.driverProfile.status,
+    });
 
     console.log(`❌ Conductor ${req.params.id} RECHAZADO por ${req.admin.email}: ${reason}`);
 
@@ -471,6 +561,11 @@ router.put('/drivers/:id/suspend', async (req, res) => {
     driver.driverProfile.isOnline = false;
     driver.driverProfile.rejectionReason = reason || 'Suspendido por administración';
     await driver.save();
+    global.io?.to('admin:ops').emit('admin:driver-status-changed', {
+      driverId: driver._id.toString(),
+      name: driver.name,
+      status: driver.driverProfile.status,
+    });
 
     console.log(`🔒 Conductor ${req.params.id} SUSPENDIDO por ${req.admin.email}`);
 
@@ -548,6 +643,11 @@ router.put('/drivers/:id/activate', async (req, res) => {
     driver.driverProfile.status = 'approved';
     driver.driverProfile.rejectionReason = undefined;
     await driver.save();
+    global.io?.to('admin:ops').emit('admin:driver-status-changed', {
+      driverId: driver._id.toString(),
+      name: driver.name,
+      status: driver.driverProfile.status,
+    });
 
     console.log(`✅ Conductor ${req.params.id} ACTIVADO por ${req.admin.email}`);
 
@@ -881,12 +981,20 @@ router.get('/services', async (req, res) => {
     const total = await Request.countDocuments(query);
 
     // Calcular estadísticas generales
-    const [totalServices, completedServices, activeServices, cancelledServices, pendingServices] = await Promise.all([
+    const [
+      totalServices,
+      completedServices,
+      acceptedServices,
+      inProgressServices,
+      cancelledServices,
+      pendingServices
+    ] = await Promise.all([
       Request.countDocuments(),
       Request.countDocuments({ status: 'completed' }),
+      Request.countDocuments({ status: 'accepted' }),
       Request.countDocuments({ status: 'in_progress' }),
       Request.countDocuments({ status: 'cancelled' }),
-      Request.countDocuments({ status: { $in: ['pending', 'quoted', 'accepted'] } })
+      Request.countDocuments({ status: { $in: ['pending', 'quoted'] } })
     ]);
 
     res.json({
@@ -900,7 +1008,9 @@ router.get('/services', async (req, res) => {
       stats: {
         total: totalServices,
         completed: completedServices,
-        active: activeServices,
+        accepted: acceptedServices,
+        inProgress: inProgressServices,
+        active: acceptedServices + inProgressServices,
         cancelled: cancelledServices,
         pending: pendingServices
       }
@@ -992,15 +1102,16 @@ router.get('/reports/revenue', async (req, res) => {
 
     // Servicios completados agrupados por fecha (para gráfico de ingresos y servicios)
     const revenueByPeriod = await Request.aggregate([
+      { $match: { status: 'completed' } },
+      { $addFields: { reportDate: { $ifNull: ['$completedAt', '$createdAt'] } } },
       {
         $match: {
-          status: 'completed',
-          createdAt: { $gte: startDate }
+          reportDate: { $gte: startDate }
         }
       },
       {
         $group: {
-          _id: { $dateToString: { format: groupFormat, date: '$createdAt', timezone: 'America/Bogota' } },
+          _id: { $dateToString: { format: groupFormat, date: '$reportDate', timezone: 'America/Bogota' } },
           ingresos: { $sum: '$totalAmount' },
           completados: { $sum: 1 }
         }
@@ -1010,15 +1121,16 @@ router.get('/reports/revenue', async (req, res) => {
 
     // Servicios cancelados agrupados por fecha
     const cancelledByPeriod = await Request.aggregate([
+      { $match: { status: 'cancelled' } },
+      { $addFields: { reportDate: { $ifNull: ['$cancelledAt', '$createdAt'] } } },
       {
         $match: {
-          status: 'cancelled',
-          createdAt: { $gte: startDate }
+          reportDate: { $gte: startDate }
         }
       },
       {
         $group: {
-          _id: { $dateToString: { format: groupFormat, date: '$createdAt', timezone: 'America/Bogota' } },
+          _id: { $dateToString: { format: groupFormat, date: '$reportDate', timezone: 'America/Bogota' } },
           cancelados: { $sum: 1 }
         }
       },
@@ -1038,10 +1150,11 @@ router.get('/reports/revenue', async (req, res) => {
 
     // Categorías de vehículos en servicios completados del periodo
     const vehicleCategories = await Request.aggregate([
+      { $match: { status: 'completed' } },
+      { $addFields: { reportDate: { $ifNull: ['$completedAt', '$createdAt'] } } },
       {
         $match: {
-          status: 'completed',
-          createdAt: { $gte: startDate },
+          reportDate: { $gte: startDate },
           'vehicleSnapshot.categoryId': { $exists: true }
         }
       },
@@ -1060,10 +1173,11 @@ router.get('/reports/revenue', async (req, res) => {
 
     // Top conductores del periodo
     const topDrivers = await Request.aggregate([
+      { $match: { status: 'completed' } },
+      { $addFields: { reportDate: { $ifNull: ['$completedAt', '$createdAt'] } } },
       {
         $match: {
-          status: 'completed',
-          createdAt: { $gte: startDate },
+          reportDate: { $gte: startDate },
           assignedDriverId: { $exists: true }
         }
       },
@@ -1097,7 +1211,14 @@ router.get('/reports/revenue', async (req, res) => {
 
     // Totales del periodo
     const periodTotals = await Request.aggregate([
-      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $addFields: {
+          reportDate: {
+            $ifNull: ['$completedAt', { $ifNull: ['$cancelledAt', '$createdAt'] }]
+          }
+        }
+      },
+      { $match: { reportDate: { $gte: startDate } } },
       {
         $group: {
           _id: null,
@@ -1128,8 +1249,10 @@ router.get('/reports/revenue', async (req, res) => {
       totals: {
         ingresos: totals.totalIngresos,
         ganancias: Math.round(totals.totalIngresos * 0.10),
+        conductores: totals.totalIngresos - Math.round(totals.totalIngresos * 0.10),
         completados: totals.completados,
-        cancelados: totals.cancelados
+        cancelados: totals.cancelados,
+        total: totals.total
       }
     });
 
