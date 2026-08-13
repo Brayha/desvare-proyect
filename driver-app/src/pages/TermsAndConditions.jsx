@@ -38,7 +38,7 @@ const TermsAndConditions = () => {
           <p>Para operar en Desvare debes mantener vigentes:</p>
           <ul>
             <li>Licencia de conducción categoría C2 o superior</li>
-            <li>SOAT del vehículo grúa</li>
+            <li>SOAT del vehículo grúa (su carga durante el registro es opcional y puede completarse después)</li>
             <li>Tarjeta de propiedad o contrato de arrendamiento del vehículo</li>
             <li>Revisión técnico-mecánica al día</li>
             <li>Permiso de operación o habilitación de transporte especial (donde aplique)</li>

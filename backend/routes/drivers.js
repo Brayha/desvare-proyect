@@ -18,8 +18,21 @@ const {
 } = require('../services/notifications');
 const { sendOTP, verifyOTP } = require('../services/sms');
 const { notifyAdminNewDriver, notifyDriverApproved } = require('../services/emailService');
-const { requireAuth, requireDriver, optionalAuth } = require('../middleware/auth');
+const { requireAuth, requireDriver, requireDriverPin, optionalAuth } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/adminAuth');
+
+const DRIVER_DOCUMENT_TYPES = new Set([
+  'cedula-front',
+  'cedula-back',
+  'licencia-front',
+  'licencia-back',
+  'soat',
+  'tarjeta-front',
+  'tarjeta-back',
+  'seguro',
+  'selfie',
+  'grua-photo',
+]);
 
 // Configurar multer para manejar archivos en memoria
 const upload = multer({
@@ -62,6 +75,76 @@ const notifyAdminDriverPendingReview = (driver, previousStatus) => {
   ).catch(error => console.warn('⚠️ Push admin de nuevo conductor no enviado:', error.message));
 };
 
+const getDriverPinState = (driver) => {
+  const hasPIN = !!driver.driverPin;
+  return {
+    hasPIN,
+    requiresPinSetup: driver.driverPinSetupRequired === true && !hasPIN,
+    requiresProfileSetup: driver.requiresInitialDriverProfileSetup(),
+  };
+};
+
+const ensureDriverOnboardingComplete = (driver, res) => {
+  if (driver.requiresInitialDriverProfileSetup()) {
+    res.status(403).json({
+      error: 'Debes completar tus datos personales para continuar.',
+      requiresProfileSetup: true,
+      requiresPinSetup: driver.requiresDriverPinSetup(),
+      hasPIN: !!driver.driverPin,
+    });
+    return false;
+  }
+
+  if (!driver.requiresDriverPinSetup()) return true;
+
+  res.status(403).json({
+    error: 'Debes configurar tu PIN para continuar.',
+    requiresPinSetup: true,
+    hasPIN: false,
+  });
+  return false;
+};
+
+const persistDriverDocumentUrl = (driver, documentType, url) => {
+  if (!driver.driverProfile.documents) {
+    driver.driverProfile.documents = {};
+  }
+  const docs = driver.driverProfile.documents;
+  docs.cedula = docs.cedula || {};
+  docs.licenciaTransito = docs.licenciaTransito || {};
+  docs.soat = docs.soat || {};
+  docs.tarjetaPropiedad = docs.tarjetaPropiedad || {};
+  docs.seguroTodoRiesgo = docs.seguroTodoRiesgo || {};
+  if (!driver.driverProfile.towTruck) {
+    driver.driverProfile.towTruck = {};
+  }
+  const setters = {
+    'cedula-front': () => { docs.cedula.front = url; },
+    'cedula-back': () => { docs.cedula.back = url; },
+    'licencia-front': () => { docs.licenciaTransito.front = url; },
+    'licencia-back': () => { docs.licenciaTransito.back = url; },
+    soat: () => { docs.soat.url = url; },
+    'tarjeta-front': () => { docs.tarjetaPropiedad.front = url; },
+    'tarjeta-back': () => { docs.tarjetaPropiedad.back = url; },
+    seguro: () => { docs.seguroTodoRiesgo.url = url; },
+    selfie: () => { docs.selfie = url; },
+    'grua-photo': () => { driver.driverProfile.towTruck.photoUrl = url; },
+  };
+
+  setters[documentType]?.();
+};
+
+const transitionDriverToPendingReview = (driver) => {
+  const previousStatus = driver.driverProfile.status;
+  const canTransition = ['pending_documents', 'rejected'].includes(previousStatus);
+
+  if (canTransition && driver.isReadyForReview()) {
+    driver.driverProfile.status = 'pending_review';
+  }
+
+  return previousStatus;
+};
+
 // ============================================
 // REGISTRO INICIAL (Paso 1)
 // ============================================
@@ -97,6 +180,8 @@ router.post('/register-initial', async (req, res) => {
       phone: cleanPhone,
       userType: 'driver',
       phoneVerified: false,
+      driverPinSetupRequired: true,
+      driverInitialProfileCompleted: false,
       driverProfile: { status: 'pending_documents' }
     });
 
@@ -169,6 +254,7 @@ router.post('/complete-initial-registration', optionalAuth, async (req, res) => 
 
     driver.name = name.trim();
     if (email) driver.email = email.trim();
+    driver.driverInitialProfileCompleted = true;
 
     await driver.save();
 
@@ -202,11 +288,12 @@ router.post('/check-phone', async (req, res) => {
       return res.json({ exists: false });
     }
 
+    const pinState = getDriverPinState(driver);
     res.json({
       exists: true,
       userId: driver._id,
       name: driver.name,
-      hasPIN: !!driver.driverPin,
+      ...pinState,
       status: driver.driverProfile?.status || 'pending_documents',
     });
   } catch (error) {
@@ -250,12 +337,14 @@ router.post('/login-pin', async (req, res) => {
     res.json({
       message: 'Login exitoso',
       token,
+      ...getDriverPinState(driver),
       user: {
         _id: driver._id,
         name: driver.name,
         phone: driver.phone,
         email: driver.email,
         userType: driver.userType,
+        ...getDriverPinState(driver),
         driverProfile: {
           status: driver.driverProfile.status,
           entityType: driver.driverProfile.entityType,
@@ -295,11 +384,24 @@ router.post('/set-driver-pin', optionalAuth, async (req, res) => {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
+    if (driver.driverPinSetupRequired === true && !req.user) {
+      return res.status(401).json({
+        error: 'Debes verificar tu teléfono antes de configurar el PIN.',
+        requiresPinSetup: true,
+        hasPIN: false,
+      });
+    }
+
     await driver.setDriverPin(pin);
+    driver.driverPinSetupRequired = false;
     await driver.save();
 
     console.log(`✅ PIN configurado para conductor ${userId}`);
-    res.json({ message: 'PIN configurado exitosamente' });
+    res.json({
+      message: 'PIN configurado exitosamente',
+      hasPIN: true,
+      requiresPinSetup: false,
+    });
   } catch (error) {
     console.error('❌ Error en set-driver-pin:', error);
     res.status(500).json({ error: 'Error al configurar PIN', details: error.message });
@@ -351,7 +453,8 @@ router.post('/login-otp', async (req, res) => {
 
     res.json({
       message: 'OTP enviado. Verifica tu teléfono.',
-      userId: driver._id
+      userId: driver._id,
+      ...getDriverPinState(driver),
     });
 
   } catch (error) {
@@ -427,12 +530,14 @@ router.post('/verify-otp', async (req, res) => {
     res.json({
       message: 'Teléfono verificado exitosamente',
       token,
+      ...getDriverPinState(driver),
       user: {
         _id: driver._id, // ✅ Cambiar 'id' por '_id' para que Socket.IO funcione
         name: driver.name,
         phone: driver.phone,
         email: driver.email,
         userType: driver.userType,
+        ...getDriverPinState(driver),
         driverProfile: {
           status: driver.driverProfile.status,
           entityType: driver.driverProfile.entityType,
@@ -488,6 +593,7 @@ router.post('/register-complete', optionalAuth, async (req, res) => {
     if (!driver || driver.userType !== 'driver') {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
+    if (!ensureDriverOnboardingComplete(driver, res)) return;
 
     // Actualizar perfil
     driver.driverProfile.entityType = entityType;
@@ -589,6 +695,65 @@ router.post('/register-complete', optionalAuth, async (req, res) => {
 // ============================================
 
 /**
+ * POST /api/drivers/upload-document
+ * Sube un documento individual usando multipart/form-data.
+ */
+router.post(
+  '/upload-document',
+  requireAuth,
+  requireDriverPin,
+  upload.single('file'),
+  async (req, res) => {
+    try {
+      const { documentType, userId } = req.body;
+      const authenticatedDriverId = req.user._id.toString();
+
+      if (userId && userId.toString() !== authenticatedDriverId) {
+        return res.status(403).json({ error: 'No puedes subir documentos de otro conductor.' });
+      }
+      if (!req.file) {
+        return res.status(400).json({ error: 'El archivo es requerido en el campo file.' });
+      }
+      if (!DRIVER_DOCUMENT_TYPES.has(documentType)) {
+        return res.status(400).json({
+          error: 'documentType no válido',
+          allowedDocumentTypes: Array.from(DRIVER_DOCUMENT_TYPES),
+        });
+      }
+
+      const driver = await User.findOne({
+        _id: authenticatedDriverId,
+        userType: 'driver',
+      });
+      if (!driver) {
+        return res.status(404).json({ error: 'Conductor no encontrado' });
+      }
+      if (!ensureDriverOnboardingComplete(driver, res)) return;
+
+      const url = await uploadDriverDocument(req.file, authenticatedDriverId, documentType);
+      persistDriverDocumentUrl(driver, documentType, url);
+      const previousStatus = transitionDriverToPendingReview(driver);
+
+      await driver.save();
+      notifyAdminDriverPendingReview(driver, previousStatus);
+
+      res.json({
+        message: 'Documento subido exitosamente',
+        documentType,
+        url,
+        status: driver.driverProfile.status,
+      });
+    } catch (error) {
+      console.error('❌ Error subiendo documento:', error);
+      res.status(500).json({
+        error: 'Error al subir documento',
+        details: error.message,
+      });
+    }
+  }
+);
+
+/**
  * POST /api/drivers/upload-documents
  * Sube todos los documentos del conductor de una vez
  */
@@ -611,10 +776,22 @@ router.post('/upload-documents', optionalAuth, async (req, res) => {
       });
     }
 
+    const invalidDocumentTypes = documents
+      .map((document) => document?.documentType)
+      .filter((documentType) => !DRIVER_DOCUMENT_TYPES.has(documentType));
+    if (invalidDocumentTypes.length > 0) {
+      return res.status(400).json({
+        error: 'documentType no válido',
+        invalidDocumentTypes,
+        allowedDocumentTypes: Array.from(DRIVER_DOCUMENT_TYPES),
+      });
+    }
+
     const driver = await User.findById(userId);
     if (!driver || driver.userType !== 'driver') {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
+    if (!ensureDriverOnboardingComplete(driver, res)) return;
 
     // Subir todos los documentos en paralelo
     const uploadResults = await uploadMultipleDocuments(documents, userId);
@@ -635,26 +812,14 @@ router.post('/upload-documents', optionalAuth, async (req, res) => {
 
     console.log(`✅ Todos los documentos subidos exitosamente para ${userId}`);
 
-    // Guardar URLs en el perfil del conductor
-    const docs = driver.driverProfile.documents;
-
     // Mapear resultados a la estructura del modelo
-    if (uploadResults['cedula-front']) docs.cedula.front = uploadResults['cedula-front'];
-    if (uploadResults['cedula-back']) docs.cedula.back = uploadResults['cedula-back'];
-    if (uploadResults['licencia-front']) docs.licenciaTransito.front = uploadResults['licencia-front'];
-    if (uploadResults['licencia-back']) docs.licenciaTransito.back = uploadResults['licencia-back'];
-    if (uploadResults['soat']) docs.soat.url = uploadResults['soat'];
-    if (uploadResults['tarjeta-front']) docs.tarjetaPropiedad.front = uploadResults['tarjeta-front'];
-    if (uploadResults['tarjeta-back']) docs.tarjetaPropiedad.back = uploadResults['tarjeta-back'];
-    if (uploadResults['seguro']) docs.seguroTodoRiesgo.url = uploadResults['seguro'];
-    if (uploadResults['selfie']) docs.selfie = uploadResults['selfie'];
-    if (uploadResults['grua-photo']) driver.driverProfile.towTruck.photoUrl = uploadResults['grua-photo'];
+    Object.entries(uploadResults).forEach(([documentType, url]) => {
+      if (url) persistDriverDocumentUrl(driver, documentType, url);
+    });
 
-    const previousStatus = driver.driverProfile.status;
+    const previousStatus = transitionDriverToPendingReview(driver);
 
-    // Actualizar estado si está completo
-    if (driver.isDocumentationComplete()) {
-      driver.driverProfile.status = 'pending_review';
+    if (driver.driverProfile.status === 'pending_review' && previousStatus !== 'pending_review') {
       console.log(`✅ Documentación completa para conductor ${userId} - En revisión`);
     }
 
@@ -703,11 +868,17 @@ router.post('/set-capabilities', optionalAuth, async (req, res) => {
         error: 'userId y vehicleCapabilities (array) son requeridos'
       });
     }
+    if (vehicleCapabilities.length === 0) {
+      return res.status(400).json({
+        error: 'Selecciona al menos un tipo de vehículo que puedas transportar',
+      });
+    }
 
     const driver = await User.findById(userId);
     if (!driver || driver.userType !== 'driver') {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
+    if (!ensureDriverOnboardingComplete(driver, res)) return;
 
     // Actualizar capacidades
     driver.driverProfile.vehicleCapabilities = vehicleCapabilities;
@@ -719,11 +890,9 @@ router.post('/set-capabilities', optionalAuth, async (req, res) => {
       };
     }
 
-    const previousStatus = driver.driverProfile.status;
+    const previousStatus = transitionDriverToPendingReview(driver);
 
-    // Verificar si la documentación está completa (docs + capacidades)
-    if (driver.isDocumentationComplete()) {
-      driver.driverProfile.status = 'pending_review';
+    if (driver.driverProfile.status === 'pending_review' && previousStatus !== 'pending_review') {
       console.log(`✅ Documentación completa para conductor ${userId} - Cambiando a pending_review`);
     }
 
@@ -874,6 +1043,15 @@ router.put('/admin/approve/:userId', requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
+    if (
+      driver.driverProfile.status !== 'pending_review'
+      || !driver.isReadyForApproval()
+    ) {
+      return res.status(400).json({
+        error: 'El conductor debe completar documentos, foto, capacidades y datos de la grúa antes de ser aprobado',
+      });
+    }
+
     driver.driverProfile.status = 'approved';
     driver.driverProfile.rejectionReason = undefined;
     await driver.save();
@@ -1005,10 +1183,58 @@ router.patch('/toggle-availability', requireAuth, requireDriver, async (req, res
 });
 
 /**
+ * GET /api/drivers/profile/me
+ * Obtener el perfil del conductor autenticado.
+ */
+router.get('/profile/me', requireAuth, async (req, res) => {
+  try {
+    const driver = await User.findOne({
+      _id: req.user._id,
+      userType: 'driver',
+    });
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    const pinState = getDriverPinState(driver);
+    res.json({
+      message: 'Perfil obtenido exitosamente',
+      ...pinState,
+      driver: {
+        id: driver._id,
+        _id: driver._id,
+        name: driver.name,
+        phone: driver.phone,
+        email: driver.email,
+        userType: driver.userType,
+        city: driver.driverProfile.city,
+        address: driver.driverProfile.address,
+        status: driver.driverProfile.status,
+        isOnline: driver.driverProfile.isOnline,
+        rating: driver.driverProfile.rating,
+        totalServices: driver.driverProfile.totalServices,
+        totalEarnings: driver.driverProfile.totalEarnings,
+        vehicleCapabilities: driver.driverProfile.vehicleCapabilities,
+        towTruck: driver.driverProfile.towTruck,
+        documents: driver.driverProfile.documents,
+        ...pinState,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error al obtener perfil autenticado:', error);
+    res.status(500).json({
+      error: 'Error al obtener perfil',
+      details: error.message,
+    });
+  }
+});
+
+/**
  * GET /api/drivers/profile/:id
  * Obtener perfil completo del conductor
  */
-router.get('/profile/:id', async (req, res) => {
+router.get('/profile/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -1017,23 +1243,33 @@ router.get('/profile/:id', async (req, res) => {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
+    const isOwner = req.user?._id?.toString() === driver._id.toString();
+    const pinState = getDriverPinState(driver);
+    const publicDriver = {
+      id: driver._id,
+      name: driver.name,
+      city: driver.driverProfile.city,
+      status: driver.driverProfile.status,
+      isOnline: driver.driverProfile.isOnline,
+      rating: driver.driverProfile.rating,
+      totalServices: driver.driverProfile.totalServices,
+      vehicleCapabilities: driver.driverProfile.vehicleCapabilities,
+      towTruck: driver.driverProfile.towTruck,
+      ...pinState,
+    };
+
     res.json({
       message: 'Perfil obtenido exitosamente',
-      driver: {
-        id: driver._id,
-        name: driver.name,
-        phone: driver.phone,
-        email: driver.email,
-        city: driver.driverProfile.city,
-        status: driver.driverProfile.status,
-        isOnline: driver.driverProfile.isOnline,
-        rating: driver.driverProfile.rating,
-        totalServices: driver.driverProfile.totalServices,
-        totalEarnings: driver.driverProfile.totalEarnings,
-        vehicleCapabilities: driver.driverProfile.vehicleCapabilities,
-        towTruck: driver.driverProfile.towTruck,
-        documents: driver.driverProfile.documents
-      }
+      ...pinState,
+      driver: isOwner
+        ? {
+            ...publicDriver,
+            phone: driver.phone,
+            email: driver.email,
+            totalEarnings: driver.driverProfile.totalEarnings,
+            documents: driver.driverProfile.documents,
+          }
+        : publicDriver,
     });
 
   } catch (error) {
@@ -1186,6 +1422,24 @@ router.put('/profile/:id', requireAuth, requireDriver, async (req, res) => {
     console.error('❌ Error al actualizar perfil:', error);
     res.status(500).json({ error: 'Error al actualizar perfil', details: error.message });
   }
+});
+
+router.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    const status = error.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    return res.status(status).json({
+      error: error.code === 'LIMIT_FILE_SIZE'
+        ? 'El archivo supera el límite de 10MB.'
+        : 'Error al procesar el archivo.',
+      code: error.code,
+    });
+  }
+
+  if (error?.message === 'Solo se permiten archivos de imagen') {
+    return res.status(400).json({ error: error.message });
+  }
+
+  next(error);
 });
 
 module.exports = router;

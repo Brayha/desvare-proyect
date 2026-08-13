@@ -107,4 +107,10 @@
     <!-- Solicitar exención de optimización de batería (Samsung / Android 6+) -->
     <!-- Permite que el app pida al usuario que la exima de Doze/Battery Saver -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- Cámara y galería para el registro de documentos -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

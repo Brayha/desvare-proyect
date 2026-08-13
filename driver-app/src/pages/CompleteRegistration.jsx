@@ -1,34 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
 import {
-  IonPage,
-  IonContent,
   IonButton,
-  IonSpinner,
+  IonContent,
+  IonPage,
   IonProgressBar,
-  IonText,
   IonSelect,
   IonSelectOption,
-  IonItem,
-  IonLabel,
+  IonSpinner,
+  IonText,
 } from "@ionic/react";
-import {
-  Profile,
-  Location,
-  Building,
-  DocumentText,
-  Camera,
-  Truck,
-  Map,
-  ArrowLeft,
-} from "iconsax-react";
-import { authAPI, citiesAPI, vehicleAPI } from "../services/api";
+import { DocumentText, Location, Map, Truck } from "iconsax-react";
+import { authAPI, citiesAPI } from "../services/api";
 import { Input } from "../components/Input/Input";
-import TruckTypeSelector from "../components/TruckTypeSelector";
-import TruckBrandSelector from "../components/TruckBrandSelector";
-import TruckModelSelector from "../components/TruckModelSelector";
-import TruckPlateInput from "../components/TruckPlateInput";
 import PhotoUploadStep from "../components/PhotoUploadStep/PhotoUploadStep";
+import { createDocumentFormData, normalizeImage } from "../utils/imageUpload";
 import idCardImage from "../assets/img/id-card.png";
 import selfieImage from "../assets/img/selfie.png";
 import licenseImage from "../assets/img/license.png";
@@ -38,360 +24,309 @@ import securityImage from "../assets/img/Security.png";
 import truckImage from "../assets/img/tow.png";
 import "./CompleteRegistration.css";
 
-/**
- * Flujo de Registro Completo para Conductores (13 pasos - Separados para mejor UX)
- *
- * Paso 1: Ubicación (ciudad, dirección)
- * Paso 2: Cédula (Frente y Atrás) 🆕 Separado
- * Paso 3: Selfie 🆕 Separado
- * Paso 4: Licencia de Tránsito (Frente y Atrás) 🆕 Separado
- * Paso 5: SOAT 🆕 Separado
- * Paso 6: Tarjeta de Propiedad (Frente y Atrás) 🆕 Separado
- * Paso 7: Seguro Todo Riesgo (Opcional) 🆕 Separado
- * Paso 8: Foto de la Grúa 🆕 Separado
- * Paso 9: Tipo de grúa (Liviana / Pesada)
- * Paso 10: Marca del vehículo base
- * Paso 11: Modelo del vehículo base
- * Paso 12: Placa de la grúa
- * Paso 13: Capacidades del vehículo (qué puede llevar)
- *
- * Nota: Se eliminó la selección de tipo de entidad (Natural/Jurídica) para simplificar el MVP.
- * Por defecto todos los conductores se registran como Persona Natural.
- */
-
-// Capacidades permitidas por tipo de grúa (según canPickup del catálogo)
-const CAPABILITIES_BY_TRUCK_TYPE = {
-  GRUA_MOTO:    ['MOTOS'],
-  GRUA_LIVIANA: ['AUTOS', 'CAMIONETAS'],
-  GRUA_PESADA:  ['AUTOS', 'CAMIONETAS', 'CAMIONES', 'BUSES'],
+const TOTAL_STEPS = 10;
+const ALL_CAPABILITIES = ["MOTOS", "AUTOS", "CAMIONETAS", "CAMIONES", "BUSES"];
+const CAPABILITY_LABELS = {
+  MOTOS: "Motos",
+  AUTOS: "Autos / Carros",
+  CAMIONETAS: "Camionetas y SUVs",
+  CAMIONES: "Camiones de carga",
+  BUSES: "Buses y busetas",
 };
 
-const CAPABILITY_LABELS = {
-  MOTOS:     'Motos',
-  AUTOS:     'Autos / Carros',
-  CAMIONETAS:'Camionetas y SUVs',
-  CAMIONES:  'Camiones de carga',
-  BUSES:     'Buses y busetas',
+const DOCUMENTS = {
+  cedulaFront: { type: "cedula-front", path: ["documents", "cedula", "front"] },
+  cedulaBack: { type: "cedula-back", path: ["documents", "cedula", "back"] },
+  selfie: { type: "selfie", path: ["documents", "selfie"] },
+  licenciaFront: {
+    type: "licencia-front",
+    path: ["documents", "licenciaTransito", "front"],
+  },
+  licenciaBack: {
+    type: "licencia-back",
+    path: ["documents", "licenciaTransito", "back"],
+  },
+  tarjetaFront: {
+    type: "tarjeta-front",
+    path: ["documents", "tarjetaPropiedad", "front"],
+  },
+  tarjetaBack: {
+    type: "tarjeta-back",
+    path: ["documents", "tarjetaPropiedad", "back"],
+  },
+  gruaPhoto: { type: "grua-photo", path: ["towTruck", "photoUrl"] },
+  soat: { type: "soat", path: ["documents", "soat", "url"] },
+  seguro: { type: "seguro", path: ["documents", "seguroTodoRiesgo", "url"] },
+};
+
+const emptyPhotos = () =>
+  Object.fromEntries(
+    Object.keys(DOCUMENTS).map((key) => [
+      key,
+      { file: null, status: "empty", error: "" },
+    ]),
+  );
+
+const readPath = (object, path) =>
+  path.reduce((value, key) => value?.[key], object);
+
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
 };
 
 const CompleteRegistration = () => {
   const history = useHistory();
+  const user = useMemo(getStoredUser, []);
+  const userId = user?._id;
+  const resumeKey = userId ? `driverRegistrationUploads:${userId}` : null;
 
-  // Estados del flujo
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [cities, setCities] = useState([]);
-
-  // Por defecto siempre Persona Natural (simplificado para MVP)
-  const entityType = "natural";
-
-  // Paso 1: Ubicación
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
-
-  // Paso 2: Documentos del conductor
-  const [cedulaFront, setCedulaFront] = useState(null);
-  const [cedulaBack, setCedulaBack] = useState(null);
-  const [selfie, setSelfie] = useState(null);
-
-  // Paso 3: Documentos y fotos de la grúa
-  const [licenciaTransitoFront, setLicenciaTransitoFront] = useState(null);
-  const [licenciaTransitoBack, setLicenciaTransitoBack] = useState(null);
-  const [soat, setSoat] = useState(null);
-  const [tarjetaPropiedadFront, setTarjetaPropiedadFront] = useState(null);
-  const [tarjetaPropiedadBack, setTarjetaPropiedadBack] = useState(null);
-  const [seguroTodoRiesgo, setSeguroTodoRiesgo] = useState(null);
-  const [towTruckPhoto, setTowTruckPhoto] = useState(null);
-
-  // Paso 4: Tipo de grúa
-  const [truckType, setTruckType] = useState(""); // 'GRUA_LIVIANA' | 'GRUA_PESADA'
-
-  // Paso 5: Marca del vehículo base
-  const [truckBrand, setTruckBrand] = useState(null); // { id, name }
-  const [customBrand, setCustomBrand] = useState(""); // Para marca "Otro"
-  const [truckBrands, setTruckBrands] = useState([]);
-
-  // Paso 6: Modelo del vehículo base
-  const [truckModel, setTruckModel] = useState(null); // { id, name }
-  const [customModel, setCustomModel] = useState(""); // Para modelo "Otro"
-  const [truckModels, setTruckModels] = useState([]);
-
-  // Paso 7: Placa de la grúa
-  const [truckPlate, setTruckPlate] = useState("");
-
-  // Paso 8: Capacidades del vehículo
-  const [vehicleCapabilities, setVehicleCapabilities] = useState({
-    MOTOS: false,
-    AUTOS: false,
-    CAMIONETAS: false,
-    CAMIONES: false,
-    BUSES: false,
-  });
-
-  // Control para saber si los documentos ya se subieron exitosamente
-  const [documentsUploaded, setDocumentsUploaded] = useState(false);
-
-  // Estados de error
+  const [photos, setPhotos] = useState(emptyPhotos);
+  const [useLegacyUpload, setUseLegacyUpload] = useState(false);
   const [errors, setErrors] = useState({});
-  // Estado de reintento de documentos (si Paso A pasó pero B falló)
-  const [uploadFailed, setUploadFailed] = useState(false);
-  const [submitError, setSubmitError] = useState('');
+  const [submitError, setSubmitError] = useState("");
+  const [vehicleCapabilities, setVehicleCapabilities] = useState(
+    Object.fromEntries(ALL_CAPABILITIES.map((key) => [key, false])),
+  );
 
-  // Función para cargar ciudades fallback
-  const setFallbackCities = () => {
-    // Fallback: ciudades por defecto si falla la API
-    const fallbackCities = [
-      { name: "Bogotá" },
-      { name: "Medellín" },
-      { name: "Cali" },
-      { name: "Barranquilla" },
-      { name: "Cartagena" },
-      { name: "Bucaramanga" },
-      { name: "Pereira" },
-      { name: "Santa Marta" },
-    ];
-    console.log("✅ Usando ciudades fallback:", fallbackCities.length);
-    setCities(fallbackCities);
-  };
-
-  // Función para cargar marcas de grúas según el tipo
-  const loadTruckBrands = async (type) => {
-    try {
-      setIsLoading(true);
-      setErrors({});
-      console.log("🔄 Cargando marcas para:", type);
-      const response = await vehicleAPI.getBrands(type);
-      const brandsData = response.data?.data || [];
-      setTruckBrands(brandsData);
-      console.log(`✅ ${brandsData.length} marcas cargadas para ${type}`);
-    } catch (error) {
-      console.error("❌ Error cargando marcas de grúas:", error);
-      setTruckBrands([]);
-      setErrors({ truckBrand: "Error al cargar las marcas. Vuelve al paso anterior y selecciona el tipo de grúa de nuevo." });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Función para cargar modelos de grúas según la marca
-  const loadTruckModels = async (brandId, type) => {
-    try {
-      setIsLoading(true);
-      setErrors({});
-      console.log("🔄 Cargando modelos para marca:", brandId);
-      const response = await vehicleAPI.getModels(brandId, type);
-      const modelsData = response.data?.data || [];
-      setTruckModels(modelsData);
-      console.log(`✅ ${modelsData.length} modelos cargados`);
-    } catch (error) {
-      console.error("❌ Error cargando modelos de grúas:", error);
-      setTruckModels([]);
-      setErrors({ truckModel: "Error al cargar los modelos. Vuelve al paso anterior y selecciona la marca de nuevo." });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Cargar ciudades al montar el componente
   useEffect(() => {
-    const loadCities = async () => {
-      try {
-        console.log("🔄 Cargando ciudades...");
-        const response = await citiesAPI.getAll();
-        console.log("✅ Respuesta ciudades:", response);
-
-        // Verificar que response.data sea un array
-        if (response && response.data && Array.isArray(response.data)) {
-          console.log(
-            "✅ Ciudades cargadas:",
-            response.data.length,
-            "ciudades"
-          );
-          setCities(response.data);
-        } else {
-          console.warn("⚠️ Respuesta no es un array, usando fallback");
-          setFallbackCities();
-        }
-      } catch (error) {
-        console.error("❌ Error cargando ciudades:", error);
-        setFallbackCities();
-      }
-    };
-
-    loadCities();
-  }, []);
-
-  // Cargar marcas cuando se seleccione el tipo de grúa y limpiar selecciones dependientes
-  useEffect(() => {
-    if (truckType) {
-      console.log("🚚 Tipo de grúa seleccionado:", truckType);
-      loadTruckBrands(truckType);
-      // Reset completo al cambiar tipo (incluyendo lista de modelos)
-      setTruckBrand(null);
-      setTruckModel(null);
-      setTruckModels([]);
-      setCustomBrand("");
-      setCustomModel("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [truckType]);
-
-  // Cargar modelos cuando se seleccione la marca
-  useEffect(() => {
-    if (truckBrand && truckBrand.id !== "OTHER" && truckType) {
-      console.log("🚚 Marca seleccionada:", truckBrand.name);
-      loadTruckModels(truckBrand.id, truckType);
-      // Reset modelo al cambiar marca
-      setTruckModel(null);
-      setCustomModel("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [truckBrand, truckType]);
-
-  const totalSteps = 14; // Paso 2 = pantalla introductoria de documentos + 13 pasos originales
-  const progress = currentStep / totalSteps;
-
-  const validateStep = () => {
-    const newErrors = {};
-
-    switch (currentStep) {
-      // Paso 1: Ciudad y dirección
-      case 1:
-        if (!city) newErrors.city = "Selecciona tu ciudad";
-        if (!address) newErrors.address = "Ingresa tu dirección";
-        break;
-
-      // Paso 2: Intro documentos — sin validación, solo lectura
-      case 2:
-        break;
-
-      // Paso 3: Cédula (Frente y Atrás)
-      case 3:
-        if (!cedulaFront)
-          newErrors.cedulaFront = "Sube la foto frontal de tu cédula";
-        if (!cedulaBack)
-          newErrors.cedulaBack = "Sube la foto trasera de tu cédula";
-        break;
-
-      // Paso 4: Selfie
-      case 4:
-        if (!selfie) newErrors.selfie = "Sube una selfie tuya";
-        break;
-
-      // Paso 5: Licencia de Tránsito (Frente y Atrás)
-      case 5:
-        if (!licenciaTransitoFront)
-          newErrors.licenciaTransitoFront =
-            "Sube la licencia de tránsito (frente)";
-        if (!licenciaTransitoBack)
-          newErrors.licenciaTransitoBack =
-            "Sube la licencia de tránsito (atrás)";
-        break;
-
-      // Paso 6: SOAT
-      case 6:
-        if (!soat) newErrors.soat = "Sube el SOAT";
-        break;
-
-      // Paso 7: Tarjeta de Propiedad (Frente y Atrás)
-      case 7:
-        if (!tarjetaPropiedadFront)
-          newErrors.tarjetaPropiedadFront =
-            "Sube la tarjeta de propiedad (frente)";
-        if (!tarjetaPropiedadBack)
-          newErrors.tarjetaPropiedadBack =
-            "Sube la tarjeta de propiedad (atrás)";
-        break;
-
-      // Paso 8: Seguro Todo Riesgo (Opcional)
-      case 8:
-        break;
-
-      // Paso 9: Foto de la Grúa
-      case 9:
-        if (!towTruckPhoto)
-          newErrors.towTruckPhoto = "Sube una foto de tu grúa";
-        break;
-
-      // Paso 10: Tipo de grúa
-      case 10:
-        if (!truckType) {
-          newErrors.truckType = "Selecciona el tipo de grúa";
-        }
-        break;
-
-      // Paso 11: Marca del vehículo
-      case 11:
-        if (!truckBrand) {
-          newErrors.truckBrand = "Selecciona la marca del vehículo";
-        } else if (truckBrand.id === "OTHER" && !customBrand.trim()) {
-          newErrors.customBrand = "Escribe la marca de tu vehículo";
-        }
-        break;
-
-      // Paso 12: Modelo del vehículo
-      case 12:
-        if (!truckModel) {
-          newErrors.truckModel = "Selecciona el modelo del vehículo";
-        } else if (truckModel.id === "OTHER" && !customModel.trim()) {
-          newErrors.customModel = "Escribe el modelo de tu vehículo";
-        }
-        break;
-
-      // Paso 13: Placa de la grúa
-      case 13: {
-        if (!truckPlate || truckPlate.length < 6) {
-          newErrors.truckPlate = "Ingresa una placa válida (6 caracteres)";
-        }
-        const plateRegex = /^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$/;
-        if (truckPlate && !plateRegex.test(truckPlate)) {
-          newErrors.truckPlate = "Formato inválido. Usa ABC123 o ABC12D";
-        }
-        break;
-      }
-
-      // Paso 14: Capacidades
-      case 14: {
-        const hasCapability = Object.values(vehicleCapabilities).some((v) => v);
-        if (!hasCapability) {
-          newErrors.capabilities =
-            "Selecciona al menos un tipo de vehículo que puedas llevar";
-        }
-        break;
-      }
-
-      default:
-        break;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = () => {
-    if (!validateStep()) {
+    if (!userId) {
+      history.replace("/login");
       return;
     }
 
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+    const fallbackCities = [
+      "Bogotá",
+      "Medellín",
+      "Cali",
+      "Barranquilla",
+      "Cartagena",
+      "Bucaramanga",
+      "Pereira",
+      "Santa Marta",
+    ].map((name) => ({ name }));
+
+    citiesAPI
+      .getAll()
+      .then((response) =>
+        setCities(Array.isArray(response.data) ? response.data : fallbackCities),
+      )
+      .catch(() => setCities(fallbackCities));
+
+    let cached = {};
+    try {
+      cached = JSON.parse(localStorage.getItem(resumeKey) || "{}");
+    } catch {
+      cached = {};
+    }
+
+    const reconcile = (profile) => {
+      const cachedLocation = cached.location || {};
+      setCity((current) => current || profile.city || cachedLocation.city || "");
+      setAddress(
+        (current) =>
+          current || profile.address || cachedLocation.address || "",
+      );
+      if (Array.isArray(profile.vehicleCapabilities)) {
+        setVehicleCapabilities((current) => {
+          const next = { ...current };
+          profile.vehicleCapabilities.forEach((capability) => {
+            if (capability in next) next[capability] = true;
+          });
+          return next;
+        });
+      }
+      setPhotos((current) => {
+        const next = { ...current };
+        Object.entries(DOCUMENTS).forEach(([key, config]) => {
+          const remoteUrl = readPath(profile, config.path);
+          const cachedUpload = cached[key];
+          if (remoteUrl || cachedUpload?.saved) {
+            next[key] = {
+              file: remoteUrl || cachedUpload.url || true,
+              status: "saved",
+              error: "",
+            };
+          }
+        });
+        return next;
+      });
+    };
+
+    authAPI
+      .getMyProfile()
+      .then((response) =>
+        reconcile(response.data?.driver || response.data?.profile || response.data),
+      )
+      .catch(() => reconcile({}));
+  }, [history, resumeKey, userId]);
+
+  const persistResumeState = (patch) => {
+    if (!resumeKey) return;
+    let stored = {};
+    try {
+      stored = JSON.parse(localStorage.getItem(resumeKey) || "{}");
+    } catch {
+      stored = {};
+    }
+    localStorage.setItem(resumeKey, JSON.stringify({ ...stored, ...patch }));
+  };
+
+  useEffect(() => {
+    if (!resumeKey || (!city && !address)) return;
+    let stored = {};
+    try {
+      stored = JSON.parse(localStorage.getItem(resumeKey) || "{}");
+    } catch {
+      stored = {};
+    }
+    localStorage.setItem(
+      resumeKey,
+      JSON.stringify({ ...stored, location: { city, address } }),
+    );
+  }, [address, city, resumeKey]);
+
+  const persistSuccessfulUpload = (key, url) => {
+    persistResumeState({ [key]: { saved: true, ...(url ? { url } : {}) } });
+  };
+
+  const uploadPhoto = async (key, image) => {
+    if (useLegacyUpload) {
+      setPhotos((current) => ({
+        ...current,
+        [key]: { file: image, status: "selected", error: "" },
+      }));
+      return;
+    }
+
+    setPhotos((current) => ({
+      ...current,
+      [key]: { file: image, status: "uploading", error: "" },
+    }));
+
+    try {
+      const response = await authAPI.uploadDriverDocument(
+        createDocumentFormData(image, DOCUMENTS[key].type),
+      );
+      const url =
+        response.data?.url ||
+        response.data?.documentUrl ||
+        response.data?.document?.url ||
+        null;
+      persistSuccessfulUpload(key, url);
+      setPhotos((current) => ({
+        ...current,
+        [key]: { file: url || image, status: "saved", error: "" },
+      }));
+    } catch (error) {
+      if ([404, 405, 501].includes(error.response?.status)) {
+        setUseLegacyUpload(true);
+        setPhotos((current) => ({
+          ...current,
+          [key]: { file: image, status: "selected", error: "" },
+        }));
+        return;
+      }
+      setPhotos((current) => ({
+        ...current,
+        [key]: {
+          file: image,
+          status: "error",
+          error: "No se pudo guardar. Revisa tu conexión y reintenta.",
+        },
+      }));
+    }
+  };
+
+  const selectPhoto = (key) => async (source) => {
+    try {
+      const normalized = await normalizeImage(source);
+      await uploadPhoto(key, normalized);
+    } catch {
+      setPhotos((current) => ({
+        ...current,
+        [key]: {
+          file: null,
+          status: "error",
+          error: "No pudimos procesar esta imagen.",
+        },
+      }));
+    }
+  };
+
+  const retryPhoto = (key) => () => {
+    if (photos[key].file) uploadPhoto(key, photos[key].file);
+  };
+
+  const photoConfig = (key, label) => ({
+    label,
+    file: photos[key].file,
+    status: photos[key].status,
+    error: photos[key].error || errors[key],
+    onSelect: selectPhoto(key),
+    onRetry: retryPhoto(key),
+  });
+
+  const validateStep = () => {
+    const nextErrors = {};
+    const ready = (key) =>
+      photos[key].status === "saved" || photos[key].status === "selected";
+
+    if (currentStep === 1) {
+      if (!city) nextErrors.city = "Selecciona tu ciudad";
+      if (!address.trim()) nextErrors.address = "Ingresa tu dirección";
+    }
+    if (currentStep === 3) {
+      if (!ready("cedulaFront")) nextErrors.cedulaFront = "Guarda la foto frontal";
+      if (!ready("cedulaBack")) nextErrors.cedulaBack = "Guarda la foto trasera";
+    }
+    if (currentStep === 4 && !ready("selfie")) nextErrors.selfie = "Guarda tu selfie";
+    if (currentStep === 5) {
+      if (!ready("licenciaFront")) nextErrors.licenciaFront = "Guarda la foto frontal";
+      if (!ready("licenciaBack")) nextErrors.licenciaBack = "Guarda la foto trasera";
+    }
+    if (currentStep === 6) {
+      if (!ready("tarjetaFront")) nextErrors.tarjetaFront = "Guarda la foto frontal";
+      if (!ready("tarjetaBack")) nextErrors.tarjetaBack = "Guarda la foto trasera";
+    }
+    if (currentStep === 7 && !ready("gruaPhoto")) {
+      nextErrors.gruaPhoto = "Guarda una foto de tu grúa";
+    }
+    if (
+      currentStep === 8 &&
+      !Object.values(vehicleCapabilities).some(Boolean)
+    ) {
+      nextErrors.capabilities = "Selecciona al menos una capacidad";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (!validateStep()) return;
+    if (currentStep === 1) {
+      persistResumeState({ location: { city, address } });
+    }
+    if (currentStep < TOTAL_STEPS) {
+      setCurrentStep((step) => step + 1);
       setErrors({});
     } else {
       handleSubmit();
     }
   };
 
-  // Avance automático al seleccionar un ítem del catálogo (marca o modelo)
-  const handleAutoAdvance = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep((prev) => prev + 1);
-      setErrors({});
-    }
-  };
-
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep((step) => step - 1);
       setErrors({});
     } else {
       history.goBack();
@@ -399,296 +334,108 @@ const CompleteRegistration = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("📝 Enviando registro completo...");
+    if (!validateStep() || !userId) return;
     setIsLoading(true);
-    setSubmitError('');
-    setUploadFailed(false);
+    setSubmitError("");
 
     try {
-      const userStr = localStorage.getItem("user");
-      if (!userStr) {
-        history.replace("/login");
-        return;
-      }
-
-      const user = JSON.parse(userStr);
-      const userId = user._id;
-
-      console.log("👤 Usuario ID:", userId);
-
-      // Paso A: Datos básicos + grúa
-      const towTruckData = {
-        truckType,
-        licensePlate: truckPlate,
-      };
-
-      if (truckBrand && truckBrand.id !== "OTHER") {
-        towTruckData.baseBrandId = truckBrand.id;
-        towTruckData.baseBrand = truckBrand.name;
-      }
-      if (truckModel && truckModel.id !== "OTHER") {
-        towTruckData.baseModelId = truckModel.id;
-        towTruckData.baseModel = truckModel.name;
-      }
-      if (truckBrand?.id === "OTHER" && customBrand) {
-        towTruckData.customBrand = customBrand;
-      }
-      if (truckModel?.id === "OTHER" && customModel) {
-        towTruckData.customModel = customModel;
-      }
-
       await authAPI.registerDriverComplete({
         userId,
-        entityType,
+        entityType: "natural",
         city,
         address,
-        towTruck: towTruckData,
       });
 
-      console.log("✅ Datos básicos guardados");
+      if (useLegacyUpload) {
+        const documents = Object.entries(photos)
+          .filter(([, photo]) => photo.status === "selected")
+          .map(([key, photo]) => ({
+            file: photo.file,
+            documentType: DOCUMENTS[key].type,
+          }));
+        if (documents.length) {
+          await authAPI.uploadDriverDocuments({ userId, documents });
+        }
+      }
 
-      // Paso B: Subir documentos (convertir a base64)
-      await uploadDocuments(userId);
-
+      const capabilitiesResponse = await authAPI.setDriverCapabilities({
+        userId,
+        vehicleCapabilities: Object.keys(vehicleCapabilities).filter(
+          (key) => vehicleCapabilities[key],
+        ),
+      });
+      if (capabilitiesResponse.data?.status !== "pending_review") {
+        const compatibilityError = new Error(
+          "El servidor todavía requiere información adicional para enviar el perfil a revisión.",
+        );
+        compatibilityError.code = "REGISTRATION_NOT_READY";
+        throw compatibilityError;
+      }
+      if (resumeKey) localStorage.removeItem(resumeKey);
+      history.replace("/under-review");
     } catch (error) {
-      console.error("❌ Error en registro (Paso A):", error);
-      setSubmitError("Error al guardar tus datos. Verifica tu conexión e intenta de nuevo.");
+      console.error("Error finalizando el registro:", error);
+      setSubmitError(
+        error.code === "REGISTRATION_NOT_READY"
+          ? "El servidor aún no admite el registro sin SOAT. Intenta nuevamente cuando el backend esté actualizado o agrega el SOAT para continuar."
+          : "No pudimos finalizar el registro. Tus fotos guardadas no se repetirán; intenta de nuevo.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const uploadDocuments = async (userId) => {
-    console.log("📤 Preparando documentos para subir...");
+  const renderPhotoStep = (props) => (
+    <PhotoUploadStep
+      {...props}
+      continueLabel={currentStep === TOTAL_STEPS ? "Finalizar" : undefined}
+      onComplete={handleNext}
+    />
+  );
 
-    // Las fotos ya están en DataURL (se comprimen al seleccionar), solo mapear.
-    const fileMap = [
-      { file: cedulaFront,           type: "cedula-front"  },
-      { file: cedulaBack,            type: "cedula-back"   },
-      { file: selfie,                type: "selfie"        },
-      { file: licenciaTransitoFront, type: "licencia-front"},
-      { file: licenciaTransitoBack,  type: "licencia-back" },
-      { file: soat,                  type: "soat"          },
-      { file: tarjetaPropiedadFront, type: "tarjeta-front" },
-      { file: tarjetaPropiedadBack,  type: "tarjeta-back"  },
-      { file: seguroTodoRiesgo,      type: "seguro"        },
-      { file: towTruckPhoto,         type: "grua-photo"    },
-    ];
-
-    const documents = fileMap
-      .filter(({ file }) => file != null)
-      .map(({ file, type }) => ({ file, documentType: type }));
-
-    console.log(`📎 ${documents.length} documentos listos para subir`);
-
-    // ── Paso B: Enviar al servidor ───────────────────────────────────────────
-    try {
-      await authAPI.uploadDriverDocuments({ userId, documents });
-      console.log("✅ Documentos subidos");
-      setDocumentsUploaded(true);
-    } catch (uploadError) {
-      console.error("❌ Error subiendo documentos:", uploadError);
-      setUploadFailed(true);
-      setSubmitError(
-        "Tus datos se guardaron pero hubo un problema al subir las fotos. " +
-        "Por favor intenta subirlas de nuevo."
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    // ── Paso C: Guardar capacidades ─────────────────────────────────────────
-    const selectedCapabilities = Object.keys(vehicleCapabilities).filter(
-      (key) => vehicleCapabilities[key]
-    );
-
-    try {
-      await authAPI.setDriverCapabilities({
-        userId,
-        vehicleCapabilities: selectedCapabilities,
-      });
-      console.log("✅ Capacidades guardadas");
-    } catch (capError) {
-      console.error("❌ Error guardando capacidades:", capError);
-      setSubmitError(
-        "Tus fotos se subieron correctamente pero hubo un error al guardar las capacidades. " +
-        "Por favor intenta de nuevo."
-      );
-      setUploadFailed(true);
-      setIsLoading(false);
-      return;
-    }
-
-    history.replace("/under-review");
-  };
-
-  const handleRetryUpload = async () => {
-    setIsLoading(true);
-    setSubmitError('');
-    setUploadFailed(false);
-    const userStr = localStorage.getItem("user");
-    if (!userStr) {
-      setIsLoading(false);
-      history.replace("/login");
-      return;
-    }
-    const userId = JSON.parse(userStr)._id;
-
-    if (documentsUploaded) {
-      // Las fotos ya subieron — solo reintenta las capacidades
-      const selectedCapabilities = Object.keys(vehicleCapabilities).filter(
-        (key) => vehicleCapabilities[key]
-      );
-      try {
-        await authAPI.setDriverCapabilities({ userId, vehicleCapabilities: selectedCapabilities });
-        history.replace("/under-review");
-      } catch (capError) {
-        console.error("❌ Error guardando capacidades (reintento):", capError);
-        setSubmitError(
-          "Sigue habiendo un problema al guardar las capacidades. Verifica tu conexión e intenta de nuevo."
-        );
-        setUploadFailed(true);
-      }
-      setIsLoading(false);
-      return;
-    }
-
-    // Fotos aún no subidas — proceso completo
-    await uploadDocuments(userId);
-    setIsLoading(false);
-  };
-
-  /**
-   * Convierte y comprime la imagen inmediatamente al seleccionarla.
-   * Almacenar DataURL en lugar de File object evita que Android WebView invalide
-   * la referencia al archivo cuando el componente se desmonta al cambiar de paso.
-   */
-  const handleFileChange = (setter) => (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-
-    reader.onerror = () => {
-      console.error(`❌ FileReader falló leyendo: ${file.name}`);
-    };
-
-    reader.onload = (evt) => {
-      const originalDataUrl = evt.target.result;
-      try {
-        const img = new Image();
-
-        img.onerror = () => {
-          console.warn(`⚠️ Imagen no cargó para comprimir, guardando original: ${file.name}`);
-          setter(originalDataUrl);
-        };
-
-        img.onload = () => {
-          try {
-            const MAX_DIM = 1200;
-            let { width, height } = img;
-            if (width > MAX_DIM || height > MAX_DIM) {
-              if (width >= height) {
-                height = Math.round((height * MAX_DIM) / width);
-                width = MAX_DIM;
-              } else {
-                width = Math.round((width * MAX_DIM) / height);
-                height = MAX_DIM;
-              }
-            }
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            const compressed = canvas.toDataURL('image/jpeg', 0.75);
-            console.log(`✅ Foto lista: ${Math.round(compressed.length / 1024)}KB (${file.name})`);
-            setter(compressed);
-          } catch {
-            console.warn(`⚠️ Canvas falló, guardando original: ${file.name}`);
-            setter(originalDataUrl);
-          }
-        };
-
-        img.src = originalDataUrl;
-      } catch {
-        setter(originalDataUrl);
-      }
-    };
-  };
-
-  const renderStepContent = () => {
+  const renderStep = () => {
     switch (currentStep) {
-      // Paso 1: Ciudad y dirección (antes era paso 3)
       case 1:
         return (
           <div className="step-content">
             <div className="step-icon">
               <Location size="48" color="#0055FF" variant="Bulk" />
             </div>
-
             <div className="step-title-container">
               <h2 className="step-title">Ubicación</h2>
               <p className="step-description">¿Desde dónde operas tu grúa?</p>
             </div>
-
-            {/* IonSelect con estilo moderno */}
             <div className="modern-input-wrapper">
-              <div
-                className={`modern-input-group ${
-                  errors.city ? "has-error" : ""
-                }`}
-              >
+              <div className={`modern-input-group ${errors.city ? "has-error" : ""}`}>
                 <div className="modern-input-icon">
-                  <Location
-                    size="24"
-                    color={errors.city ? "#EF4444" : "#9CA3AF"}
-                  />
+                  <Location size="24" color={errors.city ? "#EF4444" : "#9CA3AF"} />
                 </div>
                 <IonSelect
                   value={city}
                   placeholder="Selecciona tu ciudad"
-                  onIonChange={(e) => setCity(e.detail.value)}
+                  onIonChange={(event) => setCity(event.detail.value)}
                   interface="action-sheet"
                   className="modern-select-field"
                 >
-                  {Array.isArray(cities) && cities.length > 0 ? (
-                    cities.map((c, index) => (
-                      <IonSelectOption
-                        mode="ios"
-                        key={`${c.name}-${index}`}
-                        value={c.name}
-                      >
-                        {c.name}
-                      </IonSelectOption>
-                    ))
-                  ) : (
-                    <IonSelectOption value="" disabled>
-                      Cargando ciudades...
+                  {cities.map((item, index) => (
+                    <IonSelectOption key={`${item.name}-${index}`} value={item.name}>
+                      {item.name}
                     </IonSelectOption>
-                  )}
+                  ))}
                 </IonSelect>
               </div>
-              {errors.city && (
-                <span className="modern-input-error">{errors.city}</span>
-              )}
+              {errors.city && <span className="modern-input-error">{errors.city}</span>}
             </div>
-
             <Input
               type="text"
               placeholder="Dirección completa"
               value={address}
               onChange={setAddress}
               error={errors.address}
-              icon={
-                <Map size="24" color={errors.address ? "#EF4444" : "#9CA3AF"} />
-              }
+              icon={<Map size="24" color={errors.address ? "#EF4444" : "#9CA3AF"} />}
             />
           </div>
         );
-
-      // Paso 2: Intro — lista de documentos que se van a pedir
       case 2:
         return (
           <div className="step-content docs-intro">
@@ -698,24 +445,24 @@ const CompleteRegistration = () => {
             <div className="step-title-container">
               <h2 className="step-title">Ten estos documentos listos</h2>
               <p className="step-description">
-                A continuación te pediremos fotos de los siguientes documentos. Tenlos a la mano o en tu galería.
+                Guardaremos cada foto al seleccionarla para que puedas continuar después.
               </p>
             </div>
             <div className="docs-intro-list">
               {[
-                { emoji: '🪪', label: 'Cédula de ciudadanía', detail: 'Frente y reverso' },
-                { emoji: '🤳', label: 'Selfie tuya',           detail: '1 foto' },
-                { emoji: '📋', label: 'Licencia de tránsito', detail: 'Frente y reverso' },
-                { emoji: '🛡️', label: 'SOAT vigente',          detail: '1 foto' },
-                { emoji: '📄', label: 'Tarjeta de propiedad', detail: 'Frente y reverso' },
-                { emoji: '🔒', label: 'Seguro todo riesgo',   detail: '1 foto · Opcional' },
-                { emoji: '🚛', label: 'Foto de tu grúa',      detail: '1 foto' },
-              ].map((doc, i) => (
-                <div key={i} className="docs-intro-item">
-                  <span className="docs-intro-emoji">{doc.emoji}</span>
+                ["🪪", "Cédula de ciudadanía", "Frente y reverso"],
+                ["🤳", "Selfie tuya", "1 foto"],
+                ["📋", "Licencia de tránsito", "Frente y reverso"],
+                ["📄", "Tarjeta de propiedad", "Frente y reverso"],
+                ["🚛", "Foto de tu grúa", "1 foto"],
+                ["🛡️", "SOAT", "Opcional · al final"],
+                ["🔒", "Seguro todo riesgo", "Opcional · al final"],
+              ].map(([emoji, label, detail]) => (
+                <div key={label} className="docs-intro-item">
+                  <span className="docs-intro-emoji">{emoji}</span>
                   <div className="docs-intro-info">
-                    <span className="docs-intro-label">{doc.label}</span>
-                    <span className="docs-intro-detail">{doc.detail}</span>
+                    <span className="docs-intro-label">{label}</span>
+                    <span className="docs-intro-detail">{detail}</span>
                   </div>
                   <span className="docs-intro-check">✓</span>
                 </div>
@@ -723,166 +470,51 @@ const CompleteRegistration = () => {
             </div>
           </div>
         );
-
-      // Paso 3: Cédula (Frente y Atrás)
       case 3:
-        return (
-          <PhotoUploadStep
-            image={idCardImage}
-            title="Fotos de tu cédula"
-            description="Toma foto a tu cédula por delante y por detrás"
-            photos={[
-              { label: 'Foto de frente', file: cedulaFront, onChange: handleFileChange(setCedulaFront), error: errors.cedulaFront },
-              { label: 'Foto por detrás', file: cedulaBack,  onChange: handleFileChange(setCedulaBack),  error: errors.cedulaBack  },
-            ]}
-            onComplete={handleAutoAdvance}
-          />
-        );
-
-      // Paso 4: Selfie
+        return renderPhotoStep({
+          image: idCardImage,
+          title: "Fotos de tu cédula",
+          description: "Toma una foto por delante y otra por detrás",
+          photos: [
+            photoConfig("cedulaFront", "Foto de frente"),
+            photoConfig("cedulaBack", "Foto por detrás"),
+          ],
+        });
       case 4:
-        return (
-          <PhotoUploadStep
-            image={selfieImage}
-            title="Una selfie 😉"
-            description="Tómate una buena foto que verán tus clientes"
-            photos={[
-              { label: 'Selfie tuya', file: selfie, onChange: handleFileChange(setSelfie), error: errors.selfie },
-            ]}
-            onComplete={handleAutoAdvance}
-          />
-        );
-
-      // Paso 5: Licencia de Tránsito (Frente y Atrás)
+        return renderPhotoStep({
+          image: selfieImage,
+          title: "Una selfie 😉",
+          description: "Tómate una foto clara que verán tus clientes",
+          photos: [photoConfig("selfie", "Selfie tuya")],
+        });
       case 5:
-        return (
-          <PhotoUploadStep
-            image={licenseImage}
-            title="Licencia de tránsito"
-            description="Toma foto a tu licencia de tránsito por delante y por detrás"
-            photos={[
-              { label: 'Foto de frente', file: licenciaTransitoFront, onChange: handleFileChange(setLicenciaTransitoFront), error: errors.licenciaTransitoFront },
-              { label: 'Foto por detrás', file: licenciaTransitoBack,  onChange: handleFileChange(setLicenciaTransitoBack),  error: errors.licenciaTransitoBack  },
-            ]}
-            onComplete={handleAutoAdvance}
-          />
-        );
-
-      // Paso 6: SOAT
+        return renderPhotoStep({
+          image: licenseImage,
+          title: "Licencia de tránsito",
+          description: "Toma una foto por delante y otra por detrás",
+          photos: [
+            photoConfig("licenciaFront", "Foto de frente"),
+            photoConfig("licenciaBack", "Foto por detrás"),
+          ],
+        });
       case 6:
-        return (
-          <PhotoUploadStep
-            image={soatImage}
-            title="Seguro SOAT"
-            description="Necesitamos ver que estás al día con el SOAT"
-            photos={[
-              { label: 'Foto del SOAT', file: soat, onChange: handleFileChange(setSoat), error: errors.soat },
-            ]}
-            onComplete={handleAutoAdvance}
-          />
-        );
-
-      // Paso 7: Tarjeta de Propiedad (Frente y Atrás)
+        return renderPhotoStep({
+          image: propertyImage,
+          title: "Tarjeta de propiedad",
+          description: "Toma una foto por delante y otra por detrás",
+          photos: [
+            photoConfig("tarjetaFront", "Foto de frente"),
+            photoConfig("tarjetaBack", "Foto por detrás"),
+          ],
+        });
       case 7:
-        return (
-          <PhotoUploadStep
-            image={propertyImage}
-            title="Tarjeta de propiedad"
-            description="Necesitamos saber de quién es la grúa"
-            photos={[
-              { label: 'Foto de frente', file: tarjetaPropiedadFront, onChange: handleFileChange(setTarjetaPropiedadFront), error: errors.tarjetaPropiedadFront },
-              { label: 'Foto por detrás', file: tarjetaPropiedadBack,  onChange: handleFileChange(setTarjetaPropiedadBack),  error: errors.tarjetaPropiedadBack  },
-            ]}
-            onComplete={handleAutoAdvance}
-          />
-        );
-
-      // Paso 8: Seguro Todo Riesgo (Opcional)
+        return renderPhotoStep({
+          image: truckImage,
+          title: "Foto de tu grúa",
+          description: "Sube una foto clara de tu grúa completa",
+          photos: [photoConfig("gruaPhoto", "Foto de la grúa")],
+        });
       case 8:
-        return (
-          <PhotoUploadStep
-            image={securityImage}
-            title="Seguro todo riesgo"
-            description="Ayuda a clientes con vehículos en patios de movilidad"
-            photos={[
-              { label: 'Foto del seguro', file: seguroTodoRiesgo, onChange: handleFileChange(setSeguroTodoRiesgo), error: errors.seguroTodoRiesgo },
-            ]}
-            isOptional
-            onComplete={handleAutoAdvance}
-          />
-        );
-
-      // Paso 9: Foto de la Grúa
-      case 9:
-        return (
-          <PhotoUploadStep
-            image={truckImage}
-            title="Foto de tu grúa"
-            description="Sube una foto clara de tu grúa completa"
-            photos={[
-              { label: 'Foto de la grúa', file: towTruckPhoto, onChange: handleFileChange(setTowTruckPhoto), error: errors.towTruckPhoto },
-            ]}
-            onComplete={handleAutoAdvance}
-          />
-        );
-
-      // Paso 10: Tipo de grúa
-      case 10:
-        return (
-          <TruckTypeSelector
-            selectedType={truckType}
-            onSelect={setTruckType}
-            onAutoAdvance={handleAutoAdvance}
-            error={errors.truckType}
-          />
-        );
-
-      // Paso 11: Marca del vehículo base
-      case 11:
-        return (
-          <TruckBrandSelector
-            brands={truckBrands}
-            selectedBrand={truckBrand}
-            customBrand={customBrand}
-            onSelect={setTruckBrand}
-            onCustomBrandChange={setCustomBrand}
-            onAutoAdvance={handleAutoAdvance}
-            isLoading={isLoading}
-            error={errors.truckBrand || errors.customBrand}
-          />
-        );
-
-      // Paso 12: Modelo del vehículo base
-      case 12:
-        return (
-          <TruckModelSelector
-            models={truckModels}
-            selectedModel={truckModel}
-            customModel={customModel}
-            brandName={
-              truckBrand?.id === "OTHER" ? customBrand : truckBrand?.name
-            }
-            onSelect={setTruckModel}
-            onCustomModelChange={setCustomModel}
-            onAutoAdvance={handleAutoAdvance}
-            isLoading={isLoading}
-            error={errors.truckModel || errors.customModel}
-          />
-        );
-
-      // Paso 13: Placa de la grúa
-      case 13:
-        return (
-          <TruckPlateInput
-            plate={truckPlate}
-            onPlateChange={setTruckPlate}
-            plateError={errors.truckPlate}
-          />
-        );
-
-      // Paso 14: Capacidades
-      case 14: {
-        const allowedCapabilities = CAPABILITIES_BY_TRUCK_TYPE[truckType] || Object.keys(vehicleCapabilities);
         return (
           <div className="step-content">
             <div className="step-icon">
@@ -890,33 +522,28 @@ const CompleteRegistration = () => {
             </div>
             <h2 className="step-title">¿Qué puedes llevar?</h2>
             <p className="step-description">
-              Selecciona los tipos de vehículos que tu grúa puede transportar.
+              Selecciona todos los tipos de vehículos que puedes transportar.
             </p>
-
             <div className="capabilities-grid">
-              {allowedCapabilities.map((key) => (
+              {ALL_CAPABILITIES.map((key) => (
                 <button
+                  type="button"
                   key={key}
-                  className={`capability-option ${
-                    vehicleCapabilities[key] ? "selected" : ""
-                  }`}
+                  className={`capability-option ${vehicleCapabilities[key] ? "selected" : ""}`}
                   onClick={() =>
-                    setVehicleCapabilities({
-                      ...vehicleCapabilities,
-                      [key]: !vehicleCapabilities[key],
-                    })
+                    setVehicleCapabilities((current) => ({
+                      ...current,
+                      [key]: !current[key],
+                    }))
                   }
                 >
                   <div className="capability-checkbox">
                     {vehicleCapabilities[key] && "✓"}
                   </div>
-                  <span className="capability-label">
-                    {CAPABILITY_LABELS[key] || key}
-                  </span>
+                  <span className="capability-label">{CAPABILITY_LABELS[key]}</span>
                 </button>
               ))}
             </div>
-
             {errors.capabilities && (
               <IonText color="danger" className="step-error">
                 <small>{errors.capabilities}</small>
@@ -924,129 +551,72 @@ const CompleteRegistration = () => {
             )}
           </div>
         );
-      }
-
+      case 9:
+        return renderPhotoStep({
+          image: soatImage,
+          title: "Seguro SOAT",
+          description: "Puedes agregarlo ahora o continuar sin este documento",
+          photos: [photoConfig("soat", "Foto del SOAT")],
+          isOptional: true,
+        });
+      case 10:
+        return renderPhotoStep({
+          image: securityImage,
+          title: "Seguro todo riesgo",
+          description: "Puedes agregarlo ahora o finalizar sin este documento",
+          photos: [photoConfig("seguro", "Foto del seguro")],
+          isOptional: true,
+        });
       default:
         return null;
     }
   };
 
+  const isPhotoStep = currentStep >= 3 && currentStep <= 7;
+  const isOptionalPhotoStep = currentStep >= 9;
+
   return (
     <IonPage>
       <IonContent className="complete-registration-content">
-        {/* Progress Bar */}
-        <IonProgressBar value={progress} className="registration-progress" />
-
+        <IonProgressBar
+          value={currentStep / TOTAL_STEPS}
+          className="registration-progress"
+        />
         <div className="complete-registration-container">
-          {/* Step Indicator */}
-          <div className={`step-indicator${currentStep >= 10 && currentStep <= 12 ? ' step-indicator--with-back' : ''}`}>
-            {currentStep >= 10 && currentStep <= 12 && (
-              <button
-                className="step-back-icon"
-                onClick={handleBack}
-                disabled={isLoading}
-                aria-label="Volver"
-              >
-                <ArrowLeft size={22} color="#374151" />
-              </button>
-            )}
-            <span>
-              Paso {currentStep} de {totalSteps}
-            </span>
+          <div className="step-indicator">
+            Paso {currentStep} de {TOTAL_STEPS}
           </div>
-
-          {/* Step Content */}
-          {renderStepContent()}
-
-          {/* Error general y reintento de documentos */}
+          {renderStep()}
           {submitError && (
             <div className="submit-error-box">
               <p className="submit-error-text">{submitError}</p>
-              {uploadFailed && (
-                <IonButton
-                  expand="block"
-                  className="retry-upload-button"
-                  onClick={handleRetryUpload}
-                  disabled={isLoading}
-                >
-                  {isLoading ? <IonSpinner name="crescent" /> : "Reintentar subir fotos"}
-                </IonButton>
-              )}
+              <IonButton expand="block" onClick={handleSubmit} disabled={isLoading}>
+                {isLoading ? <IonSpinner name="crescent" /> : "Reintentar"}
+              </IonButton>
             </div>
           )}
-
-          {/* Navigation Buttons */}
-          {/* Pasos 3-9 (fotos): sin botones, PhotoUploadStep controla el avance */}
-          {/* Pasos 10-12 (selectores con auto-advance): solo ← icono arriba    */}
-          {/* Resto de pasos: botones Atrás + Siguiente/Finalizar normales       */}
-          {!uploadFailed && (() => {
-            const isPhotoStep    = currentStep >= 3  && currentStep <= 9;
-            const isSelectorStep = currentStep >= 10 && currentStep <= 12;
-
-            if (isPhotoStep) return null;
-
-            if (isSelectorStep) return null; // el ← se renderiza en el step-indicator
-
-            return (
-              <div className="navigation-buttons">
-                <IonButton
-                  fill="outline"
-                  className="nav-button back-button"
-                  onClick={handleBack}
-                  disabled={isLoading}
-                >
-                  {currentStep === 1 ? "Cancelar" : "Atrás"}
-                </IonButton>
-
-                <IonButton
-                  className="nav-button next-button"
-                  onClick={handleNext}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <IonSpinner name="crescent" />
-                  ) : currentStep === totalSteps ? (
-                    "Finalizar"
-                  ) : currentStep === 2 ? (
-                    "¡Los tengo listos!"
-                  ) : (
-                    "Siguiente"
-                  )}
-                </IonButton>
-              </div>
-            );
-          })()}
+          {!isPhotoStep && !isOptionalPhotoStep && (
+            <div className="navigation-buttons">
+              <IonButton
+                fill="outline"
+                className="nav-button back-button"
+                onClick={handleBack}
+                disabled={isLoading}
+              >
+                {currentStep === 1 ? "Cancelar" : "Atrás"}
+              </IonButton>
+              <IonButton
+                className="nav-button next-button"
+                onClick={handleNext}
+                disabled={isLoading}
+              >
+                {currentStep === 2 ? "¡Los tengo listos!" : "Siguiente"}
+              </IonButton>
+            </div>
+          )}
         </div>
       </IonContent>
     </IonPage>
-  );
-};
-
-// Componente auxiliar para subir archivos
-const FileUpload = ({ label, file, onChange, error }) => {
-  return (
-    <div className="file-upload-wrapper">
-      <label className="file-upload-label">{label}</label>
-      <div
-        className={`file-upload-box ${error ? "error" : ""} ${
-          file ? "uploaded" : ""
-        }`}
-      >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={onChange}
-          className="file-upload-input"
-        />
-        <div className="file-upload-content">
-          <Camera size="32" color={file ? "#10B981" : "#9CA3AF"} />
-          <span className="file-upload-text">
-            {file ? `✓ ${file.name}` : "Toca para subir foto"}
-          </span>
-        </div>
-      </div>
-      {error && <span className="input-error-text">{error}</span>}
-    </div>
   );
 };
 

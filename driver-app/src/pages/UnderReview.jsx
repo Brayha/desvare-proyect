@@ -53,9 +53,21 @@ const UnderReview = () => {
       setToastMessage('¡Tu cuenta ha sido aprobada! Redirigiendo...');
       setShowToast(true);
       
-      // Redirigir al home después de 1.5 segundos
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const updatedUser = {
+        ...storedUser,
+        driverProfile: {
+          ...(storedUser.driverProfile || {}),
+          status: 'approved',
+        },
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // Enviar a permisos la primera vez; conservar la configuración existente.
       setTimeout(() => {
-        history.replace('/home');
+        history.replace(
+          localStorage.getItem('permissionsConfigured') ? '/home' : '/permissions',
+        );
       }, 1500);
     });
 

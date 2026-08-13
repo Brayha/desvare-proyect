@@ -48,6 +48,28 @@ const requireDriver = (req, res, next) => {
 };
 
 /**
+ * Exige que los conductores creados por el onboarding nuevo hayan configurado PIN.
+ * Las cuentas legacy (flag ausente/false) continúan funcionando sin cambios.
+ * Debe usarse DESPUÉS de requireAuth.
+ */
+const requireDriverPin = (req, res, next) => {
+  if (req.user?.userType !== 'driver') {
+    return res.status(403).json({ error: 'Acceso exclusivo para conductores.' });
+  }
+
+  const requiresPinSetup = req.user.driverPinSetupRequired === true && !req.user.driverPin;
+  if (requiresPinSetup) {
+    return res.status(403).json({
+      error: 'Debes configurar tu PIN para continuar.',
+      requiresPinSetup: true,
+      hasPIN: false
+    });
+  }
+
+  next();
+};
+
+/**
  * Middleware: verifica que el usuario autenticado es un cliente.
  * Debe usarse DESPUÉS de requireAuth.
  */
@@ -77,4 +99,4 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { requireAuth, requireDriver, requireClient, optionalAuth };
+module.exports = { requireAuth, requireDriver, requireDriverPin, requireClient, optionalAuth };

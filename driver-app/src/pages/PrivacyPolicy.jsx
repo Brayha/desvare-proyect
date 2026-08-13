@@ -39,7 +39,7 @@ const PrivacyPolicy = () => {
             <li>Fotografía de perfil (selfie)</li>
             <li>Cédula de ciudadanía (frente y reverso)</li>
             <li>Licencia de conducción (frente y reverso)</li>
-            <li>SOAT y tarjeta de propiedad del vehículo</li>
+            <li>SOAT (si decides aportarlo) y tarjeta de propiedad del vehículo</li>
             <li>Ubicación GPS durante servicios activos</li>
             <li>Historial de servicios prestados y calificaciones</li>
             <li>Token FCM para notificaciones push</li>

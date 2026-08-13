@@ -7,6 +7,24 @@ import { driversAPI } from '../services/adminAPI';
 import { ArrowLeft2, LockSlash } from 'iconsax-react';
 import './DriverDetail.css';
 
+const TRUCK_TYPES = [
+  { value: 'GRUA_MOTO', label: 'Grúa para motos' },
+  { value: 'GRUA_LIVIANA', label: 'Grúa liviana' },
+  { value: 'GRUA_PESADA', label: 'Grúa pesada' }
+];
+
+const VEHICLE_CAPABILITIES = ['MOTOS', 'AUTOS', 'CAMIONETAS', 'CAMIONES', 'BUSES'];
+
+const EMPTY_TRUCK_FORM = {
+  truckType: '',
+  brand: '',
+  model: '',
+  licensePlate: '',
+  vehicleCapabilities: []
+};
+
+const normalizePlate = (value) => value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+
 const DriverDetail = () => {
   const { id } = useParams();
   const history = useHistory();
@@ -17,10 +35,27 @@ const DriverDetail = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const [toast, setToast] = useState({ isOpen: false, message: '', color: 'success' });
+  const [truckForm, setTruckForm] = useState(EMPTY_TRUCK_FORM);
+  const [isSavingTruck, setIsSavingTruck] = useState(false);
+  const [isTruckDirty, setIsTruckDirty] = useState(false);
 
   useEffect(() => {
     loadDriverDetail();
   }, [id]);
+
+  useEffect(() => {
+    if (!driver) return;
+
+    const towTruck = driver.driverProfile?.towTruck || {};
+    setTruckForm({
+      truckType: towTruck.truckType || '',
+      brand: towTruck.baseBrand || towTruck.customBrand || towTruck.brand || '',
+      model: towTruck.baseModel || towTruck.customModel || towTruck.model || '',
+      licensePlate: normalizePlate(towTruck.licensePlate || ''),
+      vehicleCapabilities: driver.driverProfile?.vehicleCapabilities || []
+    });
+    setIsTruckDirty(false);
+  }, [driver]);
 
   const loadDriverDetail = async () => {
     try {
@@ -38,10 +73,93 @@ const DriverDetail = () => {
     setToast({ isOpen: true, message, color });
   };
 
+  const getMissingTruckFields = () => {
+    const missing = [];
+
+    if (!truckForm.truckType) missing.push('tipo de grúa');
+    if (!truckForm.brand.trim()) missing.push('marca');
+    if (!truckForm.model.trim()) missing.push('modelo/referencia');
+    if (!/^[A-Z]{3}(?:\d{3}|\d{2}[A-Z])$/.test(truckForm.licensePlate)) {
+      missing.push('placa válida (ABC123 o ABC12D)');
+    }
+    if (truckForm.vehicleCapabilities.length === 0) missing.push('al menos una capacidad');
+
+    return missing;
+  };
+
+  const missingTruckFields = getMissingTruckFields();
+  const isTruckFormComplete = missingTruckFields.length === 0;
+  const approvalBlockers = [
+    ...missingTruckFields,
+    ...(isTruckDirty ? ['guardar los cambios de la grúa'] : [])
+  ];
+  const canApprove = approvalBlockers.length === 0;
+
+  const handleTruckFieldChange = (event) => {
+    const { name, value } = event.target;
+    setIsTruckDirty(true);
+    setTruckForm((current) => ({
+      ...current,
+      [name]: name === 'licensePlate' ? normalizePlate(value) : value
+    }));
+  };
+
+  const handleCapabilityChange = (capability) => {
+    setIsTruckDirty(true);
+    setTruckForm((current) => ({
+      ...current,
+      vehicleCapabilities: current.vehicleCapabilities.includes(capability)
+        ? current.vehicleCapabilities.filter((item) => item !== capability)
+        : [...current.vehicleCapabilities, capability]
+    }));
+  };
+
+  const handleSaveTruck = async (event) => {
+    event.preventDefault();
+
+    if (!isTruckFormComplete) {
+      showToast(`Completa: ${missingTruckFields.join(', ')}.`, 'warning');
+      return;
+    }
+
+    try {
+      setIsSavingTruck(true);
+      const currentTowTruck = driver.driverProfile?.towTruck || {};
+      await driversAPI.update(id, {
+        towTruck: {
+          ...currentTowTruck,
+          truckType: truckForm.truckType,
+          baseBrand: truckForm.brand.trim(),
+          baseModel: truckForm.model.trim(),
+          licensePlate: truckForm.licensePlate
+        },
+        vehicleCapabilities: truckForm.vehicleCapabilities
+      });
+      await loadDriverDetail();
+      showToast('Información de la grúa guardada exitosamente.');
+    } catch (error) {
+      showToast(
+        error.response?.data?.error || error.message || 'No se pudo guardar la información de la grúa.',
+        'danger'
+      );
+    } finally {
+      setIsSavingTruck(false);
+    }
+  };
+
   const executeAction = async (action, data = {}) => {
     const reason = data.reason?.trim();
     if ((action === 'reject' || action === 'archive') && !reason) {
       showToast('Debes indicar una razón.', 'warning');
+      return;
+    }
+
+    const requiresCompleteTruck =
+      action === 'approve'
+      || (action === 'activate' && driver.driverProfile.status === 'rejected');
+    if (requiresCompleteTruck && !canApprove) {
+      showToast(`No puedes habilitar al conductor todavía. Falta: ${approvalBlockers.join(', ')}.`, 'warning');
+      setPendingAction(null);
       return;
     }
 
@@ -166,7 +284,7 @@ const DriverDetail = () => {
               <IonButton 
                 color="success" 
                 onClick={() => setPendingAction('approve')}
-                disabled={isProcessing}
+                disabled={isProcessing || isSavingTruck || !canApprove}
               >
                 ✅ Aprobar Conductor
               </IonButton>
@@ -184,7 +302,11 @@ const DriverDetail = () => {
             <IonButton 
               color="success" 
               onClick={() => setPendingAction('activate')}
-              disabled={isProcessing}
+              disabled={
+                isProcessing
+                || isSavingTruck
+                || (driver.driverProfile.status === 'rejected' && !canApprove)
+              }
             >
               <LockSlash size="20" style={{ marginRight: '8px' }} />
               Activar Conductor
@@ -202,6 +324,18 @@ const DriverDetail = () => {
             </IonButton>
           )}
         </div>
+        {(driver.driverProfile.status === 'pending_review'
+          || driver.driverProfile.status === 'rejected') && (
+          <div className={`approval-requirements ${canApprove ? 'complete' : 'incomplete'}`}>
+            <strong>{canApprove ? 'La información de la grúa está completa.' : 'Aprobación bloqueada.'}</strong>
+            <span>
+              {canApprove
+                ? 'Puedes continuar con la revisión y aprobación.'
+                : `Falta: ${approvalBlockers.join(', ')}.`}
+            </span>
+            <span>SOAT y seguro todo riesgo son opcionales y no bloquean la aprobación.</span>
+          </div>
+        )}
 
         {/* Driver Info */}
         <div className="detail-section">
@@ -327,7 +461,7 @@ const DriverDetail = () => {
             
             {driver.driverProfile.documents.soat?.url ? (
               <div className="document-item">
-                <p className="document-label">✅ SOAT</p>
+                <p className="document-label">✅ SOAT (Opcional)</p>
                 <img 
                   src={driver.driverProfile.documents.soat.url} 
                   alt="SOAT" 
@@ -336,9 +470,9 @@ const DriverDetail = () => {
                 />
               </div>
             ) : (
-              <div className="document-item missing">
-                <p className="document-label">❌ SOAT</p>
-                <div className="document-missing">No subido</div>
+              <div className="document-item optional">
+                <p className="document-label">SOAT (Opcional)</p>
+                <div className="document-missing optional">Opcional · No agregado</div>
               </div>
             )}
             
@@ -376,7 +510,7 @@ const DriverDetail = () => {
               </div>
             )}
             
-            {driver.driverProfile.documents.seguroTodoRiesgo?.url && (
+            {driver.driverProfile.documents.seguroTodoRiesgo?.url ? (
               <div className="document-item">
                 <p className="document-label">✅ Seguro Todo Riesgo (Opcional)</p>
                 <img 
@@ -385,6 +519,11 @@ const DriverDetail = () => {
                   onClick={() => handleImageClick(driver.driverProfile.documents.seguroTodoRiesgo.url, 'Seguro Todo Riesgo')}
                   style={{ cursor: 'pointer' }}
                 />
+              </div>
+            ) : (
+              <div className="document-item optional">
+                <p className="document-label">Seguro Todo Riesgo (Opcional)</p>
+                <div className="document-missing optional">Opcional · No agregado</div>
               </div>
             )}
             
@@ -408,47 +547,105 @@ const DriverDetail = () => {
         </div>
 
         {/* Tow Truck Details */}
-        {driver.driverProfile.towTruck && (
-          <div className="detail-section">
-            <h3>🚛 Información de la Grúa</h3>
-            <p className="section-subtitle">Detalles del vehículo de remolque</p>
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="info-label">Tipo de Grúa</span>
-                <span className="info-value">
-                  {driver.driverProfile.towTruck.truckType === 'GRUA_LIVIANA' ? '🚙 Grúa Liviana' : '🚛 Grúa Pesada'}
-                </span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Marca</span>
-                <span className="info-value">{driver.driverProfile.towTruck.baseBrand || 'N/A'}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Modelo</span>
-                <span className="info-value">{driver.driverProfile.towTruck.baseModel || 'N/A'}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Placa</span>
-                <span className="info-value">{driver.driverProfile.towTruck.licensePlate || 'N/A'}</span>
-              </div>
+        <div className="detail-section">
+          <h3>🚛 Información de la Grúa</h3>
+          <p className="section-subtitle">
+            Completa y verifica estos datos antes de aprobar al conductor.
+          </p>
+          <form className="truck-form" onSubmit={handleSaveTruck}>
+            <div className="truck-form-grid">
+              <label className="truck-field">
+                <span>Tipo de grúa *</span>
+                <select
+                  name="truckType"
+                  value={truckForm.truckType}
+                  onChange={handleTruckFieldChange}
+                  disabled={isSavingTruck}
+                >
+                  <option value="">Selecciona un tipo</option>
+                  {TRUCK_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="truck-field">
+                <span>Marca *</span>
+                <input
+                  name="brand"
+                  type="text"
+                  value={truckForm.brand}
+                  onChange={handleTruckFieldChange}
+                  placeholder="Ej. Chevrolet"
+                  disabled={isSavingTruck}
+                />
+              </label>
+              <label className="truck-field">
+                <span>Modelo / referencia *</span>
+                <input
+                  name="model"
+                  type="text"
+                  value={truckForm.model}
+                  onChange={handleTruckFieldChange}
+                  placeholder="Ej. NHR"
+                  disabled={isSavingTruck}
+                />
+              </label>
+              <label className="truck-field">
+                <span>Placa *</span>
+                <input
+                  name="licensePlate"
+                  type="text"
+                  value={truckForm.licensePlate}
+                  onChange={handleTruckFieldChange}
+                  placeholder="ABC123"
+                  maxLength={6}
+                  disabled={isSavingTruck}
+                  aria-describedby="plate-help"
+                />
+                <small id="plate-help">Formatos permitidos: ABC123 o ABC12D.</small>
+              </label>
             </div>
-          </div>
-        )}
 
-        {/* Vehicle Capabilities */}
-        {driver.driverProfile.vehicleCapabilities && driver.driverProfile.vehicleCapabilities.length > 0 && (
-          <div className="detail-section">
-            <h3>🚚 Capacidades de la Grúa</h3>
-            <p className="section-subtitle">Tipos de vehículos que puede transportar</p>
-            <div className="capabilities-list">
-              {driver.driverProfile.vehicleCapabilities.map((cap, index) => (
-                <span key={index} className="capability-badge">
-                  {cap}
-                </span>
-              ))}
+            <fieldset className="capabilities-fieldset" disabled={isSavingTruck}>
+              <legend>Capacidades de transporte *</legend>
+              <p>Selecciona al menos un tipo de vehículo.</p>
+              <div className="capability-options">
+                {VEHICLE_CAPABILITIES.map((capability) => (
+                  <label
+                    key={capability}
+                    className={`capability-option ${
+                      truckForm.vehicleCapabilities.includes(capability) ? 'selected' : ''
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={truckForm.vehicleCapabilities.includes(capability)}
+                      onChange={() => handleCapabilityChange(capability)}
+                    />
+                    <span>{capability}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {missingTruckFields.length > 0 && (
+              <div className="truck-form-warning">
+                Completa: {missingTruckFields.join(', ')}.
+              </div>
+            )}
+            {isTruckFormComplete && isTruckDirty && (
+              <div className="truck-form-warning">
+                Guarda los cambios para habilitar la aprobación.
+              </div>
+            )}
+
+            <div className="truck-form-actions">
+              <IonButton type="submit" disabled={isSavingTruck || isProcessing}>
+                {isSavingTruck ? <IonSpinner name="crescent" /> : 'Guardar información de la grúa'}
+              </IonButton>
             </div>
-          </div>
-        )}
+          </form>
+        </div>
         </div>
 
         {/* Image Modal */}

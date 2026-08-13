@@ -35,6 +35,16 @@ const LoginOTP = () => {
   const navigateAfterAuth = (token, user) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
+    if (user.requiresPinSetup || user.requiresProfileSetup) {
+      localStorage.setItem('tempDriverId', user._id);
+      localStorage.setItem('tempDriverPhone', user.phone || phone);
+      localStorage.setItem(
+        'otpPurpose',
+        user.requiresProfileSetup ? 'PROFILE_SETUP' : 'PIN_SETUP',
+      );
+      history.replace('/verify-otp');
+      return;
+    }
     const status = user.driverProfile?.status;
     if (status === 'pending_documents') history.replace('/complete-registration');
     else if (status === 'pending_review') history.replace('/under-review');
@@ -63,7 +73,7 @@ const LoginOTP = () => {
         localStorage.setItem('tempDriverPhone', phone);
         localStorage.setItem('otpPurpose', 'NEW_DRIVER');
         history.push('/verify-otp');
-      } else if (data.hasPIN) {
+      } else if (data.hasPIN && !data.requiresPinSetup) {
         // Conductor existente con PIN → mostrar cajas de PIN
         setUserId(data.userId);
         setUserName(data.name);
@@ -71,12 +81,18 @@ const LoginOTP = () => {
         setShowPin(true);
         setTimeout(() => pinRefs.current[0]?.focus(), 100);
       } else {
-        // No debería ocurrir (todos los conductores nuevos crearán PIN en el registro)
-        // Por seguridad, si existe sin PIN, enviar OTP para crear uno
+        // Cuenta existente sin PIN: verificar identidad y reanudar su creación.
         const otpRes = await authAPI.loginDriverOTP({ phone });
         localStorage.setItem('tempDriverId', otpRes.data.userId || data.userId);
         localStorage.setItem('tempDriverPhone', phone);
-        localStorage.setItem('otpPurpose', 'FORGOT_PIN');
+        localStorage.setItem(
+          'otpPurpose',
+          data.requiresProfileSetup
+            ? 'PROFILE_SETUP_OTP'
+            : data.requiresPinSetup
+              ? 'PIN_SETUP'
+              : 'FORGOT_PIN',
+        );
         history.push('/verify-otp');
       }
     } catch (err) {
@@ -133,7 +149,7 @@ const LoginOTP = () => {
       localStorage.setItem('tempDriverPhone', phone);
       localStorage.setItem('otpPurpose', 'FORGOT_PIN');
       history.push('/verify-otp');
-    } catch (err) {
+    } catch {
       setError('No se pudo enviar el código. Intenta de nuevo.');
     } finally {
       setIsLoading(false);

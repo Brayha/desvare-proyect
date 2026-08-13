@@ -1,6 +1,16 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const DRIVER_STATUS_VALUES = [
+  'pending_documents',
+  'pending_review',
+  'approved',
+  'rejected',
+  'suspended'
+];
+const TRUCK_TYPE_VALUES = ['GRUA_MOTO', 'GRUA_LIVIANA', 'GRUA_PESADA'];
+const LICENSE_PLATE_REGEX = /^[A-Z]{3}(?:[0-9]{3}|[0-9]{2}[A-Z])$/;
+
 const userSchema = new mongoose.Schema({
   // Campos comunes
   name: {
@@ -40,6 +50,20 @@ const userSchema = new mongoose.Schema({
   driverPin: {
     type: String,
     default: null
+  },
+
+  // Solo se activa para registros nuevos del flujo simplificado.
+  // El default false evita bloquear conductores legacy que nunca configuraron PIN.
+  driverPinSetupRequired: {
+    type: Boolean,
+    default: false
+  },
+
+  // Los registros nuevos deben completar nombre/email antes de continuar.
+  // El default true mantiene compatibles las cuentas creadas antes de este flujo.
+  driverInitialProfileCompleted: {
+    type: Boolean,
+    default: true
   },
   
   // Para DRIVERS - Email (opcional, usado para notificaciones)
@@ -85,8 +109,13 @@ const userSchema = new mongoose.Schema({
     // Estado de verificación del conductor
     status: {
       type: String,
-      enum: ['pending_documents', 'pending_review', 'approved', 'rejected', 'suspended'],
+      enum: DRIVER_STATUS_VALUES,
       default: 'pending_documents'
+    },
+    statusBeforeSuspension: {
+      type: String,
+      enum: DRIVER_STATUS_VALUES,
+      required: false
     },
     
     // Tipo de persona (Natural o Jurídica)
@@ -148,7 +177,7 @@ const userSchema = new mongoose.Schema({
       // Tipo de grúa (Liviana o Pesada)
       truckType: {
         type: String,
-        enum: ['GRUA_MOTO', 'GRUA_LIVIANA', 'GRUA_PESADA'],
+        enum: TRUCK_TYPE_VALUES,
         required: false // Se completa en el registro
       },
       
@@ -332,17 +361,48 @@ userSchema.methods.compareDriverPin = async function(pin) {
 // MÉTODOS PARA CONDUCTORES
 // ========================================
 userSchema.methods.isDocumentationComplete = function() {
+  return this.isReadyForReview();
+};
+
+userSchema.methods.isReadyForReview = function() {
   if (this.userType !== 'driver' || !this.driverProfile) return false;
   
   const docs = this.driverProfile.documents;
+  const towTruck = this.driverProfile.towTruck;
   return !!(
     docs.cedula?.front && docs.cedula?.back &&
     docs.licenciaTransito?.front && docs.licenciaTransito?.back &&
-    docs.soat?.url &&
     docs.tarjetaPropiedad?.front && docs.tarjetaPropiedad?.back &&
     docs.selfie &&
+    towTruck?.photoUrl &&
     this.driverProfile.vehicleCapabilities?.length > 0
   );
+};
+
+userSchema.methods.isReadyForApproval = function() {
+  if (!this.isReadyForReview()) return false;
+
+  const towTruck = this.driverProfile.towTruck;
+  const brand = towTruck?.baseBrand || towTruck?.customBrand;
+  const model = towTruck?.baseModel || towTruck?.customModel;
+  const licensePlate = towTruck?.licensePlate?.trim().toUpperCase();
+  return !!(
+    TRUCK_TYPE_VALUES.includes(towTruck?.truckType) &&
+    typeof brand === 'string' && brand.trim() &&
+    typeof model === 'string' && model.trim() &&
+    LICENSE_PLATE_REGEX.test(licensePlate)
+  );
+};
+
+userSchema.methods.requiresInitialDriverProfileSetup = function() {
+  return this.userType === 'driver'
+    && this.driverInitialProfileCompleted === false;
+};
+
+userSchema.methods.requiresDriverPinSetup = function() {
+  return this.userType === 'driver'
+    && this.driverPinSetupRequired === true
+    && !this.driverPin;
 };
 
 userSchema.methods.canAcceptServices = function() {

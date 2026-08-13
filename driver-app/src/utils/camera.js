@@ -3,8 +3,8 @@
  * Compatible con iOS, Android y Web (fallback a input file)
  */
 
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { isPlatform } from '@ionic/react';
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 
 /**
  * Toma una foto usando la cámara nativa o el selector de archivos
@@ -13,93 +13,53 @@ import { isPlatform } from '@ionic/react';
  * @param {number} options.quality - Calidad de la imagen (0-100)
  * @returns {Promise<Blob>} - Archivo de imagen como Blob
  */
-export const takePicture = async (options = {}) => {
-  const {
-    allowGallery = true,
-    quality = 80,
-  } = options;
+const isCancellation = (error) =>
+  error?.message?.toLowerCase().includes("cancel") ||
+  error?.message?.toLowerCase().includes("user cancelled");
 
+export const isNativeCameraAvailable = () => Capacitor.isNativePlatform();
+
+export const requestCameraPermissions = async (source = "camera") => {
+  if (!isNativeCameraAvailable()) return true;
+  const permissions = await Camera.requestPermissions({
+    permissions: source === "gallery" ? ["photos"] : ["camera", "photos"],
+  });
+  if (source === "gallery") return permissions.photos === "granted";
+  return permissions.camera === "granted" || permissions.photos === "granted";
+};
+
+const pickNativeImage = async (source, quality = 80) => {
+  const granted = await requestCameraPermissions(
+    source === CameraSource.Photos ? "gallery" : "camera",
+  );
+  if (!granted) {
+    throw new Error("Necesitamos permiso para usar la cámara o la galería.");
+  }
   try {
-    // Verificar si estamos en una plataforma nativa
-    const isNative = isPlatform('capacitor') || isPlatform('cordova');
-
-    if (isNative) {
-      // Usar Capacitor Camera en iOS/Android
-      const image = await Camera.getPhoto({
-        resultType: CameraResultType.Uri,
-        source: allowGallery ? CameraSource.Prompt : CameraSource.Camera,
-        quality: quality,
-        allowEditing: false,
-        correctOrientation: true,
-      });
-
-      // Convertir la URI a Blob
-      const response = await fetch(image.webPath);
-      const blob = await response.blob();
-      
-      // Crear File object con nombre único
-      const fileName = `photo_${Date.now()}.${image.format}`;
-      return new File([blob], fileName, { type: `image/${image.format}` });
-    } else {
-      // Fallback para web: usar input file
-      return new Promise((resolve, reject) => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        if (!allowGallery) {
-          input.capture = 'camera'; // Forzar cámara en móviles web
-        }
-
-        input.onchange = (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            resolve(file);
-          } else {
-            reject(new Error('No se seleccionó ninguna imagen'));
-          }
-        };
-
-        input.click();
-      });
-    }
+    const image = await Camera.getPhoto({
+      resultType: CameraResultType.Uri,
+      source,
+      quality,
+      allowEditing: false,
+      correctOrientation: true,
+    });
+    const response = await fetch(image.webPath);
+    const blob = await response.blob();
+    return new File([blob], `photo_${Date.now()}.${image.format || "jpeg"}`, {
+      type: blob.type || `image/${image.format || "jpeg"}`,
+    });
   } catch (error) {
-    console.error('Error al capturar imagen:', error);
+    if (isCancellation(error)) return null;
     throw error;
   }
 };
 
-/**
- * Solicita permisos de cámara (solo necesario en plataformas nativas)
- * @returns {Promise<boolean>} - true si tiene permisos
- */
-export const requestCameraPermissions = async () => {
-  try {
-    const isNative = isPlatform('capacitor') || isPlatform('cordova');
+export const takePhoto = () => pickNativeImage(CameraSource.Camera);
 
-    if (isNative) {
-      const permissions = await Camera.requestPermissions({ permissions: ['camera', 'photos'] });
-      return permissions.camera === 'granted' && permissions.photos === 'granted';
-    }
+// CameraSource.Photos abre la galería directamente y no solicita permiso de cámara.
+export const chooseFromGallery = () => pickNativeImage(CameraSource.Photos);
 
-    // En web, los permisos se solicitan automáticamente
-    return true;
-  } catch (error) {
-    console.error('Error solicitando permisos:', error);
-    return false;
-  }
-};
-
-/**
- * Convierte un File/Blob a una URL de datos para previsualización
- * @param {File|Blob} file - Archivo de imagen
- * @returns {Promise<string>} - Data URL
- */
-export const fileToDataURL = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-};
+// Alias conservado para consumidores existentes.
+export const takePicture = ({ allowGallery = true } = {}) =>
+  pickNativeImage(allowGallery ? CameraSource.Prompt : CameraSource.Camera);
 

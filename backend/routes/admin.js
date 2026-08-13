@@ -17,6 +17,28 @@ const { requireAdmin } = require('../middleware/adminAuth');
 const { notifyDriverApproved } = require('../services/emailService');
 const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
 
+const TRUCK_TYPES = new Set(['GRUA_MOTO', 'GRUA_LIVIANA', 'GRUA_PESADA']);
+const VEHICLE_CAPABILITIES = new Set(['MOTOS', 'AUTOS', 'CAMIONETAS', 'CAMIONES', 'BUSES']);
+const LICENSE_PLATE_REGEX = /^[A-Z]{3}(?:[0-9]{3}|[0-9]{2}[A-Z])$/;
+const TOW_TRUCK_TEXT_FIELDS = ['baseBrand', 'customBrand', 'baseModel', 'customModel'];
+
+const normalizeOptionalText = (value, fieldName) => {
+  if (value === null || value === '') return undefined;
+  if (typeof value !== 'string') {
+    const error = new Error(`${fieldName} debe ser texto`);
+    error.status = 400;
+    throw error;
+  }
+
+  const normalized = value.trim();
+  if (!normalized || normalized.length > 100) {
+    const error = new Error(`${fieldName} debe tener entre 1 y 100 caracteres`);
+    error.status = 400;
+    throw error;
+  }
+  return normalized;
+};
+
 // ============================================
 // LOGIN DE ADMIN (Sin autenticación previa)
 // ============================================
@@ -395,6 +417,106 @@ router.get('/drivers/:id', async (req, res) => {
 });
 
 /**
+ * PUT /api/admin/drivers/:id
+ * Actualiza únicamente los datos de grúa y capacidades editables por administración.
+ */
+router.put('/drivers/:id', async (req, res) => {
+  try {
+    const driver = await User.findOne({
+      _id: req.params.id,
+      userType: 'driver',
+    });
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    const towTruckInput = req.body.towTruck === undefined ? req.body : req.body.towTruck;
+    if (!towTruckInput || typeof towTruckInput !== 'object' || Array.isArray(towTruckInput)) {
+      return res.status(400).json({ error: 'towTruck debe ser un objeto' });
+    }
+
+    const hasCapabilities = Object.prototype.hasOwnProperty.call(req.body, 'vehicleCapabilities');
+    const editableTowTruckFields = ['truckType', ...TOW_TRUCK_TEXT_FIELDS, 'licensePlate'];
+    const hasTowTruckUpdate = editableTowTruckFields.some(
+      field => Object.prototype.hasOwnProperty.call(towTruckInput, field)
+    );
+
+    if (!hasTowTruckUpdate && !hasCapabilities) {
+      return res.status(400).json({
+        error: 'Debes enviar al menos un dato editable de la grúa o vehicleCapabilities',
+      });
+    }
+
+    if (!driver.driverProfile.towTruck) {
+      driver.driverProfile.towTruck = {};
+    }
+    const towTruck = driver.driverProfile.towTruck;
+
+    if (Object.prototype.hasOwnProperty.call(towTruckInput, 'truckType')) {
+      if (!TRUCK_TYPES.has(towTruckInput.truckType)) {
+        return res.status(400).json({
+          error: 'truckType no válido',
+          allowedTruckTypes: Array.from(TRUCK_TYPES),
+        });
+      }
+      towTruck.truckType = towTruckInput.truckType;
+    }
+
+    for (const field of TOW_TRUCK_TEXT_FIELDS) {
+      if (Object.prototype.hasOwnProperty.call(towTruckInput, field)) {
+        towTruck[field] = normalizeOptionalText(towTruckInput[field], field);
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(towTruckInput, 'licensePlate')) {
+      if (typeof towTruckInput.licensePlate !== 'string') {
+        return res.status(400).json({ error: 'licensePlate debe ser texto' });
+      }
+      const licensePlate = towTruckInput.licensePlate.toUpperCase().replace(/[\s-]/g, '');
+      if (!LICENSE_PLATE_REGEX.test(licensePlate)) {
+        return res.status(400).json({
+          error: 'La placa debe tener el formato ABC123 o ABC12D',
+        });
+      }
+      towTruck.licensePlate = licensePlate;
+    }
+
+    if (hasCapabilities) {
+      const capabilities = req.body.vehicleCapabilities;
+      if (
+        !Array.isArray(capabilities)
+        || capabilities.some(capability => !VEHICLE_CAPABILITIES.has(capability))
+      ) {
+        return res.status(400).json({
+          error: 'vehicleCapabilities contiene valores no válidos',
+          allowedCapabilities: Array.from(VEHICLE_CAPABILITIES),
+        });
+      }
+      driver.driverProfile.vehicleCapabilities = [...new Set(capabilities)];
+    }
+
+    await driver.save();
+
+    res.json({
+      message: 'Datos del conductor actualizados exitosamente',
+      driver: {
+        id: driver._id,
+        name: driver.name,
+        status: driver.driverProfile.status,
+        towTruck: driver.driverProfile.towTruck,
+        vehicleCapabilities: driver.driverProfile.vehicleCapabilities,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error actualizando conductor:', error);
+    res.status(error.status || 500).json({
+      error: error.status ? error.message : 'Error al actualizar conductor',
+    });
+  }
+});
+
+/**
  * PUT /api/admin/drivers/:id/approve
  * Aprobar un conductor
  */
@@ -411,10 +533,10 @@ router.put('/drivers/:id/approve', async (req, res) => {
 
     if (
       driver.driverProfile.status !== 'pending_review'
-      || !driver.isDocumentationComplete()
+      || !driver.isReadyForApproval()
     ) {
       return res.status(400).json({
-        error: 'El conductor debe completar documentos y capacidades antes de ser aprobado',
+        error: 'El conductor debe completar documentos, foto, capacidades y datos de la grúa antes de ser aprobado',
       });
     }
 
@@ -638,6 +760,15 @@ router.put('/drivers/:id/activate', async (req, res) => {
 
     if (!driver) {
       return res.status(404).json({ error: 'Conductor no encontrado' });
+    }
+
+    if (
+      driver.driverProfile.status === 'rejected'
+      && !driver.isReadyForApproval()
+    ) {
+      return res.status(400).json({
+        error: 'Completa los documentos, capacidades y datos de la grúa antes de activar al conductor',
+      });
     }
 
     driver.driverProfile.status = 'approved';

@@ -57,8 +57,33 @@
 
 .driver-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
+}
+
+.approval-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 16px;
+  margin: -8px 0 24px;
+  border: 1px solid;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.approval-requirements.complete {
+  color: #047857;
+  background: #ECFDF5;
+  border-color: #6EE7B7;
+}
+
+.approval-requirements.incomplete {
+  color: #B45309;
+  background: #FFFBEB;
+  border-color: #FCD34D;
 }
 
 .detail-section {
@@ -161,6 +186,10 @@
   opacity: 0.6;
 }
 
+.document-item.optional {
+  opacity: 1;
+}
+
 .document-missing {
   display: flex;
   align-items: center;
@@ -173,6 +202,134 @@
   color: #9CA3AF;
   font-size: 14px;
   font-weight: 600;
+}
+
+.document-missing.optional {
+  color: #6B7280;
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+/* Tow truck form */
+.truck-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.truck-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.truck-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.truck-field > span,
+.capabilities-fieldset legend {
+  color: var(--admin-dark);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.truck-field input,
+.truck-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--admin-dark);
+  background: white;
+  border: 1px solid #D1D5DB;
+  border-radius: 10px;
+  font: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.truck-field input:focus,
+.truck-field select:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.truck-field input:disabled,
+.truck-field select:disabled {
+  color: #6B7280;
+  background: #F3F4F6;
+  cursor: not-allowed;
+}
+
+.truck-field small {
+  color: #6B7280;
+  font-size: 12px;
+}
+
+.capabilities-fieldset {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.capabilities-fieldset p {
+  margin: 6px 0 12px;
+  color: #6B7280;
+  font-size: 13px;
+}
+
+.capability-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.capability-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  color: #374151;
+  background: #F9FAFB;
+  border: 1px solid #D1D5DB;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.capability-option.selected {
+  color: #1E40AF;
+  background: #EFF6FF;
+  border-color: #60A5FA;
+}
+
+.capability-option input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--admin-primary);
+}
+
+.truck-form-warning {
+  padding: 12px 14px;
+  color: #B45309;
+  background: #FFFBEB;
+  border: 1px solid #FCD34D;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.truck-form-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Capabilities */
@@ -283,5 +440,32 @@
   border-radius: 12px;
   display: block;
   margin: 0 auto;
+}
+
+@media (max-width: 700px) {
+  .detail-section {
+    padding: 18px;
+  }
+
+  .truck-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-actions ion-button,
+  .truck-form-actions ion-button {
+    width: 100%;
+    margin-inline: 0;
+  }
+
+  .capability-option {
+    flex: 1 1 calc(50% - 10px);
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .capability-option {
+    flex-basis: 100%;
+  }
 }
 

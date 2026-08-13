@@ -16,12 +16,17 @@ Ahora se muestra claramente el estado del conductor con un badge de colores:
 ### **2. Botones de Acción Mejorados**
 Los botones ahora aparecen según el estado:
 
-#### **Si está en `pending_documents` o `pending_review`:**
+#### **Si está en `pending_review`:**
 - ✅ **Aprobar Conductor** (cambia estado a `approved`)
 - ❌ **Rechazar** (requiere razón, cambia a `rejected`)
 
+El botón de aprobación permanece deshabilitado hasta completar la información obligatoria de la grúa.
+
 #### **Si está `rejected` o `suspended`:**
 - 🔓 **Activar Conductor** (reactiva la cuenta)
+
+Un conductor rechazado también debe tener completos y guardados los datos obligatorios de la
+grúa antes de poder activarse. Un conductor suspendido conserva su aprobación previa.
 
 #### **Siempre disponible:**
 - 🗑️ **Eliminar Conductor** (elimina permanentemente)
@@ -40,25 +45,38 @@ Ahora se muestran **TODOS** los documentos del conductor, organizados en 2 secci
 #### **🚛 Documentos de la Grúa:**
 1. ✅ Licencia de Tránsito (Frente)
 2. ✅ Licencia de Tránsito (Atrás)
-3. ✅ SOAT
+3. SOAT (Opcional)
 4. ✅ Tarjeta de Propiedad (Frente)
 5. ✅ Tarjeta de Propiedad (Atrás)
 6. ✅ Seguro Todo Riesgo (Opcional)
 7. ✅ Foto de la Grúa
 
-**Si un documento NO está subido:**
+**Si un documento obligatorio NO está subido:**
 - Se muestra un cuadro gris con "❌ No subido"
 - Ayuda a identificar qué falta
 
+SOAT y seguro todo riesgo se identifican como **opcionales**. Si no fueron agregados, se muestra
+"Opcional · No agregado" y su ausencia no bloquea la aprobación.
+
 ---
 
-### **4. Capacidades de la Grúa**
-Nueva sección que muestra qué tipos de vehículos puede transportar:
+### **4. Información Editable de la Grúa**
+El administrador puede corregir y guardar:
+
+- Tipo: `GRUA_MOTO`, `GRUA_LIVIANA` o `GRUA_PESADA`
+- Marca (texto libre)
+- Modelo o referencia (texto libre)
+- Placa en formato `ABC123` o `ABC12D`
+- Una o más capacidades:
+
 - MOTOS
 - AUTOS
 - CAMIONETAS
 - CAMIONES
 - BUSES
+
+Los valores existentes se cargan desde `towTruck` y `vehicleCapabilities`. Para registros antiguos,
+la marca y el modelo también se recuperan desde `customBrand` y `customModel`.
 
 ---
 
@@ -79,17 +97,28 @@ Verás:
 - ✅ Badge de estado en la parte superior
 - ✅ Información personal (teléfono, email, ciudad, tipo)
 - ✅ Todos los documentos organizados
-- ✅ Capacidades de la grúa
+- ✅ Formulario editable de la grúa y sus capacidades
 
 ### **Paso 4: Revisar Documentos**
 - Haz click en cada imagen para verla en grande
 - Verifica que:
   - Las cédulas sean legibles
   - El selfie coincida con la cédula
-  - Los documentos de la grúa estén vigentes
+  - Los documentos obligatorios de la grúa estén vigentes
   - La foto de la grúa sea clara
 
-### **Paso 5: Tomar Decisión**
+El SOAT y el seguro todo riesgo pueden revisarse si existen, pero son opcionales.
+
+### **Paso 5: Completar y guardar la grúa**
+1. Selecciona el tipo de grúa
+2. Confirma o corrige marca, modelo/referencia y placa (`ABC123` o `ABC12D`)
+3. Selecciona al menos una capacidad
+4. Haz click en "Guardar información de la grúa"
+5. Espera el mensaje de éxito; el detalle se refresca con los datos persistidos
+
+Si falta un dato, la pantalla enumera los campos pendientes y mantiene bloqueada la aprobación.
+
+### **Paso 6: Tomar Decisión**
 
 #### **Si TODO está correcto:**
 1. Click en "✅ Aprobar Conductor"
@@ -108,11 +137,11 @@ Verás:
 
 | Estado | Descripción | Acciones Disponibles |
 |--------|-------------|---------------------|
-| `pending_documents` | Está completando el registro | Aprobar, Rechazar, Eliminar |
-| `pending_review` | Listo para revisión ⚠️ | **Aprobar, Rechazar**, Eliminar |
-| `approved` | Aprobado y activo ✅ | Suspender, Eliminar |
-| `rejected` | Rechazado ❌ | Activar, Eliminar |
-| `suspended` | Suspendido 🔒 | Activar, Eliminar |
+| `pending_documents` | Está completando el registro | Suspender |
+| `pending_review` | Listo para revisión ⚠️ | **Aprobar (si la grúa está completa), Rechazar**, Suspender |
+| `approved` | Aprobado y activo ✅ | Suspender |
+| `rejected` | Rechazado ❌ | Activar, Suspender |
+| `suspended` | Suspendido 🔒 | Activar |
 
 ---
 
@@ -122,14 +151,27 @@ Verás:
 1. Cédula (ambos lados) - Legible, vigente
 2. Selfie - Clara, coincide con cédula
 3. Licencia de Tránsito - Vigente, legible
-4. SOAT - Vigente
-5. Tarjeta de Propiedad - Legible
-6. Foto de la Grúa - Clara, se ve el vehículo completo
+4. Tarjeta de Propiedad - Legible
+5. Foto de la Grúa - Clara, se ve el vehículo completo
+
+### **ℹ️ Documentos opcionales:**
+- SOAT
+- Seguro todo riesgo
+
+No deben rechazarse ni bloquearse aprobaciones únicamente por la ausencia de estos documentos.
 
 ### **✅ Información que DEBE ser correcta:**
 - Ciudad operativa válida
 - Tipo de entidad correcto
+- Tipo de grúa
+- Marca
+- Modelo o referencia
+- Placa válida en formato `ABC123` o `ABC12D`
 - Al menos 1 capacidad de vehículo
+
+La interfaz impide iniciar la aprobación mientras falte alguno de los datos obligatorios de la
+grúa y comunica cuáles faltan. El backend sigue siendo la autoridad final y vuelve a validar al
+procesar la aprobación.
 
 ### **❌ Razones para RECHAZAR:**
 - Documentos ilegibles o borrosos

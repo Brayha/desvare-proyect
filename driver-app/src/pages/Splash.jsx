@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonPage, IonContent } from '@ionic/react';
 import DesvareLogoWhite from '../assets/img/Desvare-white.svg';
+import { authAPI } from '../services/api';
 import './Splash.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
@@ -12,6 +13,17 @@ const clearSession = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
   localStorage.removeItem('hasSeenLocationModal');
+};
+
+const prepareOnboardingResume = (user, profile, requiresProfileSetup) => {
+  const id = profile?._id || profile?.userId || user?._id;
+  const phone = profile?.phone || user?.phone;
+  if (id) localStorage.setItem('tempDriverId', id);
+  if (phone) localStorage.setItem('tempDriverPhone', phone);
+  localStorage.setItem(
+    'otpPurpose',
+    requiresProfileSetup ? 'PROFILE_SETUP' : 'PIN_SETUP',
+  );
 };
 
 const Splash = () => {
@@ -37,15 +49,33 @@ const Splash = () => {
 
         if (userData.userType === 'driver') {
           try {
-            // Verificar que el conductor sigue existiendo en el backend y obtener su status actual
-            const response = await fetch(`${API_URL}/api/drivers/profile/${userData._id}`);
-            if (response.status === 404 || response.status === 401) {
-              // Sesión fantasma: el usuario fue eliminado o el token es inválido
-              clearSession();
-              return hasSeenOnboarding ? '/login' : '/onboarding';
+            let data;
+            try {
+              const response = await authAPI.getMyProfile();
+              data = response.data;
+            } catch (profileError) {
+              if (profileError.response?.status !== 404) throw profileError;
+              // Compatibilidad temporal con backends que aún no tienen profile/me.
+              const response = await fetch(`${API_URL}/api/drivers/profile/${userData._id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (response.status === 401) {
+                clearSession();
+                return hasSeenOnboarding ? '/login' : '/onboarding';
+              }
+              if (!response.ok) throw new Error(`Legacy profile: ${response.status}`);
+              data = await response.json();
             }
-            const data = await response.json();
-            const newStatus = data.driver?.status;
+            const profile = data.driver || data.profile || data;
+            const requiresPinSetup = data.requiresPinSetup ?? profile.requiresPinSetup;
+            const requiresProfileSetup =
+              data.requiresProfileSetup ?? profile.requiresProfileSetup;
+            if (requiresProfileSetup || requiresPinSetup) {
+              prepareOnboardingResume(userData, profile, requiresProfileSetup);
+              return '/verify-otp';
+            }
+
+            const newStatus = profile.status || profile.driverProfile?.status;
             const prevStatus = userData.driverProfile?.status;
 
             // Sincronizar el status en localStorage para que la próxima apertura sea correcta
@@ -75,7 +105,11 @@ const Splash = () => {
             }
             // Status desconocido: ir a permisos
             return '/permissions';
-          } catch {
+          } catch (error) {
+            if (error.response?.status === 401) {
+              clearSession();
+              return hasSeenOnboarding ? '/login' : '/onboarding';
+            }
             // Error de red (sin conexión): usar status del localStorage para no bloquear al conductor
             const status = userData.driverProfile?.status;
             if (status === 'pending_documents') return '/complete-registration';

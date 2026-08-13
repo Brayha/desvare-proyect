@@ -16,6 +16,9 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error) => {
@@ -41,12 +44,14 @@ export const authAPI = {
   // Registro completo
   registerDriverComplete: (data) => api.post('/api/drivers/register-complete', data),
   uploadDriverDocuments: (data) => api.post('/api/drivers/upload-documents', data),
+  uploadDriverDocument: (formData) => api.post('/api/drivers/upload-document', formData),
   setDriverCapabilities: (data) => api.post('/api/drivers/set-capabilities', data),
   
   // Estado del conductor
   getDriverStatus: (userId) => api.get(`/api/drivers/status/${userId}`),
   toggleDriverOnline: (data) => api.put('/api/drivers/toggle-online', data),
   // Perfil
+  getMyProfile: () => api.get('/api/drivers/profile/me'),
   updateProfile: (userId, data) => api.put(`/api/drivers/profile/${userId}`, data),
 };
 

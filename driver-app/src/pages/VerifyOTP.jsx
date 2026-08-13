@@ -10,6 +10,7 @@ import "./VerifyOTP.css";
  * Verificación OTP + flujo post-OTP según otpPurpose:
  *
  *  NEW_DRIVER  → OTP → Nombre → Email (opcional) → Crear PIN → Confirmar PIN → navegar
+ *  PROFILE_SETUP → OTP/sesión → Nombre → Email → Crear PIN → Confirmar PIN
  *  FORGOT_PIN  → OTP → Crear PIN → Confirmar PIN → navegar
  *  undefined   → OTP → navegar directo según status (legacy)
  */
@@ -31,13 +32,25 @@ const VerifyOTP = () => {
   const phone = localStorage.getItem("tempDriverPhone");
   const otpPurpose = localStorage.getItem("otpPurpose");
 
-  const [step, setStep] = useState(STEPS.OTP);
+  const [step, setStep] = useState(
+    otpPurpose === "PROFILE_SETUP" && localStorage.getItem("token")
+      ? STEPS.NAME
+      : otpPurpose === "PIN_SETUP" && localStorage.getItem("token")
+        ? STEPS.PIN_CREATE
+        : STEPS.OTP,
+  );
   const [otp, setOtp] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [newPin, setNewPin] = useState(["", "", "", ""]);
   const [confirmPin, setConfirmPin] = useState(["", "", "", ""]);
-  const [verifiedUser, setVerifiedUser] = useState(null);
+  const [verifiedUser, setVerifiedUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [verificationSuccess, setVerificationSuccess] = useState(false);
@@ -61,10 +74,10 @@ const VerifyOTP = () => {
   }, [countdown]);
 
   useEffect(() => {
-    if (!userId || !phone) {
+    if (!userId || (!phone && otpPurpose !== "PIN_SETUP")) {
       if (!verificationSuccess) history.replace("/login");
     }
-  }, [userId, phone, history, verificationSuccess]);
+  }, [userId, phone, otpPurpose, history, verificationSuccess]);
 
   const formatPhone = (p) => {
     if (!p) return "";
@@ -142,10 +155,14 @@ const VerifyOTP = () => {
       localStorage.setItem("user", JSON.stringify(user));
       setVerifiedUser(user);
 
-      if (otpPurpose === "NEW_DRIVER") {
+      if (
+        otpPurpose === "NEW_DRIVER"
+        || otpPurpose === "PROFILE_SETUP"
+        || otpPurpose === "PROFILE_SETUP_OTP"
+      ) {
         // Primero recopilar nombre y email antes de crear el PIN
         setStep(STEPS.NAME);
-      } else if (otpPurpose === "FORGOT_PIN") {
+      } else if (otpPurpose === "FORGOT_PIN" || otpPurpose === "PIN_SETUP") {
         // Directo a crear PIN
         setStep(STEPS.PIN_CREATE);
         setTimeout(() => newPinRefs.current[0]?.focus(), 100);
@@ -248,8 +265,26 @@ const VerifyOTP = () => {
     setIsLoading(true);
     setError("");
     try {
-      await authAPI.setDriverPin({ userId, pin: newPin.join("") });
-      navigateAfterAuth(verifiedUser);
+      const response = await authAPI.setDriverPin({
+        userId,
+        pin: newPin.join(""),
+      });
+      const responseUser = response.data?.user || {};
+      const currentUser = {
+        ...(verifiedUser || {}),
+        ...responseUser,
+        driverProfile:
+          responseUser.driverProfile || verifiedUser?.driverProfile,
+      };
+      const updatedUser = { ...currentUser, requiresPinSetup: false };
+      if (updatedUser.driverProfile) {
+        updatedUser.driverProfile.requiresPinSetup = false;
+      }
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      navigateAfterAuth(updatedUser);
     } catch (err) {
       setError(
         err.response?.data?.error ||
@@ -267,11 +302,18 @@ const VerifyOTP = () => {
     if (step === STEPS.PIN_CONFIRM) {
       setConfirmPin(["", "", "", ""]);
       setStep(STEPS.PIN_CREATE);
-    } else if (step === STEPS.PIN_CREATE && otpPurpose === "NEW_DRIVER") {
+    } else if (
+      step === STEPS.PIN_CREATE
+      && (
+        otpPurpose === "NEW_DRIVER"
+        || otpPurpose === "PROFILE_SETUP"
+        || otpPurpose === "PROFILE_SETUP_OTP"
+      )
+    ) {
       setStep(STEPS.EMAIL);
     } else if (step === STEPS.EMAIL) {
       setStep(STEPS.NAME);
-    } else if (step === STEPS.NAME) {
+    } else if (step === STEPS.NAME && otpPurpose !== "PROFILE_SETUP") {
       setStep(STEPS.OTP);
     } else {
       clearTempStorage();
@@ -511,7 +553,11 @@ const VerifyOTP = () => {
             >
               {isLoading ? <IonSpinner name="crescent" /> : "Guardar clave"}
             </button>
-            {otpPurpose === "NEW_DRIVER" && <LegalNotice />}
+            {(otpPurpose === "NEW_DRIVER"
+              || otpPurpose === "PROFILE_SETUP"
+              || otpPurpose === "PROFILE_SETUP_OTP") && (
+              <LegalNotice />
+            )}
           </div>
         </IonContent>
       </IonPage>
@@ -583,7 +629,11 @@ const VerifyOTP = () => {
             {isLoading ? <IonSpinner name="crescent" /> : "Verificar código"}
           </button>
 
-          {otpPurpose === "NEW_DRIVER" && <LegalNotice />}
+          {(otpPurpose === "NEW_DRIVER"
+            || otpPurpose === "PROFILE_SETUP"
+            || otpPurpose === "PROFILE_SETUP_OTP") && (
+            <LegalNotice />
+          )}
 
           <div className="verify-otp-resend">
             {canResend ? (

@@ -256,6 +256,44 @@ gap: 24px;
   flex: 1;
 }
 
+.pus-upload-status {
+  font-size: 11px;
+  font-weight: 700;
+  color: #047857;
+}
+
+.pus-source-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px;
+}
+
+.pus-source-actions button,
+.pus-retry-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 8px;
+  border: 1px solid #0055ff;
+  border-radius: 10px;
+  background: white;
+  color: #0055ff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pus-retry-btn {
+  width: calc(100% - 20px);
+  margin: 0 10px 10px;
+  border-color: #ef4444;
+  color: #b91c1c;
+}
+
 /* Error dentro de zona */
 .pus-zone-error {
   display: block;
