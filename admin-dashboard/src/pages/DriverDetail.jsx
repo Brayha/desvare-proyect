@@ -4,7 +4,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { driversAPI } from '../services/adminAPI';
-import { ArrowLeft2, LockSlash } from 'iconsax-react';
+import { ArrowLeft2, LockSlash, Trash } from 'iconsax-react';
 import './DriverDetail.css';
 
 const TRUCK_TYPES = [
@@ -153,6 +153,10 @@ const DriverDetail = () => {
       showToast('Debes indicar una razón.', 'warning');
       return;
     }
+    if (action === 'delete' && data.confirmation?.trim() !== 'ELIMINAR') {
+      showToast('Escribe ELIMINAR para confirmar el borrado permanente.', 'warning');
+      return;
+    }
 
     const requiresCompleteTruck =
       action === 'approve'
@@ -177,6 +181,11 @@ const DriverDetail = () => {
       } else if (action === 'archive') {
         await driversAPI.suspend(id, reason);
         showToast('Conductor suspendido. Su historial se conservó.');
+      } else if (action === 'delete') {
+        await driversAPI.delete(id);
+        showToast('Conductor eliminado permanentemente.');
+        history.replace('/drivers');
+        return;
       }
       await loadDriverDetail();
     } catch (error) {
@@ -207,6 +216,11 @@ const DriverDetail = () => {
       header: 'Suspender conductor',
       message: 'Se deshabilitará su acceso, pero se conservarán sus documentos y todo su historial.',
       confirmText: 'Suspender'
+    },
+    delete: {
+      header: 'Eliminar conductor',
+      message: 'Esta acción es permanente. Se borrará el conductor y sus servicios asignados. Escribe ELIMINAR para confirmar.',
+      confirmText: 'Eliminar'
     }
   };
 
@@ -323,6 +337,16 @@ const DriverDetail = () => {
               Suspender / Archivar
             </IonButton>
           )}
+
+          <IonButton
+            color="danger"
+            fill="outline"
+            onClick={() => setPendingAction('delete')}
+            disabled={isProcessing}
+          >
+            <Trash size="20" style={{ marginRight: '8px' }} />
+            Eliminar conductor
+          </IonButton>
         </div>
         {(driver.driverProfile.status === 'pending_review'
           || driver.driverProfile.status === 'rejected') && (
@@ -665,6 +689,7 @@ const DriverDetail = () => {
           </div>
         )}
         <IonAlert
+          key={pendingAction || 'idle'}
           isOpen={Boolean(pendingAction)}
           onDidDismiss={() => setPendingAction(null)}
           header={pendingAction ? actionCopy[pendingAction].header : ''}
@@ -672,7 +697,9 @@ const DriverDetail = () => {
           inputs={
             pendingAction === 'reject' || pendingAction === 'archive'
               ? [{ name: 'reason', type: 'textarea', placeholder: 'Razón' }]
-              : []
+              : pendingAction === 'delete'
+                ? [{ name: 'confirmation', type: 'text', placeholder: 'Escribe ELIMINAR' }]
+                : []
           }
           buttons={[
             { text: 'Cancelar', role: 'cancel' },

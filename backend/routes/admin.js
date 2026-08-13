@@ -812,10 +812,19 @@ router.delete('/drivers/:id', async (req, res) => {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
-    // Eliminar servicios asociados
-    await Request.deleteMany({ driverId: driver._id });
+    // Borra servicios donde este conductor quedó asignado.
+    // En solicitudes ajenas solo se quita su cotización, para no borrar pedidos reales.
+    await Request.deleteMany({
+      $or: [
+        { assignedDriverId: driver._id },
+        { driverId: driver._id },
+      ],
+    });
+    await Request.updateMany(
+      { 'quotes.driverId': driver._id },
+      { $pull: { quotes: { driverId: driver._id } } }
+    );
 
-    // Eliminar conductor
     await User.deleteOne({ _id: driver._id });
 
     console.log(`🗑️ Conductor ${req.params.id} ELIMINADO permanentemente por ${req.admin.email}`);
