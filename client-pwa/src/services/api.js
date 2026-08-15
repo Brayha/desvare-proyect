@@ -51,5 +51,17 @@ export const requestAPI = {
   getRequestById: (requestId) => api.get(`/api/requests/${requestId}`),
 };
 
+// API de perfil del cliente (PWA)
+export const profileAPI = {
+  getProfile: (userId) => api.get(`/api/auth/profile/${userId}`),
+  updateProfile: (userId, data) => api.put(`/api/auth/profile/${userId}`, data),
+};
+
+// API de ciudades (selector en editar perfil)
+export const citiesAPI = {
+  getAll: () => api.get('/api/cities'),
+  getByRegion: () => api.get('/api/cities/by-region'),
+};
+
 export default api;
 

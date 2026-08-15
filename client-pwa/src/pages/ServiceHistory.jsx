@@ -158,7 +158,8 @@ const ServiceHistory = () => {
                   )}
                   {s.rating && (
                     <span className="sh-card-rating">
-                      {"★".repeat(s.rating)}{"☆".repeat(5 - s.rating)}
+                      {"★".repeat(Number(s.rating))}
+                      {"☆".repeat(Math.max(0, 5 - Number(s.rating)))}
                     </span>
                   )}
                 </div>

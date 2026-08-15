@@ -749,5 +749,126 @@ router.delete('/fcm-token', requireAuth, async (req, res) => {
   }
 });
 
+// ============================================================
+// PERFIL DEL CLIENTE (PWA)
+// ============================================================
+
+const buildClientProfileResponse = (user) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email || null,
+  phone: user.phone,
+  userType: user.userType,
+  clientProfile: {
+    city: user.clientProfile?.city || null,
+    address: user.clientProfile?.address || null,
+    documentType: user.clientProfile?.documentType || null,
+    documentNumber: user.clientProfile?.documentNumber || null,
+    birthDate: user.clientProfile?.birthDate || null,
+  },
+});
+
+// GET /api/auth/profile/:id - Obtener perfil del cliente autenticado
+router.get('/profile/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user._id.toString() !== id) {
+      return res.status(403).json({ error: 'No puedes ver el perfil de otro usuario.' });
+    }
+
+    const user = await User.findById(id)
+      .select('name email phone userType clientProfile')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({
+      success: true,
+      profile: buildClientProfileResponse(user),
+    });
+  } catch (error) {
+    console.error('❌ Error obteniendo perfil:', error);
+    res.status(500).json({ error: 'Error al obtener perfil', details: error.message });
+  }
+});
+
+// PUT /api/auth/profile/:id - Actualizar perfil del cliente autenticado
+router.put('/profile/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user._id.toString() !== id) {
+      return res.status(403).json({ error: 'No puedes editar el perfil de otro usuario.' });
+    }
+
+    const {
+      name,
+      email,
+      city,
+      address,
+      documentType,
+      documentNumber,
+      birthDate,
+    } = req.body || {};
+
+    if (name !== undefined && (!name || String(name).trim().length < 2)) {
+      return res.status(400).json({ error: 'El nombre debe tener al menos 2 caracteres.' });
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Email inválido.' });
+    }
+
+    const allowedDocTypes = ['CC', 'CE', 'Pasaporte', 'NIT'];
+    if (documentType && !allowedDocTypes.includes(documentType)) {
+      return res.status(400).json({ error: 'Tipo de documento inválido.' });
+    }
+
+    const update = {};
+    if (name !== undefined) update.name = String(name).trim();
+    if (email !== undefined) {
+      update.email = email ? String(email).trim().toLowerCase() : null;
+    }
+
+    if (city !== undefined) update['clientProfile.city'] = city || null;
+    if (address !== undefined) update['clientProfile.address'] = address || null;
+    if (documentType !== undefined) update['clientProfile.documentType'] = documentType || null;
+    if (documentNumber !== undefined) {
+      update['clientProfile.documentNumber'] = documentNumber
+        ? String(documentNumber).trim()
+        : null;
+    }
+    if (birthDate !== undefined) {
+      update['clientProfile.birthDate'] = birthDate ? new Date(birthDate) : null;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      { $set: update },
+      { new: true, runValidators: true }
+    )
+      .select('name email phone userType clientProfile')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    console.log(`✅ Perfil actualizado para usuario ${id}`);
+
+    res.json({
+      success: true,
+      message: 'Perfil actualizado correctamente',
+      profile: buildClientProfileResponse(user),
+    });
+  } catch (error) {
+    console.error('❌ Error actualizando perfil:', error);
+    res.status(500).json({ error: 'Error al actualizar perfil', details: error.message });
+  }
+});
+
 module.exports = router;
 

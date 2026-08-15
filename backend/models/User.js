@@ -101,6 +101,21 @@ const userSchema = new mongoose.Schema({
     default: true
   },
   suspensionReason: String,
+
+  // ========================================
+  // PERFIL DEL CLIENTE (PWA)
+  // ========================================
+  clientProfile: {
+    city: { type: String, default: null },
+    address: { type: String, default: null },
+    documentType: {
+      type: String,
+      enum: ['CC', 'CE', 'Pasaporte', 'NIT'],
+      default: null
+    },
+    documentNumber: { type: String, default: null },
+    birthDate: { type: Date, default: null }
+  },
   
   // ========================================
   // PERFIL DEL CONDUCTOR

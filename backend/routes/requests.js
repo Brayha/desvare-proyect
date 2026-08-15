@@ -669,19 +669,29 @@ router.get('/client/:id', optionalAuth, async (req, res) => {
 
     // Buscar todas las solicitudes del cliente
     const requests = await Request.find({ clientId: id })
-      .sort({ createdAt: -1 }); // Más recientes primero
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       message: 'Solicitudes obtenidas exitosamente',
       count: requests.length,
-      requests: requests.map(req => ({
-        id: req._id,
-        clientName: req.clientName,
-        status: req.status,
-        quotesCount: req.quotes.length,
-        quotes: req.quotes,
-        createdAt: req.createdAt
-      }))
+      requests: requests.map((reqDoc) => {
+        const acceptedQuote = (reqDoc.quotes || []).find((q) => q.status === 'accepted');
+        return {
+          id: reqDoc._id,
+          clientName: reqDoc.clientName,
+          status: reqDoc.status,
+          quotesCount: (reqDoc.quotes || []).length,
+          createdAt: reqDoc.createdAt,
+          completedAt: reqDoc.completedAt || null,
+          origin: reqDoc.origin?.address || null,
+          destination: reqDoc.destination?.address || null,
+          vehicleSnapshot: reqDoc.vehicleSnapshot || null,
+          totalAmount: reqDoc.totalAmount || acceptedQuote?.amount || 0,
+          driverName: acceptedQuote?.driverName || null,
+          rating: reqDoc.rating?.stars || null,
+        };
+      })
     });
 
   } catch (error) {

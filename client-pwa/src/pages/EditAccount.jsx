@@ -22,7 +22,7 @@ const DOCUMENT_TYPES = ["CC", "CE", "Pasaporte", "NIT"];
 
 const EditAccount = () => {
   const history = useHistory();
-  const { user, login } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -109,16 +109,22 @@ const EditAccount = () => {
         birthDate: birthDate || null,
       });
 
-      // Actualizar el nombre en el contexto/localStorage
-      const updatedUser = { ...user, name: res.data.profile.name, email: res.data.profile.email };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      await login(updatedUser);
+      // Actualizar el nombre en el contexto/localStorage sin re-disparar flujos de login
+      const updatedUser = {
+        ...user,
+        name: res.data.profile.name,
+        email: res.data.profile.email,
+      };
+      updateUser(updatedUser);
 
       setSuccessMsg("¡Perfil actualizado correctamente!");
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (err) {
       console.error("❌ Error guardando perfil:", err);
-      setErrors({ general: "Error al guardar. Intenta de nuevo." });
+      setErrors({
+        general:
+          err.response?.data?.error || "Error al guardar. Intenta de nuevo.",
+      });
     } finally {
       setSaving(false);
     }

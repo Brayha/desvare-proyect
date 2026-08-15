@@ -148,6 +148,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /** Actualiza datos del usuario en sesión sin re-ejecutar el flujo de login. */
+  const updateUser = (userData) => {
+    setUser(userData);
+    setIsLoggedIn(true);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const value = {
     user,
     isLoggedIn,
@@ -157,6 +164,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     refreshVehicles,
+    updateUser,
     showNotificationPrompt,
     setShowNotificationPrompt,
     dismissNotificationPrompt,
