@@ -174,6 +174,32 @@ class SocketService {
     }
   }
 
+  onAccountApproved(callback) {
+    if (this.socket) {
+      this.socket.off('account:approved', callback);
+      this.socket.on('account:approved', callback);
+    }
+  }
+
+  offAccountApproved(callback) {
+    if (this.socket && callback) {
+      this.socket.off('account:approved', callback);
+    }
+  }
+
+  onAccountRejected(callback) {
+    if (this.socket) {
+      this.socket.off('account:rejected', callback);
+      this.socket.on('account:rejected', callback);
+    }
+  }
+
+  offAccountRejected(callback) {
+    if (this.socket && callback) {
+      this.socket.off('account:rejected', callback);
+    }
+  }
+
   onQuoteExpired(callback) {
     if (this.socket) {
       this.socket.off('quote:expired', callback);

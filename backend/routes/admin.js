@@ -15,7 +15,7 @@ const Request = require('../models/Request');
 const ChatMessage = require('../models/ChatMessage');
 const { requireAdmin } = require('../middleware/adminAuth');
 const { notifyDriverApproved } = require('../services/emailService');
-const { notifyAccountApproved, notifyAccountRejected } = require('../services/notifications');
+const { sendPushToUser } = require('../services/notifications');
 
 const TRUCK_TYPES = new Set(['GRUA_MOTO', 'GRUA_LIVIANA', 'GRUA_PESADA']);
 const VEHICLE_CAPABILITIES = new Set(['MOTOS', 'AUTOS', 'CAMIONETAS', 'CAMIONES', 'BUSES']);
@@ -561,14 +561,16 @@ router.put('/drivers/:id/approve', async (req, res) => {
       console.log(`📡 Evento Socket.IO enviado a driver:${driver._id}`);
     }
 
-    // 🆕 PUSH NOTIFICATION: Enviar notificación Firebase (si tiene token)
-    if (driver.driverProfile.fcmToken) {
-      try {
-        await notifyAccountApproved(driver.driverProfile.fcmToken);
-        console.log(`📱 Push notification enviada a ${driver.name}`);
-      } catch (error) {
-        console.error('⚠️ Error enviando push notification:', error.message);
-      }
+    try {
+      await sendPushToUser(
+        driver._id,
+        '🎉 ¡Cuenta Aprobada!',
+        'Tu cuenta ha sido verificada. Ya puedes empezar a recibir solicitudes.',
+        { type: 'ACCOUNT_APPROVED' },
+      );
+      console.log(`📱 Push notification enviada a ${driver.name}`);
+    } catch (error) {
+      console.error('⚠️ Error enviando push notification:', error.message);
     }
 
     // 🆕 EMAIL AL CONDUCTOR: Notificar que fue aprobado (si tiene email)
@@ -635,15 +637,16 @@ router.put('/drivers/:id/reject', async (req, res) => {
       console.log(`📡 Evento Socket.IO de rechazo enviado a driver:${driver._id}`);
     }
 
-    // 🆕 PUSH NOTIFICATION: Enviar notificación Firebase (si tiene token)
-    if (driver.driverProfile.fcmToken) {
-      try {
-        await notifyAccountRejected(driver.driverProfile.fcmToken, reason);
-        console.log(`📱 Push notification de rechazo enviada a ${driver.name}`);
-      } catch (error) {
-        console.error('⚠️ Error enviando push notification:', error.message);
-        // No fallar si la notificación push falla
-      }
+    try {
+      await sendPushToUser(
+        driver._id,
+        '❌ Cuenta Rechazada',
+        reason || 'Tu solicitud no fue aprobada. Contacta con soporte para más información.',
+        { type: 'ACCOUNT_REJECTED' },
+      );
+      console.log(`📱 Push notification de rechazo enviada a ${driver.name}`);
+    } catch (error) {
+      console.error('⚠️ Error enviando push notification:', error.message);
     }
 
     res.json({

@@ -32,6 +32,19 @@ const fmtDate = (d) =>
 const fmtTime = (d) =>
   fmt(d, { hour: "2-digit", minute: "2-digit", hour12: true });
 
+const CANCELLATION_REASONS = {
+  resuelto: "Ya se desvaró / El carro prendió",
+  conductor_no_viene: "El conductor no viene",
+  conductor_no_responde: "El conductor no responde",
+  otra_grua: "Otra grúa lo recogió",
+  muy_caro: "Muy caro",
+  muy_lejos: "Muy lejos",
+  no_puedo_atender: "No pude atender",
+  error_monto: "Error en el monto",
+  cliente_sospechoso: "Cliente sospechoso",
+  otro: "Otro motivo",
+};
+
 const InfoRow = ({ icon, label, value }) => (
   <div className="dsd-row">
     <div className="dsd-row-icon">{icon}</div>
@@ -109,13 +122,15 @@ const DriverServiceDetail = () => {
 
             {/* ── Hero: monto + fecha ── */}
             <div className="dsd-hero">
-              {service.totalAmount > 0 && (
+              {service.totalAmount > 0 && service.status !== "cancelled" && (
                 <p className="dsd-hero-amount">
                   ${service.totalAmount.toLocaleString("es-CO")}
                 </p>
               )}
-              <p className="dsd-hero-date">{fmtDate(service.completedAt || service.createdAt)}</p>
-              <span className="dsd-hero-badge">Completado</span>
+              <p className="dsd-hero-date">{fmtDate(service.completedAt || service.cancelledAt || service.createdAt)}</p>
+              <span className={`dsd-hero-badge ${service.status === "cancelled" ? "dsd-hero-badge--cancelled" : ""}`}>
+                {service.status === "cancelled" ? "Cancelado" : "Completado"}
+              </span>
             </div>
 
             {/* ── Cliente ── */}
@@ -175,7 +190,30 @@ const DriverServiceDetail = () => {
                 label="Hora de finalización"
                 value={fmtTime(service.completedAt)}
               />
+              {service.status === "cancelled" && (
+                <InfoRow
+                  icon={<Clock size="18" color="#EF4444" />}
+                  label="Hora de cancelación"
+                  value={fmtTime(service.cancelledAt)}
+                />
+              )}
             </div>
+
+            {service.status === "cancelled" && (
+              <div className="dsd-section">
+                <h3 className="dsd-section-title">Cancelación</h3>
+                <InfoRow
+                  icon={<Clock size="18" color="#EF4444" />}
+                  label="Motivo"
+                  value={
+                    service.cancellationCustomReason
+                    || CANCELLATION_REASONS[service.cancellationReason]
+                    || service.cancellationReason
+                    || "—"
+                  }
+                />
+              </div>
+            )}
 
             {/* ── Vehículo (sin placa) ── */}
             <div className="dsd-section">
@@ -207,24 +245,30 @@ const DriverServiceDetail = () => {
             )}
 
             {/* ── Calificación del cliente ── */}
-            {service.rating?.stars && (
+            {service.status === "completed" && (
               <div className="dsd-section">
                 <h3 className="dsd-section-title">Calificación del cliente</h3>
-                <div className="dsd-stars">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <span
-                      key={s}
-                      className={`dsd-star ${s <= service.rating.stars ? "dsd-star--filled" : ""}`}
-                    >
-                      ★
-                    </span>
-                  ))}
-                  <span className="dsd-stars-label">
-                    {service.rating.stars} / 5
-                  </span>
-                </div>
-                {service.rating.comment && (
-                  <p className="dsd-rating-comment">"{service.rating.comment}"</p>
+                {service.rating?.stars ? (
+                  <>
+                    <div className="dsd-stars">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <span
+                          key={s}
+                          className={`dsd-star ${s <= service.rating.stars ? "dsd-star--filled" : ""}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                      <span className="dsd-stars-label">
+                        {service.rating.stars} / 5
+                      </span>
+                    </div>
+                    {service.rating.comment && (
+                      <p className="dsd-rating-comment">"{service.rating.comment}"</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="dsd-rating-comment">Sin calificación</p>
                 )}
               </div>
             )}

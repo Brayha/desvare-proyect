@@ -32,6 +32,11 @@ const StarRating = ({ stars }) => {
   );
 };
 
+const statusLabel = (status) => {
+  if (status === "cancelled") return "Cancelado";
+  return "Completado";
+};
+
 const DriverServiceHistory = () => {
   const history = useHistory();
   const [services, setServices] = useState([]);
@@ -88,7 +93,7 @@ const DriverServiceHistory = () => {
             <Car size="52" color="#D1D5DB" />
             <p className="dsh-empty-title">Sin servicios aún</p>
             <p className="dsh-empty-sub">
-              Aquí aparecerán los servicios que hayas completado.
+              Aquí aparecerán los servicios que hayas completado o cancelado.
             </p>
           </div>
         )}
@@ -111,11 +116,14 @@ const DriverServiceHistory = () => {
                     </p>
                     <p className="dsh-card-date">
                       <Clock size="13" color="#9CA3AF" />
-                      {formatDate(s.completedAt || s.createdAt)}
+                      {formatDate(s.completedAt || s.cancelledAt || s.createdAt)}
                     </p>
                   </div>
                   <div className="dsh-card-right">
-                    {s.totalAmount > 0 && (
+                    <span className={`dsh-card-badge dsh-card-badge--${s.status === "cancelled" ? "cancelled" : "completed"}`}>
+                      {statusLabel(s.status)}
+                    </span>
+                    {s.totalAmount > 0 && s.status !== "cancelled" && (
                       <span className="dsh-card-amount">
                         ${s.totalAmount.toLocaleString("es-CO")}
                       </span>
@@ -134,11 +142,11 @@ const DriverServiceHistory = () => {
                   <p className="dsh-route-text">{s.destination || "Destino"}</p>
                 </div>
 
-                {s.rating && (
+                {s.rating?.stars && (
                   <div className="dsh-card-footer">
-                    <StarRating stars={s.rating} />
-                    {s.ratingComment && (
-                      <span className="dsh-card-comment">"{s.ratingComment}"</span>
+                    <StarRating stars={s.rating.stars} />
+                    {s.rating.comment && (
+                      <span className="dsh-card-comment">"{s.rating.comment}"</span>
                     )}
                   </div>
                 )}

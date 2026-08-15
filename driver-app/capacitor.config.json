@@ -14,5 +14,10 @@
     "allowMixedContent": false,
     "captureInput": true,
     "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "Camera": {
+      "launchShowSettings": false
+    }
   }
 }

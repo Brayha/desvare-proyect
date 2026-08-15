@@ -71,6 +71,11 @@
   color: #065f46;
 }
 
+.dsd-hero-badge--cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 /* ── Sección ── */
 .dsd-section {
   background: #fff;

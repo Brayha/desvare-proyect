@@ -72,6 +72,13 @@ const sendPushNotification = async (fcmToken, title, body, data = {}) => {
   }
 
   try {
+    // FCM exige que TODOS los valores de data sean strings
+    const stringData = {};
+    for (const [key, value] of Object.entries(data || {})) {
+      if (value === undefined || value === null) continue;
+      stringData[key] = typeof value === 'string' ? value : String(value);
+    }
+
     const message = {
       token: fcmToken,
       notification: {
@@ -79,7 +86,7 @@ const sendPushNotification = async (fcmToken, title, body, data = {}) => {
         body,
       },
       data: {
-        ...data,
+        ...stringData,
         clickAction: 'FLUTTER_NOTIFICATION_CLICK', // Para apps nativas
         timestamp: Date.now().toString()
       },
@@ -367,8 +374,8 @@ const notifyNewChatMessage = async (userId, data) => {
     truncated,
     {
       type: 'CHAT_MESSAGE',
-      requestId: data.requestId || '',
-      senderType: data.senderType || '',
+      requestId: String(data.requestId || ''),
+      senderType: String(data.senderType || ''),
       url: data.senderType === 'client' ? '/active-service' : '/driver-on-way',
     }
   );

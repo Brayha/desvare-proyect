@@ -6,6 +6,31 @@ const ChatMessage = require('../models/ChatMessage');
 const { sendPushToUser, sendPushToActiveAdmins } = require('../services/notifications');
 const { requireAuth, requireDriver, optionalAuth } = require('../middleware/auth');
 
+const addressOf = (location) => {
+  if (!location) return '';
+  if (typeof location === 'string') return location;
+  return location.address || '';
+};
+
+const mapDriverService = (request) => ({
+  id: request._id.toString(),
+  status: request.status,
+  clientName: request.clientName,
+  origin: addressOf(request.origin),
+  destination: addressOf(request.destination),
+  vehicleSnapshot: request.vehicleSnapshot || null,
+  totalAmount: request.totalAmount || 0,
+  createdAt: request.createdAt,
+  acceptedAt: request.acceptedAt || null,
+  startedAt: request.startedAt || request.trackingData?.startedAt || null,
+  completedAt: request.completedAt || null,
+  cancelledAt: request.cancelledAt || null,
+  cancelledBy: request.cancelledBy || null,
+  cancellationReason: request.cancellationReason || null,
+  cancellationCustomReason: request.cancellationCustomReason || null,
+  rating: request.rating || null,
+});
+
 // POST /api/requests/new - Crear nueva solicitud de cotización
 // optionalAuth: funciona con o sin login (clientes sin cuenta pueden pedir servicio)
 router.post('/new', optionalAuth, async (req, res) => {
@@ -623,7 +648,9 @@ router.get('/driver/:driverId', requireAuth, requireDriver, async (req, res) => 
       .limit(50)
       .lean();
 
-    res.json({ requests });
+    const services = requests.map(mapDriverService);
+
+    res.json({ services, requests });
   } catch (error) {
     console.error('❌ Error obteniendo historial del conductor:', error);
     res.status(500).json({ error: 'Error obteniendo historial', details: error.message });
@@ -827,7 +854,16 @@ router.get('/:id', async (req, res) => {
         
         // Timestamps
         createdAt: request.createdAt,
-        expiresAt: request.expiresAt
+        expiresAt: request.expiresAt,
+        acceptedAt: request.acceptedAt || null,
+        startedAt: request.startedAt || request.trackingData?.startedAt || null,
+        completedAt: request.completedAt || null,
+        cancelledAt: request.cancelledAt || null,
+        cancelledBy: request.cancelledBy || null,
+        cancellationReason: request.cancellationReason || null,
+        cancellationCustomReason: request.cancellationCustomReason || null,
+        totalAmount: request.totalAmount || 0,
+        rating: request.rating || null,
       }
     });
 
@@ -1064,13 +1100,20 @@ router.post('/:id/complete', requireAuth, requireDriver, async (req, res) => {
       completedAt: request.completedAt,
     });
     
-    // Liberar al conductor: volver a estado disponible y limpiar el servicio activo
+    // Liberar al conductor y contabilizar el servicio completado
     try {
+      const amount = request.totalAmount || 0;
       await User.findByIdAndUpdate(driverId, {
-        'driverProfile.isOnline': true,
-        'driverProfile.currentServiceId': null,
+        $set: {
+          'driverProfile.isOnline': true,
+          'driverProfile.currentServiceId': null,
+        },
+        $inc: {
+          'driverProfile.totalEarnings': amount,
+          'driverProfile.totalServices': 1,
+        },
       });
-      console.log(`✅ Conductor ${driverId} liberado y puesto en línea tras completar servicio`);
+      console.log(`✅ Conductor ${driverId} liberado. +1 servicio, +$${amount.toLocaleString('es-CO')}`);
     } catch (driverUpdateErr) {
       console.error('⚠️ No se pudo liberar conductor tras completar:', driverUpdateErr.message);
     }
@@ -1222,11 +1265,6 @@ router.post('/:id/rate', requireAuth, async (req, res) => {
       });
     }
     
-    // Capturar ANTES de guardar si este servicio ya tenía calificación previa.
-    // El check posterior a request.save() siempre encontraría rating !== null
-    // porque acabamos de asignarlo, haciendo que totalServices nunca incremente.
-    const isFirstRating = !request.rating?.ratedAt;
-
     // Actualizar calificación
     request.rating = {
       stars: stars,
@@ -1267,24 +1305,14 @@ router.post('/:id/rate', requireAuth, async (req, res) => {
           const sumRatings = allRatings.reduce((sum, r) => sum + r.rating.stars, 0);
           const newAverage = totalRatings > 0 ? (sumRatings / totalRatings) : 5;
           
-          // 2. Actualizar rating promedio
-          driver.driverProfile.rating = Math.round(newAverage * 10) / 10; // Redondear a 1 decimal
-          
-          // 3. Incrementar totalServices solo en la primera calificación del servicio
-          if (isFirstRating) {
-            driver.driverProfile.totalServices = (driver.driverProfile.totalServices || 0) + 1;
-          }
-          
-          // 4. Actualizar totalEarnings
-          const amount = request.quotes?.find(q => q.driverId?.toString() === driverId.toString())?.amount || 0;
-          driver.driverProfile.totalEarnings = (driver.driverProfile.totalEarnings || 0) + amount;
+          // 2. Actualizar solo el promedio de rating.
+          // Ganancias y totalServices se contabilizan al completar el servicio.
+          driver.driverProfile.rating = Math.round(newAverage * 10) / 10;
           
           await driver.save();
           
-          console.log(`✅ Perfil del conductor actualizado:`);
-          console.log(`   - Rating: ${driver.driverProfile.rating} ⭐ (${totalRatings} servicios)`);
-          console.log(`   - Total Servicios: ${driver.driverProfile.totalServices}`);
-          console.log(`   - Total Ganancias: $${driver.driverProfile.totalEarnings.toLocaleString()}`);
+          console.log(`✅ Rating del conductor actualizado:`);
+          console.log(`   - Rating: ${driver.driverProfile.rating} ⭐ (${totalRatings} calificaciones)`);
         } else {
           console.log(`⚠️ Conductor ${driverId} no encontrado o sin perfil`);
         }

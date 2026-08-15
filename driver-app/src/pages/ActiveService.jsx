@@ -67,10 +67,8 @@ const ActiveService = () => {
     "https://ionicframework.com/docs/img/demos/avatar.svg",
   );
   const [driverAddress, setDriverAddress] = useState("Obteniendo ubicación...");
-  const [driverLocation, setDriverLocation] = useState({
-    lat: 4.6097,
-    lng: -74.0817,
-  }); // Bogotá por defecto
+  // null hasta el primer fix GPS real (evita pin falso en Bogotá)
+  const [driverLocation, setDriverLocation] = useState(null);
 
   // ✅ Estado para controlar las 2 fases
   const [codeValidated, setCodeValidated] = useState(false);
@@ -254,11 +252,34 @@ const ActiveService = () => {
     };
     socketService.onChatMessage(handleIncomingChat);
 
+    // Push de chat en foreground (cuando el socket no alcanzó o la app está en otra vista)
+    const handleChatPush = (event) => {
+      const detail = event?.detail || {};
+      setChatOpen((open) => {
+        if (!open) {
+          setUnreadCount((n) => n + 1);
+          setChatBanner({
+            senderName: detail.title || 'Nuevo mensaje',
+            text: detail.body || '',
+          });
+        }
+        return open;
+      });
+      present({
+        message: `${detail.title || 'Nuevo mensaje'}: ${detail.body || ''}`,
+        duration: 4000,
+        color: 'primary',
+        position: 'top',
+      });
+    };
+    window.addEventListener('desvare:chat-push', handleChatPush);
+
     return () => {
       socketService.offServiceCancelled();
       socketService.offRequestCancelled();
       socketService.offCodeInvalid();
       socketService.offChatMessage(handleIncomingChat);
+      window.removeEventListener('desvare:chat-push', handleChatPush);
     };
   }, [serviceData, history, present]);
 
@@ -321,13 +342,17 @@ const ActiveService = () => {
 
     // Función central para obtener posición y enviarla (usada por ambas estrategias)
     const sendCurrentPosition = (pos) => {
+      const lat = pos.latitude ?? pos.coords?.latitude;
+      const lng = pos.longitude ?? pos.coords?.longitude;
+      if (lat == null || lng == null) return;
+
+      // Actualizar pin del mapa en la app del conductor
+      setDriverLocation({ lat, lng });
+
       const payload = {
         requestId: serviceData.requestId,
         driverId,
-        location: {
-          lat: pos.latitude ?? pos.coords?.latitude,
-          lng: pos.longitude ?? pos.coords?.longitude,
-        },
+        location: { lat, lng },
         heading: pos.bearing ?? pos.coords?.heading ?? 0,
         speed: pos.speed ?? pos.coords?.speed ?? 0,
         accuracy: pos.accuracy ?? pos.coords?.accuracy ?? 0,
@@ -497,12 +522,12 @@ const ActiveService = () => {
           },
           (error) => {
             console.error("❌ Error obteniendo ubicación GPS:", error);
-            setDriverAddress("Bogotá, Colombia");
+            setDriverAddress("Ubicación no disponible");
           },
           {
-            enableHighAccuracy: false,
-            timeout: 5000,
-            maximumAge: 300000,
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 10000,
           },
         );
       }

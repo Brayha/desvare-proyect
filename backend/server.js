@@ -1214,29 +1214,39 @@ io.on('connection', (socket) => {
       // Emitir al emisor como confirmación
       socket.emit('chat:message', payload);
 
-      // Enrutar al destinatario usando activeServices
-      const activeService = activeServices.get(requestId.toString());
-      if (activeService) {
-        const targetSocketId = isClient
-          ? activeService.driverSocketId
-          : activeService.clientSocketId;
+      const targetId = isClient ? request.assignedDriverId : request.clientId;
+      const targetIdStr = targetId?.toString();
 
-        if (targetSocketId) {
-          io.to(targetSocketId).emit('chat:message', payload);
-          console.log(`💬 Mensaje de chat ${senderType}→${isClient ? 'driver' : 'client'} en servicio ${requestId}`);
+      // Resolver socket del destinatario: activeServices → mapas de conexión
+      const activeService = activeServices.get(requestId.toString());
+      let targetSocketId = isClient
+        ? activeService?.driverSocketId
+        : activeService?.clientSocketId;
+
+      if (!targetSocketId && targetIdStr) {
+        if (isClient) {
+          targetSocketId = connectedDrivers.get(targetIdStr)?.socketId || null;
         } else {
-          // Destinatario offline → push a todos sus dispositivos
-          try {
-            const targetId = isClient ? request.assignedDriverId : request.clientId;
-            await notifyNewChatMessage(targetId, {
-              requestId,
-              senderName,
-              senderType,
-              message: chatMsg.message,
-            });
-          } catch (pushErr) {
-            console.warn('⚠️ Error enviando push de chat (no crítico):', pushErr.message);
-          }
+          targetSocketId = connectedClients.get(targetIdStr) || null;
+        }
+      }
+
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('chat:message', payload);
+        console.log(`💬 Mensaje de chat ${senderType}→${isClient ? 'driver' : 'client'} en servicio ${requestId}`);
+      }
+
+      // Siempre enviar push: el destinatario puede estar en otra pantalla o en segundo plano
+      if (targetId) {
+        try {
+          await notifyNewChatMessage(targetId, {
+            requestId: requestId.toString(),
+            senderName,
+            senderType,
+            message: chatMsg.message,
+          });
+        } catch (pushErr) {
+          console.warn('⚠️ Error enviando push de chat (no crítico):', pushErr.message);
         }
       }
     } catch (err) {

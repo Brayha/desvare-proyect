@@ -95,15 +95,20 @@ const checkBasePermissions = async () => {
 // ============================================
 // Componente principal
 // ============================================
+const buildSlides = (isAndroid, includeNotifications) => {
+  const slides = [SLIDE_LOCATION];
+  if (includeNotifications) slides.push(SLIDE_NOTIFICATIONS);
+  if (isAndroid) slides.push(SLIDE_BATTERY);
+  return slides;
+};
+
 const PermissionsSetup = () => {
   const history = useHistory();
   const swiperRef = useRef(null);
 
   // El slide de batería solo aplica en Android nativo
   const isAndroid = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
-  const SLIDES = isAndroid
-    ? [SLIDE_LOCATION, SLIDE_NOTIFICATIONS, SLIDE_BATTERY]
-    : [SLIDE_LOCATION, SLIDE_NOTIFICATIONS];
+  const [slides, setSlides] = useState(() => buildSlides(isAndroid, true));
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -113,6 +118,10 @@ const PermissionsSetup = () => {
   useEffect(() => {
     const init = async () => {
       const perms = await checkBasePermissions();
+
+      if (perms.notifications) {
+        setSlides(buildSlides(isAndroid, false));
+      }
 
       if (perms.location && perms.notifications) {
         // Si es Android, verificar también si la batería ya está exenta
@@ -150,6 +159,15 @@ const PermissionsSetup = () => {
     history.replace('/home');
   };
 
+  const advanceOrHome = () => {
+    const swiper = swiperRef.current;
+    if (swiper && swiper.activeIndex < swiper.slides.length - 1) {
+      swiper.slideNext();
+      return;
+    }
+    goToHome();
+  };
+
   const handleLocationPermission = async () => {
     setLoading(true);
     try {
@@ -170,10 +188,10 @@ const PermissionsSetup = () => {
       }
 
       setDeniedMap((prev) => ({ ...prev, location: !granted }));
-      setTimeout(() => goToNextSlide(), 400);
+      setTimeout(() => advanceOrHome(), 400);
     } catch {
       setDeniedMap((prev) => ({ ...prev, location: true }));
-      setTimeout(() => goToNextSlide(), 400);
+      setTimeout(() => advanceOrHome(), 400);
     } finally {
       setLoading(false);
     }
@@ -198,18 +216,10 @@ const PermissionsSetup = () => {
       }
 
       setDeniedMap((prev) => ({ ...prev, notifications: !granted }));
-
-      // Si hay slide de batería a continuación, ir a él; si no, ir a Home
-      setTimeout(() => {
-        if (isAndroid) goToNextSlide();
-        else goToHome();
-      }, 400);
+      setTimeout(() => advanceOrHome(), 400);
     } catch {
       setDeniedMap((prev) => ({ ...prev, notifications: true }));
-      setTimeout(() => {
-        if (isAndroid) goToNextSlide();
-        else goToHome();
-      }, 400);
+      setTimeout(() => advanceOrHome(), 400);
     } finally {
       setLoading(false);
     }
@@ -235,10 +245,10 @@ const PermissionsSetup = () => {
   };
 
   const handleSkip = () => {
-    const isLastSlide = currentSlide === SLIDES.length - 1;
+    const isLastSlide = currentSlide === slides.length - 1;
     if (isLastSlide) {
       // Guardar que el conductor pospuso el permiso de batería para no molestar en 24h
-      if (SLIDES[currentSlide].id === 'battery') {
+      if (slides[currentSlide]?.id === 'battery') {
         localStorage.setItem('batteryModalDismissedAt', Date.now().toString());
       }
       goToHome();
@@ -247,7 +257,7 @@ const PermissionsSetup = () => {
     }
   };
 
-  const slide = SLIDES[currentSlide];
+  const slide = slides[currentSlide] || SLIDE_LOCATION;
 
   return (
     <IonPage>
@@ -256,23 +266,24 @@ const PermissionsSetup = () => {
         <div className="perm-progress-bar">
           <div
             className="perm-progress-fill"
-            style={{ width: `${((currentSlide + 1) / SLIDES.length) * 100}%` }}
+            style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
           />
         </div>
 
         {/* Step label */}
         <div className="perm-step-label">
-          Paso {currentSlide + 1} de {SLIDES.length}
+          Paso {currentSlide + 1} de {slides.length}
         </div>
 
         {/* Swiper (no touch, controlado por botones) */}
         <Swiper
+          key={slides.map((s) => s.id).join('-')}
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           onSlideChange={(swiper) => setCurrentSlide(swiper.activeIndex)}
           allowTouchMove={false}
           className="perm-swiper"
         >
-          {SLIDES.map((s) => {
+          {slides.map((s) => {
             const isDenied = deniedMap[s.id];
             return (
               <SwiperSlide key={s.id}>

@@ -169,8 +169,17 @@ const setupNotificationListeners = (driverId) => {
   // Listener: Notificación recibida con app en foreground
   PushNotifications.addListener('pushNotificationReceived', (notification) => {
     console.log('📬 Notificación en foreground:', notification);
-    // La app ya muestra las solicitudes en tiempo real por Socket.IO,
-    // así que en foreground no necesitamos acción adicional.
+    const data = notification?.data;
+    if (data?.type === 'CHAT_MESSAGE') {
+      // Aviso visible si el conductor no está mirando el chat
+      window.dispatchEvent(new CustomEvent('desvare:chat-push', {
+        detail: {
+          title: notification.title || 'Nuevo mensaje',
+          body: notification.body || '',
+          requestId: data.requestId,
+        },
+      }));
+    }
   });
 
   // Listener: Usuario toca la notificación (app en background o cerrada)
@@ -187,6 +196,14 @@ const setupNotificationListeners = (driverId) => {
     } else if (data?.type === 'SERVICE_CANCELLED') {
       // Servicio cancelado → Home
       window.location.href = '/home';
+    } else if (data?.type === 'ACCOUNT_APPROVED') {
+      window.location.href = localStorage.getItem('permissionsConfigured')
+        ? '/home'
+        : '/permissions';
+    } else if (data?.type === 'ACCOUNT_REJECTED') {
+      window.location.href = '/rejected';
+    } else if (data?.type === 'CHAT_MESSAGE') {
+      window.location.href = '/active-service';
     } else if (data?.requestId) {
       window.location.href = '/home';
     }

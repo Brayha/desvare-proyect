@@ -16,13 +16,9 @@ import { settingsOutline } from "ionicons/icons";
 import planchonImg from "../assets/img/vehicles/planchon.svg";
 import ganchoImg from "../assets/img/vehicles/gancho.svg";
 import socketService from "../services/socket";
+import { authAPI } from "../services/api";
 import "./Profile.css";
 import { Logout, Verify, MessageQuestion, Moneys } from "iconsax-react";
-
-// ============================================
-// API URL Configuration
-// ============================================
-const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
 
 const Profile = () => {
   const history = useHistory();
@@ -36,32 +32,23 @@ const Profile = () => {
       return;
     }
 
-    const parsedUser = JSON.parse(userData);
-
-    // Cargar perfil completo
-    loadProfile(parsedUser._id);
+    loadProfile();
   }, [history]);
 
-  const loadProfile = async (driverId) => {
+  const loadProfile = async () => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/drivers/profile/${driverId}`,
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        setProfile(data.driver);
-      } else if (response.status === 404 || response.status === 401) {
-        // El usuario ya no existe en el backend o el token es inválido
+      const response = await authAPI.getMyProfile();
+      setProfile(response.data.driver);
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 404 || status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('hasSeenLocationModal');
         socketService.disconnect();
         history.replace('/login');
-      } else {
-        console.error("Error al cargar perfil:", data);
+        return;
       }
-    } catch (error) {
       console.error("❌ Error al cargar perfil:", error);
     } finally {
       setLoading(false);
@@ -172,7 +159,7 @@ Mi consulta es: `;
                 <h2 className="profile-name">
                   {profile.name}
                 </h2>
-                <p className="profile-subtitle">{profile.phone} <span> / {profile.rating.toFixed(1)} ⭐</span></p>
+                <p className="profile-subtitle">{profile.phone || '—'} <span> / {(profile.rating ?? 5).toFixed(1)} ⭐</span></p>
               </div>
             </div>
             <div
@@ -241,7 +228,7 @@ Mi consulta es: `;
             <div className="options-profile-item">
               <Moneys size={20} color="#9CA3AF" />
               <p>Ganancias Totales</p>
-              <p className="options-profile-item-value">${profile.totalEarnings.toLocaleString()}</p>
+              <p className="options-profile-item-value">${(profile.totalEarnings ?? 0).toLocaleString('es-CO')}</p>
             </div>
             <div
               className="options-profile-item"
@@ -250,7 +237,7 @@ Mi consulta es: `;
             >
               <Verify size={20} color="#9CA3AF" />
               <p>Servicios Completados</p>
-              <p className="options-profile-item-value">{profile.totalServices}</p>
+              <p className="options-profile-item-value">{profile.totalServices ?? 0}</p>
             </div>
             <div className="options-profile-item" onClick={handleWhatsAppSupport} style={{ cursor: "pointer" }}>
               <MessageQuestion size={20} color="#9CA3AF" />

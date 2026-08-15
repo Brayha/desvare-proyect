@@ -396,6 +396,23 @@ const Home = () => {
     };
     socketService.onQuoteExpired(handleQuoteExpired);
 
+    const handleChatPush = (event) => {
+      // Evitar toast duplicado si ActiveService ya está visible
+      if (window.location.pathname.includes('active-service')) return;
+      const detail = event?.detail || {};
+      const hasActive = !!localStorage.getItem('activeService');
+      present({
+        message: `${detail.title || 'Nuevo mensaje'}: ${detail.body || ''}`,
+        duration: 5000,
+        color: 'primary',
+        position: 'top',
+        buttons: hasActive
+          ? [{ text: 'Ver', handler: () => history.push('/active-service') }]
+          : undefined,
+      });
+    };
+    window.addEventListener('desvare:chat-push', handleChatPush);
+
     return () => {
       // Solo limpiar listeners exactos — NO desconectar el socket.
       // El socket es un singleton compartido; desconectarlo aquí mata el GPS
@@ -407,6 +424,7 @@ const Home = () => {
       socketService.offServiceAccepted(handleServiceAccepted);
       socketService.offServiceTaken(handleServiceTaken);
       socketService.offQuoteExpired(handleQuoteExpired);
+      window.removeEventListener('desvare:chat-push', handleChatPush);
     };
   }, [history, present, presentAlert]);
 

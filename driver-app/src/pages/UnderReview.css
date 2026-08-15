@@ -150,6 +150,66 @@
   text-align: left;
 }
 
+.under-review-notify-card {
+  background: #EBF2FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 16px;
+  padding: 20px 16px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.under-review-notify-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.under-review-notify-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--desvare-secondary);
+  margin: 0 0 8px;
+}
+
+.under-review-notify-text {
+  font-size: 14px;
+  color: #4B5563;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.under-review-notify-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.under-review-notify-accept {
+  --background: #0055FF;
+  --border-radius: 12px;
+  font-weight: 600;
+  text-transform: none;
+  margin: 0;
+}
+
+.under-review-notify-later {
+  background: none;
+  border: none;
+  color: #6B7280;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px;
+  cursor: pointer;
+}
+
 /* ======================================
    BOTÓN
    ====================================== */

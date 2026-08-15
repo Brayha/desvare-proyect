@@ -18,8 +18,6 @@ import { authAPI, citiesAPI } from "../services/api";
 import { Input } from "../components/Input/Input";
 import "./EditProfile.css";
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
-
 const DOCUMENT_LABELS = {
   selfie: { label: "Selfie", key: "selfie", type: "single" },
   cedulaFront: { label: "Cédula (Frente)", key: "cedula.front", type: "nested" },
@@ -99,23 +97,19 @@ const EditProfile = () => {
       history.push("/login");
       return;
     }
-    const parsedUser = JSON.parse(userData);
-    loadProfile(parsedUser._id);
+    loadProfile();
     loadCities();
   }, [history]);
 
-  const loadProfile = async (driverId) => {
+  const loadProfile = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/drivers/profile/${driverId}`);
-      const data = await response.json();
-      if (response.ok) {
-        const d = data.driver;
-        setProfile(d);
-        setName(d.name || "");
-        setEmail(d.email || "");
-        setCity(d.city || "");
-        setAddress(d.address || "");
-      }
+      const response = await authAPI.getMyProfile();
+      const d = response.data.driver;
+      setProfile(d);
+      setName(d.name || "");
+      setEmail(d.email || "");
+      setCity(d.city || "");
+      setAddress(d.address || "");
     } catch (error) {
       console.error("❌ Error cargando perfil:", error);
     } finally {
@@ -168,7 +162,7 @@ const EditProfile = () => {
         userId: userData._id,
         documents: [{ file: base64, documentType: docType }],
       });
-      await loadProfile(userData._id);
+      await loadProfile();
     } catch (error) {
       console.error("❌ Error subiendo documento:", error);
     } finally {
