@@ -39,11 +39,11 @@ export const AuthProvider = ({ children }) => {
         // Cargar vehículos automáticamente
         await loadVehicles(parsedUser.id);
 
-        // Refrescar token FCM en silencio si ya hay permisos (mantiene MongoDB actualizado)
+        // Refrescar suscripción Web Push si ya hay permisos (iOS + Android)
         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
           setTimeout(() => {
             requestNotificationPermission(parsedUser.id).catch(e =>
-              console.warn('⚠️ No se pudo refrescar token FCM al iniciar:', e.message)
+              console.warn('⚠️ No se pudo refrescar Web Push al iniciar:', e.message)
             );
           }, 3000);
         }
@@ -98,10 +98,10 @@ export const AuthProvider = ({ children }) => {
       const hasNotificationAPI = typeof window !== 'undefined' && 'Notification' in window;
 
       if (hasNotificationAPI && Notification.permission === 'granted') {
-        // Permisos ya concedidos → refrescar token en silencio para mantener MongoDB actualizado
-        console.log('🔄 Refrescando token FCM en background...');
+        // Permisos ya concedidos → refrescar Web Push en silencio
+        console.log('🔄 Refrescando suscripción Web Push en background...');
         requestNotificationPermission(userData.id).catch(e =>
-          console.warn('⚠️ No se pudo refrescar token FCM:', e.message)
+          console.warn('⚠️ No se pudo refrescar Web Push:', e.message)
         );
       } else if (hasNotificationAPI && Notification.permission === 'default' && !promptDismissed) {
         console.log('🔔 Mostrando prompt de notificaciones...');

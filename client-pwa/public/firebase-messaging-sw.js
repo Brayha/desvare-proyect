@@ -23,39 +23,77 @@ const messaging = firebase.messaging();
 
 console.log('[Service Worker] Firebase Messaging inicializado');
 
-// Manejar notificaciones en segundo plano (cuando la PWA no está activa)
-messaging.onBackgroundMessage((payload) => {
-  console.log('[Service Worker] Notificación recibida en background:', payload);
-  
-  // Extraer datos de la notificación
-  const notificationTitle = payload.notification?.title || 'Desvare';
-  const notificationOptions = {
-    body: payload.notification?.body || 'Tienes una nueva notificación',
+/**
+ * Construye título + options para showNotification a partir del payload
+ * que envía el backend (Web Push nativo o FCM).
+ */
+const buildNotificationFromPayload = (payload = {}) => {
+  const data = payload.data || {};
+  const type = data.type || 'general';
+  const title = payload.notification?.title || payload.title || 'Desvare';
+  const options = {
+    body:
+      payload.notification?.body ||
+      payload.body ||
+      'Tienes una nueva notificación',
     icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72.png', // Badge monocromático para la barra de notificaciones
-    tag: payload.data?.type || 'default', // Agrupar notificaciones del mismo tipo
+    badge: '/icons/badge-72.png',
+    tag: type,
     data: {
-      url: payload.data?.url || '/waiting-quotes',
-      quoteId: payload.data?.quoteId || null,
-      requestId: payload.data?.requestId || null,
-      type: payload.data?.type || 'general'
+      url: data.url || '/waiting-quotes',
+      quoteId: data.quoteId || null,
+      requestId: data.requestId || null,
+      type
     },
-    vibrate: [200, 100, 200], // Patrón de vibración (ignorado en iOS)
-    requireInteraction: payload.data?.type === 'QUOTE_RECEIVED' ? true : false, // Requiere acción del usuario para cotizaciones
-    actions: payload.data?.type === 'QUOTE_RECEIVED' ? [
-      {
-        action: 'view',
-        title: 'Ver Cotización'
-      },
-      {
-        action: 'dismiss',
-        title: 'Cerrar'
-      }
-    ] : []
+    vibrate: [200, 100, 200],
+    requireInteraction: type === 'QUOTE_RECEIVED',
+    actions:
+      type === 'QUOTE_RECEIVED'
+        ? [
+            { action: 'view', title: 'Ver Cotización' },
+            { action: 'dismiss', title: 'Cerrar' }
+          ]
+        : []
   };
 
-  // Mostrar la notificación
-  return self.registration.showNotification(notificationTitle, notificationOptions);
+  return { title, options };
+};
+
+// Web Push nativo (iOS + Android/Chrome): el backend envía JSON con
+// { notification, data }. Este listener es el camino principal.
+// Si el payload no es JSON usable (p. ej. FCM cifrado), no pintamos aquí
+// y deja que onBackgroundMessage lo maneje.
+self.addEventListener('push', (event) => {
+  let payload = null;
+
+  try {
+    payload = event.data ? event.data.json() : null;
+  } catch {
+    // Payload no-JSON (típico FCM) → lo maneja Firebase abajo
+    console.log('[Service Worker] Push no-JSON; defer a FCM si aplica');
+    return;
+  }
+
+  if (!payload || (!payload.notification && !payload.title && !payload.body)) {
+    return;
+  }
+
+  // Mensajes claramente FCM: evitar doble notificación
+  if (payload.fcmMessageId || payload.from) {
+    return;
+  }
+
+  console.log('[Service Worker] Push nativo recibido:', payload);
+
+  const { title, options } = buildNotificationFromPayload(payload);
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Fallback FCM (tokens legacy en PWA). Web Push nativo no pasa por aquí.
+messaging.onBackgroundMessage((payload) => {
+  console.log('[Service Worker] Notificación FCM en background:', payload);
+  const { title, options } = buildNotificationFromPayload(payload);
+  return self.registration.showNotification(title, options);
 });
 
 // Manejar click en la notificación
@@ -107,7 +145,7 @@ self.addEventListener('notificationclose', (event) => {
 // CACHÉ OFFLINE (app shell + assets estáticos)
 // ============================================================
 // Sube la versión cuando cambie la estrategia para forzar limpieza de cachés viejas.
-const CACHE_VERSION = 'desvare-cache-v1';
+const CACHE_VERSION = 'desvare-cache-v2';
 
 // Recursos mínimos para que la PWA abra sin red.
 const APP_SHELL = [

@@ -1,18 +1,20 @@
 /**
- * Servicio de Web Push nativo para iOS Safari.
- * Se usa cuando Firebase FCM no puede registrarse (iOS devuelve 401 en fcmregistrations.googleapis.com
- * porque el endpoint Apple Web Push requiere autenticación OAuth2 que el SDK web no soporta).
+ * Servicio de Web Push nativo (VAPID propio).
+ *
+ * Se usa en:
+ * - iOS Safari / PWA instalada (FCM web no funciona ahí)
+ * - Android Chrome / PWA (mismo stack; más fiable que FCM getToken)
  *
  * Flujo:
- * 1. Detectar iOS Safari
- * 2. Solicitar permiso de notificaciones
- * 3. Suscribirse via pushManager con nuestro VAPID público (no el de Firebase)
- * 4. Guardar la suscripción en el backend
- * 5. El backend usa web-push (VAPID privado) para enviar notificaciones directamente a Apple
+ * 1. Solicitar permiso de notificaciones
+ * 2. Suscribirse via pushManager con nuestro VAPID público (no el de Firebase)
+ * 3. Guardar la suscripción en el backend
+ * 4. El backend usa web-push (VAPID privado) para enviar al endpoint del navegador
  */
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_VAPID_PUBLIC_KEY || '';
 const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
+const SERVICE_WORKER_URL = '/firebase-messaging-sw.js';
 
 /**
  * Detecta si el dispositivo es iOS Safari (PWA o navegador).
@@ -23,6 +25,18 @@ export const isIOSSafari = () => {
   const isIOS = /iphone|ipad|ipod/i.test(ua);
   const isSafari = /safari/i.test(ua) && !/chrome|crios|fxios|opios/i.test(ua);
   return isIOS && isSafari;
+};
+
+/**
+ * Etiqueta de plataforma para guardar en Mongo (solo diagnóstico).
+ */
+export const getWebPushPlatform = () => {
+  const ua = navigator.userAgent.toLowerCase();
+  if (/iphone|ipad|ipod/.test(ua)) return 'ios-safari';
+  if (/android/.test(ua)) return 'android-chrome';
+  if (/macintosh|mac os x/.test(ua)) return 'macos';
+  if (/windows/.test(ua)) return 'windows';
+  return 'web';
 };
 
 /**
@@ -47,11 +61,26 @@ const urlBase64ToUint8Array = (base64String) => {
 };
 
 /**
- * Registra una suscripción Web Push nativa para iOS Safari.
- * @param {string} userId - ID del usuario autenticado
+ * Asegura que el Service Worker esté registrado y activo antes de suscribirse.
+ */
+const getReadyServiceWorker = async () => {
+  const existing = await navigator.serviceWorker.getRegistration('/');
+  if (existing) {
+    return navigator.serviceWorker.ready;
+  }
+
+  await navigator.serviceWorker.register(SERVICE_WORKER_URL, { scope: '/' });
+  return navigator.serviceWorker.ready;
+};
+
+/**
+ * Registra una suscripción Web Push nativa y la guarda en el backend.
+ * @param {string} userId - ID del usuario autenticado (reservado; el backend usa el JWT)
  * @returns {Promise<boolean>} true si el registro fue exitoso
  */
 export const registerWebPushSubscription = async (userId) => {
+  void userId;
+
   if (!supportsWebPush()) {
     console.warn('⚠️ Web Push no soportado en este navegador');
     return false;
@@ -78,16 +107,18 @@ export const registerWebPushSubscription = async (userId) => {
       }
     }
 
-    // Obtener registro del Service Worker
-    const swRegistration = await navigator.serviceWorker.ready;
+    // Obtener registro del Service Worker (registrar si hace falta)
+    const swRegistration = await getReadyServiceWorker();
+    if (!swRegistration) {
+      console.error('❌ No se pudo obtener el Service Worker');
+      return false;
+    }
 
     // Verificar si ya existe una suscripción activa con nuestro VAPID key
     let subscription = await swRegistration.pushManager.getSubscription();
 
     if (subscription) {
-      // Si la suscripción es de Firebase (endpoints de fcm o web.push.apple.com creados con VAPID de Firebase),
-      // verificar si el applicationServerKey coincide con nuestro VAPID.
-      // Si no coincide, cancelar y re-suscribir.
+      // Si la suscripción es de Firebase (otro VAPID), cancelar y re-suscribir.
       try {
         const existingKey = subscription.options?.applicationServerKey;
         if (existingKey) {
@@ -119,6 +150,7 @@ export const registerWebPushSubscription = async (userId) => {
 
     // Serializar la suscripción correctamente (incluye las keys)
     const subscriptionJson = subscription.toJSON();
+    const platform = getWebPushPlatform();
 
     // Guardar en el backend
     const token = localStorage.getItem('token');
@@ -130,12 +162,12 @@ export const registerWebPushSubscription = async (userId) => {
       },
       body: JSON.stringify({
         subscription: subscriptionJson,
-        platform: 'ios-safari'
+        platform
       })
     });
 
     if (response.ok) {
-      console.log('✅ Suscripción Web Push guardada en el servidor');
+      console.log(`✅ Suscripción Web Push guardada en el servidor (${platform})`);
       localStorage.setItem('webPushEndpoint', subscriptionJson.endpoint);
       return true;
     } else {
@@ -185,6 +217,7 @@ export const unregisterWebPushSubscription = async () => {
 
 export default {
   isIOSSafari,
+  getWebPushPlatform,
   supportsWebPush,
   registerWebPushSubscription,
   unregisterWebPushSubscription

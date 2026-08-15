@@ -10,16 +10,16 @@ const Admin = require('../models/Admin');
 
 const MAX_TOKENS_PER_USER = 10;
 
-// Configurar web-push con VAPID keys para iOS Safari
+// Configurar web-push con VAPID keys (iOS Safari + Android/Chrome PWA)
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webPush.setVapidDetails(
     'mailto:soporte@desvare.app',
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );
-  console.log('✅ Web Push (VAPID) configurado para iOS Safari');
+  console.log('✅ Web Push (VAPID) configurado para PWA (iOS + Android)');
 } else {
-  console.warn('⚠️ VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY no configuradas — Web Push iOS no disponible');
+  console.warn('⚠️ VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY no configuradas — Web Push PWA no disponible');
 }
 
 // Inicializar Firebase Admin SDK
@@ -112,11 +112,11 @@ const sendPushNotification = async (fcmToken, title, body, data = {}) => {
     return response;
 
   } catch (error) {
+    // No incluir invalid-argument: suele ser payload mal formado, no token muerto.
     const invalidTokenCodes = [
       'messaging/mismatched-credential',
       'messaging/registration-token-not-registered',
       'messaging/invalid-registration-token',
-      'messaging/invalid-argument',
     ];
     if (invalidTokenCodes.includes(error.errorInfo?.code)) {
       error.isInvalidToken = true;
@@ -387,11 +387,7 @@ const notifyNewChatMessage = async (userId, data) => {
 
 /**
  * Envía una notificación usando Web Push nativo (sin Firebase) a una suscripción.
- * Usado principalmente para iOS Safari donde FCM no puede registrarse.
- * @param {Object} subscription - Objeto { endpoint, keys: { p256dh, auth } }
- * @param {string} title
- * @param {string} body
- * @param {Object} data
+ * Usado para iOS Safari y Android/Chrome PWA.
  */
 const sendWebPushNotification = async (subscription, title, body, data = {}) => {
   if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
@@ -417,7 +413,11 @@ const sendWebPushNotification = async (subscription, title, body, data = {}) => 
   });
 
   try {
-    await webPush.sendNotification(subscription, payload);
+    // urgency:high ayuda en Android (Doze); TTL 1h evita pushes eternos.
+    await webPush.sendNotification(subscription, payload, {
+      urgency: 'high',
+      TTL: 60 * 60
+    });
     console.log(`✅ Web Push enviado a: ${subscription.endpoint.slice(0, 50)}...`);
     return true;
   } catch (error) {

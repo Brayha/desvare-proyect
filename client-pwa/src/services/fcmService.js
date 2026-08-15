@@ -1,69 +1,63 @@
 /**
- * Servicio de Firebase Cloud Messaging para Client PWA
- * Maneja el registro de tokens (FCM para Android/Chrome) y Web Push nativo (iOS Safari)
+ * Servicio de notificaciones push para Client PWA.
+ *
+ * Camino principal (iOS + Android/Chrome): Web Push nativo con VAPID propio.
+ * Firebase Messaging se mantiene solo para listeners legacy / foreground si el
+ * SDK está disponible; ya NO se llama a getToken en la PWA del cliente para
+ * evitar conflicto de VAPID con PushManager (un SW solo admite una suscripción).
  */
 
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { firebaseConfig, VAPID_KEY, isFirebaseConfigured } from '../config/firebase.config';
-import { isIOSSafari, registerWebPushSubscription } from './webPushService';
+import { getMessaging, onMessage } from 'firebase/messaging';
+import { firebaseConfig, isFirebaseConfigured } from '../config/firebase.config';
+import {
+  isIOSSafari,
+  supportsWebPush,
+  registerWebPushSubscription,
+} from './webPushService';
 
-// Inicializar Firebase
+// Inicializar Firebase (opcional: foreground toast si hay messaging)
 let app;
 let messaging;
 
 try {
-  // Verificar que Firebase esté configurado
   if (!isFirebaseConfigured()) {
-    console.error('❌ Firebase no está configurado correctamente. Verifica tu archivo .env');
+    console.warn('⚠️ Firebase no está completamente configurado (opcional para Web Push nativo)');
   } else {
     app = initializeApp(firebaseConfig);
     messaging = getMessaging(app);
-    console.log('✅ Firebase inicializado correctamente en PWA');
+    console.log('✅ Firebase inicializado en PWA (listener foreground opcional)');
   }
 } catch (error) {
   console.error('❌ Error inicializando Firebase:', error);
 }
 
 /**
- * Solicita permiso de notificaciones y registra el token/suscripción adecuada.
- * - iOS Safari: usa Web Push nativo (sin Firebase)
- * - Android / Chrome / otros: usa Firebase FCM
- * @param {string} userId - ID del usuario para asociar el token
- * @returns {Promise<string|null>} Token FCM, 'web-push-ios' (éxito iOS), o null si falla
+ * Solicita permiso de notificaciones y registra la suscripción Web Push.
+ * Misma vía en iOS Safari y en Android/Chrome (instalada o en navegador).
+ * @param {string} userId - ID del usuario para asociar la suscripción
+ * @returns {Promise<string|null>} 'web-push' si ok, o null si falla
  */
 export const requestNotificationPermission = async (userId) => {
   try {
-    // Verificar si el navegador soporta notificaciones
     if (!('Notification' in window)) {
       console.warn('⚠️ Este navegador no soporta notificaciones');
       return null;
     }
 
-    // iOS Safari: usar Web Push nativo (FCM no funciona en iOS)
-    if (isIOSSafari()) {
-      console.log('🍎 iOS Safari detectado — usando Web Push nativo (sin Firebase)');
-      const success = await registerWebPushSubscription(userId);
-      return success ? 'web-push-ios' : null;
-    }
-
-    // Verificar si ya tiene permisos (no-iOS)
-    if (Notification.permission === 'granted') {
-      console.log('✅ Permisos de notificación ya concedidos');
-      return await registerFCMToken(userId);
-    }
-
-    // Solicitar permisos
-    console.log('📱 Solicitando permisos de notificación...');
-    const permission = await Notification.requestPermission();
-
-    if (permission === 'granted') {
-      console.log('✅ Permisos concedidos');
-      return await registerFCMToken(userId);
-    } else {
-      console.warn('⚠️ Permisos de notificación denegados');
+    if (!supportsWebPush()) {
+      console.warn('⚠️ Web Push no soportado en este navegador');
       return null;
     }
+
+    if (isIOSSafari()) {
+      console.log('🍎 iOS Safari — Web Push nativo');
+    } else {
+      console.log('📡 Android/Chrome/Desktop — Web Push nativo (mismo stack que iOS)');
+    }
+
+    const success = await registerWebPushSubscription(userId);
+    return success ? 'web-push' : null;
   } catch (error) {
     console.error('❌ Error solicitando permisos:', error);
     return null;
@@ -71,89 +65,19 @@ export const requestNotificationPermission = async (userId) => {
 };
 
 /**
- * Registra el token FCM en el servidor
- * @param {string} userId - ID del usuario
- * @returns {Promise<string|null>} Token FCM
- */
-const registerFCMToken = async (userId) => {
-  try {
-    if (!messaging) {
-      console.error('❌ Firebase Messaging no inicializado');
-      return null;
-    }
-
-    // Registrar el Service Worker y esperar a que esté activo
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    await navigator.serviceWorker.ready;
-    console.log('✅ Service Worker registrado y listo:', registration);
-
-    // Obtener el token FCM
-    console.log('🔑 Obteniendo token FCM...');
-    const token = await getToken(messaging, {
-      vapidKey: VAPID_KEY,
-      serviceWorkerRegistration: registration
-    });
-
-    if (token) {
-      console.log('✅ Token FCM obtenido:', token);
-
-      // Guardar el token en el backend
-      const API_URL = import.meta.env.VITE_API_URL || 'https://api.desvare.app';
-      const response = await fetch(`${API_URL}/api/auth/fcm-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          userId,
-          fcmToken: token,
-          platform: 'web' // Para diferenciar de mobile
-        })
-      });
-
-      if (response.ok) {
-        console.log('✅ Token FCM registrado en el servidor');
-        // Guardar en localStorage para verificaciones
-        localStorage.setItem('fcmToken', token);
-        return token;
-      } else {
-        console.error('❌ Error registrando token en el servidor');
-        return null;
-      }
-    } else {
-      console.warn('⚠️ No se pudo obtener el token FCM');
-      return null;
-    }
-  } catch (error) {
-    console.error('❌ Error registrando token FCM:', error);
-    
-    // Errores comunes y sus soluciones
-    if (error.code === 'messaging/permission-blocked') {
-      console.error('🚫 Permisos bloqueados por el usuario. Debe habilitarlos manualmente en la configuración del navegador.');
-    } else if (error.code === 'messaging/token-subscribe-failed') {
-      console.error('🚫 Error suscribiéndose a notificaciones. Verifica la configuración de Firebase.');
-    }
-    
-    return null;
-  }
-};
-
-/**
- * Escucha notificaciones cuando la app está en primer plano
- * @param {Function} callback - Función que se ejecuta cuando llega una notificación
+ * Escucha notificaciones cuando la app está en primer plano (solo si FCM
+ * está inicializado). Con Web Push nativo, el SW también puede mostrar
+ * la notificación en background; este listener es complemento UI.
+ * @param {Function} callback
  */
 export const onMessageListener = (callback) => {
   if (!messaging) {
-    console.error('❌ Firebase Messaging no inicializado');
     return () => {};
   }
 
   return onMessage(messaging, (payload) => {
-    console.log('📬 Notificación recibida en foreground:', payload);
+    console.log('📬 Notificación recibida en foreground (FCM):', payload);
 
-    // Reenviar el payload al consumidor. El consumidor (App.jsx) se encarga
-    // de la UI (toast), sonido y vibración. NO duplicar sonido/vibración aquí.
     if (callback && typeof callback === 'function') {
       callback({
         title: payload.notification?.title,
@@ -187,14 +111,14 @@ export const getNotificationPermissionStatus = () => {
 };
 
 /**
- * Elimina el token FCM del servidor (logout, cambio de cuenta)
+ * Elimina el token FCM legacy del servidor (logout).
+ * La suscripción Web Push se limpia por separado si hace falta.
  * @param {string} userId - ID del usuario
  */
 export const unregisterFCMToken = async (userId) => {
   try {
     const token = localStorage.getItem('fcmToken');
     if (!token) {
-      console.log('ℹ️ No hay token FCM para eliminar');
       return;
     }
 
@@ -209,7 +133,7 @@ export const unregisterFCMToken = async (userId) => {
     });
 
     localStorage.removeItem('fcmToken');
-    console.log('✅ Token FCM eliminado del servidor');
+    console.log('✅ Token FCM legacy eliminado del servidor');
   } catch (error) {
     console.error('❌ Error eliminando token FCM:', error);
   }
