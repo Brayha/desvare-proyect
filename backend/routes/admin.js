@@ -355,14 +355,30 @@ router.get('/drivers', async (req, res) => {
       ];
     }
 
-    const drivers = await User.find(query)
-      .select('-password -otp')
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .lean();
-
-    const total = await User.countDocuments(query);
+    const [
+      drivers,
+      total,
+      totalDrivers,
+      approvedDrivers,
+      pendingReviewDrivers,
+      pendingDocumentsDrivers,
+      rejectedDrivers,
+      suspendedDrivers,
+    ] = await Promise.all([
+      User.find(query)
+        .select('-password -otp')
+        .sort({ createdAt: -1 })
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .lean(),
+      User.countDocuments(query),
+      User.countDocuments({ userType: 'driver' }),
+      User.countDocuments({ userType: 'driver', 'driverProfile.status': 'approved' }),
+      User.countDocuments({ userType: 'driver', 'driverProfile.status': 'pending_review' }),
+      User.countDocuments({ userType: 'driver', 'driverProfile.status': 'pending_documents' }),
+      User.countDocuments({ userType: 'driver', 'driverProfile.status': 'rejected' }),
+      User.countDocuments({ userType: 'driver', 'driverProfile.status': 'suspended' }),
+    ]);
 
     res.json({
       drivers,
@@ -370,7 +386,15 @@ router.get('/drivers', async (req, res) => {
         total,
         page: parseInt(page),
         pages: Math.ceil(total / limit)
-      }
+      },
+      stats: {
+        total: totalDrivers,
+        approved: approvedDrivers,
+        pendingReview: pendingReviewDrivers,
+        pendingDocuments: pendingDocumentsDrivers,
+        rejected: rejectedDrivers,
+        suspended: suspendedDrivers,
+      },
     });
 
   } catch (error) {
@@ -418,7 +442,7 @@ router.get('/drivers/:id', async (req, res) => {
 
 /**
  * PUT /api/admin/drivers/:id
- * Actualiza únicamente los datos de grúa y capacidades editables por administración.
+ * Actualiza nombre, datos de grúa y capacidades editables por administración.
  */
 router.put('/drivers/:id', async (req, res) => {
   try {
@@ -431,55 +455,74 @@ router.put('/drivers/:id', async (req, res) => {
       return res.status(404).json({ error: 'Conductor no encontrado' });
     }
 
-    const towTruckInput = req.body.towTruck === undefined ? req.body : req.body.towTruck;
-    if (!towTruckInput || typeof towTruckInput !== 'object' || Array.isArray(towTruckInput)) {
-      return res.status(400).json({ error: 'towTruck debe ser un objeto' });
-    }
-
+    const hasName = Object.prototype.hasOwnProperty.call(req.body, 'name');
+    const hasTowTruckPayload = req.body.towTruck !== undefined;
     const hasCapabilities = Object.prototype.hasOwnProperty.call(req.body, 'vehicleCapabilities');
-    const editableTowTruckFields = ['truckType', ...TOW_TRUCK_TEXT_FIELDS, 'licensePlate'];
-    const hasTowTruckUpdate = editableTowTruckFields.some(
-      field => Object.prototype.hasOwnProperty.call(towTruckInput, field)
-    );
 
-    if (!hasTowTruckUpdate && !hasCapabilities) {
+    if (hasName) {
+      if (typeof req.body.name !== 'string') {
+        return res.status(400).json({ error: 'name debe ser texto' });
+      }
+      const normalizedName = req.body.name.trim();
+      if (normalizedName.length < 2 || normalizedName.length > 80) {
+        return res.status(400).json({ error: 'El nombre debe tener entre 2 y 80 caracteres' });
+      }
+      driver.name = normalizedName;
+    }
+
+    let hasTowTruckUpdate = false;
+    if (hasTowTruckPayload) {
+      const towTruckInput = req.body.towTruck;
+      if (!towTruckInput || typeof towTruckInput !== 'object' || Array.isArray(towTruckInput)) {
+        return res.status(400).json({ error: 'towTruck debe ser un objeto' });
+      }
+
+      const editableTowTruckFields = ['truckType', ...TOW_TRUCK_TEXT_FIELDS, 'licensePlate'];
+      hasTowTruckUpdate = editableTowTruckFields.some(
+        field => Object.prototype.hasOwnProperty.call(towTruckInput, field)
+      );
+
+      if (hasTowTruckUpdate) {
+        if (!driver.driverProfile.towTruck) {
+          driver.driverProfile.towTruck = {};
+        }
+        const towTruck = driver.driverProfile.towTruck;
+
+        if (Object.prototype.hasOwnProperty.call(towTruckInput, 'truckType')) {
+          if (!TRUCK_TYPES.has(towTruckInput.truckType)) {
+            return res.status(400).json({
+              error: 'truckType no válido',
+              allowedTruckTypes: Array.from(TRUCK_TYPES),
+            });
+          }
+          towTruck.truckType = towTruckInput.truckType;
+        }
+
+        for (const field of TOW_TRUCK_TEXT_FIELDS) {
+          if (Object.prototype.hasOwnProperty.call(towTruckInput, field)) {
+            towTruck[field] = normalizeOptionalText(towTruckInput[field], field);
+          }
+        }
+
+        if (Object.prototype.hasOwnProperty.call(towTruckInput, 'licensePlate')) {
+          if (typeof towTruckInput.licensePlate !== 'string') {
+            return res.status(400).json({ error: 'licensePlate debe ser texto' });
+          }
+          const licensePlate = towTruckInput.licensePlate.toUpperCase().replace(/[\s-]/g, '');
+          if (!LICENSE_PLATE_REGEX.test(licensePlate)) {
+            return res.status(400).json({
+              error: 'La placa debe tener el formato ABC123 o ABC12D',
+            });
+          }
+          towTruck.licensePlate = licensePlate;
+        }
+      }
+    }
+
+    if (!hasName && !hasTowTruckUpdate && !hasCapabilities) {
       return res.status(400).json({
-        error: 'Debes enviar al menos un dato editable de la grúa o vehicleCapabilities',
+        error: 'Debes enviar name, towTruck o vehicleCapabilities para actualizar',
       });
-    }
-
-    if (!driver.driverProfile.towTruck) {
-      driver.driverProfile.towTruck = {};
-    }
-    const towTruck = driver.driverProfile.towTruck;
-
-    if (Object.prototype.hasOwnProperty.call(towTruckInput, 'truckType')) {
-      if (!TRUCK_TYPES.has(towTruckInput.truckType)) {
-        return res.status(400).json({
-          error: 'truckType no válido',
-          allowedTruckTypes: Array.from(TRUCK_TYPES),
-        });
-      }
-      towTruck.truckType = towTruckInput.truckType;
-    }
-
-    for (const field of TOW_TRUCK_TEXT_FIELDS) {
-      if (Object.prototype.hasOwnProperty.call(towTruckInput, field)) {
-        towTruck[field] = normalizeOptionalText(towTruckInput[field], field);
-      }
-    }
-
-    if (Object.prototype.hasOwnProperty.call(towTruckInput, 'licensePlate')) {
-      if (typeof towTruckInput.licensePlate !== 'string') {
-        return res.status(400).json({ error: 'licensePlate debe ser texto' });
-      }
-      const licensePlate = towTruckInput.licensePlate.toUpperCase().replace(/[\s-]/g, '');
-      if (!LICENSE_PLATE_REGEX.test(licensePlate)) {
-        return res.status(400).json({
-          error: 'La placa debe tener el formato ABC123 o ABC12D',
-        });
-      }
-      towTruck.licensePlate = licensePlate;
     }
 
     if (hasCapabilities) {
@@ -1198,6 +1241,149 @@ router.get('/services/:id', async (req, res) => {
   } catch (error) {
     console.error('❌ Error obteniendo detalle servicio:', error);
     res.status(500).json({ error: 'Error al obtener detalle' });
+  }
+});
+
+/**
+ * POST /api/admin/services/:id/cancel
+ * Cancela una solicitud/servicio desde el panel de administración
+ */
+router.post('/services/:id/cancel', async (req, res) => {
+  try {
+    const { reason, customReason } = req.body;
+    const request = await Request.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({ error: 'Servicio no encontrado' });
+    }
+
+    const cancellableStatuses = ['pending', 'quoted', 'accepted', 'in_progress'];
+    if (!cancellableStatuses.includes(request.status)) {
+      return res.status(400).json({
+        error: `No se puede cancelar una solicitud en estado '${request.status}'`,
+      });
+    }
+
+    const cancellationNote = (customReason || reason || 'Cancelado por administración')
+      .trim()
+      .slice(0, 200);
+
+    request.status = 'cancelled';
+    request.cancelledAt = new Date();
+    request.cancelledBy = 'admin';
+    request.cancellationReason = 'otro';
+    request.cancellationCustomReason = cancellationNote;
+    request.updatedAt = new Date();
+    if (request.trackingData) {
+      request.trackingData.isActive = false;
+    }
+    await request.save();
+
+    const requestIdStr = request._id.toString();
+
+    if (global.activeServices) {
+      global.activeServices.delete(requestIdStr);
+    }
+
+    global.io?.to('admin:ops').emit('admin:request-cancelled', {
+      requestId: requestIdStr,
+      cancelledBy: request.cancelledBy,
+      reason: request.cancellationReason,
+      customReason: request.cancellationCustomReason,
+      status: request.status,
+      cancelledAt: request.cancelledAt,
+    });
+
+    if (request.assignedDriverId) {
+      await User.findByIdAndUpdate(
+        request.assignedDriverId,
+        {
+          'driverProfile.isOnline': true,
+          'driverProfile.currentServiceId': null,
+          'driverProfile.lastOnlineAt': new Date(),
+        },
+      );
+
+      const driverIdStr = request.assignedDriverId.toString();
+      const driverData = global.connectedDrivers?.get(driverIdStr);
+      if (driverData && global.io) {
+        driverData.isOnline = true;
+        global.connectedDrivers.set(driverIdStr, driverData);
+        const driverSocket = global.io.sockets.sockets.get(driverData.socketId);
+        if (driverSocket) {
+          driverSocket.join('active-drivers');
+        }
+      }
+    }
+
+    global.io?.to('drivers').emit('request:cancelled', {
+      requestId: requestIdStr,
+      reason: 'otro',
+      customReason: cancellationNote,
+      cancelledBy: 'admin',
+      message: 'Solicitud cancelada por administración',
+      cancelledAt: request.cancelledAt,
+      timestamp: new Date(),
+    });
+
+    if (request.clientId && global.connectedClients && global.io) {
+      const clientIdStr = request.clientId.toString();
+      const clientSocketId = global.connectedClients.get(clientIdStr);
+      if (clientSocketId) {
+        global.io.to(clientSocketId).emit('service:cancelled', {
+          requestId: requestIdStr,
+          cancelledBy: 'admin',
+          reason: 'otro',
+          message: 'Tu solicitud fue cancelada por el equipo de Desvare',
+        });
+      }
+    }
+
+    if (request.assignedDriverId && global.connectedDrivers && global.io) {
+      const driverIdStr = request.assignedDriverId.toString();
+      const assignedDriverData = global.connectedDrivers.get(driverIdStr);
+      if (assignedDriverData) {
+        global.io.to(assignedDriverData.socketId).emit('service:cancelled', {
+          requestId: requestIdStr,
+          cancelledBy: 'admin',
+          reason: 'otro',
+          message: 'El servicio fue cancelado por administración',
+        });
+      }
+    }
+
+    if (request.clientId) {
+      await sendPushToUser(
+        request.clientId,
+        '🚫 Solicitud cancelada',
+        'Tu solicitud fue cancelada por el equipo de Desvare.',
+        { type: 'SERVICE_CANCELLED', requestId: requestIdStr },
+      ).catch(() => {});
+    }
+
+    if (request.assignedDriverId) {
+      await sendPushToUser(
+        request.assignedDriverId,
+        '🚫 Servicio cancelado',
+        'El servicio fue cancelado por administración.',
+        { type: 'SERVICE_CANCELLED', requestId: requestIdStr },
+      ).catch(() => {});
+    }
+
+    console.log(`🛡️ Admin ${req.admin._id} canceló servicio ${requestIdStr}`);
+
+    res.json({
+      message: 'Solicitud cancelada exitosamente',
+      service: {
+        id: request._id,
+        status: request.status,
+        cancelledAt: request.cancelledAt,
+        cancelledBy: request.cancelledBy,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error cancelando servicio desde admin:', error);
+    res.status(500).json({ error: 'Error al cancelar servicio', details: error.message });
   }
 });
 

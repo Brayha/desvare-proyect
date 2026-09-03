@@ -40,7 +40,7 @@ const EVENT_CONFIG = {
   'admin:request-cancelled': {
     type: 'cancelled',
     title: 'Solicitud cancelada',
-    detail: data => `Cancelada por ${data.cancelledBy === 'driver' ? 'el conductor' : data.cancelledBy === 'client' ? 'el cliente' : 'el usuario'}`,
+    detail: data => `Cancelada por ${data.cancelledBy === 'driver' ? 'el conductor' : data.cancelledBy === 'client' ? 'el cliente' : data.cancelledBy === 'admin' ? 'administración' : 'el usuario'}`,
   },
   'admin:driver-pending-review': {
     type: 'driver',

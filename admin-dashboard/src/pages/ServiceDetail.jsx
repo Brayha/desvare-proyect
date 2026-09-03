@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { IonPage, IonContent, IonSpinner } from '@ionic/react';
+import { IonPage, IonContent, IonSpinner, IonButton, IonAlert, IonToast } from '@ionic/react';
 import { useParams, useHistory } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { servicesAPI } from '../services/adminAPI';
 import { ArrowLeft2, Call, Sms, Location, Clock, DollarCircle, Star1, Messages2 } from 'iconsax-react';
 import './ServiceDetail.css';
+
+const CANCELLABLE_STATUSES = ['pending', 'quoted', 'accepted', 'in_progress'];
 
 const ServiceDetail = () => {
   const { id } = useParams();
@@ -14,21 +16,24 @@ const ServiceDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
+  const [showCancelAlert, setShowCancelAlert] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [toast, setToast] = useState({ isOpen: false, message: '', color: 'success' });
 
   useEffect(() => {
     loadServiceDetail();
     loadChatHistory();
   }, [id]);
 
-  const loadServiceDetail = async () => {
+  const loadServiceDetail = async (silent = false) => {
     try {
-      setIsLoading(true);
+      if (!silent) setIsLoading(true);
       const response = await servicesAPI.getById(id);
       setService(response.data.service);
     } catch (error) {
       console.error('❌ Error cargando detalle:', error);
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   };
 
@@ -92,6 +97,33 @@ const ServiceDetail = () => {
     return icons[category?.toLowerCase()] || '🚗';
   };
 
+  const handleCancelService = async (data) => {
+    const reason = data.reason?.trim();
+    if (!reason) {
+      setToast({ isOpen: true, message: 'Debes indicar el motivo de la cancelación.', color: 'warning' });
+      return false;
+    }
+
+    try {
+      setIsCancelling(true);
+      await servicesAPI.cancel(id, { customReason: reason });
+      await loadServiceDetail(true);
+      setToast({ isOpen: true, message: 'Solicitud cancelada exitosamente.', color: 'success' });
+      return true;
+    } catch (error) {
+      setToast({
+        isOpen: true,
+        message: error.response?.data?.error || 'No se pudo cancelar la solicitud.',
+        color: 'danger',
+      });
+      return false;
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const canCancel = service && CANCELLABLE_STATUSES.includes(service.status);
+
   if (isLoading) {
     return (
       <IonPage>
@@ -143,8 +175,33 @@ const ServiceDetail = () => {
                 Creado el {formatDate(service.createdAt)}
               </p>
             </div>
-            {getStatusBadge(service.status)}
+            <div className="service-detail-header-actions">
+              {getStatusBadge(service.status)}
+              {canCancel && (
+                <IonButton
+                  color="danger"
+                  fill="outline"
+                  onClick={() => setShowCancelAlert(true)}
+                  disabled={isCancelling}
+                >
+                  {isCancelling ? <IonSpinner name="crescent" /> : 'Cancelar solicitud'}
+                </IonButton>
+              )}
+            </div>
           </div>
+
+          {service.status === 'cancelled' && (
+            <div className="service-cancelled-banner">
+              <strong>Solicitud cancelada</strong>
+              <span>
+                Por: {service.cancelledBy === 'admin' ? 'Administración' : service.cancelledBy === 'driver' ? 'Conductor' : service.cancelledBy === 'client' ? 'Cliente' : 'Sistema'}
+                {service.cancelledAt ? ` · ${formatDate(service.cancelledAt)}` : ''}
+              </span>
+              {service.cancellationCustomReason && (
+                <span>Motivo: {service.cancellationCustomReason}</span>
+              )}
+            </div>
+          )}
 
           {/* Cliente y Conductor */}
           <div className="detail-grid">
@@ -409,6 +466,36 @@ const ServiceDetail = () => {
             )}
           </div>
         </div>
+
+        <IonAlert
+          isOpen={showCancelAlert}
+          onDidDismiss={() => setShowCancelAlert(false)}
+          header="Cancelar solicitud"
+          message="Esta acción notificará al cliente y conductores conectados. Indica el motivo de la cancelación."
+          inputs={[
+            {
+              name: 'reason',
+              type: 'textarea',
+              placeholder: 'Motivo de la cancelación',
+            },
+          ]}
+          buttons={[
+            { text: 'Volver', role: 'cancel' },
+            {
+              text: isCancelling ? 'Cancelando...' : 'Confirmar cancelación',
+              role: 'confirm',
+              handler: handleCancelService,
+            },
+          ]}
+        />
+        <IonToast
+          isOpen={toast.isOpen}
+          message={toast.message}
+          color={toast.color}
+          duration={3000}
+          position="top"
+          onDidDismiss={() => setToast((current) => ({ ...current, isOpen: false }))}
+        />
       </IonContent>
     </IonPage>
   );

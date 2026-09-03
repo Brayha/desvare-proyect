@@ -79,6 +79,7 @@ export const servicesAPI = {
   getAll: (params) => api.get('/api/admin/services', { params }),
   getById: (id) => api.get(`/api/admin/services/${id}`),
   getChatHistory: (id) => api.get(`/api/admin/services/${id}/chat`),
+  cancel: (id, payload) => api.post(`/api/admin/services/${id}/cancel`, payload),
 };
 
 // API de reportes

@@ -238,7 +238,7 @@ const requestSchema = new mongoose.Schema({
   },
   cancelledBy: {
     type: String,
-    enum: ['client', 'driver', 'system'],
+    enum: ['client', 'driver', 'system', 'admin'],
     default: null
   },
   cancellationReason: {

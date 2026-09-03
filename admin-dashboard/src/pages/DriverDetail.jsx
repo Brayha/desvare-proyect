@@ -9,8 +9,8 @@ import './DriverDetail.css';
 
 const TRUCK_TYPES = [
   { value: 'GRUA_MOTO', label: 'Grúa para motos' },
-  { value: 'GRUA_LIVIANA', label: 'Grúa liviana' },
-  { value: 'GRUA_PESADA', label: 'Grúa pesada' }
+  { value: 'GRUA_LIVIANA', label: 'Grúa de planchón' },
+  { value: 'GRUA_PESADA', label: 'Grúa de gancho' }
 ];
 
 const VEHICLE_CAPABILITIES = ['MOTOS', 'AUTOS', 'CAMIONETAS', 'CAMIONES', 'BUSES'];
@@ -38,6 +38,9 @@ const DriverDetail = () => {
   const [truckForm, setTruckForm] = useState(EMPTY_TRUCK_FORM);
   const [isSavingTruck, setIsSavingTruck] = useState(false);
   const [isTruckDirty, setIsTruckDirty] = useState(false);
+  const [driverName, setDriverName] = useState('');
+  const [isNameDirty, setIsNameDirty] = useState(false);
+  const [isSavingName, setIsSavingName] = useState(false);
 
   useEffect(() => {
     loadDriverDetail();
@@ -54,7 +57,9 @@ const DriverDetail = () => {
       licensePlate: normalizePlate(towTruck.licensePlate || ''),
       vehicleCapabilities: driver.driverProfile?.vehicleCapabilities || []
     });
+    setDriverName(driver.name || '');
     setIsTruckDirty(false);
+    setIsNameDirty(false);
   }, [driver]);
 
   const loadDriverDetail = async () => {
@@ -112,6 +117,34 @@ const DriverDetail = () => {
         ? current.vehicleCapabilities.filter((item) => item !== capability)
         : [...current.vehicleCapabilities, capability]
     }));
+  };
+
+  const handleNameChange = (event) => {
+    setDriverName(event.target.value);
+    setIsNameDirty(true);
+  };
+
+  const handleSaveName = async (event) => {
+    event.preventDefault();
+    const normalizedName = driverName.trim();
+    if (normalizedName.length < 2) {
+      showToast('El nombre debe tener al menos 2 caracteres.', 'warning');
+      return;
+    }
+
+    try {
+      setIsSavingName(true);
+      await driversAPI.update(id, { name: normalizedName });
+      await loadDriverDetail();
+      showToast('Nombre actualizado exitosamente.');
+    } catch (error) {
+      showToast(
+        error.response?.data?.error || error.message || 'No se pudo actualizar el nombre.',
+        'danger'
+      );
+    } finally {
+      setIsSavingName(false);
+    }
   };
 
   const handleSaveTruck = async (event) => {
@@ -364,6 +397,30 @@ const DriverDetail = () => {
         {/* Driver Info */}
         <div className="detail-section">
           <h3>Información Personal</h3>
+          <form className="driver-name-form" onSubmit={handleSaveName}>
+            <div className="info-item driver-name-field">
+              <label className="info-label" htmlFor="driver-name">Nombre</label>
+              <input
+                id="driver-name"
+                type="text"
+                className="driver-name-input"
+                value={driverName}
+                onChange={handleNameChange}
+                placeholder="Nombre según documento"
+                maxLength={80}
+                disabled={isSavingName || isProcessing}
+              />
+            </div>
+            <div className="driver-name-form-actions">
+              <IonButton
+                type="submit"
+                size="small"
+                disabled={!isNameDirty || isSavingName || isProcessing}
+              >
+                {isSavingName ? <IonSpinner name="crescent" /> : 'Guardar nombre'}
+              </IonButton>
+            </div>
+          </form>
           <div className="info-grid">
             <div className="info-item">
               <span className="info-label">Teléfono</span>
