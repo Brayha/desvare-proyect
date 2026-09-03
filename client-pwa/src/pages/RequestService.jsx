@@ -484,58 +484,45 @@ const RequestService = () => {
     history.push("/request-auth");
   };
 
+  const renderProfileButton = () =>
+    isLoggedIn ? (
+      <button
+        type="button"
+        className="request-profile-btn"
+        onClick={() => history.push("/tabs/my-account")}
+        aria-label="Mi cuenta"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+            fill="#0055ff"
+          />
+        </svg>
+      </button>
+    ) : null;
+
+  const hasVehicleStep = Boolean(vehicleData?.vehicleSnapshot && destination);
+
   return (
     <IonPage>
       <IonContent className="request-service-page">
-        {/* Header flotante: logo centrado + botón de perfil si está logueado */}
-        <div className="map-header-overlay">
-          <div
-            className="map-header-logo"
-            onClick={() => goToMarketingSite()}
-          >
-            <img src={logo} alt="Desvare" />
-          </div>
-          {isLoggedIn && (
-            <button
-              className="map-profile-btn"
-              onClick={() => history.push("/tabs/my-account")}
-              aria-label="Mi cuenta"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
-                  fill="#0055ff"
-                />
-              </svg>
-            </button>
-          )}
-        </div>
-
-        {/* Mapa a pantalla completa */}
         <div
-          className={`fullscreen-map${vehicleData?.vehicleSnapshot && destination ? " fullscreen-map--with-vehicle" : ""}`}
+          className={`request-layout${hasVehicleStep ? " request-layout--with-vehicle" : ""}`}
         >
-          {geoLoading ? (
-            <div className="map-loading">
-              <IonSpinner name="crescent" color="primary" />
-              <IonText color="medium">
-                <p>Obteniendo tu ubicación...</p>
-              </IonText>
+          {/* Card de interacción — abajo en móvil, sidebar izquierdo en desktop */}
+          <aside className="request-interaction-card">
+            <div className="request-sidebar-header">
+              <button
+                type="button"
+                className="request-sidebar-logo"
+                onClick={() => goToMarketingSite()}
+              >
+                <img src={logo} alt="Desvare" />
+              </button>
+              {renderProfileButton()}
             </div>
-          ) : (
-            <MapPicker
-              origin={origin}
-              destination={destination}
-              onRouteCalculated={setRouteInfo}
-            />
-          )}
 
+            <div className="request-interaction-body">
           {/* Botón para abrir búsqueda - solo si no hay destino */}
           {origin && !destination && (
             <div className="search-bottom-bar-container-wrapper">
@@ -724,6 +711,39 @@ const RequestService = () => {
               )}
             </div>
           )}
+            </div>
+          </aside>
+
+          {/* Card del mapa — arriba en móvil, panel derecho en desktop */}
+          <div className="request-map-card">
+            <div className="map-header-overlay map-header-overlay--mobile">
+              <button
+                type="button"
+                className="map-header-logo"
+                onClick={() => goToMarketingSite()}
+              >
+                <img src={logo} alt="Desvare" />
+              </button>
+              {isLoggedIn && (
+                <div className="map-header-profile-slot">{renderProfileButton()}</div>
+              )}
+            </div>
+
+            {geoLoading ? (
+              <div className="map-loading">
+                <IonSpinner name="crescent" color="primary" />
+                <IonText color="medium">
+                  <p>Obteniendo tu ubicación...</p>
+                </IonText>
+              </div>
+            ) : (
+              <MapPicker
+                origin={origin}
+                destination={destination}
+                onRouteCalculated={setRouteInfo}
+              />
+            )}
+          </div>
         </div>
 
         {/* Modal de búsqueda de destino */}

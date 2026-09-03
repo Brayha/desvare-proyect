@@ -1,70 +1,93 @@
 .request-service-page {
-  --background: transparent;
+  --background: var(--desvare-light, #f7f7f7);
   --padding-top: 0;
   --padding-bottom: 0;
   --padding-start: 0;
   --padding-end: 0;
+  height: 100%;
 }
 
 .request-service-page::part(scroll) {
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  min-height: 100%;
 }
 
-/* Mapa a pantalla completa */
-.fullscreen-map {
+/* ── Layout principal: dos cards que se reacomodan ─────────────────────────── */
+.request-layout {
   display: flex;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
   flex-direction: column;
-  align-items: stretch;
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
   gap: 12px;
   padding: 10px;
   box-sizing: border-box;
-  /* Separación inferior: barra de gestos iOS / navegación Android */
   padding-bottom: max(calc(10px + env(safe-area-inset-bottom, 0px)), 16px);
+  background: var(--desvare-light, #f7f7f7);
 }
 
-/* El mapa crece y deja espacio fijo para la caja inferior */
-.fullscreen-map .map-picker-container,
-.fullscreen-map .map-loading {
+/* Card del mapa — arriba en móvil */
+.request-map-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  height: auto;
+  width: 100%;
+  order: 1;
+}
+
+.request-map-card .map-picker-container,
+.request-map-card .map-loading {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
   width: 100%;
 }
 
-/* Botón re-centrar: dentro del mapa, no sobre la caja de abajo */
-.fullscreen-map .map-recenter-btn {
+.request-map-card .map-recenter-btn {
   bottom: 16px;
 }
 
-/* ── Estado 3: con vehículo agregado ─────────────────────────────────────────
-   El mapa queda fijo arriba y el contenido de abajo hace scroll.
-   Estados 1 y 2 no se ven afectados.
-   ─────────────────────────────────────────────────────────────────────────── */
-.fullscreen-map--with-vehicle {
+/* Card de interacción — abajo en móvil */
+.request-interaction-card {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 100%;
+  order: 2;
+  gap: 0;
+}
+
+.request-sidebar-header {
+  display: none;
+}
+
+.request-interaction-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Estado 3 móvil: scroll en el layout y mapa con altura fija */
+.request-layout--with-vehicle {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* Mapa con altura fija en estado 3 */
-.fullscreen-map--with-vehicle .map-picker-container {
+.request-layout--with-vehicle .request-map-card {
   flex: none;
   height: 50svh;
-  min-height: 550px;
+  min-height: 280px;
   max-height: 500px;
 }
 
-/* Caja inferior: ocupa el ancho completo y no encoge */
-.fullscreen-map--with-vehicle .search-bottom-bar-container-wrapper {
+.request-layout--with-vehicle .request-interaction-card {
   flex-shrink: 0;
-  width: 100%;
 }
 
-/* Header flotante sobre el mapa */
+/* Header flotante sobre el mapa — solo móvil */
 .map-header-overlay {
   position: absolute;
   top: 0;
@@ -81,7 +104,22 @@
   pointer-events: none;
 }
 
-/* Logo centrado (pill blanca) */
+.map-header-overlay--mobile {
+  display: flex;
+}
+
+.map-header-profile-slot {
+  position: absolute;
+  right: 16px;
+  top: max(env(safe-area-inset-top), 16px);
+  pointer-events: all;
+}
+
+.map-header-profile-slot .request-profile-btn {
+  position: static;
+}
+
+/* Logo centrado (pill blanca) — móvil */
 .map-header-logo {
   background: #ffffff;
   border-radius: 24px;
@@ -91,6 +129,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  border: none;
 }
 
 .map-header-logo img {
@@ -98,11 +137,8 @@
   display: block;
 }
 
-/* Botón de perfil — círculo blanco esquina derecha */
-.map-profile-btn {
-  position: absolute;
-  right: 16px;
-  top: max(env(safe-area-inset-top), 16px);
+/* Botón de perfil compartido */
+.request-profile-btn {
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -117,7 +153,7 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.map-profile-btn:active {
+.request-profile-btn:active {
   transform: scale(0.93);
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.12);
 }
@@ -314,7 +350,7 @@
   color: white;
 }
 
-/* Cargando ubicación (dentro de .fullscreen-map usa flex; fuera mantiene altura completa) */
+/* Cargando ubicación */
 .map-loading {
   display: flex;
   flex-direction: column;
@@ -974,4 +1010,111 @@
 .active-search-banner__btn-close:active {
   background: #e5e7eb;
   color: #374151;
+}
+
+/* ── Desktop / tablet grande: sidebar + mapa lado a lado ─────────────────── */
+@media (min-width: 1024px) {
+  .request-service-page::part(scroll) {
+    overflow: hidden;
+  }
+
+  .request-layout {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 16px;
+    padding: 16px;
+    padding-bottom: 16px;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .request-layout--with-vehicle {
+    overflow: hidden;
+  }
+
+  /* Sidebar izquierdo */
+  .request-interaction-card {
+    order: 1;
+    flex: 0 0 min(380px, 32vw);
+    width: min(380px, 32vw);
+    max-width: 420px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .request-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 4px 4px 16px;
+  }
+
+  .request-sidebar-logo {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    box-shadow: none;
+  }
+
+  .request-sidebar-logo img {
+    height: 32px;
+    width: auto;
+    display: block;
+  }
+
+  .request-interaction-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+  }
+
+  /* Mapa derecho */
+  .request-map-card {
+    order: 2;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+  }
+
+  .request-layout--with-vehicle .request-map-card {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .request-layout--with-vehicle .request-map-card .map-picker-container {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .map-header-overlay--mobile {
+    display: none;
+  }
+
+  .search-bottom-bar-container-wrapper {
+    margin-top: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .request-interaction-card {
+    flex-basis: 400px;
+    width: 400px;
+  }
+
+  .request-layout {
+    padding: 20px;
+    gap: 20px;
+  }
 }
