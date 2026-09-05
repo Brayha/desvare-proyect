@@ -49,10 +49,19 @@ function initFaq() {
   });
 }
 
-/** GA4 — eventos click_cotizar */
+/** GTM dataLayer + GA4 — eventos click_cotizar_grua */
 function initAnalytics() {
   document.querySelectorAll('[data-track="cotizar"]').forEach((el) => {
     el.addEventListener('click', () => {
+      // Evento GTM para conversión en Google Ads
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'click_cotizar_grua',
+        destination_url: 'https://desvare.app',
+        cta_label: el.getAttribute('data-track-label') || 'cta',
+      });
+
+      // Evento GA4 legacy (compatibilidad)
       if (typeof gtag === 'function') {
         gtag('event', 'click_cotizar', {
           event_category: 'engagement',
